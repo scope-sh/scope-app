@@ -4,6 +4,11 @@
   </div>
 </template>
 
+<script setup lang="ts">
+import '@fontsource-variable/inter';
+import '@fontsource/inconsolata/400.css';
+</script>
+
 <style>
 :root {
   --font-sans: -apple-system, 'BlinkMacSystemFont', avenir next, avenir,
