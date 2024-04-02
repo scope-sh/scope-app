@@ -1,0 +1,1 @@
+<template>chain page</template>
