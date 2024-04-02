@@ -61,6 +61,11 @@ body {
   font-weight: var(--font-weight-regular);
 }
 
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
 /* Reset */
 
 *,
