@@ -37,6 +37,7 @@ import { Popover } from 'radix-vue/namespaced';
   flex-direction: column;
   max-height: var(--radix-popover-content-available-height);
   padding: var(--spacing-7);
+  overflow-y: auto;
   transform-origin: var(--radix-popover-content-transform-origin);
   animation: scale-in 0.125s ease-out;
   border: 1px solid var(--color-border-tertiary);
