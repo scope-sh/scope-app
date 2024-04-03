@@ -8,24 +8,26 @@
       />
     </template>
     <template #default>
-      <div class="list">
-        <div
-          v-for="chain in CHAINS"
-          ref="optionEls"
-          :key="chain"
-          class="item"
-          @click="handleOptionClick(chain)"
-        >
-          <Popover.Close as="div">
-            <IconChain
-              class="icon"
-              :chain="chain"
-              kind="mono"
-            />
-          </Popover.Close>
+      <div class="content">
+        <div class="list">
+          <div
+            v-for="chain in CHAINS"
+            ref="optionEls"
+            :key="chain"
+            class="item"
+            @click="handleOptionClick(chain)"
+          >
+            <Popover.Close as="div">
+              <IconChain
+                class="icon"
+                :chain="chain"
+                kind="mono"
+              />
+            </Popover.Close>
+          </div>
         </div>
+        <div class="label">{{ label }}</div>
       </div>
-      <div class="label">{{ label }}</div>
     </template>
   </ScopePopover>
 </template>
@@ -73,6 +75,12 @@ const label = computed(() => {
   &:hover {
     color: var(--color-text-primary);
   }
+}
+
+.content {
+  display: flex;
+  gap: var(--spacing-8);
+  flex-direction: column;
 }
 
 .list {
