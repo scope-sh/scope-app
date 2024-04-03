@@ -6,9 +6,9 @@
     <template #default>
       <div class="content">
         <div>{{ label }}</div>
-        <ScopeShortcutGroup
+        <ScopeShortcut
           size="small"
-          :shortcuts="shortcuts"
+          :shortcut="shortcut"
         />
       </div>
     </template>
@@ -18,12 +18,12 @@
 <script setup lang="ts">
 import { Shortcut } from '@/utils/shortcuts';
 
-import ScopeShortcutGroup from './ScopeShortcutGroup.vue';
+import ScopeShortcut from './ScopeShortcut.vue';
 import ScopeTooltip from './ScopeTooltip.vue';
 
 defineProps<{
   label: string;
-  shortcuts: Shortcut[];
+  shortcut: Shortcut;
 }>();
 </script>
 

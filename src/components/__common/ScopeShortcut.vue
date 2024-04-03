@@ -1,54 +1,29 @@
 <template>
-  <div>
-    <div
-      class="shortcut"
-      :class="{ small: size === 'small', regular: size === 'regular' }"
-    >
-      <span
-        v-if="shortcut.isMeta"
-        class="meta"
-      >
-        ⌘
-      </span>
-      {{ shortcut.key }}
-    </div>
+  <div class="group">
+    <ScopeShortcutPart
+      v-for="part in shortcut"
+      :key="part.key"
+      :size="size"
+      :value="part"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { Shortcut } from '@/utils/shortcuts';
+import { ShortcutPart } from '@/utils/shortcuts';
 
-type Size = 'small' | 'regular';
+import ScopeShortcutPart from './ScopeShortcutPart.vue';
 
 defineProps<{
-  size: Size;
-  shortcut: Shortcut;
+  size: 'small' | 'regular';
+  shortcut: ShortcutPart[];
 }>();
 </script>
 
 <style scoped>
-.shortcut {
+.group {
   display: flex;
   gap: var(--spacing-2);
   align-items: center;
-  border-radius: var(--border-radius-xs);
-  background: var(--color-background-secondary);
-  box-shadow: 1px 2px 0 0 rgb(0 0 0 / 50%);
-  font-family: var(--font-mono);
-
-  &.regular {
-    padding: 3px 5px;
-  }
-
-  &.small {
-    padding: 3px 4px;
-    font-size: var(--font-size-s);
-  }
-}
-
-.meta {
-  padding-top: 2px;
-  font-size: var(--font-size-l);
-  line-height: 13px;
 }
 </style>

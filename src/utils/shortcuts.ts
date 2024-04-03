@@ -1,7 +1,8 @@
-interface Shortcut {
+interface ShortcutPart {
   key: string;
   isMeta?: boolean;
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export type { Shortcut };
+type Shortcut = ShortcutPart[];
+
+export type { Shortcut, ShortcutPart };
