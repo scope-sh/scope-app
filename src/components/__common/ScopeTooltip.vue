@@ -1,6 +1,6 @@
 <template>
   <Tooltip.Provider>
-    <Tooltip.Root :default-open="true">
+    <Tooltip.Root>
       <Tooltip.Trigger as-child>
         <button class="trigger">
           <slot name="trigger" />
