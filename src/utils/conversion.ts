@@ -1,6 +1,15 @@
+import { formatUnits } from 'viem';
+
 interface RelativeTime {
   value: number;
   unit: Intl.RelativeTimeFormatUnit;
+}
+
+function fromWei(value: bigint | number, decimals: number): number {
+  if (typeof value === 'bigint') {
+    return parseFloat(formatUnits(value, decimals));
+  }
+  return parseFloat(formatUnits(BigInt(value.toString()), decimals));
 }
 
 function toRelativeTime(from: Date, to: Date): RelativeTime {
@@ -55,6 +64,5 @@ function toRelativeTime(from: Date, to: Date): RelativeTime {
   };
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export { toRelativeTime };
+export { fromWei, toRelativeTime };
 export type { RelativeTime };
