@@ -42,7 +42,7 @@ import { Popover } from 'radix-vue/namespaced';
   animation: scale-in 0.125s ease-out;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);
-  background: oklch(from var(--color-background-primary) l c h / 20%);
+  background: oklch(from var(--color-background-primary) l c h / 60%);
   box-shadow: 2px 2px 0 0 rgb(0 0 0 / 60%);
   -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
