@@ -63,6 +63,10 @@ function getChainData(chainId: Chain): ChainData {
   }
 }
 
+function getChainName(chainId: Chain): string {
+  return getChainData(chainId).name;
+}
+
 export {
   CHAINS,
   DEFAULT_CHAIN,
@@ -75,5 +79,6 @@ export {
   POLYGON,
   POLYGON_AMOY,
   getChainData,
+  getChainName,
 };
 export type { Chain };
