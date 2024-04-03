@@ -67,6 +67,11 @@ function getChainName(chainId: Chain): string {
   return getChainData(chainId).name;
 }
 
+function parseChain(value: string): Chain | null {
+  const chain = CHAINS.find((chain) => value === chain.toString());
+  return chain ?? null;
+}
+
 export {
   CHAINS,
   DEFAULT_CHAIN,
@@ -80,5 +85,6 @@ export {
   POLYGON_AMOY,
   getChainData,
   getChainName,
+  parseChain,
 };
 export type { Chain };
