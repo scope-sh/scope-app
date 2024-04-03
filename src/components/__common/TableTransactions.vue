@@ -196,12 +196,16 @@ th {
   font-weight: var(--font-weight-regular);
 }
 
-tr th:first-child {
-  border-radius: calc(var(--border-radius) - 1px) 0 0;
-}
+tr {
+  th {
+    &:first-child {
+      border-radius: calc(var(--border-radius) - 1px) 0 0 0;
+    }
 
-tr th:last-child {
-  border-radius: 0 calc(var(--border-radius) - 1px) 0 0;
+    &:last-child {
+      border-radius: 0 calc(var(--border-radius) - 1px) 0 0;
+    }
+  }
 }
 
 td {
@@ -210,12 +214,14 @@ td {
   line-height: 1;
 }
 
-tbody tr {
-  transition: opacity 0.25s ease;
-  opacity: 1;
-}
+tbody {
+  tr {
+    transition: opacity 0.25s ease;
+    opacity: 1;
+  }
 
-tbody:hover tr:not(:hover) {
-  opacity: 0.5;
+  &:hover tr:not(:hover) {
+    opacity: 0.5;
+  }
 }
 </style>
