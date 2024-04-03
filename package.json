@@ -28,6 +28,7 @@
   "dependencies": {
     "@fontsource-variable/inter": "^5.0.17",
     "@fontsource/inconsolata": "^5.0.17",
+    "@tanstack/vue-table": "^8.15.3",
     "@vueuse/core": "^10.9.0",
     "radix-vue": "^1.6.1",
     "viem": "^2.9.6",
