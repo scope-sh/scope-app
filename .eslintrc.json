@@ -69,7 +69,11 @@
       }
     },
     {
-      "files": ["src/pages/**/*.vue", "src/components/__common/icon/**/*.vue"],
+      "files": [
+        "src/pages/**/*.vue",
+        "src/components/__common/attributes/**/*.vue",
+        "src/components/__common/icon/**/*.vue"
+      ],
       "rules": {
         "vue/multi-word-component-names": "off"
       }
