@@ -63,5 +63,17 @@ function getChainData(chainId: Chain): ChainData {
   }
 }
 
-export { CHAINS, DEFAULT_CHAIN, getChainData };
+export {
+  CHAINS,
+  DEFAULT_CHAIN,
+  ETHEREUM,
+  SEPOLIA,
+  OPTIMISM,
+  OPTIMISM_SEPOLIA,
+  BASE,
+  BASE_SEPOLIA,
+  POLYGON,
+  POLYGON_AMOY,
+  getChainData,
+};
 export type { Chain };
