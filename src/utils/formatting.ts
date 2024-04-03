@@ -10,6 +10,10 @@ function formatEther(value: bigint): string {
   return `${formatNumber(fromWei(value, 18))} ETH`;
 }
 
+function formatGasPrice(value: bigint): string {
+  return `${formatNumber(fromWei(value, 9))} Gwei`;
+}
+
 function formatNumber(value: number): string {
   const valueFormat = new Intl.NumberFormat('en-US', {
     notation: 'compact',
@@ -24,4 +28,4 @@ function formatRelativeTime({ value, unit }: RelativeTime): string {
   return format.format(value, unit);
 }
 
-export { formatAddress, formatEther, formatRelativeTime };
+export { formatAddress, formatEther, formatGasPrice, formatRelativeTime };
