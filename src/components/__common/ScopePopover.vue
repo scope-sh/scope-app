@@ -32,9 +32,6 @@ import { Popover } from 'radix-vue/namespaced';
 }
 
 .panel {
-  display: flex;
-  gap: var(--spacing-8);
-  flex-direction: column;
   max-height: var(--radix-popover-content-available-height);
   padding: var(--spacing-7);
   overflow-y: auto;
