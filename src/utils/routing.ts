@@ -13,7 +13,7 @@ interface ChainRoute {
 
 interface BlockRoute {
   name: 'block';
-  chain: Chain;
+  chain?: Chain;
   number: bigint;
 }
 
