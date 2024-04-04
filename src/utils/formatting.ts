@@ -28,4 +28,19 @@ function formatRelativeTime({ value, unit }: RelativeTime): string {
   return format.format(value, unit);
 }
 
-export { formatAddress, formatEther, formatGasPrice, formatRelativeTime };
+function formatShare(value: number): string {
+  const valueFormat = new Intl.NumberFormat('en-US', {
+    style: 'percent',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  });
+  return valueFormat.format(value);
+}
+
+export {
+  formatAddress,
+  formatEther,
+  formatGasPrice,
+  formatRelativeTime,
+  formatShare,
+};
