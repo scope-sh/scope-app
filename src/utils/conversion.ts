@@ -12,6 +12,14 @@ function fromWei(value: bigint | number, decimals: number): number {
   return parseFloat(formatUnits(BigInt(value.toString()), decimals));
 }
 
+function toBigInt(value: number | string): bigint | null {
+  try {
+    return BigInt(value);
+  } catch {
+    return null;
+  }
+}
+
 function toRelativeTime(from: Date, to: Date): RelativeTime {
   const SECOND = 1000;
   const MINUTE = 60 * SECOND;
@@ -64,5 +72,5 @@ function toRelativeTime(from: Date, to: Date): RelativeTime {
   };
 }
 
-export { fromWei, toRelativeTime };
+export { fromWei, toBigInt, toRelativeTime };
 export type { RelativeTime };
