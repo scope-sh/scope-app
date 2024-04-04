@@ -73,7 +73,8 @@
         "src/pages/**/*.vue",
         "src/components/__common/attributes/**/*.vue",
         "src/components/__common/cards/**/*.vue",
-        "src/components/__common/icon/**/*.vue"
+        "src/components/__common/icon/**/*.vue",
+        "src/components/_app/**/*.vue"
       ],
       "rules": {
         "vue/multi-word-component-names": "off"
