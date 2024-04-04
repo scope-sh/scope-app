@@ -1,3 +1,5 @@
+import { Address } from 'viem';
+
 function isBlockNumber(value: string): boolean {
   const blockNumberRegex = /^[\d]{1,9}$/;
   return !!value.match(blockNumberRegex);
@@ -8,7 +10,7 @@ function isBlockTag(value: string): boolean {
   return validBlockTags.includes(value);
 }
 
-function isAddress(value: string): boolean {
+function isAddress(value: string): value is Address {
   const addressRegex = /^0x[0-9a-fA-F]{40}$/;
   return !!value.match(addressRegex);
 }
