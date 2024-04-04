@@ -72,6 +72,7 @@
       "files": [
         "src/pages/**/*.vue",
         "src/components/__common/attributes/**/*.vue",
+        "src/components/__common/cards/**/*.vue",
         "src/components/__common/icon/**/*.vue"
       ],
       "rules": {
