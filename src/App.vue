@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <AppHeader v-if="!isChainPage" />
     <router-view />
   </div>
 </template>
@@ -7,6 +8,14 @@
 <script setup lang="ts">
 import '@fontsource-variable/inter';
 import '@fontsource/inconsolata/400.css';
+import { computed } from 'vue';
+import { useRoute } from 'vue-router';
+
+import AppHeader from '@/components/_app/Header.vue';
+
+const route = useRoute();
+
+const isChainPage = computed(() => route.name === 'chain');
 </script>
 
 <style>
