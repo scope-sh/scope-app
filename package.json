@@ -30,6 +30,7 @@
     "@fontsource/inconsolata": "^5.0.17",
     "@tanstack/vue-table": "^8.15.3",
     "@vueuse/core": "^10.9.0",
+    "evm-providers": "^0.4.3",
     "radix-vue": "^1.6.1",
     "viem": "^2.9.6",
     "vue": "^3.4.19",
