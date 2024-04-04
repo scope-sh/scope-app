@@ -1,0 +1,32 @@
+function isBlockNumber(value: string): boolean {
+  const blockNumberRegex = /^[\d]{1,9}$/;
+  return !!value.match(blockNumberRegex);
+}
+
+function isBlockTag(value: string): boolean {
+  const validBlockTags = ['earliest', 'latest'];
+  return validBlockTags.includes(value);
+}
+
+function isAddress(value: string): boolean {
+  const addressRegex = /^0x[0-9a-fA-F]{40}$/;
+  return !!value.match(addressRegex);
+}
+
+function isEnsAddress(value: string): boolean {
+  const addressRegex = /.+\.eth$/;
+  return !!value.match(addressRegex);
+}
+
+function isTransactionHash(value: string): boolean {
+  const hashRegex = /^0x[0-9a-f]{64}$/;
+  return !!value.match(hashRegex);
+}
+
+export {
+  isAddress,
+  isBlockNumber,
+  isBlockTag,
+  isEnsAddress,
+  isTransactionHash,
+};
