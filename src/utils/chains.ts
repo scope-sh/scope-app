@@ -1,3 +1,4 @@
+import { alchemy } from 'evm-providers';
 import { type Chain as ChainData } from 'viem';
 import {
   mainnet,
@@ -67,6 +68,10 @@ function getChainName(chainId: Chain): string {
   return getChainData(chainId).name;
 }
 
+function getEndpointUrl(chainId: Chain, alchemyKey: string): string {
+  return alchemy(chainId, alchemyKey);
+}
+
 function parseChain(value: string): Chain | null {
   const chain = CHAINS.find((chain) => value === chain.toString());
   return chain ?? null;
@@ -85,6 +90,7 @@ export {
   POLYGON_AMOY,
   getChainData,
   getChainName,
+  getEndpointUrl,
   parseChain,
 };
 export type { Chain };
