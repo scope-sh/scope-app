@@ -37,10 +37,22 @@ function formatShare(value: number): string {
   return valueFormat.format(value);
 }
 
+function formatTime(value: Date): string {
+  return value.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  });
+}
+
 export {
   formatAddress,
   formatEther,
   formatGasPrice,
   formatRelativeTime,
   formatShare,
+  formatTime,
 };
