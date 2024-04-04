@@ -42,16 +42,12 @@ import ScopePopover from '@/components/__common/ScopePopover.vue';
 import type { Chain } from '@/utils/chains';
 import { CHAINS, getChainName } from '@/utils/chains';
 
-const props = defineProps<{
-  modelValue: Chain;
-}>();
-
-const emit = defineEmits<{
-  'update:modelValue': [value: Chain];
-}>();
+const selectedChain = defineModel<Chain>({
+  required: true,
+});
 
 function handleOptionClick(option: Chain): void {
-  emit('update:modelValue', option);
+  selectedChain.value = option;
 }
 
 const optionEls = ref<HTMLElement[]>([]);
@@ -60,8 +56,8 @@ const isHovered = computed(() =>
 );
 const label = computed(() => {
   const hoveredIndex = isHovered.value.findIndex((hovered) => hovered.value);
-  const chain = CHAINS[hoveredIndex] ?? props.modelValue;
-  return getChainName(chain);
+  const hoveredChain = CHAINS[hoveredIndex] ?? selectedChain.value;
+  return getChainName(hoveredChain);
 });
 </script>
 
