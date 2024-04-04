@@ -157,6 +157,7 @@ function handleChainUpdate(value: Chain): void {
   flex-direction: column;
   align-items: center;
   width: 820px;
+  margin: 8px;
 }
 
 .icons {
