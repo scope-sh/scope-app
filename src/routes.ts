@@ -3,6 +3,7 @@ import type { RouteRecordRaw } from 'vue-router';
 import Address from './pages/Address.vue';
 import Block from './pages/Block.vue';
 import Chain from './pages/Chain.vue';
+import Transaction from './pages/Transaction.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -19,6 +20,11 @@ const routes: RouteRecordRaw[] = [
     path: '/:chain/block/:number',
     name: 'block',
     component: Block,
+  },
+  {
+    path: '/:chain/transaction/:hash',
+    name: 'transaction',
+    component: Transaction,
   },
   {
     path: '/:chain/address/:address',
