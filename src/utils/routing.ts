@@ -1,3 +1,4 @@
+import { Address } from 'viem';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { Chain } from './chains';
@@ -17,7 +18,13 @@ interface BlockRoute {
   number: bigint;
 }
 
-type Route = HomeRoute | ChainRoute | BlockRoute;
+interface AddressRoute {
+  name: 'address';
+  chain?: Chain;
+  address: Address;
+}
+
+type Route = HomeRoute | ChainRoute | BlockRoute | AddressRoute;
 
 function getRouteLocation(route: Route): RouteLocationRaw {
   switch (route.name) {
@@ -38,6 +45,14 @@ function getRouteLocation(route: Route): RouteLocationRaw {
         params: {
           chain: route.chain,
           number: route.number.toString(),
+        },
+      };
+    case 'address':
+      return {
+        name: 'address',
+        params: {
+          chain: route.chain,
+          address: route.address,
         },
       };
   }
