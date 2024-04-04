@@ -2,6 +2,12 @@
   <div class="panel">
     <div class="header">
       <h2 class="title">{{ title }}</h2>
+      <div
+        v-if="subtitle"
+        class="subtitle"
+      >
+        {{ subtitle }}
+      </div>
     </div>
     <div class="content">
       <slot />
@@ -12,6 +18,7 @@
 <script setup lang="ts">
 defineProps<{
   title: string;
+  subtitle?: string;
 }>();
 </script>
 
@@ -34,7 +41,7 @@ defineProps<{
 .header {
   display: flex;
   gap: var(--spacing-4);
-  align-items: center;
+  flex-direction: column;
 }
 
 .title {
@@ -43,6 +50,11 @@ defineProps<{
   font-family: var(--font-mono);
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-regular);
+}
+
+.subtitle {
+  font-size: var(--font-size-l);
+  font-weight: var(--font-weight-light);
 }
 
 .content {
