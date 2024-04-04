@@ -52,6 +52,7 @@ export {
   formatAddress,
   formatEther,
   formatGasPrice,
+  formatNumber,
   formatRelativeTime,
   formatShare,
   formatTime,
