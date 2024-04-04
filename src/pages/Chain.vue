@@ -41,7 +41,7 @@
 
 <script setup lang="ts">
 import { useIntervalFn } from '@vueuse/core';
-import { ref, onMounted, watch } from 'vue';
+import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
@@ -51,6 +51,7 @@ import InputSearch from '@/components/chain/InputSearch.vue';
 import PopoverChain from '@/components/chain/PopoverChain.vue';
 import useChain from '@/composables/useChain';
 import useEnv from '@/composables/useEnv';
+import EvmService from '@/services/evm';
 import NamingService from '@/services/naming';
 import type { Chain } from '@/utils/chains';
 import { toBigInt } from '@/utils/conversion';
@@ -74,6 +75,12 @@ useIntervalFn(
   {
     immediate: true,
   },
+);
+
+const evmService = computed(() =>
+  chainId.value && client.value
+    ? new EvmService(chainId.value, client.value)
+    : null,
 );
 
 const nameService = new NamingService(alchemyApiKey);
@@ -123,8 +130,11 @@ watch(chainId, (_newChain, oldChain) => {
 });
 
 async function fetch(): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
   isLoading.value = true;
-  latestBlock.value = await client.value.getBlockNumber();
+  latestBlock.value = await evmService.value.getLatestBlock();
   isLoading.value = false;
 }
 
