@@ -2,9 +2,13 @@
   <router-link
     :to="to"
     class="link"
+    :class="{ minimal: type === 'minimal' }"
   >
     <slot />
-    <div class="background" />
+    <div
+      v-if="type === 'normal'"
+      class="background"
+    />
   </router-link>
 </template>
 
@@ -14,18 +18,37 @@ import { computed } from 'vue';
 import type { Route } from '@/utils/routing';
 import { getRouteLocation } from '@/utils/routing';
 
-const props = defineProps<{
-  route: Route;
-}>();
+type Type = 'minimal' | 'normal';
+
+const props = withDefaults(
+  defineProps<{
+    route: Route;
+    type: Type;
+  }>(),
+  {
+    type: 'normal',
+  },
+);
 
 const to = computed(() => getRouteLocation(props.route));
 </script>
 
 <style scoped>
 .link {
+  --color-accent-toned-down: oklch(from var(--color-accent) l calc(c * 0.6) h);
+
   display: inline-flex;
   position: relative;
+  transition: all 0.2s ease-in-out;
   color: var(--color-accent);
+
+  &.minimal {
+    color: var(--color-accent-toned-down);
+
+    &:hover {
+      color: var(--color-accent);
+    }
+  }
 }
 
 .background {
