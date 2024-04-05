@@ -19,9 +19,7 @@ defineProps<{
   sections: Section[];
 }>();
 
-const section = defineModel<Section['value']>('section', {
-  required: true,
-});
+const section = defineModel<Section['value']>('section');
 </script>
 
 <script lang="ts">
