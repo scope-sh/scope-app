@@ -56,7 +56,6 @@ function toRelativeTime(from: Date, to: Date): RelativeTime {
     const unit = unitString as Intl.RelativeTimeFormatUnit;
     if (Math.abs(diff) >= value) {
       selectedUnit = unit;
-      break;
     }
   }
 
