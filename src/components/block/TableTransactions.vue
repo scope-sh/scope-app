@@ -28,7 +28,22 @@
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
           >
+            <ScopeLinkInternal
+              v-if="cell.column.id === 'from'"
+              :route="{ name: 'address', address: cell.getValue() as Address }"
+              type="minimal"
+            >
+              {{ formatAddress(cell.getValue() as Address, 16) }}
+            </ScopeLinkInternal>
+            <ScopeLinkInternal
+              v-else-if="cell.column.id === 'to'"
+              :route="{ name: 'address', address: cell.getValue() as Address }"
+              type="minimal"
+            >
+              {{ formatAddress(cell.getValue() as Address, 16) }}
+            </ScopeLinkInternal>
             <FlexRender
+              v-else
               :render="cell.column.columnDef.cell"
               :props="cell.getContext()"
             />
@@ -50,13 +65,9 @@ import {
 import { Address, Hex, size, slice } from 'viem';
 import { watch } from 'vue';
 
-import { toRelativeTime } from '@/utils/conversion';
-import {
-  formatAddress,
-  formatEther,
-  formatGasPrice,
-  formatRelativeTime,
-} from '@/utils/formatting';
+import { formatAddress, formatEther, formatGasPrice } from '@/utils/formatting';
+
+import ScopeLinkInternal from '../__common/ScopeLinkInternal.vue';
 
 const props = defineProps<{
   transactions: Transaction[];
@@ -67,29 +78,17 @@ const props = defineProps<{
 const columnHelper = createColumnHelper<Transaction>();
 
 const columns = [
-  columnHelper.accessor('index', {
-    header: 'index',
-    cell: (cell) => cell.getValue(),
-  }),
-  columnHelper.accessor('timestamp', {
-    header: 'date',
-    cell: (cell) => formatTimestamp(cell.getValue()),
-  }),
-  columnHelper.accessor('block', {
-    header: 'block',
-    cell: (cell) => cell.getValue(),
-  }),
   columnHelper.accessor('blockPosition', {
     header: 'pos.',
     cell: (cell) => cell.getValue(),
   }),
   columnHelper.accessor('from', {
     header: 'from',
-    cell: (cell) => formatAddress(cell.getValue(), 12),
+    cell: (cell) => formatAddress(cell.getValue(), 16),
   }),
   columnHelper.accessor('to', {
     header: 'to',
-    cell: (cell) => formatAddress(cell.getValue(), 12),
+    cell: (cell) => formatAddress(cell.getValue(), 16),
   }),
   columnHelper.accessor('function', {
     header: 'function',
@@ -134,12 +133,6 @@ watch(
   },
 );
 
-function formatTimestamp(timestamp: number): string {
-  const date = new Date(timestamp);
-  const now = new Date();
-  return formatRelativeTime(toRelativeTime(now, date));
-}
-
 function formatFunction(value: Hex): string {
   return size(value) === 0 ? '—' : value;
 }
@@ -148,15 +141,12 @@ function formatData(value: Hex): string {
   if (size(value) === 0) {
     return '—';
   }
-  return slice(value, 0, 8) + '…';
+  return slice(value, 0, 20) + '…';
 }
 </script>
 
 <script lang="ts">
 interface Transaction {
-  index: number;
-  timestamp: number;
-  block: bigint;
   blockPosition: number | null;
   from: Address;
   to: Address;
