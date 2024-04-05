@@ -22,9 +22,6 @@ defineProps<{
   flex: 1;
   gap: var(--spacing-4);
   align-items: baseline;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .note {
