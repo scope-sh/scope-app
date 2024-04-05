@@ -173,6 +173,7 @@ export type { Transaction };
 table {
   --border-radius: var(--border-radius-s);
 
+  width: 100%;
   border-spacing: 0;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius);
