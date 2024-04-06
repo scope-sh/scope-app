@@ -90,7 +90,9 @@ function handleSearchSubmit(): void {
   if (search.value === '') {
     return;
   }
-  if (isEnsAddress(search.value)) {
+  if (search.value === 'latest') {
+    openLatestBlock();
+  } else if (isEnsAddress(search.value)) {
     openEnsAddress(search.value);
   } else if (isAddress(search.value)) {
     router.push(getRouteLocation({ name: 'address', address: search.value }));
@@ -113,6 +115,17 @@ async function openEnsAddress(name: string): Promise<void> {
   if (address) {
     router.push(getRouteLocation({ name: 'address', address }));
   }
+}
+
+const isLatestBlockResolving = ref(false);
+async function openLatestBlock(): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
+  isLatestBlockResolving.value = true;
+  const number = await evmService.value.getLatestBlock();
+  isLatestBlockResolving.value = false;
+  router.push(getRouteLocation({ name: 'block', number }));
 }
 
 const isLoading = ref(false);
