@@ -43,7 +43,7 @@
               {{ formatAddress(cell.getValue() as Address, 16) }}
             </ScopeLinkInternal>
             <ScopeLinkInternal
-              v-else-if="cell.column.id === 'to'"
+              v-else-if="cell.column.id === 'to' && cell.getValue()"
               :route="{ name: 'address', address: cell.getValue() as Address }"
               type="minimal"
             >
@@ -99,7 +99,10 @@ const columns = [
   }),
   columnHelper.accessor('to', {
     header: 'to',
-    cell: (cell) => formatAddress(cell.getValue(), 16),
+    cell: (cell) => {
+      const value = cell.getValue();
+      return value ? formatAddress(value, 16) : null;
+    },
   }),
   columnHelper.accessor('function', {
     header: 'function',
@@ -166,7 +169,7 @@ interface Transaction {
   blockPosition: number | null;
   hash: Hex;
   from: Address;
-  to: Address;
+  to: Address | null;
   function: Hex;
   data: Hex;
   value: bigint;
