@@ -11,4 +11,7 @@ export default defineConfig({
     vue(),
     VueDevTools(),
   ],
+  css: {
+    transformer: 'lightningcss',
+  },
 });
