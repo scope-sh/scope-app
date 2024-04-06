@@ -4,12 +4,17 @@
     class="panel"
   >
     <div class="header">
-      <h2 class="title">{{ title }}</h2>
-      <div
-        v-if="subtitle"
-        class="subtitle"
-      >
-        {{ subtitle }}
+      <div class="header-side">
+        <h2 class="title">{{ title }}</h2>
+        <div
+          v-if="subtitle"
+          class="subtitle"
+        >
+          {{ subtitle }}
+        </div>
+      </div>
+      <div class="header-side">
+        <slot name="header" />
       </div>
     </div>
     <div class="content">
@@ -51,6 +56,11 @@ defineExpose({
 }
 
 .header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.header-side {
   display: flex;
   gap: var(--spacing-4);
   flex-direction: column;
