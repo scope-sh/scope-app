@@ -1,5 +1,5 @@
 <template>
-  <div class="p-2">
+  <div class="table">
     <table>
       <thead>
         <tr
@@ -29,7 +29,14 @@
             :key="cell.id"
           >
             <ScopeLinkInternal
-              v-if="cell.column.id === 'from'"
+              v-if="cell.column.id === 'hash'"
+              :route="{ name: 'transaction', hash: cell.getValue() as Hex }"
+              type="minimal"
+            >
+              {{ formatHash(cell.getValue() as Hex) }}
+            </ScopeLinkInternal>
+            <ScopeLinkInternal
+              v-else-if="cell.column.id === 'from'"
               :route="{ name: 'address', address: cell.getValue() as Address }"
               type="minimal"
             >
@@ -80,6 +87,10 @@ const columnHelper = createColumnHelper<Transaction>();
 const columns = [
   columnHelper.accessor('blockPosition', {
     header: 'pos.',
+    cell: (cell) => cell.getValue(),
+  }),
+  columnHelper.accessor('hash', {
+    header: 'hash',
     cell: (cell) => cell.getValue(),
   }),
   columnHelper.accessor('from', {
@@ -133,6 +144,11 @@ watch(
   },
 );
 
+function formatHash(value: Hex): string {
+  const size = 16;
+  return `${value.slice(0, 2 + size / 2)}...${value.slice(-size / 2)}`;
+}
+
 function formatFunction(value: Hex): string {
   return size(value) === 0 ? '—' : value;
 }
@@ -148,6 +164,7 @@ function formatData(value: Hex): string {
 <script lang="ts">
 interface Transaction {
   blockPosition: number | null;
+  hash: Hex;
   from: Address;
   to: Address;
   function: Hex;
@@ -160,6 +177,10 @@ export type { Transaction };
 </script>
 
 <style scoped>
+.table {
+  overflow-x: auto;
+}
+
 table {
   --border-radius: var(--border-radius-s);
 
@@ -187,7 +208,29 @@ th {
   font-weight: var(--font-weight-regular);
 }
 
+td {
+  padding: 6px 10px;
+  font-weight: var(--font-weight-light);
+  line-height: 1;
+  white-space: nowrap;
+}
+
 tr {
+  transition: opacity 0.25s ease;
+  opacity: 1;
+
+  &:first-child {
+    td {
+      padding: 10px 10px 6px;
+    }
+  }
+
+  &:last-child {
+    td {
+      padding: 6px 10px 10px;
+    }
+  }
+
   th {
     &:first-child {
       border-radius: calc(var(--border-radius) - 1px) 0 0 0;
@@ -199,18 +242,7 @@ tr {
   }
 }
 
-td {
-  padding: 6px 10px;
-  font-weight: var(--font-weight-light);
-  line-height: 1;
-}
-
 tbody {
-  tr {
-    transition: opacity 0.25s ease;
-    opacity: 1;
-  }
-
   &:hover tr:not(:hover) {
     opacity: 0.5;
   }
