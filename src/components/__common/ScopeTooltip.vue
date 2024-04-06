@@ -44,7 +44,6 @@ import { Tooltip } from 'radix-vue/namespaced';
   background: oklch(from var(--color-background-primary) l c h / 80%);
   box-shadow: 1px 2px 0 0 rgb(0 0 0 / 20%);
   font-size: var(--font-size-s);
-  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 

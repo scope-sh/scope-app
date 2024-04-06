@@ -48,7 +48,6 @@ function handleOpen(value: boolean): void {
   z-index: 1;
   background-color: rgb(0 0 0 / 40%);
   inset: 0;
-  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 

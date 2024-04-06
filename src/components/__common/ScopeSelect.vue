@@ -136,7 +136,6 @@ export type { Item };
   border-radius: var(--border-radius-m);
   background: oklch(from var(--color-background-primary) l c h / 60%);
   box-shadow: 1px 1px 0 0 rgb(0 0 0 / 80%);
-  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
