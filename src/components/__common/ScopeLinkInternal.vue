@@ -23,7 +23,7 @@ type Type = 'minimal' | 'normal';
 const props = withDefaults(
   defineProps<{
     route: Route;
-    type: Type;
+    type?: Type;
   }>(),
   {
     type: 'normal',
