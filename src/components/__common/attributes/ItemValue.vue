@@ -22,6 +22,13 @@ defineProps<{
   flex: 1;
   gap: var(--spacing-4);
   align-items: baseline;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+
+  @media (width > 768px) {
+    overflow-x: initial;
+    text-overflow: initial;
+  }
 }
 
 .note {
