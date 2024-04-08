@@ -45,7 +45,9 @@ class Service {
     return label;
   }
 
-  public async getLabels(addresses: Address[]): Promise<LabelWithAddress[]> {
+  public async getLabels(
+    addresses: Address[],
+  ): Promise<Record<Address, Label>> {
     const params: Record<string, string> = {
       chain: this.chainId.toString(),
     };
@@ -59,7 +61,7 @@ class Service {
       },
       body,
     });
-    const labels: LabelWithAddress[] = await response.json();
+    const labels: Record<Address, Label> = await response.json();
     return labels;
   }
 
@@ -77,4 +79,4 @@ class Service {
 }
 
 export default Service;
-export type { LabelWithAddress };
+export type { Label };
