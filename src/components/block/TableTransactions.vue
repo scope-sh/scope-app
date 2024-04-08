@@ -35,20 +35,20 @@
             >
               {{ formatHash(cell.getValue() as Hex) }}
             </ScopeLinkInternal>
-            <ScopeLinkInternal
+            <LinkAddress
               v-else-if="cell.column.id === 'from'"
-              :route="{ name: 'address', address: cell.getValue() as Address }"
+              :address="cell.getValue() as Address"
               type="minimal"
             >
               {{ formatAddress(cell.getValue() as Address, 16) }}
-            </ScopeLinkInternal>
-            <ScopeLinkInternal
+            </LinkAddress>
+            <LinkAddress
               v-else-if="cell.column.id === 'to' && cell.getValue()"
-              :route="{ name: 'address', address: cell.getValue() as Address }"
+              :address="cell.getValue() as Address"
               type="minimal"
             >
               {{ formatAddress(cell.getValue() as Address, 16) }}
-            </ScopeLinkInternal>
+            </LinkAddress>
             <FlexRender
               v-else
               :render="cell.column.columnDef.cell"
@@ -72,9 +72,9 @@ import {
 import { Address, Hex, size, slice } from 'viem';
 import { watch } from 'vue';
 
+import LinkAddress from '@/components/__common/LinkAddress.vue';
+import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import { formatAddress, formatEther, formatGasPrice } from '@/utils/formatting';
-
-import ScopeLinkInternal from '../__common/ScopeLinkInternal.vue';
 
 const props = defineProps<{
   transactions: Transaction[];

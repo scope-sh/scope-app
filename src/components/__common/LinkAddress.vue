@@ -4,21 +4,28 @@
       name: 'address',
       address: address,
     }"
+    :type
   >
-    <div class="content">
+    <slot>
       {{ address }}
-    </div>
+    </slot>
   </ScopeLinkInternal>
 </template>
 
 <script setup lang="ts">
 import { Address } from 'viem';
 
-import ScopeLinkInternal from './ScopeLinkInternal.vue';
+import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
-defineProps<{
-  address: Address;
-}>();
+withDefaults(
+  defineProps<{
+    address: Address;
+    type?: Type;
+  }>(),
+  {
+    type: 'normal',
+  },
+);
 </script>
 
 <style scoped>

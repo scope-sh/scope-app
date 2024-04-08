@@ -18,8 +18,6 @@ import { computed } from 'vue';
 import type { Route } from '@/utils/routing';
 import { getRouteLocation } from '@/utils/routing';
 
-type Type = 'minimal' | 'normal';
-
 const props = withDefaults(
   defineProps<{
     route: Route;
@@ -31,6 +29,12 @@ const props = withDefaults(
 );
 
 const to = computed(() => getRouteLocation(props.route));
+</script>
+
+<script lang="ts">
+type Type = 'minimal' | 'normal';
+
+export type { Type };
 </script>
 
 <style scoped>
