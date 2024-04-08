@@ -7,17 +7,22 @@
     :type
   >
     <slot>
-      {{ address }}
+      {{ labelText || address }}
     </slot>
   </ScopeLinkInternal>
 </template>
 
 <script setup lang="ts">
 import { Address } from 'viem';
+import { computed } from 'vue';
+
+import useLabels from '@/composables/useLabels.js';
 
 import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
-withDefaults(
+const { getLabelText } = useLabels();
+
+const props = withDefaults(
   defineProps<{
     address: Address;
     type?: Type;
@@ -26,6 +31,8 @@ withDefaults(
     type: 'normal',
   },
 );
+
+const labelText = computed(() => getLabelText(props.address));
 </script>
 
 <style scoped>

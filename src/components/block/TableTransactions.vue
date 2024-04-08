@@ -40,14 +40,14 @@
               :address="cell.getValue() as Address"
               type="minimal"
             >
-              {{ formatAddress(cell.getValue() as Address, 16) }}
+              {{ getAddress(cell.getValue() as Address) }}
             </LinkAddress>
             <LinkAddress
               v-else-if="cell.column.id === 'to' && cell.getValue()"
               :address="cell.getValue() as Address"
               type="minimal"
             >
-              {{ formatAddress(cell.getValue() as Address, 16) }}
+              {{ getAddress(cell.getValue() as Address) }}
             </LinkAddress>
             <FlexRender
               v-else
@@ -74,7 +74,10 @@ import { watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
+import useLabels from '@/composables/useLabels.js';
 import { formatAddress, formatEther, formatGasPrice } from '@/utils/formatting';
+
+const { getLabelText } = useLabels();
 
 const props = defineProps<{
   transactions: Transaction[];
@@ -146,6 +149,11 @@ watch(
     table.setPageIndex(props.page);
   },
 );
+
+function getAddress(value: Address): string {
+  const labelText = getLabelText(value);
+  return labelText ? labelText : formatAddress(value, 16);
+}
 
 function formatHash(value: Hex): string {
   const size = 16;
