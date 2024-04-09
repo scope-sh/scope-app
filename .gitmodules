@@ -1,3 +1,0 @@
-[submodule "modules/registry"]
-	path = modules/registry
-	url = https://github.com/scope-sh/scope-registry

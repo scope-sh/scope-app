@@ -29,6 +29,5 @@
     "paths": {
       "@/*": ["*"]
     }
-  },
-  "exclude": ["./modules/registry/**/*"]
+  }
 }

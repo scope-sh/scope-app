@@ -2,13 +2,36 @@ import { Address } from 'viem';
 
 import useEnv from '@/composables/useEnv';
 import { Chain } from '@/utils/chains';
-import { Label } from 'scope-registry';
 
-const { apiEndpoint } = useEnv();
+type LabelType =
+  | 'wrapped'
+  | 'erc20'
+  | 'aave-v2-atoken'
+  | 'aave-v2-variable-debt-token'
+  | 'aave-v2-stable-debt-token'
+  | 'aave-v3-atoken'
+  | 'aave-v3-vtoken'
+  | 'aave-v3-stoken'
+  | 'biconomy-v2-account'
+  | 'kernel-v2-account'
+  | 'rhinestone-v1-module'
+  | 'safe-v1.3.0-account'
+  | 'safe-v1.4.1-account'
+  | 'uniswap-v2-pool'
+  | 'uniswap-v3-pool';
+
+interface Label {
+  value: string;
+  namespace?: string;
+  type?: LabelType;
+  metadata?: Record<string, unknown>;
+}
 
 type LabelWithAddress = Label & {
   address: string;
 };
+
+const { apiEndpoint } = useEnv();
 
 class Service {
   chainId: Chain;
