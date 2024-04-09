@@ -21,7 +21,7 @@ function useLabels(): UseLabels {
     const addressSet = new Set<Address>();
     for (const address of addresses) {
       const existingLabel = store.getLabel(chain.value, address);
-      if (existingLabel === undefined) {
+      if (!existingLabel) {
         addressSet.add(address);
       }
     }
