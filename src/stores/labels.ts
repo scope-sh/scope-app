@@ -3,20 +3,26 @@ import { Address } from 'viem';
 import { ref } from 'vue';
 
 import { Label } from '@/services/api.js';
+import { Chain } from '@/utils/chains';
 
 const store = defineStore('labels', () => {
-  const labels = ref<Record<Address, Label>>({});
+  const labels = ref<Partial<Record<Chain, Record<Address, Label>>>>({});
 
-  function setLabels(value: Record<Address, Label>): void {
-    labels.value = value;
+  function addLabels(chain: Chain, value: Record<Address, Label>): void {
+    const chainLabels = labels.value[chain] || {};
+    labels.value[chain] = { ...chainLabels, ...value };
   }
 
-  function getLabel(address: Address): Label | null {
-    return labels.value[address] || null;
+  function getLabel(chain: Chain, address: Address): Label | null {
+    const chainLabels = labels.value[chain];
+    if (!chainLabels) {
+      return null;
+    }
+    return chainLabels[address] || null;
   }
 
   return {
-    setLabels,
+    addLabels,
     getLabel,
   };
 });

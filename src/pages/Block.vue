@@ -113,7 +113,6 @@ import TableTransactions, {
 } from '@/components/block/TableTransactions.vue';
 import useChain from '@/composables/useChain';
 import useLabels from '@/composables/useLabels';
-import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
 import type { BlockWithTransactions } from '@/services/evm';
 import { toBigInt } from '@/utils/conversion';
@@ -121,7 +120,7 @@ import { formatShare, formatTime } from '@/utils/formatting';
 
 const route = useRoute();
 const { id: chainId, client } = useChain();
-const { setLabels } = useLabels();
+const { requestLabels } = useLabels();
 
 const TRANSACTIONS_PER_PAGE = 20;
 
@@ -171,9 +170,6 @@ watch(number, () => {
   fetch();
 });
 
-const apiService = computed(() =>
-  chainId.value ? new ApiService(chainId.value) : null,
-);
 const evmService = computed(() =>
   chainId.value && client.value
     ? new EvmService(chainId.value, client.value)
@@ -247,20 +243,11 @@ const addresses = computed(() => {
   const toAddresses = block.value.transactions
     .map((transaction) => transaction.to)
     .filter((to): to is Address => to !== null);
-  const addressSet = new Set<Address>([
-    blockProducer,
-    ...fromAddresses,
-    ...toAddresses,
-  ]);
-  return Array.from(addressSet);
+  return [blockProducer, ...fromAddresses, ...toAddresses];
 });
 
 watch(addresses, async () => {
-  if (!apiService.value) {
-    return;
-  }
-  const addressLabels = await apiService.value.getLabels(addresses.value);
-  setLabels(addressLabels);
+  requestLabels(addresses.value);
 });
 </script>
 
