@@ -1,13 +1,14 @@
 import { Address } from 'viem';
 import { computed } from 'vue';
 
-import ApiService from '@/services/api';
+import ApiService, { Label } from '@/services/api';
 import useStore from '@/stores/labels.js';
 
 import useChain from './useChain';
 
 interface UseLabels {
   requestLabels: (addresses: Address[]) => Promise<void>;
+  getLabel: (address: Address) => Label | null;
   getLabelText: (address: Address) => string | null;
 }
 
@@ -30,8 +31,12 @@ function useLabels(): UseLabels {
     store.addLabels(chain.value, labels);
   }
 
+  function getLabel(address: Address): Label | null {
+    return store.getLabel(chain.value, address);
+  }
+
   function getLabelText(address: Address): string | null {
-    const label = store.getLabel(chain.value, address);
+    const label = getLabel(address);
     return label
       ? label.namespace
         ? `${label.namespace}: ${label.value}`
@@ -41,6 +46,7 @@ function useLabels(): UseLabels {
 
   return {
     requestLabels,
+    getLabel,
     getLabelText,
   };
 }
