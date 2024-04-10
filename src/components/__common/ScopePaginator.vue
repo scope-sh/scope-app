@@ -36,7 +36,7 @@ import { Pagination } from 'radix-vue/namespaced';
 import ScopeIcon from './ScopeIcon.vue';
 
 defineProps<{
-  total: number;
+  total?: number;
 }>();
 
 const page = defineModel<number>({
