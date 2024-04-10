@@ -1,4 +1,4 @@
-import { Address } from 'viem';
+import { Address, Hex } from 'viem';
 
 import useEnv from '@/composables/useEnv';
 import { Chain } from '@/utils/chains';
@@ -30,6 +30,26 @@ interface Label {
 type LabelWithAddress = Label & {
   address: string;
 };
+
+interface Transaction {
+  blockNumber: number;
+  from: Address;
+  gasPrice: Hex;
+  hash: Hex;
+  input: Hex;
+  to: Address;
+  transactionIndex: number;
+  value: Hex;
+}
+
+interface Log {
+  blockNumber: number;
+  transactionHash: Hex;
+  logIndex: number;
+  address: Address;
+  topics: Hex[];
+  data: Hex;
+}
 
 const { apiEndpoint } = useEnv();
 
@@ -83,7 +103,43 @@ class Service {
     const labels: LabelWithAddress[] = await response.json();
     return labels;
   }
+
+  public async getAddressTransactions(
+    address: Address,
+    startBlock: number,
+    limit: number,
+  ): Promise<Transaction[]> {
+    const params: Record<string, string> = {
+      chain: this.chainId.toString(),
+      address,
+      startBlock: startBlock.toString(),
+      limit: limit.toString(),
+    };
+    const url = new URL(`${apiEndpoint}/evm/transactions`);
+    url.search = new URLSearchParams(params).toString();
+    const response = await fetch(url);
+    const transactions: Transaction[] = await response.json();
+    return transactions;
+  }
+
+  public async getAddressLogs(
+    address: Address,
+    startBlock: number,
+    limit: number,
+  ): Promise<Log[]> {
+    const params: Record<string, string> = {
+      chain: this.chainId.toString(),
+      address,
+      startBlock: startBlock.toString(),
+      limit: limit.toString(),
+    };
+    const url = new URL(`${apiEndpoint}/evm/logs`);
+    url.search = new URLSearchParams(params).toString();
+    const response = await fetch(url);
+    const logs: Log[] = await response.json();
+    return logs;
+  }
 }
 
 export default Service;
-export type { Label };
+export type { Label, Log, Transaction };
