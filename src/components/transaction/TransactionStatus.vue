@@ -2,10 +2,13 @@
   <div class="wrapper">
     <div
       class="status"
-      :class="{ success: status === 'success', error: status === 'reverted' }"
+      :class="{
+        success: status === 'success' || status === null,
+        error: status === 'reverted',
+      }"
     >
       <ScopeIcon
-        v-if="status === 'success'"
+        v-if="status === 'success' || status === null"
         :kind="'check-circled'"
         class="icon"
       />
@@ -26,10 +29,13 @@ import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import type { TransactionStatus } from '@/services/evm';
 
 const props = defineProps<{
-  status: TransactionStatus;
+  status: TransactionStatus | null;
 }>();
 
 const label = computed(() => {
+  if (!props.status) {
+    return 'Executed';
+  }
   const map: Record<TransactionStatus, string> = {
     success: 'Success',
     reverted: 'Reverted',
