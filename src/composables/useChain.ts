@@ -9,11 +9,13 @@ import {
   CHAINS,
   DEFAULT_CHAIN,
   getChainData,
+  getChainName,
   getEndpointUrl,
 } from '@/utils/chains';
 
 interface UseChain {
   id: Ref<Chain>;
+  name: Ref<string>;
   client: Ref<ReturnType<typeof createPublicClient>>;
 }
 
@@ -39,6 +41,7 @@ function useChain(): UseChain {
   const { alchemyApiKey } = useEnv();
 
   const id = ref<Chain>(parseChain(route.params.chain) || DEFAULT_CHAIN);
+  const name = computed(() => getChainName(id.value));
 
   watch(
     () => route.params.chain,
@@ -63,7 +66,7 @@ function useChain(): UseChain {
     }),
   );
 
-  return { id, client };
+  return { id, name, client };
 }
 
 export default useChain;
