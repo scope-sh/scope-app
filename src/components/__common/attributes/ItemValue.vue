@@ -20,6 +20,7 @@ defineProps<{
 .value {
   display: flex;
   flex: 1;
+  flex-wrap: wrap;
   gap: var(--spacing-4);
   align-items: baseline;
   overflow-x: hidden;
