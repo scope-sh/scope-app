@@ -1,4 +1,5 @@
 import { createPinia } from 'pinia';
+import { createHead } from 'unhead';
 import { createApp } from 'vue';
 import { createWebHistory, createRouter } from 'vue-router';
 
@@ -11,6 +12,7 @@ const router = createRouter({
   routes,
 });
 const pinia = createPinia();
+createHead();
 
 const app = createApp(App);
 
