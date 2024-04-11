@@ -39,7 +39,7 @@ function useLabels(): UseLabels {
     const label = getLabel(address);
     return label
       ? label.namespace
-        ? `${label.namespace}: ${label.value}`
+        ? `${label.namespace.value}: ${label.value}`
         : label.value
       : null;
   }

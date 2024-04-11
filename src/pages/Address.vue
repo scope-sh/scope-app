@@ -30,7 +30,7 @@
             v-if="addressLabel.namespace"
             class="label-namespace"
           >
-            {{ addressLabel.namespace }}
+            {{ addressLabel.namespace.value }}
           </div>
           <div class="label-value">{{ addressLabel.value }}</div>
         </div>
@@ -239,39 +239,10 @@ const overviewPanelTitle = computed<string>(() => {
   if (!addressLabel.value) {
     return 'Contract';
   }
-  switch (addressLabel.value.type) {
-    case 'wrapped':
-      return 'Contract: Wrapped Native';
-    case 'erc20':
-      return 'Contract: ERC20';
-    case 'aave-v2-atoken':
-      return 'Contract: Aave V2 aToken';
-    case 'aave-v2-variable-debt-token':
-      return 'Contract: Aave V2 Variable Debt Token';
-    case 'aave-v2-stable-debt-token':
-      return 'Contract: Aave V2 Stable Debt Token';
-    case 'aave-v3-atoken':
-      return 'Contract: Aave V3 aToken';
-    case 'aave-v3-vtoken':
-      return 'Contract: Aave V3 vToken';
-    case 'aave-v3-stoken':
-      return 'Contract: Aave V3 sToken';
-    case 'biconomy-v2-account':
-      return 'Contract: BiConomy V2 Account';
-    case 'kernel-v2-account':
-      return 'Contract: Kernel V2 Account';
-    case 'rhinestone-v1-module':
-      return 'Contract: Rhinestone Module';
-    case 'safe-v1.3.0-account':
-      return 'Contract: Safe V1.3.0 Wallet';
-    case 'safe-v1.4.1-account':
-      return 'Contract: Safe V1.4.1 Wallet';
-    case 'uniswap-v2-pool':
-      return 'Contract: Uniswap V2 Pool';
-    case 'uniswap-v3-pool':
-      return 'Contract: Uniswap V3 Pool';
+  if (!addressLabel.value.type) {
+    return 'Contract';
   }
-  return 'Contract';
+  return `Contract — ${addressLabel.value.type.value}`;
 });
 
 async function fetch(): Promise<void> {

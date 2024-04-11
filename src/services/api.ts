@@ -3,7 +3,7 @@ import { Address, Hex } from 'viem';
 import useEnv from '@/composables/useEnv';
 import { Chain } from '@/utils/chains';
 
-type LabelType =
+type LabelId =
   | 'wrapped'
   | 'erc20'
   | 'aave-v2-atoken'
@@ -20,10 +20,21 @@ type LabelType =
   | 'uniswap-v2-pool'
   | 'uniswap-v3-pool';
 
+interface LabelType {
+  id: LabelId;
+  value: string;
+}
+
+interface LabelNamespace {
+  id: string;
+  value: string;
+}
+
 interface Label {
   value: string;
-  namespace?: string;
+  namespace?: LabelNamespace;
   type?: LabelType;
+  iconUrl?: string;
   metadata?: Record<string, unknown>;
 }
 
