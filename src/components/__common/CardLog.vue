@@ -40,7 +40,10 @@
           {{ topic }}
         </div>
       </div>
-      <div class="data">
+      <div
+        v-if="log.data !== '0x'"
+        class="data"
+      >
         <ScopeTextView
           :value="log.data"
           size="tiny"
