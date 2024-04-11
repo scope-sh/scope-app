@@ -211,7 +211,7 @@ interface AddressTransaction {
   transactionIndex: number;
   hash: Hex;
   from: Address;
-  to: Address;
+  to: Address | null;
   function: Hex;
   data: Hex;
   value: bigint;
