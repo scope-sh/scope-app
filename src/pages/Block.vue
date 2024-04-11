@@ -32,7 +32,7 @@
       <AttributeList v-if="block">
         <AttributeItem>
           <AttributeItemLabel :value="'Timestamp'" />
-          <AttributeItemValue>
+          <AttributeItemValue :note="blockRelativeTimeLabel">
             {{ formatTime(block.timestamp) }}
           </AttributeItemValue>
         </AttributeItem>
@@ -115,8 +115,12 @@ import useChain from '@/composables/useChain';
 import useLabels from '@/composables/useLabels';
 import EvmService from '@/services/evm';
 import type { BlockWithTransactions } from '@/services/evm';
-import { toBigInt } from '@/utils/conversion';
-import { formatShare, formatTime } from '@/utils/formatting';
+import { toBigInt, toRelativeTime } from '@/utils/conversion';
+import {
+  formatRelativeTime,
+  formatShare,
+  formatTime,
+} from '@/utils/formatting';
 
 const route = useRoute();
 const { id: chainId, client } = useChain();
@@ -194,6 +198,20 @@ async function fetch(): Promise<void> {
   block.value = await evmService.value.getBlockWithTransactions(number.value);
   isLoading.value = false;
 }
+
+const blockRelativeTime = computed(() => {
+  if (!block.value) {
+    return null;
+  }
+  return toRelativeTime(new Date(), block.value.timestamp);
+});
+
+const blockRelativeTimeLabel = computed(() => {
+  if (!blockRelativeTime.value) {
+    return undefined;
+  }
+  return formatRelativeTime(blockRelativeTime.value);
+});
 
 const gasUsedShare = computed(() => {
   if (!block.value) {
