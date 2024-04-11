@@ -41,6 +41,7 @@
 
 <script setup lang="ts">
 import { useIntervalFn } from '@vueuse/core';
+import { useHead } from 'unhead';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -63,9 +64,21 @@ import {
   isTransactionHash,
 } from '@/utils/validation/pattern';
 
-const { id: chainId, client } = useChain();
+const { id: chainId, name: chainName, client } = useChain();
 const { alchemyApiKey } = useEnv();
 const router = useRouter();
+
+watch(
+  chainName,
+  () => {
+    useHead({
+      title: `${chainName.value} | Scope`,
+    });
+  },
+  {
+    immediate: true,
+  },
+);
 
 useIntervalFn(
   () => {

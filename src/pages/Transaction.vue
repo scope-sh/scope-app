@@ -132,6 +132,7 @@
 </template>
 
 <script setup lang="ts">
+import { useHead } from 'unhead';
 import { Address, TransactionType } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -164,7 +165,7 @@ import {
 } from '@/utils/formatting.js';
 
 const route = useRoute();
-const { id: chainId, client } = useChain();
+const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
 
 const sections = [
@@ -212,6 +213,18 @@ onMounted(() => {
 watch(hash, () => {
   fetch();
 });
+
+watch(
+  hash,
+  () => {
+    useHead({
+      title: `Transaction ${hash.value} on ${chainName.value} | Scope`,
+    });
+  },
+  {
+    immediate: true,
+  },
+);
 
 const evmService = computed(() =>
   chainId.value && client.value

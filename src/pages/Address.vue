@@ -98,6 +98,7 @@
 </template>
 
 <script setup lang="ts">
+import { useHead } from 'unhead';
 import { Address, Hex, Log, slice } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -122,7 +123,7 @@ import ApiService, {
 import EvmService from '@/services/evm';
 
 const route = useRoute();
-const { id: chainId, client } = useChain();
+const { id: chainId, name: chainName, client } = useChain();
 const { getLabel, requestLabels } = useLabels();
 
 const sections = [
@@ -194,6 +195,18 @@ watch(address, () => {
   // Fetch new data
   fetch();
 });
+
+watch(
+  address,
+  () => {
+    useHead({
+      title: `Address ${address.value} on ${chainName.value} | Scope`,
+    });
+  },
+  {
+    immediate: true,
+  },
+);
 
 const apiService = computed(() =>
   chainId.value ? new ApiService(chainId.value) : null,
