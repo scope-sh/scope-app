@@ -1,5 +1,9 @@
 <template>
-  <div id="app">
+  <LockScreen v-if="locked" />
+  <div
+    v-else
+    id="app"
+  >
     <AppHeader v-if="!isChainPage" />
     <router-view />
   </div>
@@ -8,12 +12,18 @@
 <script setup lang="ts">
 import '@fontsource-variable/inter';
 import '@fontsource/inconsolata/400.css';
+import { useStorage } from '@vueuse/core';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 import AppHeader from '@/components/_app/Header.vue';
+import LockScreen from '@/components/_app/LockScreen.vue';
+
+import useEnv from './composables/useEnv';
 
 const route = useRoute();
+const { appPassphrase } = useEnv();
+const locked = useStorage('scope-locked', appPassphrase.length > 0);
 
 const isChainPage = computed(() => route.name === 'chain');
 </script>
