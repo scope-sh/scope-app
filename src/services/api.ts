@@ -37,7 +37,7 @@ interface Transaction {
   gasPrice: Hex;
   hash: Hex;
   input: Hex;
-  to: Address;
+  to: Address | undefined;
   transactionIndex: number;
   value: Hex;
 }

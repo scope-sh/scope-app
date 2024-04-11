@@ -349,7 +349,7 @@ const transactions = computed<TransactionRow[]>(() => {
       transactionIndex: transaction.transactionIndex,
       hash: transaction.hash,
       from: transaction.from,
-      to: transaction.to,
+      to: transaction.to || null,
       function:
         transaction.input.length >= 10 ? slice(transaction.input, 0, 4) : '0x',
       data: transaction.input.length > 10 ? slice(transaction.input, 4) : '0x',
