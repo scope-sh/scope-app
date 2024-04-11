@@ -70,7 +70,10 @@ defineProps<{
 }
 
 .topic {
+  overflow: hidden;
   font-family: var(--font-mono);
   font-size: var(--font-size-m);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>
