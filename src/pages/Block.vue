@@ -83,6 +83,7 @@
           :transactions
           :page="page - 1"
           :per-page="TRANSACTIONS_PER_PAGE"
+          type="block"
         />
       </template>
     </ScopePanel>
@@ -101,6 +102,9 @@ import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
+import TableTransactions, {
+  type Transaction,
+} from '@/components/__common/TableTransactions.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -108,9 +112,6 @@ import {
   AttributeList,
 } from '@/components/__common/attributes';
 import BlockStatus from '@/components/block/BlockStatus.vue';
-import TableTransactions, {
-  type Transaction,
-} from '@/components/block/TableTransactions.vue';
 import useChain from '@/composables/useChain';
 import useLabels from '@/composables/useLabels';
 import EvmService from '@/services/evm';

@@ -57,6 +57,7 @@
         :transactions="transactions"
         :per-page="TRANSACTIONS_PER_PAGE"
         :page="transactionPage - 1"
+        type="address"
       />
     </ScopePanel>
     <ScopePanelLoading
@@ -108,10 +109,10 @@ import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
-import FormEther from '@/components/address/FormEther.vue';
 import TableTransactions, {
   Transaction as TransactionRow,
-} from '@/components/address/TableTransactions.vue';
+} from '@/components/__common/TableTransactions.vue';
+import FormEther from '@/components/address/FormEther.vue';
 import useChain from '@/composables/useChain';
 import useLabels from '@/composables/useLabels';
 import ApiService, {

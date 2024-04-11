@@ -29,7 +29,14 @@
             :key="cell.id"
           >
             <ScopeLinkInternal
-              v-if="cell.column.id === 'hash'"
+              v-if="cell.column.id === 'blockNumber'"
+              :route="{ name: 'block', number: cell.getValue() as bigint }"
+              type="minimal"
+            >
+              {{ cell.getValue() }}
+            </ScopeLinkInternal>
+            <ScopeLinkInternal
+              v-else-if="cell.column.id === 'hash'"
               :route="{ name: 'transaction', hash: cell.getValue() as Hex }"
               type="minimal"
             >
@@ -68,9 +75,10 @@ import {
   createColumnHelper,
   getCoreRowModel,
   getPaginationRowModel,
+  ColumnDef,
 } from '@tanstack/vue-table';
 import { Address, Hex, size, slice } from 'viem';
-import { watch } from 'vue';
+import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
@@ -83,53 +91,78 @@ const props = defineProps<{
   transactions: Transaction[];
   page: number;
   perPage: number;
+  type: 'address' | 'block';
 }>();
 
 const columnHelper = createColumnHelper<Transaction>();
 
-const columns = [
-  columnHelper.accessor('blockPosition', {
-    header: 'pos.',
-    cell: (cell) => cell.getValue(),
-  }),
-  columnHelper.accessor('hash', {
-    header: 'hash',
-    cell: (cell) => cell.getValue(),
-  }),
-  columnHelper.accessor('from', {
-    header: 'from',
-    cell: (cell) => formatAddress(cell.getValue(), 16),
-  }),
-  columnHelper.accessor('to', {
-    header: 'to',
-    cell: (cell) => {
-      const value = cell.getValue();
-      return value ? formatAddress(value, 16) : null;
-    },
-  }),
-  columnHelper.accessor('function', {
-    header: 'function',
-    cell: (cell) => formatFunction(cell.getValue()),
-  }),
-  columnHelper.accessor('data', {
-    header: 'data',
-    cell: (cell) => formatData(cell.getValue()),
-  }),
-  columnHelper.accessor('value', {
-    header: 'value',
-    cell: (cell) => formatEther(cell.getValue()),
-  }),
-  columnHelper.accessor('gasPrice', {
-    header: 'gas price',
-    cell: (cell) => formatGasPrice(cell.getValue()),
-  }),
-];
+const columns = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const columns: ColumnDef<Transaction, any>[] = [];
+  if (props.type === 'address') {
+    columns.push(
+      columnHelper.accessor('blockNumber', {
+        header: 'block',
+        cell: (cell) => cell.getValue(),
+      }),
+    );
+    columns.push(
+      columnHelper.accessor('transactionIndex', {
+        header: 'pos.',
+        cell: (cell) => cell.getValue(),
+      }),
+    );
+  } else if (props.type === 'block') {
+    columns.push(
+      columnHelper.accessor('blockPosition', {
+        header: 'pos.',
+        cell: (cell) => cell.getValue(),
+      }),
+    );
+  }
+  columns.push(
+    ...[
+      columnHelper.accessor('hash', {
+        header: 'hash',
+        cell: (cell) => cell.getValue(),
+      }),
+      columnHelper.accessor('from', {
+        header: 'from',
+        cell: (cell) => formatAddress(cell.getValue(), 16),
+      }),
+      columnHelper.accessor('to', {
+        header: 'to',
+        cell: (cell) => {
+          const value = cell.getValue();
+          return value ? formatAddress(value, 16) : null;
+        },
+      }),
+      columnHelper.accessor('function', {
+        header: 'function',
+        cell: (cell) => formatFunction(cell.getValue()),
+      }),
+      columnHelper.accessor('data', {
+        header: 'data',
+        cell: (cell) => formatData(cell.getValue()),
+      }),
+      columnHelper.accessor('value', {
+        header: 'value',
+        cell: (cell) => formatEther(cell.getValue()),
+      }),
+      columnHelper.accessor('gasPrice', {
+        header: 'gas price',
+        cell: (cell) => formatGasPrice(cell.getValue()),
+      }),
+    ],
+  );
+  return columns;
+});
 
 const table = useVueTable({
   get data() {
     return props.transactions;
   },
-  columns: columns,
+  columns: columns.value,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
 });
@@ -173,7 +206,19 @@ function formatData(value: Hex): string {
 </script>
 
 <script lang="ts">
-interface Transaction {
+interface AddressTransaction {
+  blockNumber: number;
+  transactionIndex: number;
+  hash: Hex;
+  from: Address;
+  to: Address;
+  function: Hex;
+  data: Hex;
+  value: bigint;
+  gasPrice: bigint;
+}
+
+interface BlockTransaction {
   blockPosition: number | null;
   hash: Hex;
   from: Address;
@@ -184,7 +229,9 @@ interface Transaction {
   gasPrice: bigint;
 }
 
-export type { Transaction };
+type Transaction = AddressTransaction | BlockTransaction;
+
+export type { AddressTransaction, BlockTransaction, Transaction };
 </script>
 
 <style scoped>
