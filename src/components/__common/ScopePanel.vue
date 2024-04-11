@@ -64,6 +64,7 @@ defineExpose({
   display: flex;
   gap: var(--spacing-4);
   flex-direction: column;
+  overflow: hidden;
 }
 
 .title {
@@ -75,8 +76,11 @@ defineExpose({
 }
 
 .subtitle {
+  overflow: hidden;
   font-size: var(--font-size-l);
   font-weight: var(--font-weight-light);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .content {
