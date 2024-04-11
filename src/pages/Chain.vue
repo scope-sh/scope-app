@@ -40,8 +40,8 @@
 </template>
 
 <script setup lang="ts">
+import { useHead } from '@unhead/vue';
 import { useIntervalFn } from '@vueuse/core';
-import { useHead } from 'unhead';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 

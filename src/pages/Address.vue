@@ -99,7 +99,7 @@
 </template>
 
 <script setup lang="ts">
-import { useHead } from 'unhead';
+import { useHead } from '@unhead/vue';
 import { Address, Hex, Log, slice } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
