@@ -128,14 +128,11 @@ const columns = computed(() => {
       }),
       columnHelper.accessor('from', {
         header: 'from',
-        cell: (cell) => formatAddress(cell.getValue(), 16),
+        cell: (cell) => cell.getValue(),
       }),
       columnHelper.accessor('to', {
         header: 'to',
-        cell: (cell) => {
-          const value = cell.getValue();
-          return value ? formatAddress(value, 16) : null;
-        },
+        cell: (cell) => cell.getValue(),
       }),
       columnHelper.accessor('function', {
         header: 'function',
