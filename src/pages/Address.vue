@@ -90,6 +90,7 @@
             v-for="(log, index) in logs"
             :key="index"
             :log="log"
+            type="address"
           />
         </div>
       </template>

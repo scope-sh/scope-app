@@ -15,9 +15,18 @@
         ·
         <span>
           <LinkAddress
+            v-if="type === 'transaction'"
             :address="log.address"
-            :with-icon="false"
           />
+          <ScopeLinkInternal
+            v-else-if="type === 'address' && log.transactionHash"
+            :route="{
+              name: 'transaction',
+              hash: log.transactionHash,
+            }"
+          >
+            {{ log.transactionHash }}
+          </ScopeLinkInternal>
         </span>
         ·
         <span class="index">#{{ log.logIndex }}</span>
@@ -50,6 +59,7 @@ import type { Log } from '@/services/evm';
 
 defineProps<{
   log: Log;
+  type: 'address' | 'transaction';
 }>();
 </script>
 

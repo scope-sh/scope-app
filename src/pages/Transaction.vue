@@ -124,6 +124,7 @@
             v-for="(log, index) in transactionReceipt.logs"
             :key="index"
             :log="log"
+            type="transaction"
           />
         </div>
       </template>
