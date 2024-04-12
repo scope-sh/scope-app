@@ -48,12 +48,17 @@
     >
       <template #header>
         <ScopePaginator
+          v-if="transactions.length"
           v-model="transactionPage"
           :total="maxTransactionPage"
         />
       </template>
+      <ScopeLabelEmptyState
+        v-if="!transactions.length"
+        value="No transactions found"
+      />
       <TableTransactions
-        v-if="transactions.length"
+        v-else
         :transactions="transactions"
         :per-page="TRANSACTIONS_PER_PAGE"
         :page="transactionPage - 1"
