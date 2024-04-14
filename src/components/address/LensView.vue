@@ -1,6 +1,6 @@
 <template>
   <Erc20Lens
-    v-if="labelTypeId === 'erc20'"
+    v-if="labelTypeId === 'erc20' || labelTypeId === 'wrapped'"
     :address="address"
   />
   <SafeV1_4_1Lens
