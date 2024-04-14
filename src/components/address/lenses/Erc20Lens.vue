@@ -94,8 +94,8 @@ const symbol = ref<string | null>(null);
 const name = ref<string | null>(null);
 const decimals = ref<number | null>(null);
 const totalSupply = ref<number | null>(null);
-const balance = ref<bigint | null>(null);
-const allowance = ref<bigint | null>(null);
+const balance = ref<string | null>(null);
+const allowance = ref<string | null>(null);
 
 watch(
   () => props.address,
@@ -147,6 +147,7 @@ async function fetch(): Promise<void> {
 }
 
 async function fetchBalance(): Promise<void> {
+  balance.value = null;
   if (!client.value || !balanceOwner.value) return;
 
   const result = await client.value.readContract({
@@ -156,10 +157,13 @@ async function fetchBalance(): Promise<void> {
     args: [balanceOwner.value as Address],
   });
 
-  balance.value = result;
+  balance.value = decimals.value
+    ? fromWei(result, decimals.value).toString()
+    : result.toString();
 }
 
 async function fetchAllowance(): Promise<void> {
+  allowance.value = null;
   if (!client.value || !allowanceOwner.value || !allowanceSpender.value) return;
 
   const result = await client.value.readContract({
@@ -169,6 +173,8 @@ async function fetchAllowance(): Promise<void> {
     args: [allowanceOwner.value as Address, allowanceSpender.value as Address],
   });
 
-  allowance.value = result;
+  allowance.value = decimals.value
+    ? fromWei(result, decimals.value).toString()
+    : result.toString();
 }
 </script>
