@@ -53,18 +53,18 @@
     >
       <template #header>
         <ScopePaginator
-          v-if="transactions.length"
+          v-if="transactionRows.length"
           v-model="transactionPage"
           :total="maxTransactionPage"
         />
       </template>
       <ScopeLabelEmptyState
-        v-if="!transactions.length"
+        v-if="!transactionRows.length"
         value="No transactions found"
       />
       <TableTransactions
         v-else
-        :transactions="transactions"
+        :transactions="transactionRows"
         :per-page="TRANSACTIONS_PER_PAGE"
         :page="transactionPage - 1"
         type="address"
@@ -82,14 +82,14 @@
     >
       <template #header>
         <ScopePaginator
-          v-if="logs.length"
+          v-if="logRows.length"
           v-model="logPage"
           :total="maxLogPage"
         />
       </template>
       <template #default>
         <ScopeLabelEmptyState
-          v-if="!logs.length"
+          v-if="!logRows.length"
           value="No logs found"
         />
         <div
@@ -97,7 +97,7 @@
           class="logs"
         >
           <CardLog
-            v-for="(log, index) in logs"
+            v-for="(log, index) in logRows"
             :key="index"
             :log="log"
             type="address"
@@ -200,9 +200,9 @@ onMounted(() => {
 
 watch(address, () => {
   // Clean up the state
-  addressTransactions.value = [];
+  transactions.value = [];
   transactionPage.value = 1;
-  addressLogs.value = [];
+  logs.value = [];
   logPage.value = 1;
   // Fetch new data
   fetch();
@@ -236,10 +236,10 @@ const isLoadingCode = ref(false);
 const code = ref<string | null>(null);
 
 const isLoadingTransactions = ref(false);
-const addressTransactions = ref<AddressTransaction[]>([]);
+const transactions = ref<AddressTransaction[]>([]);
 
 const isLoadingLogs = ref(false);
-const addressLogs = ref<AddressLog[]>([]);
+const logs = ref<AddressLog[]>([]);
 
 const isContract = computed<boolean>(() => !!code.value);
 const addressLabel = computed(() => getLabel(address.value));
@@ -292,7 +292,7 @@ async function fetchTransactions(): Promise<void> {
   }
   isLoadingTransactions.value = true;
   // Define the start block based on the last transaction in the list
-  const lastTransaction = addressTransactions.value.at(-1);
+  const lastTransaction = transactions.value.at(-1);
   const startBlock = lastTransaction ? lastTransaction.blockNumber : 0;
   const newTransactions = await apiService.value.getAddressTransactions(
     address.value,
@@ -301,9 +301,9 @@ async function fetchTransactions(): Promise<void> {
   );
   // Append newly fetched transactions to the end of the list
   // Make sure there are no duplicates
-  addressTransactions.value = [
+  transactions.value = [
     ...new Map(
-      addressTransactions.value
+      transactions.value
         .concat(newTransactions)
         .map((transaction) => [transaction.hash, transaction]),
     ).values(),
@@ -317,7 +317,7 @@ async function fetchLogs(): Promise<void> {
   }
   isLoadingLogs.value = true;
   // Define the start block based on the last transaction in the list
-  const lastLog = addressLogs.value.at(-1);
+  const lastLog = logs.value.at(-1);
   const startBlock = lastLog ? lastLog.blockNumber : 0;
   const newLogs = await apiService.value.getAddressLogs(
     address.value,
@@ -326,9 +326,9 @@ async function fetchLogs(): Promise<void> {
   );
   // Append newly fetched logs to the end of the list
   // Make sure there are no duplicates
-  addressLogs.value = [
+  logs.value = [
     ...new Map(
-      addressLogs.value
+      logs.value
         .concat(newLogs)
         .map((log) => [`${log.transactionHash}-${log.logIndex}`, log]),
     ).values(),
@@ -338,8 +338,8 @@ async function fetchLogs(): Promise<void> {
 
 const TRANSACTIONS_PER_PAGE = 20;
 const transactionPage = ref(1);
-const transactions = computed<TransactionRow[]>(() => {
-  return addressTransactions.value.map((transaction) => {
+const transactionRows = computed<TransactionRow[]>(() => {
+  return transactions.value.map((transaction) => {
     return {
       blockNumber: transaction.blockNumber,
       transactionIndex: transaction.transactionIndex,
@@ -355,11 +355,11 @@ const transactions = computed<TransactionRow[]>(() => {
   });
 });
 const maxTransactionPage = computed(() => {
-  return Math.ceil(addressTransactions.value.length / TRANSACTIONS_PER_PAGE);
+  return Math.ceil(transactions.value.length / TRANSACTIONS_PER_PAGE);
 });
 
 watch(transactionPage, (page) => {
-  if (transactions.value.length >= page * TRANSACTIONS_PER_PAGE) {
+  if (transactionRows.value.length >= page * TRANSACTIONS_PER_PAGE) {
     return;
   }
   fetchTransactions();
@@ -367,8 +367,8 @@ watch(transactionPage, (page) => {
 
 const LOGS_PER_PAGE = 20;
 const logPage = ref(1);
-const logs = computed<Log[]>(() => {
-  return addressLogs.value
+const logRows = computed<Log[]>(() => {
+  return logs.value
     .map((log) => {
       return {
         blockHash: null,
@@ -385,11 +385,11 @@ const logs = computed<Log[]>(() => {
     .slice((logPage.value - 1) * LOGS_PER_PAGE, logPage.value * LOGS_PER_PAGE);
 });
 const maxLogPage = computed(() => {
-  return Math.ceil(addressLogs.value.length / LOGS_PER_PAGE);
+  return Math.ceil(logs.value.length / LOGS_PER_PAGE);
 });
 
 watch(logPage, (page) => {
-  if (addressLogs.value.length >= page * LOGS_PER_PAGE) {
+  if (logs.value.length >= page * LOGS_PER_PAGE) {
     return;
   }
   fetchLogs();
@@ -398,13 +398,15 @@ watch(logPage, (page) => {
 const addresses = computed(() => {
   const addresses: Address[] = [];
   addresses.push(address.value);
-  addresses.push(...transactions.value.map((transaction) => transaction.from));
   addresses.push(
-    ...transactions.value
+    ...transactionRows.value.map((transaction) => transaction.from),
+  );
+  addresses.push(
+    ...transactionRows.value
       .map((transaction) => transaction.to)
       .filter((to): to is Address => to !== null),
   );
-  addresses.push(...logs.value.map((log) => log.address));
+  addresses.push(...logRows.value.map((log) => log.address));
   return addresses;
 });
 
