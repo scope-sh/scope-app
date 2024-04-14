@@ -509,7 +509,7 @@ async function getGoToItems(
   }
 }
 
-const localCommands = computed(() => commandStore.commands);
+const localCommands = computed(() => commandStore.allCommands);
 
 const staticCommands = computed(() => [
   ...globalCommands.value,

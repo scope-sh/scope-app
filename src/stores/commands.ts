@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import type { Kind as IconKind } from '@/components/__common/icon/general';
 
@@ -23,15 +23,25 @@ interface NestedCommand extends BaseCommand {
 type Command = SimpleCommand | NestedCommand;
 
 const store = defineStore('commands', () => {
-  const commands = ref<Command[]>([]);
+  const commands = ref<Record<string, Command[]>>({});
 
-  function setCommands(newCommands: Command[]): void {
-    commands.value = newCommands;
+  const allCommands = computed<Command[]>(() =>
+    Object.values<Command[]>(commands.value).flat(1),
+  );
+
+  function setCommands(scope: string, newCommands: Command[]): void {
+    commands.value[scope] = newCommands;
+  }
+
+  function removeCommands(scope: string): void {
+    delete commands.value[scope];
   }
 
   return {
     commands,
+    allCommands,
     setCommands,
+    removeCommands,
   };
 });
 
