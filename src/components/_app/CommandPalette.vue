@@ -104,7 +104,6 @@ useMagicKeys({
   passive: false,
   onEventFired(e) {
     // Manually handle CMD + K
-    console.log(e, e.metaKey, e.key, e.type);
     if (e.metaKey && e.key === 'k' && e.type === 'keydown') {
       e.preventDefault();
       toggle();
