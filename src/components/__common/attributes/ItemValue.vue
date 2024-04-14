@@ -22,7 +22,7 @@ defineProps<{
   flex: 1;
   flex-wrap: wrap;
   gap: var(--spacing-4);
-  align-items: baseline;
+  align-items: center;
   overflow-x: hidden;
   text-overflow: ellipsis;
 
