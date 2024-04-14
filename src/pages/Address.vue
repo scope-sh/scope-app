@@ -35,6 +35,11 @@
           <div class="label-value">{{ addressLabel.value }}</div>
         </div>
       </div>
+      <LensView
+        v-if="address && isContract && addressLabel && addressLabel.type"
+        :label-type-id="addressLabel.type.id"
+        :address="address"
+      />
     </ScopePanel>
     <ScopePanelLoading
       v-if="isLoadingTransactions"
@@ -120,6 +125,7 @@ import TableTransactions, {
   Transaction as TransactionRow,
 } from '@/components/__common/TableTransactions.vue';
 import FormEther from '@/components/address/FormEther.vue';
+import LensView from '@/components/address/LensView.vue';
 import useChain from '@/composables/useChain';
 import useLabels from '@/composables/useLabels';
 import ApiService, {
