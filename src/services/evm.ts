@@ -94,6 +94,21 @@ class Service {
     return transaction || null;
   }
 
+  public async getBlockTransaction(
+    block: number,
+    index: number,
+  ): Promise<Transaction | null> {
+    try {
+      const transaction = await this.client.getTransaction({
+        blockNumber: BigInt(block),
+        index,
+      });
+      return transaction;
+    } catch (e) {
+      return null;
+    }
+  }
+
   public async getTransactionReceipt(
     hash: Hex,
   ): Promise<TransactionReceipt | null> {
