@@ -4,6 +4,7 @@
       <router-link :to="homeRoute">
         <IconBrand class="icon" />
       </router-link>
+      <CommandPaletteTrigger />
     </div>
     <div class="side">
       <ChainSelector
@@ -25,6 +26,7 @@ import type { Chain } from '@/utils/chains';
 import { CHAINS } from '@/utils/chains';
 import { getRouteLocation } from '@/utils/routing';
 
+import CommandPaletteTrigger from './header/CommandPaletteTrigger.vue';
 import ChainSelector from './header/SelectChain.vue';
 
 const { id: chainId } = useChain();
