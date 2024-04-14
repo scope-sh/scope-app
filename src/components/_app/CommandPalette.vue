@@ -73,12 +73,12 @@ import { useRouter } from 'vue-router';
 import ScopeDialog from '@/components/__common/ScopeDialog.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useChain from '@/composables/useChain';
+import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
 import NamingService from '@/services/naming';
-import useCommandStore from '@/stores/commands';
 import type { Command, NestedCommand } from '@/stores/commands';
 import useUiStore from '@/stores/ui';
 import type { Chain } from '@/utils/chains';
@@ -111,7 +111,7 @@ useMagicKeys({
   },
 });
 const { alchemyApiKey } = useEnv();
-const commandStore = useCommandStore();
+const { commands: localCommands } = useCommands();
 const uiStore = useUiStore();
 const { send: sendToast } = useToast();
 const { id: chainId, client } = useChain();
@@ -508,8 +508,6 @@ async function getGoToItems(
     }
   }
 }
-
-const localCommands = computed(() => commandStore.allCommands);
 
 const staticCommands = computed(() => [
   ...globalCommands.value,
