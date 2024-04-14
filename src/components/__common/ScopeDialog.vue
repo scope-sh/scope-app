@@ -6,7 +6,10 @@
     <Dialog.Portal>
       <Dialog.Overlay class="overlay" />
       <Dialog.Content as-child>
-        <div class="content">
+        <div
+          class="content"
+          :class="{ 'with-context': withContext }"
+        >
           <VisuallyHidden as-child>
             <Dialog.Title>{{ title }}</Dialog.Title>
           </VisuallyHidden>
@@ -29,6 +32,7 @@ import { Dialog } from 'radix-vue/namespaced';
 defineProps<{
   title: string;
   description?: string;
+  withContext?: boolean;
 }>();
 
 const open = defineModel<boolean>('open', {
@@ -74,6 +78,10 @@ function handleOpen(value: boolean): void {
   max-width: 90vw;
   max-height: 80vh;
   transform: translate(-50%, -50%);
+}
+
+.content.with-context {
+  top: calc(40% - 12px);
 }
 
 .content[data-state='open'] {
