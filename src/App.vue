@@ -6,6 +6,11 @@
   >
     <AppHeader v-if="!isChainPage" />
     <router-view />
+    <CommandPalette />
+    <Toast
+      :value="activeToast"
+      @close="hideToast"
+    />
   </div>
 </template>
 
@@ -16,14 +21,19 @@ import { useStorage } from '@vueuse/core';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
+import CommandPalette from '@/components/_app/CommandPalette.vue';
 import AppHeader from '@/components/_app/Header.vue';
 import LockScreen from '@/components/_app/LockScreen.vue';
+import Toast from '@/components/_app/Toast.vue';
+import useToast from '@/composables/useToast';
 
 import useEnv from './composables/useEnv';
 
 const route = useRoute();
 const { appPassphrase } = useEnv();
 const locked = useStorage('scope-locked', appPassphrase.length > 0);
+
+const { active: activeToast, hide: hideToast } = useToast();
 
 const isChainPage = computed(() => route.name === 'chain');
 </script>
