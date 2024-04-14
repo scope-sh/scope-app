@@ -8,7 +8,7 @@
         v-if="value.isMeta"
         class="meta"
       >
-        ⌘
+        {{ metaKeyLabel }}
       </span>
       {{ value.key }}
     </div>
@@ -24,6 +24,10 @@ defineProps<{
   size: Size;
   value: ShortcutPart;
 }>();
+
+const metaKeyLabel = /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent)
+  ? '⌘'
+  : 'Ctrl';
 </script>
 
 <style scoped>
