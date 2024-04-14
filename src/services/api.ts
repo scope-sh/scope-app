@@ -153,4 +153,4 @@ class Service {
 }
 
 export default Service;
-export type { Label, Log, Transaction };
+export type { Label, LabelId, Log, Transaction };
