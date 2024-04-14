@@ -128,43 +128,38 @@ const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
 
+type PanelEl = InstanceType<typeof ScopePanel>;
+type PanelSection = Section & { el: PanelEl | null };
+
 const TRANSACTIONS_PER_PAGE = 20;
 
-const sections = [
+const blockPanelEl = ref<PanelEl | null>(null);
+const blockTransactionsEl = ref<PanelEl | null>(null);
+const sections = computed<PanelSection[]>(() => [
   {
     label: 'Overview',
     value: 'overview',
+    el: blockPanelEl.value,
   },
   {
     label: 'Transactions',
     value: 'transactions',
+    el: blockTransactionsEl.value,
   },
-] as Section[];
+]);
 function handleSectionUpdate(value: Section['value']): void {
-  if (value === 'overview') {
-    if (!blockPanelEl.value) {
-      return;
-    }
-    const el = blockPanelEl.value.rootEl;
-    if (!el) {
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth' });
+  const panelSection = sections.value.find(
+    (section) => section.value === value,
+  );
+  if (!panelSection) {
+    return;
   }
-  if (value === 'transactions') {
-    if (!blockTransactionsEl.value) {
-      return;
-    }
-    const el = blockTransactionsEl.value.rootEl;
-    if (!el) {
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth' });
+  const el = panelSection.el;
+  if (!el || !el.rootEl) {
+    return;
   }
+  el.rootEl.scrollIntoView({ behavior: 'smooth' });
 }
-
-const blockPanelEl = ref<InstanceType<typeof ScopePanel> | null>(null);
-const blockTransactionsEl = ref<InstanceType<typeof ScopePanel> | null>(null);
 
 const number = computed(() => toBigInt(route.params.number as string) || 0n);
 

@@ -167,45 +167,40 @@ import {
   formatTime,
 } from '@/utils/formatting.js';
 
+type PanelEl = InstanceType<typeof ScopePanel>;
+type PanelSection = Section & { el: PanelEl | null };
+
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
 
-const sections = [
+const txPanelEl = ref<PanelEl | null>(null);
+const txLogsEl = ref<PanelEl | null>(null);
+const sections = computed<PanelSection[]>(() => [
   {
     label: 'Overview',
     value: 'overview',
+    el: txPanelEl.value,
   },
   {
     label: 'Logs',
     value: 'logs',
+    el: txLogsEl.value,
   },
-] as Section[];
+]);
 function handleSectionUpdate(value: Section['value']): void {
-  if (value === 'overview') {
-    if (!txPanelEl.value) {
-      return;
-    }
-    const el = txPanelEl.value.rootEl;
-    if (!el) {
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth' });
+  const panelSection = sections.value.find(
+    (section) => section.value === value,
+  );
+  if (!panelSection) {
+    return;
   }
-  if (value === 'logs') {
-    if (!txLogsEl.value) {
-      return;
-    }
-    const el = txLogsEl.value.rootEl;
-    if (!el) {
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth' });
+  const el = panelSection.el;
+  if (!el || !el.rootEl) {
+    return;
   }
+  el.rootEl.scrollIntoView({ behavior: 'smooth' });
 }
-
-const txPanelEl = ref<InstanceType<typeof ScopePanel> | null>(null);
-const txLogsEl = ref<InstanceType<typeof ScopePanel> | null>(null);
 
 const hash = computed(() => route.params.hash as Address);
 

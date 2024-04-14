@@ -134,60 +134,46 @@ import ApiService, {
 } from '@/services/api';
 import EvmService from '@/services/evm';
 
+type PanelEl = InstanceType<typeof ScopePanel>;
+type PanelSection = Section & { el: PanelEl | null };
+
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
 const { getLabel, requestLabels } = useLabels();
 
-const sections = [
+const addressPanelEl = ref<PanelEl | null>(null);
+const addressTransactionsEl = ref<PanelEl | null>(null);
+const addressLogsEl = ref<PanelEl | null>(null);
+const sections = computed<PanelSection[]>(() => [
   {
     label: 'Overview',
     value: 'overview',
+    el: addressPanelEl.value,
   },
   {
     label: 'Transactions',
     value: 'transactions',
+    el: addressTransactionsEl.value,
   },
   {
     label: 'Logs',
     value: 'logs',
+    el: addressLogsEl.value,
   },
-] as Section[];
+]);
 function handleSectionUpdate(value: Section['value']): void {
-  if (value === 'overview') {
-    if (!addressPanelEl.value) {
-      return;
-    }
-    const el = addressPanelEl.value.rootEl;
-    if (!el) {
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth' });
+  const panelSection = sections.value.find(
+    (section) => section.value === value,
+  );
+  if (!panelSection) {
+    return;
   }
-  if (value === 'transactions') {
-    if (!addressTransactionsEl.value) {
-      return;
-    }
-    const el = addressTransactionsEl.value.rootEl;
-    if (!el) {
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth' });
+  const el = panelSection.el;
+  if (!el || !el.rootEl) {
+    return;
   }
-  if (value === 'logs') {
-    if (!addressLogsEl.value) {
-      return;
-    }
-    const el = addressLogsEl.value.rootEl;
-    if (!el) {
-      return;
-    }
-    el.scrollIntoView({ behavior: 'smooth' });
-  }
+  el.rootEl.scrollIntoView({ behavior: 'smooth' });
 }
-
-const addressPanelEl = ref<InstanceType<typeof ScopePanel> | null>(null);
-const addressTransactionsEl = ref<InstanceType<typeof ScopePanel> | null>(null);
-const addressLogsEl = ref<InstanceType<typeof ScopePanel> | null>(null);
 
 const address = computed(() => {
   const address = route.params.address as string;
