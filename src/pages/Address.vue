@@ -127,16 +127,26 @@ import TableTransactions, {
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
 import useChain from '@/composables/useChain';
+import useCommands from '@/composables/useCommands';
 import useLabels from '@/composables/useLabels';
+import useToast from '@/composables/useToast';
 import ApiService, {
   Log as AddressLog,
   Transaction as AddressTransaction,
 } from '@/services/api';
 import EvmService from '@/services/evm';
+import { Command } from '@/stores/commands';
+
+const PAGE_ADDRESS = 'page_address';
+const SECTION_OVERVIEW = 'overview';
+const SECTION_TRANSACTIONS = 'transactions';
+const SECTION_LOGS = 'logs';
 
 type PanelEl = InstanceType<typeof ScopePanel>;
 type PanelSection = Section & { el: PanelEl | null };
 
+const { setCommands } = useCommands(PAGE_ADDRESS);
+const { send: sendToast } = useToast();
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
 const { getLabel, requestLabels } = useLabels();
@@ -147,21 +157,24 @@ const addressLogsEl = ref<PanelEl | null>(null);
 const sections = computed<PanelSection[]>(() => [
   {
     label: 'Overview',
-    value: 'overview',
+    value: SECTION_OVERVIEW,
     el: addressPanelEl.value,
   },
   {
     label: 'Transactions',
-    value: 'transactions',
+    value: SECTION_TRANSACTIONS,
     el: addressTransactionsEl.value,
   },
   {
     label: 'Logs',
-    value: 'logs',
+    value: SECTION_LOGS,
     el: addressLogsEl.value,
   },
 ]);
 function handleSectionUpdate(value: Section['value']): void {
+  openSection(value);
+}
+function openSection(value: Section['value']): void {
   const panelSection = sections.value.find(
     (section) => section.value === value,
   );
@@ -179,6 +192,54 @@ const address = computed(() => {
   const address = route.params.address as string;
   return address.toLowerCase() as Address;
 });
+
+const commands = computed<Command[]>(() => [
+  {
+    icon: 'copy',
+    label: 'Copy address',
+    act: (): void => {
+      if (!address.value) {
+        return;
+      }
+      navigator.clipboard.writeText(address.value);
+      sendToast({
+        type: 'success',
+        message: 'Address copied to clipboard',
+      });
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Go to overview',
+    act: (): void => {
+      openSection(SECTION_OVERVIEW);
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Go to transactions',
+    act: (): void => {
+      openSection(SECTION_TRANSACTIONS);
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Go to logs',
+    act: (): void => {
+      openSection(SECTION_LOGS);
+    },
+  },
+]);
+
+watch(
+  commands,
+  () => {
+    setCommands(commands.value);
+  },
+  {
+    immediate: true,
+  },
+);
 
 onMounted(() => {
   fetch();

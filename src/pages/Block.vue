@@ -94,7 +94,7 @@
 import { useHead } from '@unhead/vue';
 import { Address, slice, zeroAddress } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
@@ -114,40 +114,53 @@ import {
 } from '@/components/__common/attributes';
 import BlockStatus from '@/components/block/BlockStatus.vue';
 import useChain from '@/composables/useChain';
+import useCommands from '@/composables/useCommands';
 import useLabels from '@/composables/useLabels';
+import useToast from '@/composables/useToast';
 import EvmService from '@/services/evm';
 import type { BlockWithTransactions } from '@/services/evm';
+import { Command } from '@/stores/commands';
 import { toBigInt, toRelativeTime } from '@/utils/conversion';
 import {
   formatRelativeTime,
   formatShare,
   formatTime,
 } from '@/utils/formatting';
+import { getRouteLocation } from '@/utils/routing';
+
+const PAGE_BLOCK = 'page_block';
+const SECTION_OVERVIEW = 'overview';
+const SECTION_TRANSACTIONS = 'transactions';
+const TRANSACTIONS_PER_PAGE = 20;
 
 const route = useRoute();
+const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
+const { setCommands } = useCommands(PAGE_BLOCK);
+const { send: sendToast } = useToast();
 
 type PanelEl = InstanceType<typeof ScopePanel>;
 type PanelSection = Section & { el: PanelEl | null };
-
-const TRANSACTIONS_PER_PAGE = 20;
 
 const blockPanelEl = ref<PanelEl | null>(null);
 const blockTransactionsEl = ref<PanelEl | null>(null);
 const sections = computed<PanelSection[]>(() => [
   {
     label: 'Overview',
-    value: 'overview',
+    value: SECTION_OVERVIEW,
     el: blockPanelEl.value,
   },
   {
     label: 'Transactions',
-    value: 'transactions',
+    value: SECTION_TRANSACTIONS,
     el: blockTransactionsEl.value,
   },
 ]);
 function handleSectionUpdate(value: Section['value']): void {
+  openSection(value);
+}
+function openSection(value: Section['value']): void {
   const panelSection = sections.value.find(
     (section) => section.value === value,
   );
@@ -162,6 +175,62 @@ function handleSectionUpdate(value: Section['value']): void {
 }
 
 const number = computed(() => toBigInt(route.params.number as string) || 0n);
+
+const commands = computed<Command[]>(() => [
+  {
+    icon: 'copy',
+    label: 'Copy block number',
+    act: (): void => {
+      navigator.clipboard.writeText(number.value.toString());
+      sendToast({
+        type: 'success',
+        message: 'Block number copied to clipboard',
+      });
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Go to overview',
+    act: (): void => {
+      openSection(SECTION_OVERVIEW);
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Go to transactions',
+    act: (): void => {
+      openSection(SECTION_TRANSACTIONS);
+    },
+  },
+  {
+    icon: 'arrow-left',
+    label: 'Previous block',
+    act: (): void => {
+      router.push(
+        getRouteLocation({ name: 'block', number: number.value - 1n }),
+      );
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Next block',
+    act: (): void => {
+      router.push(
+        getRouteLocation({ name: 'block', number: number.value + 1n }),
+      );
+    },
+  },
+]);
+
+watch(
+  commands,
+  () => {
+    setCommands(commands.value);
+  },
+  {
+    immediate: true,
+  },
+);
 
 onMounted(() => {
   fetch();

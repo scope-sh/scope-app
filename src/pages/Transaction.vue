@@ -136,7 +136,7 @@
 import { useHead } from '@unhead/vue';
 import { Address, TransactionType } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -155,9 +155,12 @@ import {
 } from '@/components/__common/attributes';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
 import useChain from '@/composables/useChain';
+import useCommands from '@/composables/useCommands';
 import useLabels from '@/composables/useLabels';
+import useToast from '@/composables/useToast';
 import EvmService, { Block } from '@/services/evm';
 import type { Transaction, TransactionReceipt } from '@/services/evm';
+import { Command } from '@/stores/commands';
 import { toRelativeTime } from '@/utils/conversion';
 import {
   formatEther,
@@ -165,12 +168,20 @@ import {
   formatRelativeTime,
   formatShare,
   formatTime,
-} from '@/utils/formatting.js';
+} from '@/utils/formatting';
+
+const PAGE_TRANSACTION = 'page_transaction';
+const SECTION_OVERVIEW = 'overview';
+const SECTION_LOGS = 'logs';
+
+const { setCommands } = useCommands(PAGE_TRANSACTION);
+const { send: sendToast } = useToast();
 
 type PanelEl = InstanceType<typeof ScopePanel>;
 type PanelSection = Section & { el: PanelEl | null };
 
 const route = useRoute();
+const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
 
@@ -179,16 +190,19 @@ const txLogsEl = ref<PanelEl | null>(null);
 const sections = computed<PanelSection[]>(() => [
   {
     label: 'Overview',
-    value: 'overview',
+    value: SECTION_OVERVIEW,
     el: txPanelEl.value,
   },
   {
     label: 'Logs',
-    value: 'logs',
+    value: SECTION_LOGS,
     el: txLogsEl.value,
   },
 ]);
 function handleSectionUpdate(value: Section['value']): void {
+  openSection(value);
+}
+function openSection(value: Section['value']): void {
   const panelSection = sections.value.find(
     (section) => section.value === value,
   );
@@ -203,6 +217,71 @@ function handleSectionUpdate(value: Section['value']): void {
 }
 
 const hash = computed(() => route.params.hash as Address);
+
+const commands = computed<Command[]>(() => [
+  {
+    icon: 'copy',
+    label: 'Copy transaction hash',
+    act: (): void => {
+      if (!hash.value) {
+        return;
+      }
+      navigator.clipboard.writeText(hash.value);
+      sendToast({
+        type: 'success',
+        message: 'Transaction hash copied to clipboard',
+      });
+    },
+  },
+  {
+    icon: 'arrow-left',
+    label: 'Previous transaction',
+    act: (): void => {
+      if (transaction.value && transaction.value.transactionIndex) {
+        openBlockTransaction(
+          transaction.value.transactionIndex - 1,
+          'No previous transaction',
+        );
+      }
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Next transaction',
+    act: (): void => {
+      if (transaction.value && transaction.value.transactionIndex) {
+        openBlockTransaction(
+          transaction.value.transactionIndex + 1,
+          'No next transaction',
+        );
+      }
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Go to overview',
+    act: (): void => {
+      openSection(SECTION_OVERVIEW);
+    },
+  },
+  {
+    icon: 'arrow-right',
+    label: 'Go to logs',
+    act: (): void => {
+      openSection(SECTION_LOGS);
+    },
+  },
+]);
+
+watch(
+  commands,
+  () => {
+    setCommands(commands.value);
+  },
+  {
+    immediate: true,
+  },
+);
 
 onMounted(() => {
   fetch();
@@ -330,6 +409,30 @@ const addresses = computed(() => {
 watch(addresses, async () => {
   requestLabels(addresses.value);
 });
+
+async function openBlockTransaction(
+  index: number,
+  errorMessage: string,
+): Promise<void> {
+  if (!evmService.value || !block.value) {
+    return;
+  }
+  const transaction = await evmService.value.getBlockTransaction(
+    block.value.number,
+    index,
+  );
+  if (!transaction) {
+    sendToast({
+      type: 'error',
+      message: errorMessage,
+    });
+    return;
+  }
+  router.push({
+    name: 'transaction',
+    params: { hash: transaction.hash },
+  });
+}
 </script>
 
 <style scoped>

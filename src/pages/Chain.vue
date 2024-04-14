@@ -51,9 +51,12 @@ import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import InputSearch from '@/components/chain/InputSearch.vue';
 import PopoverChain from '@/components/chain/PopoverChain.vue';
 import useChain from '@/composables/useChain';
+import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
+import useToast from '@/composables/useToast';
 import EvmService from '@/services/evm';
 import NamingService from '@/services/naming';
+import type { Command } from '@/stores/commands';
 import type { Chain } from '@/utils/chains';
 import { toBigInt } from '@/utils/conversion';
 import { getRouteLocation } from '@/utils/routing';
@@ -64,9 +67,13 @@ import {
   isTransactionHash,
 } from '@/utils/validation/pattern';
 
+const CHAIN_PAGE = 'page_chain';
+
 const { id: chainId, name: chainName, client } = useChain();
 const { alchemyApiKey } = useEnv();
 const router = useRouter();
+const { setCommands } = useCommands(CHAIN_PAGE);
+const { send: sendToast } = useToast();
 
 watch(
   chainName,
@@ -74,6 +81,30 @@ watch(
     useHead({
       title: `${chainName.value} | Scope`,
     });
+  },
+  {
+    immediate: true,
+  },
+);
+
+const commands = computed<Command[]>(() => [
+  {
+    icon: 'copy',
+    label: 'Copy chain ID',
+    act: (): void => {
+      navigator.clipboard.writeText(chainId.value.toString());
+      sendToast({
+        type: 'success',
+        message: 'Chain ID copied to clipboard',
+      });
+    },
+  },
+]);
+
+watch(
+  commands,
+  () => {
+    setCommands(commands.value);
   },
   {
     immediate: true,
