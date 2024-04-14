@@ -39,7 +39,7 @@ interface Label {
 }
 
 type LabelWithAddress = Label & {
-  address: string;
+  address: Address;
 };
 
 interface Transaction {
