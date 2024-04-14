@@ -68,6 +68,38 @@ function getChainName(chainId: Chain): string {
   return getChainData(chainId).name;
 }
 
+function getChainNames(chain: Chain): string[] {
+  function getAliases(chain: Chain): string[] {
+    switch (chain) {
+      case ETHEREUM: {
+        return ['mainnet'];
+      }
+      case OPTIMISM: {
+        return ['optimism'];
+      }
+    }
+    return [];
+  }
+  const mainName = getChainName(chain);
+  const aliases = getAliases(chain);
+  return [mainName, ...aliases];
+}
+
+function getChainByName(value: string): Chain | null {
+  const chainIndex = CHAINS.findIndex((chain) => {
+    const chainNames = getChainNames(chain);
+    return chainNames.some(
+      (name) => name.toLowerCase() === value.toLowerCase(),
+    );
+  });
+  return CHAINS[chainIndex] || null;
+}
+
+function isChainName(value: string): boolean {
+  const chain = getChainByName(value);
+  return !!chain;
+}
+
 function getEndpointUrl(chainId: Chain, alchemyKey: string): string {
   return alchemy(chainId, alchemyKey);
 }
@@ -88,9 +120,12 @@ export {
   BASE_SEPOLIA,
   POLYGON,
   POLYGON_AMOY,
+  getChainByName,
   getChainData,
   getChainName,
+  getChainNames,
   getEndpointUrl,
+  isChainName,
   parseChain,
 };
 export type { Chain };
