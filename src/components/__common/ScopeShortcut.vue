@@ -25,5 +25,6 @@ defineProps<{
   display: flex;
   gap: var(--spacing-2);
   align-items: center;
+  color: var(--color-text-secondary);
 }
 </style>
