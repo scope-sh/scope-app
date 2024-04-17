@@ -4,6 +4,7 @@ import Address from './pages/Address.vue';
 import Block from './pages/Block.vue';
 import Chain from './pages/Chain.vue';
 import Transaction from './pages/Transaction.vue';
+import UserOp from './pages/UserOp.vue';
 
 const routes: RouteRecordRaw[] = [
   {
@@ -30,6 +31,11 @@ const routes: RouteRecordRaw[] = [
     path: '/:chain/address/:address',
     name: 'address',
     component: Address,
+  },
+  {
+    path: '/:chain/op/:hash',
+    name: 'userop',
+    component: UserOp,
   },
 ];
 
