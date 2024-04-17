@@ -740,8 +740,12 @@ input {
   cursor: pointer;
 
   &.selected {
+    --color-accent-toned-down: oklch(
+      from var(--color-accent) l calc(c * 0.6) h
+    );
+
     background: var(--color-background-secondary);
-    color: var(--color-text-primary);
+    color: var(--color-accent-toned-down);
   }
 }
 
