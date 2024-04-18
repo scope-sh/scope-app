@@ -237,6 +237,7 @@ onMounted(() => {
 });
 
 watch(number, () => {
+  page.value = 1;
   fetch();
 });
 
