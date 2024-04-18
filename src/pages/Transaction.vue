@@ -107,6 +107,23 @@
       </AttributeList>
     </ScopePanel>
     <ScopePanel
+      v-if="
+        !isLoading && transaction && transactionReceipt && userOps.length > 0
+      "
+      ref="txOpsEl"
+      title="UserOps"
+    >
+      <template #default>
+        <CardUserOp
+          v-for="(op, index) in userOps"
+          :key="index"
+          :op="op"
+          :transaction="transaction"
+          :transaction-receipt="transactionReceipt"
+        />
+      </template>
+    </ScopePanel>
+    <ScopePanel
       v-if="!isLoading && transactionReceipt"
       ref="txLogsEl"
       title="Logs"
@@ -153,6 +170,7 @@ import {
   AttributeItemValue,
   AttributeList,
 } from '@/components/__common/attributes';
+import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -161,6 +179,7 @@ import useToast from '@/composables/useToast';
 import EvmService, { Block } from '@/services/evm';
 import type { Transaction, TransactionReceipt } from '@/services/evm';
 import { Command } from '@/stores/commands';
+import { UserOp, getUserOps } from '@/utils/context/erc4337/entryPoint';
 import { toRelativeTime } from '@/utils/conversion';
 import {
   formatEther,
@@ -172,6 +191,7 @@ import {
 
 const PAGE_TRANSACTION = 'page_transaction';
 const SECTION_OVERVIEW = 'overview';
+const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
 
 const { setCommands } = useCommands(PAGE_TRANSACTION);
@@ -186,19 +206,29 @@ const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
 
 const txPanelEl = ref<PanelEl | null>(null);
+const txOpsEl = ref<PanelEl | null>(null);
 const txLogsEl = ref<PanelEl | null>(null);
-const sections = computed<PanelSection[]>(() => [
-  {
+const sections = computed<PanelSection[]>(() => {
+  const list: PanelSection[] = [];
+  list.push({
     label: 'Overview',
     value: SECTION_OVERVIEW,
     el: txPanelEl.value,
-  },
-  {
+  });
+  if (userOps.value && userOps.value.length > 0) {
+    list.push({
+      label: 'UserOps',
+      value: SECTION_OPS,
+      el: txOpsEl.value,
+    });
+  }
+  list.push({
     label: 'Logs',
     value: SECTION_LOGS,
     el: txLogsEl.value,
-  },
-]);
+  });
+  return list;
+});
 function handleSectionUpdate(value: Section['value']): void {
   openSection(value);
 }
@@ -390,6 +420,10 @@ const typeLabel = computed(() => {
   };
   return map[transaction.value.type];
 });
+
+const userOps = computed<UserOp[] | null>(() =>
+  transaction.value ? getUserOps(transaction.value) : null,
+);
 
 const addresses = computed(() => {
   if (!transaction.value || !transactionReceipt.value) {
