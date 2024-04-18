@@ -37,7 +37,7 @@
             {{ data.nonce }}
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem>
+        <AttributeItem v-if="size(data.initCode) > 0">
           <AttributeItemLabel value="Init Code" />
           <AttributeItemValue>
             <ScopeTextView
@@ -93,7 +93,7 @@
             />
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem>
+        <AttributeItem v-if="size(data.signature) > 0">
           <AttributeItemLabel value="Signature" />
           <AttributeItemValue>
             <ScopeTextView
@@ -226,7 +226,7 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, Log, Transaction, TransactionReceipt } from 'viem';
+import { Address, Log, Transaction, TransactionReceipt, size } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
