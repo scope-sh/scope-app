@@ -249,7 +249,7 @@ function getUserOpHash(
         { type: 'bytes32' },
       ],
       [
-        userOperation.sender as Address,
+        userOperation.sender,
         userOperation.nonce,
         hashedInitCode,
         hashedCallData,
@@ -268,40 +268,35 @@ function getUserOpHash(
     return keccak256(encoded);
   } else if (entrypoint === ENTRYPOINT_0_7_ADDRESS) {
     const userOperation = userOp as UserOp_0_7;
-    const sender = userOperation.sender;
-    const nonce = userOperation.nonce;
-    const hashInitCode = keccak256(userOperation.initCode);
-    const hashCallData = keccak256(userOperation.callData);
-    const accountGasLimits = userOperation.accountGasLimits;
-    const preVerificationGas = userOperation.preVerificationGas;
-    const gasFees = userOperation.gasFees;
-    const hashPaymasterAndData = keccak256(userOperation.paymasterAndData);
+    const hashedInitCode = keccak256(userOperation.initCode);
+    const hashedCallData = keccak256(userOperation.callData);
+    const hashedPaymasterAndData = keccak256(userOperation.paymasterAndData);
+    const packedUserOp = encodeAbiParameters(
+      [
+        { type: 'address' },
+        { type: 'uint256' },
+        { type: 'bytes32' },
+        { type: 'bytes32' },
+        { type: 'bytes32' },
+        { type: 'uint256' },
+        { type: 'bytes32' },
+        { type: 'bytes32' },
+      ],
+      [
+        userOperation.sender,
+        userOperation.nonce,
+        hashedInitCode,
+        hashedCallData,
+        userOperation.accountGasLimits,
+        userOperation.preVerificationGas,
+        userOperation.gasFees,
+        hashedPaymasterAndData,
+      ],
+    );
     const encoded = encodeAbiParameters(
-      [
-        { type: 'address' },
-        { type: 'uint256' },
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-        { type: 'uint256' },
-        { type: 'bytes32' },
-        { type: 'bytes32' },
-        { type: 'address' },
-        { type: 'uint256' },
-      ],
-      [
-        sender,
-        nonce,
-        hashInitCode,
-        hashCallData,
-        accountGasLimits,
-        preVerificationGas,
-        gasFees,
-        hashPaymasterAndData,
-        entrypoint,
-        BigInt(chain),
-      ],
-    ) as `0x${string}`;
+      [{ type: 'bytes32' }, { type: 'address' }, { type: 'uint256' }],
+      [keccak256(packedUserOp), entrypoint, BigInt(chain)],
+    );
     return keccak256(encoded);
   }
   return null;
