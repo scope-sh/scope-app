@@ -42,6 +42,36 @@
       />
     </ScopePanel>
     <ScopePanelLoading
+      v-if="isLoadingOps"
+      ref="addressOpsEl"
+      title="UserOps"
+    />
+    <ScopePanel
+      v-else-if="ops.length > 0"
+      ref="addressOpsEl"
+      title="UserOps"
+    >
+      <template #header>
+        <ScopePaginator
+          v-if="opRows.length"
+          v-model="opPage"
+          :total="maxOpPage"
+        />
+      </template>
+      <template #default>
+        <ScopeLabelEmptyState
+          v-if="!opRows.length"
+          value="No ops found"
+        />
+        <TableUserOps
+          v-else
+          :ops="opRows"
+          :per-page="OPS_PER_PAGE"
+          :page="opPage - 1"
+        />
+      </template>
+    </ScopePanel>
+    <ScopePanelLoading
       v-if="isLoadingTransactions"
       ref="addressTransactionsEl"
       title="Transactions"
@@ -110,10 +140,11 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, Hex, Log, slice } from 'viem';
+import { Address, Hex, Log, decodeEventLog, slice } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
 import CardLog from '@/components/__common/CardLog.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
@@ -126,6 +157,9 @@ import TableTransactions, {
 } from '@/components/__common/TableTransactions.vue';
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
+import TableUserOps, {
+  UserOp as UserOpRow,
+} from '@/components/address/TableUserOps.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useLabels from '@/composables/useLabels';
@@ -288,6 +322,9 @@ const transactions = ref<AddressTransaction[]>([]);
 const isLoadingLogs = ref(false);
 const logs = ref<AddressLog[]>([]);
 
+const isLoadingOps = ref(false);
+const ops = ref<AddressLog[]>([]);
+
 const isContract = computed<boolean>(() => !!code.value);
 const addressLabel = computed(() => getLabel(address.value));
 const overviewPanelTitle = computed<string>(() => {
@@ -312,6 +349,7 @@ async function fetch(): Promise<void> {
     fetchCode(),
     fetchTransactions(),
     fetchLogs(),
+    fetchUserOps(),
   ]);
 }
 
@@ -383,6 +421,13 @@ async function fetchLogs(): Promise<void> {
   isLoadingLogs.value = false;
 }
 
+async function fetchUserOps(): Promise<void> {
+  if (!address.value || !apiService.value) {
+    return;
+  }
+  ops.value = await apiService.value.getAddressOps(address.value, 0, 20);
+}
+
 const TRANSACTIONS_PER_PAGE = 20;
 const transactionPage = ref(1);
 const transactionRows = computed<TransactionRow[]>(() => {
@@ -440,6 +485,44 @@ watch(logPage, (page) => {
     return;
   }
   fetchLogs();
+});
+
+const OPS_PER_PAGE = 20;
+const opPage = ref(1);
+const opRows = computed<UserOpRow[]>(() => {
+  return ops.value
+    .map((log) => {
+      const decodedLog = decodeEventLog({
+        abi: entryPointV0_6_0Abi,
+        data: log.data,
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        topics: log.topics,
+      });
+      if (decodedLog.eventName !== 'UserOperationEvent') {
+        return null;
+      }
+      return {
+        success: decodedLog.args.success,
+        entryPoint: log.address,
+        hash: decodedLog.args.userOpHash,
+        paymaster: decodedLog.args.paymaster.toLowerCase() as Address,
+        blockNumber: log.blockNumber,
+        transactionHash: log.transactionHash,
+      };
+    })
+    .filter((row): row is UserOpRow => row !== null)
+    .slice((opPage.value - 1) * OPS_PER_PAGE, opPage.value * OPS_PER_PAGE);
+});
+const maxOpPage = computed(() => {
+  return Math.ceil(ops.value.length / OPS_PER_PAGE);
+});
+
+watch(opPage, (page) => {
+  if (ops.value.length >= page * OPS_PER_PAGE) {
+    return;
+  }
+  fetchUserOps();
 });
 
 const addresses = computed(() => {
