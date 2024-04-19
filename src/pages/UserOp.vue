@@ -145,6 +145,10 @@
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
+      <CardActions
+        v-if="actions.length > 0"
+        :actions
+      />
     </ScopePanel>
     <ScopePanel
       v-if="!isLoading && transaction !== null"
@@ -244,6 +248,7 @@ import {
   AttributeItemValue,
   AttributeList,
 } from '@/components/__common/attributes';
+import CardActions, { Action } from '@/components/user-op/CardActions.vue';
 import UserOpStatus from '@/components/user-op/UserOpStatus.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -262,6 +267,7 @@ import {
   getBeneficiary,
   getUserOpLogs,
 } from '@/utils/context/erc4337/entryPoint';
+import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 import { formatEther } from '@/utils/formatting';
 
 const PAGE_USEROP = 'page_userop';
@@ -277,7 +283,7 @@ type PanelSection = Section & { el: PanelEl | null };
 
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
-const { requestLabels } = useLabels();
+const { requestLabels, getLabel } = useLabels();
 
 const opPanelEl = ref<PanelEl | null>(null);
 const txPanelEl = ref<PanelEl | null>(null);
@@ -488,6 +494,42 @@ async function fetch(): Promise<void> {
   isLoading.value = false;
 }
 
+const actions = computed<Action[]>(() => {
+  const opData = data.value;
+  if (!opData) {
+    return [];
+  }
+  const sender = opData.sender;
+  const label = getLabel(sender);
+  if (!label) {
+    return [];
+  }
+  const labelType = label.type;
+  if (!labelType) {
+    return [];
+  }
+  if (labelType.id === 'kernel-v3-account') {
+    const nonce = opData.nonce;
+    const decodedNonce = kernelV3DecodeNonce(nonce);
+    if (!decodedNonce) {
+      return [];
+    }
+    return [
+      [
+        {
+          type: 'text',
+          value: 'Validated by',
+        },
+        {
+          type: 'address',
+          address: decodedNonce.identifier,
+        },
+      ],
+    ] as Action[];
+  }
+  return [];
+});
+
 const addresses = computed(() => {
   const list: Address[] = [];
   if (data.value) {
@@ -511,6 +553,15 @@ const addresses = computed(() => {
   if (logs.value) {
     logs.value.forEach((log) => {
       list.push(log.address);
+    });
+  }
+  if (actions.value && actions.value.length > 0) {
+    actions.value.forEach((action) => {
+      action.forEach((part) => {
+        if (part.type === 'address') {
+          list.push(part.address);
+        }
+      });
     });
   }
   return list;
