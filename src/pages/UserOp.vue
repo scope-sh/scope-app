@@ -6,13 +6,13 @@
     <ScopePanelLoading
       v-if="isLoading"
       ref="opPanelEl"
-      title="Transaction"
+      title="UserOp"
       :subtitle="hash"
     />
     <ScopePanel
       v-if="!isLoading && userOp === null"
       ref="opPanelEl"
-      title="Transaction"
+      title="UserOp"
       :subtitle="hash"
     >
       <ScopeLabelEmptyState value="Couldn't find this UserOp" />
