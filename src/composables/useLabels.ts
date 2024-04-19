@@ -31,6 +31,9 @@ function useLabels(): UseLabels {
       return;
     }
     const labels = await apiService.value.getLabels(uniqueAddresses);
+    if (Object.keys(labels).length === 0) {
+      return;
+    }
     store.addLabels(chain.value, labels);
   }
 
