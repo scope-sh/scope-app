@@ -107,13 +107,14 @@
       </AttributeList>
     </ScopePanel>
     <ScopePanel
-      v-if="
-        !isLoading && transaction && transactionReceipt && userOps.length > 0
-      "
+      v-if="!isLoading && userOps && userOps.length > 0"
       ref="txOpsEl"
       title="UserOps"
     >
-      <template #default>
+      <template
+        v-if="transaction && transactionReceipt"
+        #default
+      >
         <CardUserOp
           v-for="(op, index) in userOps"
           :key="index"

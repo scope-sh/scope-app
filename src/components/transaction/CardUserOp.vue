@@ -100,29 +100,26 @@ const hash = computed<Hex | null>(() => {
   return getUserOpHash(chainId.value, entrypoint.value, props.op);
 });
 
-const event = computed(() => {
+const data = computed(() => {
+  if (!hash.value) {
+    return null;
+  }
   if (!chainId.value) {
     return null;
   }
   if (!entrypoint.value) {
     return null;
   }
-  return getUserOpEvent(
+  const event = getUserOpEvent(
     chainId.value,
     entrypoint.value,
     props.transactionReceipt.logs,
     props.op,
   );
-});
-
-const data = computed(() => {
-  if (!hash.value) {
+  if (!event) {
     return null;
   }
-  if (!event.value) {
-    return null;
-  }
-  return getUserOpData(hash.value, props.op, event.value);
+  return getUserOpData(hash.value, props.op, event);
 });
 </script>
 
