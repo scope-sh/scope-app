@@ -6,6 +6,7 @@ import {
   keccak256,
   decodeEventLog,
   slice,
+  size,
 } from 'viem';
 
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
@@ -57,14 +58,18 @@ interface UserOp_0_7 {
 
 type UserOp = UserOp_0_6 | UserOp_0_7;
 
-interface UserOpData {
+interface UserOpUnpacked {
   hash: Hex;
   success: boolean;
   sender: Address;
   nonce: bigint;
   initCode: Hex;
+  factory: Address | null;
+  initData: Hex | null;
   callData: Hex;
   paymaster: Address | null;
+  paymasterVerificationGasLimit: bigint | null;
+  paymasterPostOpGasLimit: bigint | null;
   paymasterData: Hex | null;
   signature: Hex;
   preVerificationGas: bigint;
@@ -302,20 +307,38 @@ function getUserOpHash(
   return null;
 }
 
-function getUserOpData(
+function unpackUserOp(
   hash: Hex,
   userOp: UserOp,
   event: UserOpEvent,
-): UserOpData {
-  const paymasterAndDataDecoded =
-    userOp.paymasterAndData.length > 2
+): UserOpUnpacked {
+  const initCodeUnpacked =
+    size(userOp.initCode) > 0
+      ? {
+          factory: slice(userOp.initCode, 0, 20),
+          initData: slice(userOp.initCode, 20),
+        }
+      : {
+          factory: null,
+          initData: null,
+        };
+  const paymasterDataUnpacked =
+    size(userOp.paymasterAndData) > 0
       ? {
           paymaster: slice(userOp.paymasterAndData, 0, 20),
-          data: slice(userOp.paymasterAndData, 20),
+          paymasterVerificationGasLimit: BigInt(
+            slice(userOp.paymasterAndData, 20, 36),
+          ),
+          paymasterPostOpGasLimit: BigInt(
+            slice(userOp.paymasterAndData, 36, 52),
+          ),
+          paymasterData: slice(userOp.paymasterAndData, 52),
         }
       : {
           paymaster: null,
-          data: null,
+          paymasterVerificationGasLimit: null,
+          paymasterPostOpGasLimit: null,
+          paymasterData: null,
         };
   const verificationGasLimit =
     'verificationGasLimit' in userOp
@@ -339,9 +362,14 @@ function getUserOpData(
     sender: event.sender.toLowerCase() as Address,
     nonce: event.nonce,
     initCode: userOp.initCode,
+    factory: initCodeUnpacked.factory,
+    initData: initCodeUnpacked.initData,
     callData: userOp.callData,
-    paymaster: paymasterAndDataDecoded.paymaster,
-    paymasterData: paymasterAndDataDecoded.data,
+    paymaster: paymasterDataUnpacked.paymaster,
+    paymasterVerificationGasLimit:
+      paymasterDataUnpacked.paymasterVerificationGasLimit,
+    paymasterPostOpGasLimit: paymasterDataUnpacked.paymasterPostOpGasLimit,
+    paymasterData: paymasterDataUnpacked.paymasterData,
     signature: userOp.signature,
     preVerificationGas: userOp.preVerificationGas,
     verificationGasLimit: verificationGasLimit,
@@ -462,7 +490,6 @@ export {
   getTxType,
   getUserOpEvent,
   getUserOpEvents,
-  getUserOpData,
   getUserOps,
   getUserOpHash,
   getAccountDeployments,
@@ -470,5 +497,6 @@ export {
   getUserOpLogs,
   isEntrypoint,
   decodeCallData,
+  unpackUserOp,
 };
 export type { CallData, TxType, UserOp, UserOp_0_6, UserOp_0_7 };

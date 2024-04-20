@@ -1,5 +1,5 @@
 <template>
-  <ScopeCard v-if="data">
+  <ScopeCard v-if="userOpUnpacked">
     <AttributeList>
       <AttributeItem>
         <AttributeItemLabel value="Hash" />
@@ -7,37 +7,37 @@
           <ScopeLinkInternal
             :route="{
               name: 'userop',
-              hash: data.hash,
+              hash: userOpUnpacked.hash,
             }"
           >
-            {{ data.hash }}
+            {{ userOpUnpacked.hash }}
           </ScopeLinkInternal>
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
         <AttributeItemLabel value="Success" />
         <AttributeItemValue>
-          {{ data.success }}
+          {{ userOpUnpacked.success }}
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
         <AttributeItemLabel value="Sender" />
         <AttributeItemValue>
-          <LinkAddress :address="data.sender" />
+          <LinkAddress :address="userOpUnpacked.sender" />
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
         <AttributeItemLabel value="Nonce" />
         <AttributeItemValue>
-          {{ data.nonce }}
+          {{ userOpUnpacked.nonce }}
         </AttributeItemValue>
       </AttributeItem>
 
-      <AttributeItem v-if="size(data.initCode) > 0">
+      <AttributeItem v-if="size(userOpUnpacked.initCode) > 0">
         <AttributeItemLabel value="Init Code" />
         <AttributeItemValue>
           <ScopeTextView
-            :value="data.initCode"
+            :value="userOpUnpacked.initCode"
             :size="'tiny'"
           />
         </AttributeItemValue>
@@ -46,7 +46,7 @@
         <AttributeItemLabel value="Call Data" />
         <AttributeItemValue>
           <ScopeTextView
-            :value="data.callData"
+            :value="userOpUnpacked.callData"
             :size="'tiny'"
           />
         </AttributeItemValue>
@@ -75,7 +75,7 @@ import {
   type UserOp,
   getUserOpHash,
   getUserOpEvent,
-  getUserOpData,
+  unpackUserOp,
 } from '@/utils/context/erc4337/entryPoint';
 
 import ScopeCard from '../__common/ScopeCard.vue';
@@ -100,7 +100,7 @@ const hash = computed<Hex | null>(() => {
   return getUserOpHash(chainId.value, entrypoint.value, props.op);
 });
 
-const data = computed(() => {
+const userOpUnpacked = computed(() => {
   if (!hash.value) {
     return null;
   }
@@ -119,7 +119,7 @@ const data = computed(() => {
   if (!event) {
     return null;
   }
-  return getUserOpData(hash.value, props.op, event);
+  return unpackUserOp(hash.value, props.op, event);
 });
 </script>
 

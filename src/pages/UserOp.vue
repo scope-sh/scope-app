@@ -18,30 +18,36 @@
       <ScopeLabelEmptyState value="Couldn't find this UserOp" />
     </ScopePanel>
     <ScopePanel
-      v-else-if="data"
+      v-else-if="userOpUnpacked"
       ref="opPanelEl"
       title="UserOp"
       :subtitle="hash"
     >
-      <UserOpStatus :success="data.success" />
+      <UserOpStatus :success="userOpUnpacked.success" />
       <AttributeList>
         <AttributeItem>
           <AttributeItemLabel value="Sender" />
           <AttributeItemValue>
-            <LinkAddress :address="data.sender" />
+            <LinkAddress :address="userOpUnpacked.sender" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel value="Nonce" />
           <AttributeItemValue>
-            {{ data.nonce }}
+            {{ userOpUnpacked.nonce }}
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem v-if="size(data.initCode) > 0">
-          <AttributeItemLabel value="Init Code" />
+        <AttributeItem v-if="userOpUnpacked.factory">
+          <AttributeItemLabel value="Factory" />
+          <AttributeItemValue>
+            <LinkAddress :address="userOpUnpacked.factory" />
+          </AttributeItemValue>
+        </AttributeItem>
+        <AttributeItem v-if="userOpUnpacked.initData">
+          <AttributeItemLabel value="Init Data" />
           <AttributeItemValue>
             <ScopeTextView
-              :value="data.initCode"
+              :value="userOpUnpacked.initData"
               size="tiny"
             />
           </AttributeItemValue>
@@ -73,31 +79,31 @@
           <AttributeItemLabel value="Call Data" />
           <AttributeItemValue>
             <ScopeTextView
-              :value="data.callData"
+              :value="userOpUnpacked.callData"
               size="tiny"
             />
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem v-if="data.paymaster">
+        <AttributeItem v-if="userOpUnpacked.paymaster">
           <AttributeItemLabel value="Paymaster" />
           <AttributeItemValue>
-            <LinkAddress :address="data.paymaster" />
+            <LinkAddress :address="userOpUnpacked.paymaster" />
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem v-if="data.paymasterData">
+        <AttributeItem v-if="userOpUnpacked.paymasterData">
           <AttributeItemLabel value="Paymaster Data" />
           <AttributeItemValue>
             <ScopeTextView
-              :value="data.paymasterData"
+              :value="userOpUnpacked.paymasterData"
               size="tiny"
             />
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem v-if="size(data.signature) > 0">
+        <AttributeItem v-if="size(userOpUnpacked.signature) > 0">
           <AttributeItemLabel value="Signature" />
           <AttributeItemValue>
             <ScopeTextView
-              :value="data.signature"
+              :value="userOpUnpacked.signature"
               size="tiny"
             />
           </AttributeItemValue>
@@ -105,43 +111,55 @@
         <AttributeItem>
           <AttributeItemLabel value="Pre-verification Gas" />
           <AttributeItemValue>
-            {{ data.preVerificationGas }}
+            {{ userOpUnpacked.preVerificationGas }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel value="Verification Gas Limit" />
           <AttributeItemValue>
-            {{ data.verificationGasLimit }}
+            {{ userOpUnpacked.verificationGasLimit }}
+          </AttributeItemValue>
+        </AttributeItem>
+        <AttributeItem v-if="userOpUnpacked.paymasterVerificationGasLimit">
+          <AttributeItemLabel value="Paymaster Verif. Gas Limit" />
+          <AttributeItemValue>
+            {{ userOpUnpacked.paymasterVerificationGasLimit }}
+          </AttributeItemValue>
+        </AttributeItem>
+        <AttributeItem v-if="userOpUnpacked.paymasterPostOpGasLimit">
+          <AttributeItemLabel value="Paymaster Gas Limit" />
+          <AttributeItemValue>
+            {{ userOpUnpacked.paymasterPostOpGasLimit }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel value="Actual Gas Used" />
           <AttributeItemValue>
-            {{ data.actualGasUsed }}
+            {{ userOpUnpacked.actualGasUsed }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel value="Call Gas Limit" />
           <AttributeItemValue>
-            {{ data.callGasLimit }}
+            {{ userOpUnpacked.callGasLimit }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel value="Max Fee per Gas" />
           <AttributeItemValue>
-            {{ data.maxFeePerGas }}
+            {{ userOpUnpacked.maxFeePerGas }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel value="Max Priority Fee per Gas" />
           <AttributeItemValue>
-            {{ data.maxPriorityFeePerGas }}
+            {{ userOpUnpacked.maxPriorityFeePerGas }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel value="Actual Gas Cost" />
           <AttributeItemValue>
-            {{ data.actualGasCost }}
+            {{ userOpUnpacked.actualGasCost }}
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
@@ -259,13 +277,13 @@ import IndexerService from '@/services/indexer';
 import { Command } from '@/stores/commands';
 import {
   UserOp,
-  getUserOpData,
   getUserOpEvent,
   getUserOpHash,
   getUserOps,
   decodeCallData,
   getBeneficiary,
   getUserOpLogs,
+  unpackUserOp,
 } from '@/utils/context/erc4337/entryPoint';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 import { formatEther } from '@/utils/formatting';
@@ -426,7 +444,7 @@ const userOp = computed<UserOp | null>(() => {
   );
   return userOp || null;
 });
-const data = computed(() => {
+const userOpUnpacked = computed(() => {
   if (!chainId.value) {
     return null;
   }
@@ -454,13 +472,13 @@ const data = computed(() => {
   if (!event) {
     return null;
   }
-  return getUserOpData(hash.value, userOp.value, event);
+  return unpackUserOp(hash.value, userOp.value, event);
 });
 const decodedCallData = computed(() => {
-  if (!data.value) {
+  if (!userOpUnpacked.value) {
     return null;
   }
-  return decodeCallData(data.value.callData);
+  return decodeCallData(userOpUnpacked.value.callData);
 });
 const beneficiary = computed<Address | null>(() => {
   if (!transaction.value) {
@@ -495,7 +513,7 @@ async function fetch(): Promise<void> {
 }
 
 const actions = computed<Action[]>(() => {
-  const opData = data.value;
+  const opData = userOpUnpacked.value;
   if (!opData) {
     return [];
   }
@@ -532,13 +550,16 @@ const actions = computed<Action[]>(() => {
 
 const addresses = computed(() => {
   const list: Address[] = [];
-  if (data.value) {
-    list.push(data.value.sender);
+  if (userOpUnpacked.value) {
+    if (userOpUnpacked.value.factory) {
+      list.push(userOpUnpacked.value.factory);
+    }
+    list.push(userOpUnpacked.value.sender);
     if (decodedCallData.value) {
       list.push(decodedCallData.value.to);
     }
-    if (data.value.paymaster) {
-      list.push(data.value.paymaster);
+    if (userOpUnpacked.value.paymaster) {
+      list.push(userOpUnpacked.value.paymaster);
     }
   }
   if (transaction.value) {
