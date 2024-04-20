@@ -3,17 +3,22 @@
     <div class="content">
       <div class="header">
         <span v-if="log.blockNumber">
-          <LinkBlock :number="log.blockNumber" />
+          <LinkBlock
+            :number="log.blockNumber"
+            type="minimal"
+          />
         </span>
         ·
         <span>
           <LinkAddress
             v-if="type === 'transaction'"
             :address="log.address"
+            type="minimal"
           />
           <LinkTransaction
             v-else-if="type === 'address' && log.transactionHash"
             :hash="log.transactionHash"
+            type="minimal"
           />
         </span>
         ·
