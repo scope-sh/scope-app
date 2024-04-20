@@ -1,15 +1,20 @@
 <template>
-  <ScopeLinkInternal
-    :route="{
-      name: 'address',
-      address: address,
-    }"
+  <LinkBase
+    :value="address"
     :type
   >
-    <slot>
-      {{ labelText || address }}
-    </slot>
-  </ScopeLinkInternal>
+    <ScopeLinkInternal
+      :route="{
+        name: 'address',
+        address: address,
+      }"
+      :type
+    >
+      <slot>
+        {{ labelText || address }}
+      </slot>
+    </ScopeLinkInternal>
+  </LinkBase>
 </template>
 
 <script setup lang="ts">
@@ -18,6 +23,7 @@ import { computed } from 'vue';
 
 import useLabels from '@/composables/useLabels.js';
 
+import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
 const { getLabelText } = useLabels();

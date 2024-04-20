@@ -1,20 +1,26 @@
 <template>
-  <ScopeLinkInternal
-    :route="{
-      name: 'userop',
-      hash,
-    }"
+  <LinkBase
+    :value="hash"
     :type
   >
-    <slot>
-      {{ hash }}
-    </slot>
-  </ScopeLinkInternal>
+    <ScopeLinkInternal
+      :route="{
+        name: 'userop',
+        hash,
+      }"
+      :type
+    >
+      <slot>
+        {{ hash }}
+      </slot>
+    </ScopeLinkInternal>
+  </LinkBase>
 </template>
 
 <script setup lang="ts">
 import { Hex } from 'viem';
 
+import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
 withDefaults(

@@ -1,18 +1,24 @@
 <template>
-  <ScopeLinkInternal
-    :route="{
-      name: 'block',
-      number,
-    }"
+  <LinkBase
+    :value="number.toString()"
     :type
   >
-    <slot>
-      {{ number }}
-    </slot>
-  </ScopeLinkInternal>
+    <ScopeLinkInternal
+      :route="{
+        name: 'block',
+        number,
+      }"
+      :type
+    >
+      <slot>
+        {{ number }}
+      </slot>
+    </ScopeLinkInternal>
+  </LinkBase>
 </template>
 
 <script setup lang="ts">
+import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
 withDefaults(
