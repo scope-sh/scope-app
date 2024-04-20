@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import type { MaybeElement } from '@vueuse/core';
 import { useDebounceFn, useMagicKeys, useAnimate } from '@vueuse/core';
-import { Address } from 'viem';
+import { Address, Hex } from 'viem';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -78,6 +78,7 @@ import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
+import IndexerService from '@/services/indexer';
 import NamingService from '@/services/naming';
 import type { Command, NestedCommand } from '@/stores/commands';
 import useUiStore from '@/stores/ui';
@@ -97,6 +98,7 @@ import {
   isBlockTag,
   isEnsAddress,
   isTransactionHash,
+  isUserOpHash,
 } from '@/utils/validation/pattern';
 
 const router = useRouter();
@@ -133,6 +135,9 @@ const evmService = computed(() =>
   chainId.value && client.value
     ? new EvmService(chainId.value, client.value)
     : null,
+);
+const indexerService = computed(() =>
+  chainId.value ? new IndexerService(chainId.value) : null,
 );
 const namingService = new NamingService(alchemyApiKey);
 
@@ -212,6 +217,14 @@ const globalCommands = computed<Command[]>(() => {
       isAsync: areGoToItemsAsync('transaction'),
       getItems: async (query): Promise<Command[]> =>
         getGoToItems('transaction', query),
+    },
+    {
+      icon: 'arrow-right',
+      label: 'Go to UserOp',
+      placeholder: 'Enter hash',
+      isAsync: areGoToItemsAsync('userop'),
+      getItems: async (query): Promise<Command[]> =>
+        getGoToItems('userop', query),
     },
     {
       icon: 'arrow-right',
@@ -295,7 +308,7 @@ const globalCommands = computed<Command[]>(() => {
 });
 
 function areGoToItemsAsync(
-  type: 'address' | 'block' | 'transaction' | 'all',
+  type: 'address' | 'block' | 'transaction' | 'userop' | 'all',
 ): (query: string) => boolean {
   return (query: string): boolean => {
     if (type === 'address') {
@@ -319,6 +332,9 @@ function areGoToItemsAsync(
     if (type === 'transaction') {
       return false;
     }
+    if (type === 'userop') {
+      return false;
+    }
     if (type === 'all') {
       if (isChainName(query)) {
         return false;
@@ -336,7 +352,7 @@ function areGoToItemsAsync(
         return true;
       }
       if (isTransactionHash(query)) {
-        return false;
+        return true;
       }
       return true;
     }
@@ -345,7 +361,7 @@ function areGoToItemsAsync(
 }
 
 async function getGoToItems(
-  type: 'address' | 'block' | 'transaction' | 'all',
+  type: 'address' | 'block' | 'transaction' | 'userop' | 'all',
   query: string,
 ): Promise<Command[]> {
   function getOpenChainCommand(chain: Chain): Command {
@@ -434,6 +450,32 @@ async function getGoToItems(
     };
   }
 
+  function getOpenUserOpCommand(hash: string): Command {
+    return {
+      icon: 'arrow-right',
+      label: hash,
+      act: (): void => {
+        router.push(getRouteLocation({ name: 'userop', hash }));
+      },
+    };
+  }
+
+  async function getOpenTransactionOrUserOpCommand(
+    hash: string,
+  ): Promise<Command | null> {
+    if (!evmService.value || !indexerService.value) {
+      return null;
+    }
+    const foundUserOp = await indexerService.value.getTxHashByUserOpHash(
+      hash as Hex,
+    );
+    if (foundUserOp) {
+      return getOpenUserOpCommand(hash);
+    } else {
+      return getOpenTransactionCommand(hash);
+    }
+  }
+
   async function getOpenLabelCommands(query: string): Promise<Command[]> {
     if (!apiService.value) {
       return [];
@@ -481,6 +523,9 @@ async function getGoToItems(
     case 'transaction': {
       return isTransactionHash(query) ? [getOpenTransactionCommand(query)] : [];
     }
+    case 'userop': {
+      return isUserOpHash(query) ? [getOpenUserOpCommand(query)] : [];
+    }
     case 'all': {
       if (isChainName(query)) {
         const chain = getChainByName(query);
@@ -502,7 +547,8 @@ async function getGoToItems(
         return command ? [command] : [];
       }
       if (isTransactionHash(query)) {
-        return [getOpenTransactionCommand(query)];
+        const command = await getOpenTransactionOrUserOpCommand(query);
+        return command ? [command] : [];
       }
       return getOpenLabelCommands(query);
     }
