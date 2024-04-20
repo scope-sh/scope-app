@@ -88,10 +88,14 @@ class Service {
   }
 
   public async getTransaction(hash: Hex): Promise<Transaction | null> {
-    const transaction = await this.client.getTransaction({
-      hash,
-    });
-    return transaction || null;
+    try {
+      const transaction = await this.client.getTransaction({
+        hash,
+      });
+      return transaction || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   public async getBlockTransaction(
@@ -112,10 +116,14 @@ class Service {
   public async getTransactionReceipt(
     hash: Hex,
   ): Promise<TransactionReceipt | null> {
-    const receipt = await this.client.getTransactionReceipt({
-      hash,
-    });
-    return receipt || null;
+    try {
+      const receipt = await this.client.getTransactionReceipt({
+        hash,
+      });
+      return receipt || null;
+    } catch (e) {
+      return null;
+    }
   }
 
   public async getBalance(address: Address): Promise<bigint> {
