@@ -23,15 +23,10 @@
           :class="{ loading: isLoading }"
         >
           Latest block
-          <ScopeLinkInternal
+          <LinkBlock
             v-if="latestBlock"
-            :route="{
-              name: 'block',
-              number: latestBlock,
-            }"
-          >
-            {{ latestBlock }}
-          </ScopeLinkInternal>
+            :number="latestBlock"
+          />
           <span v-else>…</span>
         </div>
       </div>
@@ -46,8 +41,8 @@ import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
+import LinkBlock from '@/components/__common/LinkBlock.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import InputSearch from '@/components/chain/InputSearch.vue';
 import PopoverChain from '@/components/chain/PopoverChain.vue';
 import useChain from '@/composables/useChain';

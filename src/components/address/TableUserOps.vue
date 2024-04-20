@@ -34,27 +34,25 @@
                 class="icon"
               />
             </template>
-            <ScopeLinkInternal
+            <LinkBlock
               v-else-if="cell.column.id === 'blockNumber'"
-              :route="{ name: 'block', number: cell.getValue() as bigint }"
+              :number="cell.getValue() as bigint"
               type="minimal"
-            >
-              {{ cell.getValue() }}
-            </ScopeLinkInternal>
-            <ScopeLinkInternal
+            />
+            <LinkTransaction
               v-else-if="cell.column.id === 'transactionHash'"
-              :route="{ name: 'transaction', hash: cell.getValue() as Hex }"
+              :hash="cell.getValue() as Hex"
               type="minimal"
             >
               {{ formatHash(cell.getValue() as Hex) }}
-            </ScopeLinkInternal>
-            <ScopeLinkInternal
+            </LinkTransaction>
+            <LinkUserOp
               v-else-if="cell.column.id === 'hash'"
-              :route="{ name: 'userop', hash: cell.getValue() as Hex }"
+              :hash="cell.getValue() as Hex"
               type="minimal"
             >
               {{ formatHash(cell.getValue() as Hex) }}
-            </ScopeLinkInternal>
+            </LinkUserOp>
             <LinkAddress
               v-else-if="cell.column.id === 'paymaster'"
               :address="cell.getValue() as Address"
@@ -86,7 +84,6 @@ import { Address, Hex } from 'viem';
 import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
-import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import useLabels from '@/composables/useLabels.js';
 import {
   ENTRYPOINT_0_6_ADDRESS,
@@ -94,6 +91,9 @@ import {
 } from '@/utils/context/erc4337/entryPoint';
 import { formatAddress } from '@/utils/formatting';
 
+import LinkBlock from '../__common/LinkBlock.vue';
+import LinkTransaction from '../__common/LinkTransaction.vue';
+import LinkUserOp from '../__common/LinkUserOp.vue';
 import ScopeIcon from '../__common/ScopeIcon.vue';
 
 const { getLabelText } = useLabels();

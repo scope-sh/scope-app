@@ -4,14 +4,7 @@
       <AttributeItem>
         <AttributeItemLabel value="Hash" />
         <AttributeItemValue>
-          <ScopeLinkInternal
-            :route="{
-              name: 'userop',
-              hash: userOpUnpacked.hash,
-            }"
-          >
-            {{ userOpUnpacked.hash }}
-          </ScopeLinkInternal>
+          <LinkUserOp :hash="userOpUnpacked.hash" />
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
@@ -61,7 +54,6 @@ import { size } from 'viem';
 import { computed } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
-import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
 import {
   AttributeItem,
@@ -78,6 +70,7 @@ import {
   unpackUserOp,
 } from '@/utils/context/erc4337/entryPoint';
 
+import LinkUserOp from '../__common/LinkUserOp.vue';
 import ScopeCard from '../__common/ScopeCard.vue';
 
 const props = defineProps<{

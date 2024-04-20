@@ -31,14 +31,7 @@
         <AttributeItem v-if="transaction.blockNumber">
           <AttributeItemLabel :value="'Block'" />
           <AttributeItemValue>
-            <ScopeLinkInternal
-              :route="{
-                name: 'block',
-                number: transaction.blockNumber,
-              }"
-            >
-              {{ transaction.blockNumber }}
-            </ScopeLinkInternal>
+            <LinkBlock :number="transaction.blockNumber" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="block && block.timestamp">
@@ -158,8 +151,8 @@ import { useRoute, useRouter } from 'vue-router';
 
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
+import LinkBlock from '@/components/__common/LinkBlock.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
-import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';

@@ -177,27 +177,13 @@
         <AttributeItem v-if="transaction.blockNumber">
           <AttributeItemLabel :value="'Block'" />
           <AttributeItemValue>
-            <ScopeLinkInternal
-              :route="{
-                name: 'block',
-                number: transaction.blockNumber,
-              }"
-            >
-              {{ transaction.blockNumber }}
-            </ScopeLinkInternal>
+            <LinkBlock :number="transaction.blockNumber" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
           <AttributeItemLabel :value="'Hash'" />
           <AttributeItemValue>
-            <ScopeLinkInternal
-              :route="{
-                name: 'transaction',
-                hash: transaction.hash,
-              }"
-            >
-              {{ transaction.hash }}
-            </ScopeLinkInternal>
+            <LinkTransaction :hash="transaction.hash" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
@@ -254,8 +240,8 @@ import { useRoute } from 'vue-router';
 
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
+import LinkBlock from '@/components/__common/LinkBlock.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
-import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import ScopePage, { Section } from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';

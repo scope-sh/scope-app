@@ -3,14 +3,7 @@
     <div class="content">
       <div class="header">
         <span v-if="log.blockNumber">
-          <ScopeLinkInternal
-            :route="{
-              name: 'block',
-              number: log.blockNumber,
-            }"
-          >
-            {{ log.blockNumber }}
-          </ScopeLinkInternal>
+          <LinkBlock :number="log.blockNumber" />
         </span>
         ·
         <span>
@@ -18,15 +11,10 @@
             v-if="type === 'transaction'"
             :address="log.address"
           />
-          <ScopeLinkInternal
+          <LinkTransaction
             v-else-if="type === 'address' && log.transactionHash"
-            :route="{
-              name: 'transaction',
-              hash: log.transactionHash,
-            }"
-          >
-            {{ log.transactionHash }}
-          </ScopeLinkInternal>
+            :hash="log.transactionHash"
+          />
         </span>
         ·
         <span class="index">#{{ log.logIndex }}</span>
@@ -56,9 +44,11 @@
 <script setup lang="ts">
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
-import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
 import type { Log } from '@/services/evm';
+
+import LinkBlock from './LinkBlock.vue';
+import LinkTransaction from './LinkTransaction.vue';
 
 defineProps<{
   log: Log;

@@ -28,20 +28,18 @@
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
           >
-            <ScopeLinkInternal
+            <LinkBlock
               v-if="cell.column.id === 'blockNumber'"
-              :route="{ name: 'block', number: cell.getValue() as bigint }"
+              :number="cell.getValue() as bigint"
               type="minimal"
-            >
-              {{ cell.getValue() }}
-            </ScopeLinkInternal>
-            <ScopeLinkInternal
+            />
+            <LinkTransaction
               v-else-if="cell.column.id === 'hash'"
-              :route="{ name: 'transaction', hash: cell.getValue() as Hex }"
+              :hash="cell.getValue() as Hex"
               type="minimal"
             >
               {{ formatHash(cell.getValue() as Hex) }}
-            </ScopeLinkInternal>
+            </LinkTransaction>
             <LinkAddress
               v-else-if="cell.column.id === 'from'"
               :address="cell.getValue() as Address"
@@ -81,9 +79,11 @@ import { Address, Hex, size, slice } from 'viem';
 import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
-import ScopeLinkInternal from '@/components/__common/ScopeLinkInternal.vue';
 import useLabels from '@/composables/useLabels.js';
 import { formatAddress, formatEther, formatGasPrice } from '@/utils/formatting';
+
+import LinkBlock from './LinkBlock.vue';
+import LinkTransaction from './LinkTransaction.vue';
 
 const { getLabelText } = useLabels();
 

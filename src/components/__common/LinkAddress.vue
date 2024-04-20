@@ -34,11 +34,3 @@ const props = withDefaults(
 
 const labelText = computed(() => getLabelText(props.address));
 </script>
-
-<style scoped>
-.content {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-</style>
