@@ -173,6 +173,7 @@ async function fetch(): Promise<void> {
       const permissionResultItem = permissionResult[0];
       if (permissionResultItem.error) {
         rootValidator.value = null;
+        isLoading.value = false;
         return;
       }
       const signer =
