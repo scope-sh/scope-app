@@ -10,7 +10,7 @@
       :subtitle="hash"
     />
     <ScopePanel
-      v-if="!isLoading && transaction === null"
+      v-else-if="!isLoading && transaction === null"
       ref="txPanelEl"
       title="Transaction"
       :subtitle="hash"
@@ -18,7 +18,7 @@
       <ScopeLabelEmptyState value="Couldn't find this transaction" />
     </ScopePanel>
     <ScopePanel
-      v-if="!isLoading"
+      v-else
       ref="txPanelEl"
       title="Transaction"
       :subtitle="hash"
