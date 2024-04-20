@@ -25,10 +25,16 @@ function isTransactionHash(value: string): boolean {
   return !!value.match(hashRegex);
 }
 
+function isUserOpHash(value: string): boolean {
+  const hashRegex = /^0x[0-9a-f]{64}$/;
+  return !!value.match(hashRegex);
+}
+
 export {
   isAddress,
   isBlockNumber,
   isBlockTag,
   isEnsAddress,
   isTransactionHash,
+  isUserOpHash,
 };
