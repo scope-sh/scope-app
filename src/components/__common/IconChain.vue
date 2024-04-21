@@ -39,6 +39,16 @@
     :kind
     type="amoy"
   />
+  <IconArbitrum
+    v-else-if="chain === ARBITRUM"
+    :kind
+    type="mainnet"
+  />
+  <IconArbitrum
+    v-else-if="chain === ARBITRUM_SEPOLIA"
+    :kind
+    type="sepolia"
+  />
 </template>
 
 <script setup lang="ts">
@@ -52,8 +62,11 @@ import {
   BASE_SEPOLIA,
   POLYGON,
   POLYGON_AMOY,
+  ARBITRUM,
+  ARBITRUM_SEPOLIA,
 } from '@/utils/chains';
 
+import IconArbitrum from './icon/chain/Arbitrum.vue';
 import IconBase from './icon/chain/Base.vue';
 import IconEthereum from './icon/chain/Ethereum.vue';
 import IconOptimism from './icon/chain/Optimism.vue';

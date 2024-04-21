@@ -9,6 +9,8 @@ import {
   baseSepolia,
   polygon,
   polygonAmoy,
+  arbitrum,
+  arbitrumSepolia,
 } from 'viem/chains';
 
 const ETHEREUM = mainnet.id;
@@ -19,6 +21,8 @@ const BASE = base.id;
 const BASE_SEPOLIA = baseSepolia.id;
 const POLYGON = polygon.id;
 const POLYGON_AMOY = polygonAmoy.id;
+const ARBITRUM = arbitrum.id;
+const ARBITRUM_SEPOLIA = arbitrumSepolia.id;
 
 type Chain =
   | typeof ETHEREUM
@@ -28,7 +32,9 @@ type Chain =
   | typeof BASE
   | typeof BASE_SEPOLIA
   | typeof POLYGON
-  | typeof POLYGON_AMOY;
+  | typeof POLYGON_AMOY
+  | typeof ARBITRUM
+  | typeof ARBITRUM_SEPOLIA;
 
 const DEFAULT_CHAIN = ETHEREUM;
 
@@ -41,6 +47,8 @@ const CHAINS: Chain[] = [
   BASE_SEPOLIA,
   POLYGON,
   POLYGON_AMOY,
+  ARBITRUM,
+  ARBITRUM_SEPOLIA,
 ];
 
 function getChainData(chainId: Chain): ChainData {
@@ -61,6 +69,10 @@ function getChainData(chainId: Chain): ChainData {
       return polygon;
     case POLYGON_AMOY:
       return polygonAmoy;
+    case ARBITRUM:
+      return arbitrum;
+    case ARBITRUM_SEPOLIA:
+      return arbitrumSepolia;
   }
 }
 
@@ -76,6 +88,9 @@ function getChainNames(chain: Chain): string[] {
       }
       case OPTIMISM: {
         return ['optimism'];
+      }
+      case ARBITRUM: {
+        return ['arbitrum'];
       }
     }
     return [];
@@ -120,6 +135,8 @@ export {
   BASE_SEPOLIA,
   POLYGON,
   POLYGON_AMOY,
+  ARBITRUM,
+  ARBITRUM_SEPOLIA,
   getChainByName,
   getChainData,
   getChainName,
