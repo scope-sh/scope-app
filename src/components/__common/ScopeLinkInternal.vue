@@ -1,7 +1,7 @@
 <template>
   <router-link
     :to="to"
-    class="link"
+    class="root"
     :class="{ minimal: type === 'minimal' }"
   >
     <slot />
@@ -38,7 +38,7 @@ export type { Type };
 </script>
 
 <style scoped>
-.link {
+.root {
   --color-accent-toned-down: oklch(from var(--color-accent) l calc(c * 0.6) h);
 
   display: inline-flex;
@@ -66,7 +66,7 @@ export type { Type };
   background: var(--color-accent);
 }
 
-.link:hover .background {
+.root:hover .background {
   opacity: 0.1;
 }
 </style>
