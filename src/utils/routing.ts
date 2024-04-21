@@ -9,7 +9,7 @@ interface HomeRoute {
 
 interface ChainRoute {
   name: 'chain';
-  chain: Chain;
+  chain?: Chain;
 }
 
 interface BlockRoute {
