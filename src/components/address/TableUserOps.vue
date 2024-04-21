@@ -10,6 +10,16 @@
             v-for="header in headerGroup.headers"
             :key="header.id"
             :colSpan="header.colSpan"
+            :class="{
+              tiny:
+                header.column.id === 'success' ||
+                header.column.id === 'entryPoint',
+              block: header.column.id === 'blockNumber',
+              hash:
+                header.column.id === 'transactionHash' ||
+                header.column.id === 'hash',
+              address: header.column.id === 'paymaster',
+            }"
           >
             <FlexRender
               v-if="!header.isPlaceholder"
@@ -27,6 +37,15 @@
           <td
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
+            :class="{
+              tiny:
+                cell.column.id === 'success' || cell.column.id === 'entryPoint',
+              block: cell.column.id === 'blockNumber',
+              hash:
+                cell.column.id === 'transactionHash' ||
+                cell.column.id === 'hash',
+              address: cell.column.id === 'paymaster',
+            }"
           >
             <template v-if="cell.column.id === 'success'">
               <ScopeIcon
@@ -44,14 +63,14 @@
               :hash="cell.getValue() as Hex"
               type="minimal"
             >
-              {{ formatHash(cell.getValue() as Hex) }}
+              {{ cell.getValue() as Hex }}
             </LinkTransaction>
             <LinkUserOp
               v-else-if="cell.column.id === 'hash'"
               :hash="cell.getValue() as Hex"
               type="minimal"
             >
-              {{ formatHash(cell.getValue() as Hex) }}
+              {{ cell.getValue() as Hex }}
             </LinkUserOp>
             <LinkAddress
               v-else-if="cell.column.id === 'paymaster'"
@@ -89,7 +108,6 @@ import {
   ENTRYPOINT_0_6_ADDRESS,
   ENTRYPOINT_0_7_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
-import { formatAddress } from '@/utils/formatting';
 
 import LinkBlock from '../__common/LinkBlock.vue';
 import LinkTransaction from '../__common/LinkTransaction.vue';
@@ -169,12 +187,7 @@ watch(
 
 function getAddress(value: Address): string {
   const labelText = getLabelText(value);
-  return labelText ? labelText : formatAddress(value, 16);
-}
-
-function formatHash(value: Hex): string {
-  const size = 16;
-  return `${value.slice(0, 2 + size / 2)}...${value.slice(-size / 2)}`;
+  return labelText ? labelText : value;
 }
 </script>
 
@@ -206,6 +219,8 @@ table {
 }
 
 thead {
+  border-radius: calc(var(--border-radius) - 1px)
+    calc(var(--border-radius) - 1px) 0 0;
   background: var(--color-background-secondary);
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
@@ -214,6 +229,7 @@ thead {
 
 th,
 td {
+  overflow: hidden;
   text-align: left;
   cursor: default;
 }
@@ -231,6 +247,7 @@ td {
 }
 
 tr {
+  display: flex;
   transition: opacity 0.25s ease;
   opacity: 1;
 
@@ -266,5 +283,33 @@ tbody {
 .icon {
   width: 12px;
   height: 12px;
+}
+
+.tiny {
+  width: 60px;
+}
+
+.hash {
+  width: 250px;
+}
+
+.block {
+  width: 100px;
+}
+
+.address {
+  width: 250px;
+}
+
+.func {
+  width: 70px;
+}
+
+.data {
+  width: 260px;
+}
+
+.value {
+  width: 100px;
 }
 </style>

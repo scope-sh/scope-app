@@ -10,6 +10,18 @@
             v-for="header in headerGroup.headers"
             :key="header.id"
             :colSpan="header.colSpan"
+            :class="{
+              tiny:
+                header.column.id === 'blockPosition' ||
+                header.column.id === 'transactionIndex',
+              block: header.column.id === 'blockNumber',
+              hash: header.column.id === 'hash',
+              address: header.column.id === 'from' || header.column.id === 'to',
+              func: header.column.id === 'function',
+              data: header.column.id === 'data',
+              value:
+                header.column.id === 'value' || header.column.id === 'gasPrice',
+            }"
           >
             <FlexRender
               v-if="!header.isPlaceholder"
@@ -27,6 +39,18 @@
           <td
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
+            :class="{
+              tiny:
+                cell.column.id === 'blockPosition' ||
+                cell.column.id === 'transactionIndex',
+              block: cell.column.id === 'blockNumber',
+              hash: cell.column.id === 'hash',
+              address: cell.column.id === 'from' || cell.column.id === 'to',
+              func: cell.column.id === 'function',
+              data: cell.column.id === 'data',
+              value:
+                cell.column.id === 'value' || cell.column.id === 'gasPrice',
+            }"
           >
             <LinkBlock
               v-if="cell.column.id === 'blockNumber'"
@@ -38,7 +62,7 @@
               :hash="cell.getValue() as Hex"
               type="minimal"
             >
-              {{ formatHash(cell.getValue() as Hex) }}
+              {{ cell.getValue() as Hex }}
             </LinkTransaction>
             <LinkAddress
               v-else-if="cell.column.id === 'from'"
@@ -75,12 +99,12 @@ import {
   getPaginationRowModel,
   ColumnDef,
 } from '@tanstack/vue-table';
-import { Address, Hex, size, slice } from 'viem';
+import { Address, Hex, size } from 'viem';
 import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import useLabels from '@/composables/useLabels.js';
-import { formatAddress, formatEther, formatGasPrice } from '@/utils/formatting';
+import { formatEther, formatGasPrice } from '@/utils/formatting';
 
 import LinkBlock from './LinkBlock.vue';
 import LinkTransaction from './LinkTransaction.vue';
@@ -182,12 +206,7 @@ watch(
 
 function getAddress(value: Address): string {
   const labelText = getLabelText(value);
-  return labelText ? labelText : formatAddress(value, 16);
-}
-
-function formatHash(value: Hex): string {
-  const size = 16;
-  return `${value.slice(0, 2 + size / 2)}...${value.slice(-size / 2)}`;
+  return labelText ? labelText : value;
 }
 
 function formatFunction(value: Hex): string {
@@ -198,7 +217,7 @@ function formatData(value: Hex): string {
   if (size(value) === 0) {
     return '—';
   }
-  return slice(value, 0, 20) + '…';
+  return value;
 }
 </script>
 
@@ -246,6 +265,8 @@ table {
 }
 
 thead {
+  border-radius: calc(var(--border-radius) - 1px)
+    calc(var(--border-radius) - 1px) 0 0;
   background: var(--color-background-secondary);
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
@@ -254,6 +275,7 @@ thead {
 
 th,
 td {
+  overflow: hidden;
   text-align: left;
   cursor: default;
 }
@@ -271,6 +293,7 @@ td {
 }
 
 tr {
+  display: flex;
   transition: opacity 0.25s ease;
   opacity: 1;
 
@@ -301,5 +324,33 @@ tbody {
   &:hover tr:not(:hover) {
     opacity: 0.5;
   }
+}
+
+.tiny {
+  width: 60px;
+}
+
+.hash {
+  width: 250px;
+}
+
+.block {
+  width: 100px;
+}
+
+.address {
+  width: 250px;
+}
+
+.func {
+  width: 70px;
+}
+
+.data {
+  width: 260px;
+}
+
+.value {
+  width: 100px;
 }
 </style>
