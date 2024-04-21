@@ -15,7 +15,13 @@
       title="UserOp"
       :subtitle="hash"
     >
-      <ScopeLabelEmptyState value="Couldn't find this UserOp" />
+      <ScopeEmptyState label="Couldn't find this UserOp">
+        <template #actions>
+          <ScopeButton @click="handleOpenAsTransactionClick">
+            Open as transaction
+          </ScopeButton>
+        </template>
+      </ScopeEmptyState>
     </ScopePanel>
     <ScopePanel
       v-else-if="userOpUnpacked"
@@ -236,12 +242,14 @@
 import { useHead } from '@unhead/vue';
 import { Address, Log, Transaction, TransactionReceipt, size } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
 import LinkTransaction from '@/components/__common/LinkTransaction.vue';
+import ScopeButton from '@/components/__common/ScopeButton.vue';
+import ScopeEmptyState from '@/components/__common/ScopeEmptyState.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import ScopePage, { Section } from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
@@ -274,6 +282,7 @@ import {
 } from '@/utils/context/erc4337/entryPoint';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 import { formatEther } from '@/utils/formatting';
+import { getRouteLocation } from '@/utils/routing';
 
 const PAGE_USEROP = 'page_userop';
 const SECTION_OVERVIEW = 'overview';
@@ -287,6 +296,7 @@ type PanelEl = InstanceType<typeof ScopePanel>;
 type PanelSection = Section & { el: PanelEl | null };
 
 const route = useRoute();
+const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels, getLabel } = useLabels();
 
@@ -578,4 +588,8 @@ const addresses = computed(() => {
 watch(addresses, async () => {
   requestLabels(addresses.value);
 });
+
+function handleOpenAsTransactionClick(): void {
+  router.push(getRouteLocation({ name: 'transaction', hash: hash.value }));
+}
 </script>

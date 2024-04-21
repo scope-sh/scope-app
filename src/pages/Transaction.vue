@@ -15,7 +15,13 @@
       title="Transaction"
       :subtitle="hash"
     >
-      <ScopeLabelEmptyState value="Couldn't find this transaction" />
+      <ScopeEmptyState label="Couldn't find this transaction">
+        <template #actions>
+          <ScopeButton @click="handleOpenAsUserOpClick">
+            Open as UserOp
+          </ScopeButton>
+        </template>
+      </ScopeEmptyState>
     </ScopePanel>
     <ScopePanel
       v-else
@@ -152,6 +158,8 @@ import { useRoute, useRouter } from 'vue-router';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
+import ScopeButton from '@/components/__common/ScopeButton.vue';
+import ScopeEmptyState from '@/components/__common/ScopeEmptyState.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
@@ -182,6 +190,7 @@ import {
   formatShare,
   formatTime,
 } from '@/utils/formatting';
+import { getRouteLocation } from '@/utils/routing';
 
 const PAGE_TRANSACTION = 'page_transaction';
 const SECTION_OVERVIEW = 'overview';
@@ -460,6 +469,10 @@ async function openBlockTransaction(
     name: 'transaction',
     params: { hash: transaction.hash },
   });
+}
+
+function handleOpenAsUserOpClick(): void {
+  router.push(getRouteLocation({ name: 'userop', hash: hash.value }));
 }
 </script>
 

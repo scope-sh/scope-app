@@ -15,9 +15,15 @@
       title="Block"
       :subtitle="number.toString()"
     >
-      <ScopeLabelEmptyState
-        value="Sorry, time traveler, but this block has not been produced yet"
-      />
+      <ScopeEmptyState
+        label="Sorry, time traveler, but this block has not been produced yet"
+      >
+        <template #actions>
+          <ScopeButton @click="handleOpenLatestBlockClick">
+            Open latest
+          </ScopeButton>
+        </template>
+      </ScopeEmptyState>
     </ScopePanel>
     <ScopePanel
       v-if="!isLoading && !isFuture"
@@ -97,7 +103,8 @@ import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
-import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
+import ScopeButton from '@/components/__common/ScopeButton.vue';
+import ScopeEmptyState from '@/components/__common/ScopeEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
@@ -329,6 +336,14 @@ const maxPage = computed(() => {
   return Math.ceil(block.value.transactions.length / TRANSACTIONS_PER_PAGE);
 });
 
+async function handleOpenLatestBlockClick(): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
+  const block = await evmService.value.getLatestBlock();
+  router.push(getRouteLocation({ name: 'block', number: block }));
+}
+
 const addresses = computed(() => {
   if (!block.value) {
     return [];
@@ -347,11 +362,3 @@ watch(addresses, async () => {
   requestLabels(addresses.value);
 });
 </script>
-
-<style scoped>
-.list {
-  display: flex;
-  gap: var(--spacing-5);
-  flex-direction: column;
-}
-</style>
