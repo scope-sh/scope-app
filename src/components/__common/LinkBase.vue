@@ -26,13 +26,11 @@ defineProps<{
   gap: var(--spacing-4);
 
   .button {
-    display: none;
+    opacity: 0.4;
     cursor: pointer;
-  }
 
-  &:hover {
-    .button {
-      display: block;
+    &:hover {
+      opacity: 1;
     }
   }
 }
