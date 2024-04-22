@@ -58,28 +58,33 @@
             />
           </AttributeItemValue>
         </AttributeItem>
-        <template v-if="decodedCallData">
-          <AttributeItem>
-            <AttributeItemLabel value="To" />
-            <AttributeItemValue>
-              <LinkAddress :address="decodedCallData.to" />
-            </AttributeItemValue>
-          </AttributeItem>
-          <AttributeItem>
-            <AttributeItemLabel value="Value" />
-            <AttributeItemValue>
-              {{ formatEther(decodedCallData.value) }}
-            </AttributeItemValue>
-          </AttributeItem>
-          <AttributeItem>
-            <AttributeItemLabel value="Data" />
-            <AttributeItemValue>
-              <ScopeTextView
-                :value="decodedCallData.data"
-                size="tiny"
-              />
-            </AttributeItemValue>
-          </AttributeItem>
+        <template v-if="calls">
+          <template
+            v-for="(call, index) in calls"
+            :key="index"
+          >
+            <AttributeItem>
+              <AttributeItemLabel :value="`To ${index + 1}`" />
+              <AttributeItemValue>
+                <LinkAddress :address="call.to" />
+              </AttributeItemValue>
+            </AttributeItem>
+            <AttributeItem>
+              <AttributeItemLabel :value="`Value ${index + 1}`" />
+              <AttributeItemValue>
+                {{ formatEther(call.value) }}
+              </AttributeItemValue>
+            </AttributeItem>
+            <AttributeItem>
+              <AttributeItemLabel :value="`Data ${index + 1}`" />
+              <AttributeItemValue>
+                <ScopeTextView
+                  :value="call.callData"
+                  size="tiny"
+                />
+              </AttributeItemValue>
+            </AttributeItem>
+          </template>
         </template>
         <AttributeItem v-else>
           <AttributeItemLabel value="Call Data" />
@@ -275,7 +280,7 @@ import {
   getUserOpEvent,
   getUserOpHash,
   getUserOps,
-  decodeCallData,
+  decodeCalls,
   getBeneficiary,
   getUserOpLogs,
   unpackUserOp,
@@ -471,11 +476,11 @@ const userOpUnpacked = computed(() => {
   }
   return unpackUserOp(hash.value, userOp.value, event);
 });
-const decodedCallData = computed(() => {
+const calls = computed(() => {
   if (!userOpUnpacked.value) {
     return null;
   }
-  return decodeCallData(userOpUnpacked.value.callData);
+  return decodeCalls(userOpUnpacked.value.callData);
 });
 const beneficiary = computed<Address | null>(() => {
   if (!transaction.value) {
@@ -552,8 +557,10 @@ const addresses = computed(() => {
       list.push(userOpUnpacked.value.factory);
     }
     list.push(userOpUnpacked.value.sender);
-    if (decodedCallData.value) {
-      list.push(decodedCallData.value.to);
+    if (calls.value) {
+      for (const call of calls.value) {
+        list.push(call.to);
+      }
     }
     if (userOpUnpacked.value.paymaster) {
       list.push(userOpUnpacked.value.paymaster);

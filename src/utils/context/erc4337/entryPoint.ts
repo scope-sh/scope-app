@@ -13,6 +13,7 @@ import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0';
 import type { Log, Transaction } from '@/services/evm';
 import type { Chain } from '@/utils/chains';
+import { decodeCallData as decodeKernelV3CallData } from '@/utils/context/erc7579/kernelV3.js';
 
 interface UserOpEvent {
   logIndex: number | null;
@@ -86,9 +87,9 @@ interface AccountDeployment {
   factory: Address;
 }
 
-interface CallData {
+interface Call {
   to: Address;
-  data: Hex;
+  callData: Hex;
   value: bigint;
 }
 
@@ -477,7 +478,22 @@ function getBeneficiary(transaction: Transaction): Address | null {
   return null;
 }
 
-function decodeCallData(callData: Hex): CallData | null {
+function decodeCalls(callData: Hex): Call[] | null {
+  const selector = slice(callData, 0, 4);
+  if (selector === '0xe9ae5c53') {
+    // Kernel V3 `execute` function
+    const decodedCallData = decodeKernelV3CallData(callData);
+    if (!decodedCallData) {
+      return null;
+    }
+    if (decodedCallData.type === 'single') {
+      return [decodedCallData.execution];
+    }
+    if (decodedCallData.type === 'batch') {
+      return decodedCallData.executions;
+    }
+    return null;
+  }
   return null;
 }
 
@@ -496,7 +512,7 @@ export {
   getBeneficiary,
   getUserOpLogs,
   isEntrypoint,
-  decodeCallData,
+  decodeCalls,
   unpackUserOp,
 };
-export type { CallData, TxType, UserOp, UserOp_0_6, UserOp_0_7 };
+export type { Call, TxType, UserOp, UserOp_0_6, UserOp_0_7 };
