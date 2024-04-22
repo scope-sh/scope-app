@@ -285,6 +285,8 @@ watch(address, () => {
   transactionPage.value = 1;
   logs.value = [];
   logPage.value = 1;
+  ops.value = [];
+  opPage.value = 1;
   // Fetch new data
   fetch();
 });
