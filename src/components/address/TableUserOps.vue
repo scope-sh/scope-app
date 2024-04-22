@@ -49,7 +49,7 @@
           >
             <template v-if="cell.column.id === 'success'">
               <ScopeIcon
-                :kind="cell.getValue() ? 'check-circled' : 'cross'"
+                :kind="cell.getValue() ? 'check' : 'cross'"
                 class="icon"
               />
             </template>
