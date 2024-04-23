@@ -219,6 +219,7 @@ table {
 }
 
 thead {
+  display: flex;
   border-radius: calc(var(--border-radius) - 1px)
     calc(var(--border-radius) - 1px) 0 0;
   background: var(--color-background-secondary);
