@@ -142,10 +142,6 @@ const columns = computed(() => [
       return '–';
     },
   }),
-  columnHelper.accessor('paymaster', {
-    header: 'paymaster',
-    cell: (cell) => cell.getValue(),
-  }),
   columnHelper.accessor('blockNumber', {
     header: 'block',
     cell: (cell) => cell.getValue(),
@@ -156,6 +152,10 @@ const columns = computed(() => [
   }),
   columnHelper.accessor('hash', {
     header: 'hash',
+    cell: (cell) => cell.getValue(),
+  }),
+  columnHelper.accessor('paymaster', {
+    header: 'paymaster',
     cell: (cell) => cell.getValue(),
   }),
 ]);
