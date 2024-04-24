@@ -105,6 +105,7 @@ import { useRoute, useRouter } from 'vue-router';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeButton from '@/components/__common/ScopeButton.vue';
 import ScopeEmptyState from '@/components/__common/ScopeEmptyState.vue';
+import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
