@@ -12,6 +12,7 @@
             :colSpan="header.colSpan"
             :class="{
               tiny:
+                header.column.id === 'success' ||
                 header.column.id === 'blockPosition' ||
                 header.column.id === 'transactionIndex',
               block: header.column.id === 'blockNumber',
@@ -41,6 +42,7 @@
             :key="cell.id"
             :class="{
               tiny:
+                cell.column.id === 'success' ||
                 cell.column.id === 'blockPosition' ||
                 cell.column.id === 'transactionIndex',
               block: cell.column.id === 'blockNumber',
@@ -52,6 +54,13 @@
                 cell.column.id === 'value' || cell.column.id === 'gasPrice',
             }"
           >
+            <template v-if="cell.column.id === 'success'">
+              <ScopeIcon
+                v-if="cell.getValue() !== undefined"
+                :kind="cell.getValue() ? 'check' : 'cross'"
+                class="icon"
+              />
+            </template>
             <LinkBlock
               v-if="cell.column.id === 'blockNumber'"
               :number="cell.getValue() as bigint"
@@ -103,6 +112,7 @@ import { Address, Hex, size } from 'viem';
 import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
+import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useLabels from '@/composables/useLabels.js';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 
@@ -124,6 +134,12 @@ const columns = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<Transaction, any>[] = [];
   if (props.type === 'address') {
+    columns.push(
+      columnHelper.accessor('success', {
+        header: 'success',
+        cell: (cell) => cell.getValue(),
+      }),
+    );
     columns.push(
       columnHelper.accessor('blockNumber', {
         header: 'block',
@@ -223,6 +239,7 @@ function formatData(value: Hex): string {
 
 <script lang="ts">
 interface AddressTransaction {
+  success: boolean;
   blockNumber: number;
   transactionIndex: number;
   hash: Hex;
@@ -325,6 +342,11 @@ tbody {
   &:hover tr:not(:hover) {
     opacity: 0.5;
   }
+}
+
+.icon {
+  width: 12px;
+  height: 12px;
 }
 
 .tiny {

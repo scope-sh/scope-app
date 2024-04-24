@@ -435,6 +435,7 @@ const transactionPage = ref(1);
 const transactionRows = computed<TransactionRow[]>(() => {
   return transactions.value.map((transaction) => {
     return {
+      success: transaction.status > 0,
       blockNumber: transaction.blockNumber,
       transactionIndex: transaction.transactionIndex,
       hash: transaction.hash,
