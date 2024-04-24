@@ -103,16 +103,15 @@ import { Address, Hex } from 'viem';
 import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
+import LinkBlock from '@/components/__common/LinkBlock.vue';
+import LinkTransaction from '@/components/__common/LinkTransaction.vue';
+import LinkUserOp from '@/components/__common/LinkUserOp.vue';
+import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useLabels from '@/composables/useLabels.js';
 import {
   ENTRYPOINT_0_6_ADDRESS,
   ENTRYPOINT_0_7_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
-
-import LinkBlock from '../__common/LinkBlock.vue';
-import LinkTransaction from '../__common/LinkTransaction.vue';
-import LinkUserOp from '../__common/LinkUserOp.vue';
-import ScopeIcon from '../__common/ScopeIcon.vue';
 
 const { getLabelText } = useLabels();
 
