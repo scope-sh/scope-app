@@ -505,10 +505,12 @@ const opRows = computed<UserOpRow[]>(() => {
       return {
         success: op.success,
         entryPoint: op.entryPoint,
-        hash: op.hash,
-        paymaster: op.paymaster,
+        nonce: op.nonce,
         blockNumber: op.blockNumber,
         transactionHash: op.transactionHash,
+        hash: op.hash,
+        bundler: op.bundler,
+        paymaster: op.paymaster,
       };
     })
     .slice((opPage.value - 1) * OPS_PER_PAGE, opPage.value * OPS_PER_PAGE);

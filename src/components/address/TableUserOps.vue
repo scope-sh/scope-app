@@ -13,12 +13,15 @@
             :class="{
               tiny:
                 header.column.id === 'success' ||
-                header.column.id === 'entryPoint',
+                header.column.id === 'entryPoint' ||
+                header.column.id === 'nonce',
               block: header.column.id === 'blockNumber',
               hash:
                 header.column.id === 'transactionHash' ||
                 header.column.id === 'hash',
-              address: header.column.id === 'paymaster',
+              address:
+                header.column.id === 'bundler' ||
+                header.column.id === 'paymaster',
             }"
           >
             <FlexRender
@@ -39,12 +42,15 @@
             :key="cell.id"
             :class="{
               tiny:
-                cell.column.id === 'success' || cell.column.id === 'entryPoint',
+                cell.column.id === 'success' ||
+                cell.column.id === 'entryPoint' ||
+                cell.column.id === 'nonce',
               block: cell.column.id === 'blockNumber',
               hash:
                 cell.column.id === 'transactionHash' ||
                 cell.column.id === 'hash',
-              address: cell.column.id === 'paymaster',
+              address:
+                cell.column.id === 'bundler' || cell.column.id === 'paymaster',
             }"
           >
             <template v-if="cell.column.id === 'success'">
@@ -73,7 +79,14 @@
               {{ cell.getValue() as Hex }}
             </LinkUserOp>
             <LinkAddress
-              v-else-if="cell.column.id === 'paymaster'"
+              v-else-if="cell.column.id === 'bundler'"
+              :address="cell.getValue() as Address"
+              type="minimal"
+            >
+              {{ getAddress(cell.getValue() as Address) }}
+            </LinkAddress>
+            <LinkAddress
+              v-else-if="isPaymaster(cell)"
               :address="cell.getValue() as Address"
               type="minimal"
             >
@@ -98,8 +111,9 @@ import {
   createColumnHelper,
   getCoreRowModel,
   getPaginationRowModel,
+  Cell,
 } from '@tanstack/vue-table';
-import { Address, Hex } from 'viem';
+import { Address, Hex, zeroAddress } from 'viem';
 import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -141,6 +155,10 @@ const columns = computed(() => [
       return '—';
     },
   }),
+  columnHelper.accessor('nonce', {
+    header: 'nonce',
+    cell: (cell) => cell.getValue(),
+  }),
   columnHelper.accessor('blockNumber', {
     header: 'block',
     cell: (cell) => cell.getValue(),
@@ -153,9 +171,16 @@ const columns = computed(() => [
     header: 'hash',
     cell: (cell) => cell.getValue(),
   }),
+  columnHelper.accessor('bundler', {
+    header: 'bundler',
+    cell: (cell) => cell.getValue(),
+  }),
   columnHelper.accessor('paymaster', {
     header: 'paymaster',
-    cell: (cell) => cell.getValue(),
+    cell: (cell) => {
+      const value = cell.getValue();
+      return value === zeroAddress ? '—' : value;
+    },
   }),
 ]);
 
@@ -188,16 +213,22 @@ function getAddress(value: Address): string {
   const labelText = getLabelText(value);
   return labelText ? labelText : value;
 }
+
+function isPaymaster(cell: Cell<UserOp, unknown>): boolean {
+  return cell.column.id === 'paymaster' && cell.getValue() !== zeroAddress;
+}
 </script>
 
 <script lang="ts">
 interface UserOp {
   success: boolean;
   entryPoint: Address;
-  paymaster: Address;
+  nonce: bigint;
   blockNumber: number;
   transactionHash: Hex;
   hash: Hex;
+  bundler: Address;
+  paymaster: Address;
 }
 
 export type { UserOp };
