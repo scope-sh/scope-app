@@ -53,6 +53,7 @@ interface Transaction {
   to: Address | undefined;
   transactionIndex: number;
   value: Hex;
+  status: number;
 }
 
 interface Log {
