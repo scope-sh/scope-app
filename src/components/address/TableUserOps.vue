@@ -139,7 +139,7 @@ const columns = computed(() => [
       if (value === ENTRYPOINT_0_7_ADDRESS) {
         return '0.7';
       }
-      return '–';
+      return '—';
     },
   }),
   columnHelper.accessor('blockNumber', {
