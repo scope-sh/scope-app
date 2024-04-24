@@ -140,11 +140,10 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, Hex, Log, decodeEventLog, slice } from 'viem';
+import { Address, Hex, Log, slice } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
 import CardLog from '@/components/__common/CardLog.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
@@ -169,6 +168,7 @@ import ApiService, {
   Transaction as AddressTransaction,
 } from '@/services/api';
 import EvmService from '@/services/evm';
+import IndexerService, { UserOp } from '@/services/indexer';
 import { Command } from '@/stores/commands';
 
 const PAGE_ADDRESS = 'page_address';
@@ -311,6 +311,9 @@ const evmService = computed(() =>
     ? new EvmService(chainId.value, client.value)
     : null,
 );
+const indexerService = computed(() =>
+  chainId.value ? new IndexerService(chainId.value) : null,
+);
 
 const isLoadingBalance = ref(false);
 const etherBalance = ref<bigint | undefined>(undefined);
@@ -325,7 +328,7 @@ const isLoadingLogs = ref(false);
 const logs = ref<AddressLog[]>([]);
 
 const isLoadingOps = ref(false);
-const ops = ref<AddressLog[]>([]);
+const ops = ref<UserOp[]>([]);
 
 const isContract = computed<boolean>(() => !!code.value);
 const addressLabel = computed(() => getLabel(address.value));
@@ -424,10 +427,14 @@ async function fetchLogs(): Promise<void> {
 }
 
 async function fetchUserOps(): Promise<void> {
-  if (!address.value || !apiService.value) {
+  if (!address.value || !indexerService.value) {
     return;
   }
-  ops.value = await apiService.value.getAddressOps(address.value, 0, 20);
+  ops.value = await indexerService.value.getUserOpsByAddress(
+    address.value,
+    0,
+    OPS_PER_PAGE,
+  );
 }
 
 const TRANSACTIONS_PER_PAGE = 20;
@@ -494,27 +501,16 @@ const OPS_PER_PAGE = 20;
 const opPage = ref(1);
 const opRows = computed<UserOpRow[]>(() => {
   return ops.value
-    .map((log) => {
-      const decodedLog = decodeEventLog({
-        abi: entryPointV0_6_0Abi,
-        data: log.data,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        topics: log.topics,
-      });
-      if (decodedLog.eventName !== 'UserOperationEvent') {
-        return null;
-      }
+    .map((op) => {
       return {
-        success: decodedLog.args.success,
-        entryPoint: log.address,
-        hash: decodedLog.args.userOpHash,
-        paymaster: decodedLog.args.paymaster.toLowerCase() as Address,
-        blockNumber: log.blockNumber,
-        transactionHash: log.transactionHash,
+        success: op.success,
+        entryPoint: op.entryPoint,
+        hash: op.hash,
+        paymaster: op.paymaster,
+        blockNumber: op.blockNumber,
+        transactionHash: op.transactionHash,
       };
     })
-    .filter((row): row is UserOpRow => row !== null)
     .slice((opPage.value - 1) * OPS_PER_PAGE, opPage.value * OPS_PER_PAGE);
 });
 const maxOpPage = computed(() => {
