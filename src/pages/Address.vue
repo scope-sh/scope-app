@@ -529,15 +529,15 @@ watch(opPage, (page) => {
 const addresses = computed(() => {
   const addresses: Address[] = [];
   addresses.push(address.value);
+  addresses.push(...transactions.value.map((transaction) => transaction.from));
   addresses.push(
-    ...transactionRows.value.map((transaction) => transaction.from),
-  );
-  addresses.push(
-    ...transactionRows.value
+    ...transactions.value
       .map((transaction) => transaction.to)
       .filter((to): to is Address => to !== null),
   );
-  addresses.push(...logRows.value.map((log) => log.address));
+  addresses.push(...logs.value.map((log) => log.address));
+  addresses.push(...ops.value.map((op) => op.bundler));
+  addresses.push(...ops.value.map((op) => op.paymaster));
   return addresses;
 });
 
