@@ -430,11 +430,18 @@ async function fetchUserOps(): Promise<void> {
   if (!address.value || !indexerService.value) {
     return;
   }
-  ops.value = await indexerService.value.getUserOpsByAddress(
+  isLoadingOps.value = true;
+  const newOps = await indexerService.value.getUserOpsByAddress(
     address.value,
-    0,
-    OPS_PER_PAGE,
+    (opPage.value - 1) * OPS_PER_PAGE,
+    OPS_PER_PAGE + 1,
   );
+  // Append newly fetched ops to the end of the list
+  // Make sure there are no duplicates
+  ops.value = [
+    ...new Map(ops.value.concat(newOps).map((op) => [op.hash, op])).values(),
+  ];
+  isLoadingOps.value = false;
 }
 
 const TRANSACTIONS_PER_PAGE = 20;
@@ -500,20 +507,18 @@ watch(logPage, (page) => {
 const OPS_PER_PAGE = 20;
 const opPage = ref(1);
 const opRows = computed<UserOpRow[]>(() => {
-  return ops.value
-    .map((op) => {
-      return {
-        success: op.success,
-        entryPoint: op.entryPoint,
-        nonce: op.nonce,
-        blockNumber: op.blockNumber,
-        transactionHash: op.transactionHash,
-        hash: op.hash,
-        bundler: op.bundler,
-        paymaster: op.paymaster,
-      };
-    })
-    .slice((opPage.value - 1) * OPS_PER_PAGE, opPage.value * OPS_PER_PAGE);
+  return ops.value.map((op) => {
+    return {
+      success: op.success,
+      entryPoint: op.entryPoint,
+      nonce: op.nonce,
+      blockNumber: op.blockNumber,
+      transactionHash: op.transactionHash,
+      hash: op.hash,
+      bundler: op.bundler,
+      paymaster: op.paymaster,
+    };
+  });
 });
 const maxOpPage = computed(() => {
   return Math.ceil(ops.value.length / OPS_PER_PAGE);
