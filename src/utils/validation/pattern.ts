@@ -1,4 +1,4 @@
-import { Address } from 'viem';
+import { Address, Hex } from 'viem';
 
 function isBlockNumber(value: string): boolean {
   const blockNumberRegex = /^[\d]{1,9}$/;
@@ -20,12 +20,12 @@ function isEnsAddress(value: string): boolean {
   return !!value.match(addressRegex);
 }
 
-function isTransactionHash(value: string): boolean {
+function isTransactionHash(value: string): value is Hex {
   const hashRegex = /^0x[0-9a-f]{64}$/;
   return !!value.match(hashRegex);
 }
 
-function isUserOpHash(value: string): boolean {
+function isUserOpHash(value: string): value is Hex {
   const hashRegex = /^0x[0-9a-f]{64}$/;
   return !!value.match(hashRegex);
 }
