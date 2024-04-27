@@ -381,12 +381,6 @@ function unpackUserOp(
   };
 }
 
-function isEntryPoint(address: Address): boolean {
-  return (
-    address === ENTRY_POINT_0_6_ADDRESS || address === ENTRY_POINT_0_7_ADDRESS
-  );
-}
-
 function getUserOpLogs(logs: Log[], hash: Hex): Log[] {
   const beforeExecutionLog = getBeforeExecutionLog(logs);
   if (!beforeExecutionLog) {
@@ -510,7 +504,6 @@ export {
   getAccountDeployments,
   getBeneficiary,
   getUserOpLogs,
-  isEntryPoint,
   decodeCalls,
   unpackUserOp,
 };
