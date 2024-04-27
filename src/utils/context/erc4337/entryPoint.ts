@@ -205,7 +205,6 @@ function getUserOpEvent(
 }
 
 function getUserOps(transaction: Transaction): UserOp[] {
-  const emptyOps: UserOp[] = [];
   const txType = getTxType(transaction);
   if (txType === TX_TYPE_ENTRYPOINT_0_6) {
     const { functionName, args } = decodeFunctionData({
@@ -213,7 +212,7 @@ function getUserOps(transaction: Transaction): UserOp[] {
       data: transaction.input,
     });
     if (functionName !== 'handleOps') {
-      return emptyOps;
+      return [];
     }
     return args[0] as UserOp_0_6[];
   }
@@ -223,11 +222,11 @@ function getUserOps(transaction: Transaction): UserOp[] {
       data: transaction.input,
     });
     if (functionName !== 'handleOps') {
-      return emptyOps;
+      return [];
     }
     return args[0] as UserOp_0_7[];
   }
-  return emptyOps;
+  return [];
 }
 
 function getUserOpHash(
