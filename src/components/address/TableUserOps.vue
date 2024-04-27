@@ -123,8 +123,8 @@ import LinkUserOp from '@/components/__common/LinkUserOp.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useLabels from '@/composables/useLabels.js';
 import {
-  ENTRYPOINT_0_6_ADDRESS,
-  ENTRYPOINT_0_7_ADDRESS,
+  ENTRY_POINT_0_6_ADDRESS,
+  ENTRY_POINT_0_7_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
 
 const { getLabelText } = useLabels();
@@ -146,10 +146,10 @@ const columns = computed(() => [
     header: 'ep',
     cell: (cell) => {
       const value = cell.getValue();
-      if (value === ENTRYPOINT_0_6_ADDRESS) {
+      if (value === ENTRY_POINT_0_6_ADDRESS) {
         return '0.6';
       }
-      if (value === ENTRYPOINT_0_7_ADDRESS) {
+      if (value === ENTRY_POINT_0_7_ADDRESS) {
         return '0.7';
       }
       return '—';

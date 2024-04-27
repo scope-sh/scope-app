@@ -27,8 +27,8 @@ interface UserOpEvent {
 }
 
 type TxType =
-  | typeof TX_TYPE_ENTRYPOINT_0_6
-  | typeof TX_TYPE_ENTRYPOINT_0_7
+  | typeof TX_TYPE_ENTRY_POINT_0_6
+  | typeof TX_TYPE_ENTRY_POINT_0_7
   | typeof TX_TYPE_UNKNOWN;
 
 interface UserOp_0_6 {
@@ -93,26 +93,26 @@ interface Call {
   value: bigint;
 }
 
-const TX_TYPE_ENTRYPOINT_0_6 = 'Entrypoint 0.6';
-const TX_TYPE_ENTRYPOINT_0_7 = 'Entrypoint 0.7';
+const TX_TYPE_ENTRY_POINT_0_6 = 'Entry Point 0.6';
+const TX_TYPE_ENTRY_POINT_0_7 = 'Entry Point 0.7';
 const TX_TYPE_UNKNOWN = 'Unknown';
 
-const ENTRYPOINT_0_6_ADDRESS = '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789';
-const ENTRYPOINT_0_7_ADDRESS = '0x0000000071727de22e5e9d8baf0edac6f37da032';
+const ENTRY_POINT_0_6_ADDRESS = '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789';
+const ENTRY_POINT_0_7_ADDRESS = '0x0000000071727de22e5e9d8baf0edac6f37da032';
 
 function getTxType(transaction: Transaction): TxType {
-  if (transaction.to === ENTRYPOINT_0_6_ADDRESS) {
-    return TX_TYPE_ENTRYPOINT_0_6;
+  if (transaction.to === ENTRY_POINT_0_6_ADDRESS) {
+    return TX_TYPE_ENTRY_POINT_0_6;
   }
-  if (transaction.to === ENTRYPOINT_0_7_ADDRESS) {
-    return TX_TYPE_ENTRYPOINT_0_7;
+  if (transaction.to === ENTRY_POINT_0_7_ADDRESS) {
+    return TX_TYPE_ENTRY_POINT_0_7;
   }
   return TX_TYPE_UNKNOWN;
 }
 
 function getBeforeExecutionLog(logs: Log[]): Log | null {
   for (const log of logs) {
-    if (log.address === ENTRYPOINT_0_6_ADDRESS) {
+    if (log.address === ENTRY_POINT_0_6_ADDRESS) {
       const event = decodeEventLog({
         abi: entryPointV0_6_0Abi,
         data: log.data,
@@ -124,7 +124,7 @@ function getBeforeExecutionLog(logs: Log[]): Log | null {
         continue;
       }
       return log;
-    } else if (log.address === ENTRYPOINT_0_7_ADDRESS) {
+    } else if (log.address === ENTRY_POINT_0_7_ADDRESS) {
       const event = decodeEventLog({
         abi: entryPointV0_7_0Abi,
         data: log.data,
@@ -144,7 +144,7 @@ function getBeforeExecutionLog(logs: Log[]): Log | null {
 function getUserOpEvents(logs: Log[]): UserOpEvent[] {
   const events: UserOpEvent[] = [];
   for (const log of logs) {
-    if (log.address === ENTRYPOINT_0_6_ADDRESS) {
+    if (log.address === ENTRY_POINT_0_6_ADDRESS) {
       const event = decodeEventLog({
         abi: entryPointV0_6_0Abi,
         data: log.data,
@@ -165,7 +165,7 @@ function getUserOpEvents(logs: Log[]): UserOpEvent[] {
         actualGasCost: event.args.actualGasCost,
         actualGasUsed: event.args.actualGasUsed,
       });
-    } else if (log.address === ENTRYPOINT_0_7_ADDRESS) {
+    } else if (log.address === ENTRY_POINT_0_7_ADDRESS) {
       const event = decodeEventLog({
         abi: entryPointV0_7_0Abi,
         data: log.data,
@@ -206,7 +206,7 @@ function getUserOpEvent(
 
 function getUserOps(transaction: Transaction): UserOp[] {
   const txType = getTxType(transaction);
-  if (txType === TX_TYPE_ENTRYPOINT_0_6) {
+  if (txType === TX_TYPE_ENTRY_POINT_0_6) {
     const { functionName, args } = decodeFunctionData({
       abi: entryPointV0_6_0Abi,
       data: transaction.input,
@@ -216,7 +216,7 @@ function getUserOps(transaction: Transaction): UserOp[] {
     }
     return args[0] as UserOp_0_6[];
   }
-  if (txType === TX_TYPE_ENTRYPOINT_0_7) {
+  if (txType === TX_TYPE_ENTRY_POINT_0_7) {
     const { functionName, args } = decodeFunctionData({
       abi: entryPointV0_7_0Abi,
       data: transaction.input,
@@ -231,10 +231,10 @@ function getUserOps(transaction: Transaction): UserOp[] {
 
 function getUserOpHash(
   chain: Chain,
-  entrypoint: Address,
+  entryPoint: Address,
   userOp: UserOp,
 ): Hex | null {
-  if (entrypoint === ENTRYPOINT_0_6_ADDRESS) {
+  if (entryPoint === ENTRY_POINT_0_6_ADDRESS) {
     const userOperation = userOp as UserOp_0_6;
     const hashedInitCode = keccak256(userOperation.initCode);
     const hashedCallData = keccak256(userOperation.callData);
@@ -268,10 +268,10 @@ function getUserOpHash(
     );
     const encoded = encodeAbiParameters(
       [{ type: 'bytes32' }, { type: 'address' }, { type: 'uint256' }],
-      [keccak256(packedUserOp), entrypoint, BigInt(chain)],
+      [keccak256(packedUserOp), entryPoint, BigInt(chain)],
     ) as `0x${string}`;
     return keccak256(encoded);
-  } else if (entrypoint === ENTRYPOINT_0_7_ADDRESS) {
+  } else if (entryPoint === ENTRY_POINT_0_7_ADDRESS) {
     const userOperation = userOp as UserOp_0_7;
     const hashedInitCode = keccak256(userOperation.initCode);
     const hashedCallData = keccak256(userOperation.callData);
@@ -300,7 +300,7 @@ function getUserOpHash(
     );
     const encoded = encodeAbiParameters(
       [{ type: 'bytes32' }, { type: 'address' }, { type: 'uint256' }],
-      [keccak256(packedUserOp), entrypoint, BigInt(chain)],
+      [keccak256(packedUserOp), entryPoint, BigInt(chain)],
     );
     return keccak256(encoded);
   }
@@ -381,9 +381,9 @@ function unpackUserOp(
   };
 }
 
-function isEntrypoint(address: Address): boolean {
+function isEntryPoint(address: Address): boolean {
   return (
-    address === ENTRYPOINT_0_6_ADDRESS || address === ENTRYPOINT_0_7_ADDRESS
+    address === ENTRY_POINT_0_6_ADDRESS || address === ENTRY_POINT_0_7_ADDRESS
   );
 }
 
@@ -417,7 +417,7 @@ function getUserOpLogs(logs: Log[], hash: Hex): Log[] {
 function getAccountDeployments(logs: Log[]): AccountDeployment[] {
   const deployments: AccountDeployment[] = [];
   for (const log of logs) {
-    if (log.address === ENTRYPOINT_0_6_ADDRESS) {
+    if (log.address === ENTRY_POINT_0_6_ADDRESS) {
       const event = decodeEventLog({
         abi: entryPointV0_6_0Abi,
         data: log.data,
@@ -432,7 +432,7 @@ function getAccountDeployments(logs: Log[]): AccountDeployment[] {
         address: event.args.sender,
         factory: event.args.factory,
       });
-    } else if (log.address === ENTRYPOINT_0_7_ADDRESS) {
+    } else if (log.address === ENTRY_POINT_0_7_ADDRESS) {
       const event = decodeEventLog({
         abi: entryPointV0_7_0Abi,
         data: log.data,
@@ -454,7 +454,7 @@ function getAccountDeployments(logs: Log[]): AccountDeployment[] {
 
 function getBeneficiary(transaction: Transaction): Address | null {
   const txType = getTxType(transaction);
-  if (txType === TX_TYPE_ENTRYPOINT_0_6) {
+  if (txType === TX_TYPE_ENTRY_POINT_0_6) {
     const { functionName, args } = decodeFunctionData({
       abi: entryPointV0_6_0Abi,
       data: transaction.input,
@@ -464,7 +464,7 @@ function getBeneficiary(transaction: Transaction): Address | null {
     }
     return args[1].toLowerCase() as Address;
   }
-  if (txType === TX_TYPE_ENTRYPOINT_0_7) {
+  if (txType === TX_TYPE_ENTRY_POINT_0_7) {
     const { functionName, args } = decodeFunctionData({
       abi: entryPointV0_7_0Abi,
       data: transaction.input,
@@ -497,10 +497,10 @@ function decodeCalls(callData: Hex): Call[] | null {
 }
 
 export {
-  ENTRYPOINT_0_6_ADDRESS,
-  ENTRYPOINT_0_7_ADDRESS,
-  TX_TYPE_ENTRYPOINT_0_6,
-  TX_TYPE_ENTRYPOINT_0_7,
+  ENTRY_POINT_0_6_ADDRESS,
+  ENTRY_POINT_0_7_ADDRESS,
+  TX_TYPE_ENTRY_POINT_0_6,
+  TX_TYPE_ENTRY_POINT_0_7,
   TX_TYPE_UNKNOWN,
   getTxType,
   getUserOpEvent,
@@ -510,7 +510,7 @@ export {
   getAccountDeployments,
   getBeneficiary,
   getUserOpLogs,
-  isEntrypoint,
+  isEntryPoint,
   decodeCalls,
   unpackUserOp,
 };
