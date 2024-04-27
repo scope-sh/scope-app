@@ -36,12 +36,12 @@ interface UserOp {
   nonce: bigint;
 }
 
-const ENDPOINT_URL = 'https://indexer.bigdevenergy.link/e64d4f6/v1/graphql';
-
 class Service {
+  endpointUrl: string;
   chainId: Chain;
 
-  constructor(chainId: Chain) {
+  constructor(endpointUrl: string, chainId: Chain) {
+    this.endpointUrl = endpointUrl;
     this.chainId = chainId;
   }
 
@@ -57,7 +57,7 @@ class Service {
       }
     }`;
 
-    const response = await fetch(ENDPOINT_URL, {
+    const response = await fetch(this.endpointUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -106,7 +106,7 @@ class Service {
       }
     }`;
 
-    const response = await fetch(ENDPOINT_URL, {
+    const response = await fetch(this.endpointUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

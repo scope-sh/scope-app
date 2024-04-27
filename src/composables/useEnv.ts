@@ -2,6 +2,7 @@ interface EnvironmentVariables {
   alchemyApiKey: string;
   apiEndpoint: string;
   appPassphrase: string;
+  indexerEndpoint: string;
 }
 
 function useEnv(): EnvironmentVariables {
@@ -10,6 +11,7 @@ function useEnv(): EnvironmentVariables {
     alchemyApiKey: env.VITE_ALCHEMY_API_KEY || '',
     apiEndpoint: env.VITE_API_ENDPOINT || '',
     appPassphrase: env.VITE_APP_PASSPHRASE || '',
+    indexerEndpoint: env.VITE_INDEXER_ENDPOINT || '',
   };
 }
 

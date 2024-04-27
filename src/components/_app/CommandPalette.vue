@@ -112,7 +112,7 @@ useMagicKeys({
     }
   },
 });
-const { alchemyApiKey } = useEnv();
+const { alchemyApiKey, indexerEndpoint } = useEnv();
 const { commands: localCommands } = useCommands();
 const uiStore = useUiStore();
 const { send: sendToast } = useToast();
@@ -137,7 +137,7 @@ const evmService = computed(() =>
     : null,
 );
 const indexerService = computed(() =>
-  chainId.value ? new IndexerService(chainId.value) : null,
+  chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
 );
 const namingService = new NamingService(alchemyApiKey);
 

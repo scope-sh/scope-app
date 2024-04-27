@@ -161,6 +161,7 @@ import TableUserOps, {
 } from '@/components/address/TableUserOps.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
+import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import ApiService, {
@@ -179,6 +180,7 @@ const SECTION_LOGS = 'logs';
 type PanelEl = InstanceType<typeof ScopePanel>;
 type PanelSection = Section & { el: PanelEl | null };
 
+const { indexerEndpoint } = useEnv();
 const { setCommands } = useCommands(PAGE_ADDRESS);
 const { send: sendToast } = useToast();
 const route = useRoute();
@@ -312,7 +314,7 @@ const evmService = computed(() =>
     : null,
 );
 const indexerService = computed(() =>
-  chainId.value ? new IndexerService(chainId.value) : null,
+  chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
 );
 
 const isLoadingBalance = ref(false);

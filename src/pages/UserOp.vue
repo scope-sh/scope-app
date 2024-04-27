@@ -270,6 +270,7 @@ import CardActions, { Action } from '@/components/user-op/CardActions.vue';
 import UserOpStatus from '@/components/user-op/UserOpStatus.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
+import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import EvmService from '@/services/evm';
@@ -300,6 +301,7 @@ const { send: sendToast } = useToast();
 type PanelEl = InstanceType<typeof ScopePanel>;
 type PanelSection = Section & { el: PanelEl | null };
 
+const { indexerEndpoint } = useEnv();
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
@@ -418,7 +420,7 @@ const evmService = computed(() =>
     : null,
 );
 const indexerService = computed(() =>
-  chainId.value ? new IndexerService(chainId.value) : null,
+  chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
 );
 
 const isLoading = ref(false);
