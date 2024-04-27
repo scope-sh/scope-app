@@ -139,7 +139,6 @@ const columnHelper = createColumnHelper<UserOp>();
 
 const columns = computed(() => [
   columnHelper.accessor('success', {
-    header: 'status',
     cell: (cell) => cell.getValue(),
   }),
   columnHelper.accessor('entryPoint', {
