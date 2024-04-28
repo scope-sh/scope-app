@@ -136,7 +136,7 @@ const columns = computed(() => {
   if (props.type === 'address') {
     columns.push(
       columnHelper.accessor('success', {
-        header: 'success',
+        header: '',
         cell: (cell) => cell.getValue(),
       }),
     );
