@@ -117,42 +117,6 @@ class Service {
     const labels: LabelWithAddress[] = await response.json();
     return labels;
   }
-
-  public async getAddressTransactions(
-    address: Address,
-    startBlock: number,
-    limit: number,
-  ): Promise<Transaction[]> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-      address,
-      startBlock: startBlock.toString(),
-      limit: limit.toString(),
-    };
-    const url = new URL(`${apiEndpoint}/evm/transactions`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url);
-    const transactions: Transaction[] = await response.json();
-    return transactions;
-  }
-
-  public async getAddressLogs(
-    address: Address,
-    startBlock: number,
-    limit: number,
-  ): Promise<Log[]> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-      address,
-      startBlock: startBlock.toString(),
-      limit: limit.toString(),
-    };
-    const url = new URL(`${apiEndpoint}/evm/logs`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url);
-    const logs: Log[] = await response.json();
-    return logs;
-  }
 }
 
 export default Service;
