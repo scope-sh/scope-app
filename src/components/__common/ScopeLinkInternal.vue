@@ -5,10 +5,6 @@
     :class="{ minimal: type === 'minimal' }"
   >
     <slot />
-    <div
-      v-if="type === 'normal'"
-      class="background"
-    />
   </router-link>
 </template>
 
@@ -42,31 +38,23 @@ export type { Type };
   --color-accent-toned-down: oklch(from var(--color-accent) l calc(c * 0.6) h);
 
   display: inline-flex;
-  position: relative;
+  padding: 2px;
   transition: all 0.2s ease-in-out;
+  border-radius: var(--border-radius-xs);
+  background: oklch(from var(--color-accent) l c h / 5%);
   color: var(--color-accent);
 
+  &:hover {
+    background: oklch(from var(--color-accent) l c h / 10%);
+  }
+
   &.minimal {
+    background: none;
     color: var(--color-accent-toned-down);
 
     &:hover {
       color: var(--color-accent);
     }
   }
-}
-
-.background {
-  position: absolute;
-  top: -2px;
-  left: -2px;
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
-  border-radius: var(--border-radius-xs);
-  opacity: 0.05;
-  background: var(--color-accent);
-}
-
-.root:hover .background {
-  opacity: 0.1;
 }
 </style>
