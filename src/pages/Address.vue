@@ -164,11 +164,11 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
-import ApiService, {
+import EvmService from '@/services/evm';
+import HypersyncService, {
   Log as AddressLog,
   Transaction as AddressTransaction,
-} from '@/services/api';
-import EvmService from '@/services/evm';
+} from '@/services/hypersync';
 import IndexerService, { UserOp } from '@/services/indexer';
 import { Command } from '@/stores/commands';
 
@@ -305,9 +305,6 @@ watch(
   },
 );
 
-const apiService = computed(() =>
-  chainId.value ? new ApiService(chainId.value) : null,
-);
 const evmService = computed(() =>
   chainId.value && client.value
     ? new EvmService(chainId.value, client.value)
@@ -315,6 +312,9 @@ const evmService = computed(() =>
 );
 const indexerService = computed(() =>
   chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
+);
+const hypersyncService = computed(() =>
+  chainId.value ? new HypersyncService(chainId.value) : null,
 );
 
 const isLoadingBalance = ref(false);
@@ -378,19 +378,30 @@ async function fetchCode(): Promise<void> {
   isLoadingCode.value = false;
 }
 
+const TRANSACTIONS_PER_PAGE = 20;
+const transactionPage = ref(1);
+const maxTransactionPage = ref(Infinity);
+watch(transactionPage, (page) => {
+  if (transactionRows.value.length >= page * TRANSACTIONS_PER_PAGE) {
+    return;
+  }
+  fetchTransactions();
+});
 async function fetchTransactions(): Promise<void> {
-  if (!address.value || !apiService.value) {
+  if (!address.value || !hypersyncService.value) {
     return;
   }
   isLoadingTransactions.value = true;
   // Define the start block based on the last transaction in the list
   const lastTransaction = transactions.value.at(-1);
   const startBlock = lastTransaction ? lastTransaction.blockNumber : 0;
-  const newTransactions = await apiService.value.getAddressTransactions(
-    address.value,
-    startBlock,
-    TRANSACTIONS_PER_PAGE + 1,
-  );
+  const addressTransactions =
+    await hypersyncService.value.getAddressTransactions(
+      address.value,
+      startBlock,
+      TRANSACTIONS_PER_PAGE + 1,
+    );
+  const newTransactions = addressTransactions.transactions;
   // Append newly fetched transactions to the end of the list
   // Make sure there are no duplicates
   transactions.value = [
@@ -400,54 +411,13 @@ async function fetchTransactions(): Promise<void> {
         .map((transaction) => [transaction.hash, transaction]),
     ).values(),
   ];
+  if (!addressTransactions.hasNextPage) {
+    maxTransactionPage.value = Math.ceil(
+      transactions.value.length / TRANSACTIONS_PER_PAGE,
+    );
+  }
   isLoadingTransactions.value = false;
 }
-
-async function fetchLogs(): Promise<void> {
-  if (!address.value || !apiService.value) {
-    return;
-  }
-  isLoadingLogs.value = true;
-  // Define the start block based on the last transaction in the list
-  const lastLog = logs.value.at(-1);
-  const startBlock = lastLog ? lastLog.blockNumber : 0;
-  const newLogs = await apiService.value.getAddressLogs(
-    address.value,
-    startBlock,
-    LOGS_PER_PAGE + 1,
-  );
-  // Append newly fetched logs to the end of the list
-  // Make sure there are no duplicates
-  logs.value = [
-    ...new Map(
-      logs.value
-        .concat(newLogs)
-        .map((log) => [`${log.transactionHash}-${log.logIndex}`, log]),
-    ).values(),
-  ];
-  isLoadingLogs.value = false;
-}
-
-async function fetchUserOps(): Promise<void> {
-  if (!address.value || !indexerService.value) {
-    return;
-  }
-  isLoadingOps.value = true;
-  const newOps = await indexerService.value.getUserOpsByAddress(
-    address.value,
-    (opPage.value - 1) * OPS_PER_PAGE,
-    OPS_PER_PAGE + 1,
-  );
-  // Append newly fetched ops to the end of the list
-  // Make sure there are no duplicates
-  ops.value = [
-    ...new Map(ops.value.concat(newOps).map((op) => [op.hash, op])).values(),
-  ];
-  isLoadingOps.value = false;
-}
-
-const TRANSACTIONS_PER_PAGE = 20;
-const transactionPage = ref(1);
 const transactionRows = computed<TransactionRow[]>(() => {
   return transactions.value.map((transaction) => {
     return {
@@ -465,19 +435,44 @@ const transactionRows = computed<TransactionRow[]>(() => {
     };
   });
 });
-const maxTransactionPage = computed(() => {
-  return Math.ceil(transactions.value.length / TRANSACTIONS_PER_PAGE);
-});
-
-watch(transactionPage, (page) => {
-  if (transactionRows.value.length >= page * TRANSACTIONS_PER_PAGE) {
-    return;
-  }
-  fetchTransactions();
-});
 
 const LOGS_PER_PAGE = 20;
 const logPage = ref(1);
+const maxLogPage = ref(Infinity);
+watch(logPage, (page) => {
+  if (logs.value.length >= page * LOGS_PER_PAGE) {
+    return;
+  }
+  fetchLogs();
+});
+async function fetchLogs(): Promise<void> {
+  if (!address.value || !hypersyncService.value) {
+    return;
+  }
+  isLoadingLogs.value = true;
+  // Define the start block based on the last transaction in the list
+  const lastLog = logs.value.at(-1);
+  const startBlock = lastLog ? lastLog.blockNumber : 0;
+  const addressLogs = await hypersyncService.value.getAddressLogs(
+    address.value,
+    startBlock,
+    LOGS_PER_PAGE + 1,
+  );
+  const newLogs = addressLogs.logs;
+  // Append newly fetched logs to the end of the list
+  // Make sure there are no duplicates
+  logs.value = [
+    ...new Map(
+      logs.value
+        .concat(newLogs)
+        .map((log) => [`${log.transactionHash}-${log.logIndex}`, log]),
+    ).values(),
+  ];
+  if (!addressLogs.hasNextPage) {
+    maxLogPage.value = Math.ceil(logs.value.length / LOGS_PER_PAGE);
+  }
+  isLoadingLogs.value = false;
+}
 const logRows = computed<Log[]>(() => {
   return logs.value
     .map((log) => {
@@ -495,19 +490,35 @@ const logRows = computed<Log[]>(() => {
     })
     .slice((logPage.value - 1) * LOGS_PER_PAGE, logPage.value * LOGS_PER_PAGE);
 });
-const maxLogPage = computed(() => {
-  return Math.ceil(logs.value.length / LOGS_PER_PAGE);
-});
-
-watch(logPage, (page) => {
-  if (logs.value.length >= page * LOGS_PER_PAGE) {
-    return;
-  }
-  fetchLogs();
-});
 
 const OPS_PER_PAGE = 20;
 const opPage = ref(1);
+const maxOpPage = computed(() => {
+  return Math.ceil(ops.value.length / OPS_PER_PAGE);
+});
+watch(opPage, (page) => {
+  if (ops.value.length >= page * OPS_PER_PAGE) {
+    return;
+  }
+  fetchUserOps();
+});
+async function fetchUserOps(): Promise<void> {
+  if (!address.value || !indexerService.value) {
+    return;
+  }
+  isLoadingOps.value = true;
+  const newOps = await indexerService.value.getUserOpsByAddress(
+    address.value,
+    (opPage.value - 1) * OPS_PER_PAGE,
+    OPS_PER_PAGE + 1,
+  );
+  // Append newly fetched ops to the end of the list
+  // Make sure there are no duplicates
+  ops.value = [
+    ...new Map(ops.value.concat(newOps).map((op) => [op.hash, op])).values(),
+  ];
+  isLoadingOps.value = false;
+}
 const opRows = computed<UserOpRow[]>(() => {
   return ops.value.map((op) => {
     return {
@@ -521,16 +532,6 @@ const opRows = computed<UserOpRow[]>(() => {
       paymaster: op.paymaster,
     };
   });
-});
-const maxOpPage = computed(() => {
-  return Math.ceil(ops.value.length / OPS_PER_PAGE);
-});
-
-watch(opPage, (page) => {
-  if (ops.value.length >= page * OPS_PER_PAGE) {
-    return;
-  }
-  fetchUserOps();
 });
 
 const addresses = computed(() => {
