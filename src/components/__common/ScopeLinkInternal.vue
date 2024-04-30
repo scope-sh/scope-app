@@ -49,6 +49,7 @@ export type { Type };
   }
 
   &.minimal {
+    padding: 0;
     background: none;
     color: var(--color-accent-toned-down);
 
