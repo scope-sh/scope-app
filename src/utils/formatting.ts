@@ -15,6 +15,9 @@ function formatGasPrice(value: bigint): string {
 }
 
 function formatNumber(value: number): string {
+  if (value > 0 && value < 0.01) {
+    return '<0.01';
+  }
   const valueFormat = new Intl.NumberFormat('en-US', {
     notation: 'compact',
     minimumFractionDigits: 0,
