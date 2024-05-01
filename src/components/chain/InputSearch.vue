@@ -2,7 +2,7 @@
   <div class="wrapper">
     <input
       ref="inputEl"
-      placeholder="Address, transaction, or block"
+      placeholder="Address, transaction, operation, or block"
       :value
       :disabled="isLoading"
       @input="handleInput"

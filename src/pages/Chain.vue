@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import { useIntervalFn } from '@vueuse/core';
+import { Hex } from 'viem';
 import { ref, onMounted, watch, computed } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -50,6 +51,7 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import EvmService from '@/services/evm';
+import IndexerService from '@/services/indexer';
 import NamingService from '@/services/naming';
 import type { Command } from '@/stores/commands';
 import type { Chain } from '@/utils/chains';
@@ -65,7 +67,7 @@ import {
 const CHAIN_PAGE = 'page_chain';
 
 const { id: chainId, name: chainName, client } = useChain();
-const { alchemyApiKey } = useEnv();
+const { alchemyApiKey, indexerEndpoint } = useEnv();
 const router = useRouter();
 const { setCommands } = useCommands(CHAIN_PAGE);
 const { send: sendToast } = useToast();
@@ -121,6 +123,11 @@ const evmService = computed(() =>
     ? new EvmService(chainId.value, client.value)
     : null,
 );
+const indexerService = computed(() =>
+  chainId.value && client.value
+    ? new IndexerService(indexerEndpoint, chainId.value)
+    : null,
+);
 
 const nameService = new NamingService(alchemyApiKey);
 
@@ -142,7 +149,7 @@ function handleSearchSubmit(): void {
     }
     router.push(getRouteLocation({ name: 'block', number }));
   } else if (isTransactionHash(search.value)) {
-    router.push(getRouteLocation({ name: 'transaction', hash: search.value }));
+    openTransactionOrUserOp(search.value);
   }
 }
 
@@ -165,6 +172,23 @@ async function openLatestBlock(): Promise<void> {
   const number = await evmService.value.getLatestBlock();
   isLatestBlockResolving.value = false;
   router.push(getRouteLocation({ name: 'block', number }));
+}
+
+const isTransactionOrUserOpResolving = ref(false);
+async function openTransactionOrUserOp(hash: Hex): Promise<void> {
+  if (!indexerService.value) {
+    return;
+  }
+  isTransactionOrUserOpResolving.value = true;
+  const foundUserOp = await indexerService.value.getTxHashByUserOpHash(
+    hash as Hex,
+  );
+  isTransactionOrUserOpResolving.value = false;
+  if (foundUserOp) {
+    router.push(getRouteLocation({ name: 'userop', hash: search.value }));
+  } else {
+    router.push(getRouteLocation({ name: 'transaction', hash: search.value }));
+  }
 }
 
 const isLoading = ref(false);
