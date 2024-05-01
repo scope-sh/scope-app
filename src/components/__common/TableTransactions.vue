@@ -75,20 +75,33 @@
             >
               {{ cell.getValue() as Hex }}
             </LinkTransaction>
-            <LinkAddress
-              v-else-if="cell.column.id === 'from'"
-              :address="cell.getValue() as Address"
-              type="minimal"
-            >
-              {{ getAddress(cell.getValue() as Address) }}
-            </LinkAddress>
-            <LinkAddress
-              v-else-if="cell.column.id === 'to' && cell.getValue()"
-              :address="cell.getValue() as Address"
-              type="minimal"
-            >
-              {{ getAddress(cell.getValue() as Address) }}
-            </LinkAddress>
+            <template v-else-if="cell.column.id === 'from'">
+              <LinkAddress
+                v-if="cell.getValue() !== address"
+                :address="cell.getValue() as Address"
+                type="minimal"
+              >
+                {{ getAddress(cell.getValue() as Address) }}
+              </LinkAddress>
+              <span v-else>
+                {{ getAddress(cell.getValue() as Address) }}
+              </span>
+            </template>
+            <template v-else-if="cell.column.id === 'to'">
+              <template v-if="cell.getValue()">
+                <LinkAddress
+                  v-if="cell.getValue() !== address"
+                  :address="cell.getValue() as Address"
+                  type="minimal"
+                >
+                  {{ getAddress(cell.getValue() as Address) }}
+                </LinkAddress>
+                <span v-else>
+                  {{ getAddress(cell.getValue() as Address) }}
+                </span>
+              </template>
+              <span v-else>—</span>
+            </template>
             <FlexRender
               v-else
               :render="cell.column.columnDef.cell"
@@ -129,6 +142,7 @@ import LinkTransaction from './LinkTransaction.vue';
 const { getLabelText } = useLabels();
 
 const props = defineProps<{
+  address?: Address;
   transactions: Transaction[];
   page: number;
   perPage: number;

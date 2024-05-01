@@ -94,6 +94,7 @@
       />
       <TableTransactions
         v-else
+        :address="address"
         :transactions="transactionRows"
         :per-page="TRANSACTIONS_PER_PAGE"
         :page="transactionPage - 1"
