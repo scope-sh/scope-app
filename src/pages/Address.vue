@@ -140,11 +140,11 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, Hex, Log, slice } from 'viem';
+import { Address, slice } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import CardLog from '@/components/__common/CardLog.vue';
+import CardLog, { Log } from '@/components/__common/CardLog.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
@@ -423,7 +423,7 @@ const transactionRows = computed<TransactionRow[]>(() => {
     return {
       success: transaction.status > 0,
       blockNumber: transaction.blockNumber,
-      blockTimestamp: 1000 * parseInt(transaction.blockTimestamp),
+      blockTimestamp: transaction.blockTimestamp,
       transactionIndex: transaction.transactionIndex,
       hash: transaction.hash,
       from: transaction.from,
@@ -431,8 +431,8 @@ const transactionRows = computed<TransactionRow[]>(() => {
       function:
         transaction.input.length >= 10 ? slice(transaction.input, 0, 4) : '0x',
       data: transaction.input.length > 10 ? slice(transaction.input, 4) : '0x',
-      value: BigInt(transaction.value),
-      gasPrice: BigInt(transaction.gasPrice),
+      value: transaction.value,
+      gasPrice: transaction.gasPrice,
     };
   });
 });
@@ -478,15 +478,13 @@ const logRows = computed<Log[]>(() => {
   return logs.value
     .map((log) => {
       return {
-        blockHash: null,
-        blockNumber: BigInt(log.blockNumber),
+        blockNumber: log.blockNumber,
+        blockTimestamp: log.blockTimestamp,
         transactionHash: log.transactionHash,
-        transactionIndex: null,
         logIndex: log.logIndex,
         address: log.address,
-        topics: log.topics as [Hex, ...Hex[]],
+        topics: log.topics,
         data: log.data,
-        removed: false,
       };
     })
     .slice((logPage.value - 1) * LOGS_PER_PAGE, logPage.value * LOGS_PER_PAGE);

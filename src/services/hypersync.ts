@@ -106,19 +106,20 @@ interface AddressLogs {
 
 interface Transaction {
   blockNumber: number;
-  blockTimestamp: Hex;
+  blockTimestamp: number;
   from: Address;
-  gasPrice: Hex;
+  gasPrice: bigint;
   hash: Hex;
   input: Hex;
   to: Address | undefined;
   transactionIndex: number;
-  value: Hex;
+  value: bigint;
   status: number;
 }
 
 interface Log {
   blockNumber: number;
+  blockTimestamp: number;
   transactionHash: Hex;
   logIndex: number;
   address: Address;
@@ -160,14 +161,14 @@ class Service {
             const timestamp = transactionBlock?.timestamp || '0x';
             return {
               blockNumber: transaction.block_number,
-              blockTimestamp: timestamp,
+              blockTimestamp: 1000 * parseInt(timestamp),
               from: transaction.from,
-              gasPrice: transaction.gas_price,
+              gasPrice: BigInt(transaction.gas_price),
               hash: transaction.hash,
               input: transaction.input,
               to: transaction.to,
               transactionIndex: transaction.transaction_index,
-              value: transaction.value,
+              value: BigInt(transaction.value),
               status: transaction.status,
             };
           });
@@ -244,16 +245,23 @@ class Service {
       const newLogs = data
         .map((dataPage) => {
           const pageLogs = dataPage.logs || [];
-          return pageLogs.map((log) => ({
-            blockNumber: log.block_number,
-            logIndex: log.log_index,
-            transactionHash: log.transaction_hash,
-            address: log.address,
-            data: log.data,
-            topics: [log.topic0, log.topic1, log.topic2, log.topic3].filter(
-              (topic): topic is Hex => topic !== null,
-            ),
-          }));
+          return pageLogs.map((log) => {
+            const logBlock = dataPage.blocks?.find(
+              (block) => block.number === log.block_number,
+            );
+            const timestamp = logBlock?.timestamp || '0x';
+            return {
+              blockNumber: log.block_number,
+              blockTimestamp: 1000 * parseInt(timestamp),
+              logIndex: log.log_index,
+              transactionHash: log.transaction_hash,
+              address: log.address,
+              data: log.data,
+              topics: [log.topic0, log.topic1, log.topic2, log.topic3].filter(
+                (topic): topic is Hex => topic !== null,
+              ),
+            };
+          });
         })
         .flat();
       logs.push(...newLogs);
@@ -280,6 +288,7 @@ class Service {
       ],
       max_num_logs: limit,
       field_selection: {
+        block: ['number', 'timestamp'],
         log: [
           'log_index',
           'transaction_hash',

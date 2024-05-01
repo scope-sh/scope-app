@@ -2,13 +2,19 @@
   <ScopeCard>
     <div class="content">
       <div class="header">
-        <span v-if="log.blockNumber">
+        <template v-if="date">
+          <span>
+            {{ formatRelativeTime(toRelativeTime(new Date(), date)) }}
+          </span>
+          ·
+        </template>
+        <template v-if="log.blockNumber">
           <LinkBlock
-            :number="log.blockNumber"
+            :number="BigInt(log.blockNumber)"
             type="minimal"
           />
-        </span>
-        ·
+          ·
+        </template>
         <span>
           <LinkAddress
             v-if="type === 'transaction'"
@@ -47,18 +53,36 @@
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
-import type { Log } from '@/services/evm';
+import type { Log as TransactionLog } from '@/services/evm';
+import type { Log as AddressLog } from '@/services/hypersync';
+import { toRelativeTime } from '@/utils/conversion';
+import { formatRelativeTime } from '@/utils/formatting';
 
 import LinkBlock from './LinkBlock.vue';
 import LinkTransaction from './LinkTransaction.vue';
 
-defineProps<{
+const props = defineProps<{
   log: Log;
   type: 'address' | 'transaction';
 }>();
+
+const date = computed<Date | null>(() => {
+  if ('blockTimestamp' in props.log) {
+    return new Date(props.log.blockTimestamp);
+  }
+  return null;
+});
+</script>
+
+<script lang="ts">
+type Log = AddressLog | TransactionLog;
+
+export type { Log };
 </script>
 
 <style scoped>
@@ -69,7 +93,6 @@ defineProps<{
 }
 
 .header {
-  padding-left: 2px;
   font-size: var(--font-size-s);
 }
 
