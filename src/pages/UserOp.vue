@@ -578,3 +578,11 @@ function handleOpenAsTransactionClick(): void {
   router.push(getRouteLocation({ name: 'transaction', hash: hash.value }));
 }
 </script>
+
+<style scoped>
+.logs {
+  display: flex;
+  gap: var(--spacing-5);
+  flex-direction: column;
+}
+</style>
