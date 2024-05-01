@@ -423,6 +423,7 @@ const transactionRows = computed<TransactionRow[]>(() => {
     return {
       success: transaction.status > 0,
       blockNumber: transaction.blockNumber,
+      blockTimestamp: 1000 * parseInt(transaction.blockTimestamp),
       transactionIndex: transaction.transactionIndex,
       hash: transaction.hash,
       from: transaction.from,

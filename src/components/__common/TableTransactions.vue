@@ -16,6 +16,7 @@
                 header.column.id === 'blockPosition' ||
                 header.column.id === 'transactionIndex',
               block: header.column.id === 'blockNumber',
+              timestamp: header.column.id === 'blockTimestamp',
               hash: header.column.id === 'hash',
               address: header.column.id === 'from' || header.column.id === 'to',
               func: header.column.id === 'function',
@@ -46,6 +47,7 @@
                 cell.column.id === 'blockPosition' ||
                 cell.column.id === 'transactionIndex',
               block: cell.column.id === 'blockNumber',
+              timestamp: cell.column.id === 'blockTimestamp',
               hash: cell.column.id === 'hash',
               address: cell.column.id === 'from' || cell.column.id === 'to',
               func: cell.column.id === 'function',
@@ -114,7 +116,12 @@ import { computed, watch } from 'vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useLabels from '@/composables/useLabels.js';
-import { formatEther, formatGasPrice } from '@/utils/formatting';
+import { toRelativeTime } from '@/utils/conversion';
+import {
+  formatEther,
+  formatGasPrice,
+  formatRelativeTime,
+} from '@/utils/formatting';
 
 import LinkBlock from './LinkBlock.vue';
 import LinkTransaction from './LinkTransaction.vue';
@@ -138,6 +145,17 @@ const columns = computed(() => {
       columnHelper.accessor('success', {
         header: '',
         cell: (cell) => cell.getValue(),
+      }),
+    );
+    columns.push(
+      columnHelper.accessor('blockTimestamp', {
+        header: 'time',
+        cell: (cell) => {
+          const timestamp = cell.getValue() as number;
+          return formatRelativeTime(
+            toRelativeTime(new Date(), new Date(timestamp)),
+          );
+        },
       }),
     );
     columns.push(
@@ -241,6 +259,7 @@ function formatData(value: Hex): string {
 interface AddressTransaction {
   success: boolean;
   blockNumber: number;
+  blockTimestamp: number;
   transactionIndex: number;
   hash: Hex;
   from: Address;
@@ -359,6 +378,10 @@ tbody {
 
 .block {
   width: 100px;
+}
+
+.timestamp {
+  width: 110px;
 }
 
 .address {

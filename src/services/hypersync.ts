@@ -14,6 +14,7 @@ import {
   SEPOLIA,
 } from '@/utils/chains';
 
+type BlockFieldSelection = 'number' | 'timestamp';
 type TransactionFieldSelection =
   | 'block_number'
   | 'transaction_index'
@@ -48,6 +49,7 @@ interface Query {
   max_num_transactions?: number;
   max_num_logs?: number;
   field_selection: {
+    block?: BlockFieldSelection[];
     transaction?: TransactionFieldSelection[];
     log?: LogFieldSelection[];
   };
@@ -55,11 +57,17 @@ interface Query {
 
 interface QueryResponse {
   data: {
+    blocks?: QueryBlock[];
     transactions?: QueryTransaction[];
     logs?: QueryLog[];
   }[];
   next_block: number;
   archive_height: number;
+}
+
+interface QueryBlock {
+  number: number;
+  timestamp: Hex;
 }
 
 interface QueryTransaction {
@@ -98,6 +106,7 @@ interface AddressLogs {
 
 interface Transaction {
   blockNumber: number;
+  blockTimestamp: Hex;
   from: Address;
   gasPrice: Hex;
   hash: Hex;
@@ -144,17 +153,24 @@ class Service {
       const newTransactions = data
         .map((dataPage) => {
           const pageTransactions = dataPage.transactions || [];
-          return pageTransactions.map((transaction) => ({
-            blockNumber: transaction.block_number,
-            from: transaction.from,
-            gasPrice: transaction.gas_price,
-            hash: transaction.hash,
-            input: transaction.input,
-            to: transaction.to,
-            transactionIndex: transaction.transaction_index,
-            value: transaction.value,
-            status: transaction.status,
-          }));
+          return pageTransactions.map((transaction) => {
+            const transactionBlock = dataPage.blocks?.find(
+              (block) => block.number === transaction.block_number,
+            );
+            const timestamp = transactionBlock?.timestamp || '0x';
+            return {
+              blockNumber: transaction.block_number,
+              blockTimestamp: timestamp,
+              from: transaction.from,
+              gasPrice: transaction.gas_price,
+              hash: transaction.hash,
+              input: transaction.input,
+              to: transaction.to,
+              transactionIndex: transaction.transaction_index,
+              value: transaction.value,
+              status: transaction.status,
+            };
+          });
         })
         .flat();
       transactions.push(...newTransactions);
@@ -184,6 +200,7 @@ class Service {
       ],
       max_num_transactions: limit,
       field_selection: {
+        block: ['number', 'timestamp'],
         transaction: [
           'block_number',
           'transaction_index',
