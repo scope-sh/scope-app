@@ -525,6 +525,7 @@ const opRows = computed<UserOpRow[]>(() => {
       entryPoint: op.entryPoint,
       nonce: op.nonce,
       blockNumber: op.blockNumber,
+      blockTimestamp: 1000 * op.blockTimestamp,
       transactionHash: op.transactionHash,
       hash: op.hash,
       bundler: op.bundler,

@@ -16,6 +16,7 @@
                 header.column.id === 'entryPoint' ||
                 header.column.id === 'nonce',
               block: header.column.id === 'blockNumber',
+              timestamp: header.column.id === 'blockTimestamp',
               hash:
                 header.column.id === 'transactionHash' ||
                 header.column.id === 'hash',
@@ -46,6 +47,7 @@
                 cell.column.id === 'entryPoint' ||
                 cell.column.id === 'nonce',
               block: cell.column.id === 'blockNumber',
+              timestamp: cell.column.id === 'blockTimestamp',
               hash:
                 cell.column.id === 'transactionHash' ||
                 cell.column.id === 'hash',
@@ -126,6 +128,8 @@ import {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
+import { toRelativeTime } from '@/utils/conversion';
+import { formatRelativeTime } from '@/utils/formatting';
 
 const { getLabelText } = useLabels();
 
@@ -142,22 +146,14 @@ const columns = computed(() => [
     header: '',
     cell: (cell) => cell.getValue(),
   }),
-  columnHelper.accessor('entryPoint', {
-    header: 'ep',
+  columnHelper.accessor('blockTimestamp', {
+    header: 'time',
     cell: (cell) => {
-      const value = cell.getValue();
-      if (value === ENTRY_POINT_0_6_ADDRESS) {
-        return '0.6';
-      }
-      if (value === ENTRY_POINT_0_7_ADDRESS) {
-        return '0.7';
-      }
-      return '—';
+      const timestamp = cell.getValue() as number;
+      return formatRelativeTime(
+        toRelativeTime(new Date(), new Date(timestamp)),
+      );
     },
-  }),
-  columnHelper.accessor('nonce', {
-    header: 'nonce',
-    cell: (cell) => cell.getValue(),
   }),
   columnHelper.accessor('blockNumber', {
     header: 'block',
@@ -180,6 +176,23 @@ const columns = computed(() => [
     cell: (cell) => {
       const value = cell.getValue();
       return value === zeroAddress ? '—' : value;
+    },
+  }),
+  columnHelper.accessor('nonce', {
+    header: 'nonce',
+    cell: (cell) => cell.getValue(),
+  }),
+  columnHelper.accessor('entryPoint', {
+    header: 'ep',
+    cell: (cell) => {
+      const value = cell.getValue();
+      if (value === ENTRY_POINT_0_6_ADDRESS) {
+        return '0.6';
+      }
+      if (value === ENTRY_POINT_0_7_ADDRESS) {
+        return '0.7';
+      }
+      return '—';
     },
   }),
 ]);
@@ -225,6 +238,7 @@ interface UserOp {
   entryPoint: Address;
   nonce: bigint;
   blockNumber: number;
+  blockTimestamp: number;
   transactionHash: Hex;
   hash: Hex;
   bundler: Address;
@@ -326,6 +340,10 @@ tbody {
 
 .block {
   width: 100px;
+}
+
+.timestamp {
+  width: 110px;
 }
 
 .address {

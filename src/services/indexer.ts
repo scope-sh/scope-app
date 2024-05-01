@@ -16,6 +16,7 @@ interface UserOpsResponse {
       success: boolean;
       entryPoint: string;
       blockNumber: number;
+      blockTimestamp: number;
       transactionHash: string;
       hash: string;
       paymaster: string;
@@ -29,6 +30,7 @@ interface UserOp {
   success: boolean;
   entryPoint: Address;
   blockNumber: number;
+  blockTimestamp: number;
   transactionHash: Hex;
   hash: Hex;
   paymaster: Address;
@@ -98,6 +100,7 @@ class Service {
         success
         entryPoint
         blockNumber
+        blockTimestamp
         transactionHash
         hash
         paymaster
@@ -122,6 +125,7 @@ class Service {
         success: userOp.success,
         entryPoint: userOp.entryPoint as Address,
         blockNumber: userOp.blockNumber,
+        blockTimestamp: userOp.blockTimestamp,
         transactionHash: userOp.transactionHash as Hex,
         hash: userOp.hash as Hex,
         paymaster: userOp.paymaster as Address,
