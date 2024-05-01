@@ -124,57 +124,21 @@
       </AttributeList>
       <AttributeList>
         <AttributeItem>
-          <AttributeItemLabel value="Pre-verification Gas" />
-          <AttributeItemValue>
-            {{ userOpUnpacked.preVerificationGas }}
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem>
-          <AttributeItemLabel value="Verification Gas Limit" />
-          <AttributeItemValue>
-            {{ userOpUnpacked.verificationGasLimit }}
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem v-if="userOpUnpacked.paymasterVerificationGasLimit">
-          <AttributeItemLabel value="Paymaster Verif. Gas Limit" />
-          <AttributeItemValue>
-            {{ userOpUnpacked.paymasterVerificationGasLimit }}
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem v-if="userOpUnpacked.paymasterPostOpGasLimit">
-          <AttributeItemLabel value="Paymaster Gas Limit" />
-          <AttributeItemValue>
-            {{ userOpUnpacked.paymasterPostOpGasLimit }}
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem>
-          <AttributeItemLabel value="Actual Gas Used" />
+          <AttributeItemLabel value="Gas Used" />
           <AttributeItemValue>
             {{ userOpUnpacked.actualGasUsed }}
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem>
-          <AttributeItemLabel value="Call Gas Limit" />
+        <AttributeItem v-if="gasPrice">
+          <AttributeItemLabel value="Gas Price" />
           <AttributeItemValue>
-            {{ userOpUnpacked.callGasLimit }}
+            {{ formatGasPrice(gasPrice) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel value="Max Fee per Gas" />
+          <AttributeItemLabel value="Cost" />
           <AttributeItemValue>
-            {{ userOpUnpacked.maxFeePerGas }}
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem>
-          <AttributeItemLabel value="Max Priority Fee per Gas" />
-          <AttributeItemValue>
-            {{ userOpUnpacked.maxPriorityFeePerGas }}
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem>
-          <AttributeItemLabel value="Actual Gas Cost" />
-          <AttributeItemValue>
-            {{ userOpUnpacked.actualGasCost }}
+            {{ formatEther(userOpUnpacked.actualGasCost) }}
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
@@ -291,7 +255,7 @@ import {
   unpackUserOp,
 } from '@/utils/context/erc4337/entryPoint';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
-import { formatEther } from '@/utils/formatting';
+import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 
 const PAGE_USEROP = 'page_userop';
@@ -481,6 +445,14 @@ const userOpUnpacked = computed(() => {
     return null;
   }
   return unpackUserOp(hash.value, userOp.value, event);
+});
+const gasPrice = computed(() => {
+  if (!userOpUnpacked.value) {
+    return null;
+  }
+  return (
+    userOpUnpacked.value.actualGasCost / userOpUnpacked.value.actualGasUsed
+  );
 });
 const calls = computed(() => {
   if (!userOpUnpacked.value) {
