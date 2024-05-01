@@ -1,7 +1,7 @@
 <template>
   <header>
     <div class="side">
-      <router-link :to="homeRoute">
+      <router-link :to="chainRoute">
         <IconBrand class="icon" />
       </router-link>
       <CommandPaletteTrigger />
@@ -32,7 +32,9 @@ import ChainSelector from './header/SelectChain.vue';
 const { id: chainId } = useChain();
 const router = useRouter();
 
-const homeRoute = computed(() => getRouteLocation({ name: 'home' }));
+const chainRoute = computed(() =>
+  getRouteLocation({ name: 'chain', chain: chainId.value }),
+);
 
 function handleChainUpdate(value: Chain): void {
   router.push(getRouteLocation({ name: 'chain', chain: value }));
