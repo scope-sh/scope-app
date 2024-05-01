@@ -74,7 +74,6 @@ function decodeCallData(callData: Hex): Call | MultisendCall[] {
         ],
         data: callData,
       });
-      console.log(multiSendArgs[0]);
       if (functionName === 'multiSend') {
         return decodeMultisend(multiSendArgs[0]);
       }
