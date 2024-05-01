@@ -15,6 +15,8 @@ import type { Log, Transaction } from '@/services/evm';
 import type { Chain } from '@/utils/chains';
 import { decodeCallData as decodeKernelV3CallData } from '@/utils/context/erc7579/kernelV3.js';
 
+import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
+
 interface UserOpEvent {
   logIndex: number | null;
   userOpHash: Hex;
@@ -486,6 +488,18 @@ function decodeCalls(callData: Hex): Call[] | null {
       return decodedCallData.executions;
     }
     return null;
+  }
+  if (selector === '0x541d63c8' || selector === '0x7bb37428') {
+    // Safe Core 4337 module
+    const decodedCallData = decodeSafeCoreCallData(callData);
+    if (Array.isArray(decodedCallData)) {
+      return decodedCallData.map((call) => ({
+        to: call.to,
+        callData: call.data,
+        value: call.value,
+      }));
+    }
+    return [decodedCallData];
   }
   return null;
 }
