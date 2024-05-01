@@ -58,6 +58,32 @@
             />
           </AttributeItemValue>
         </AttributeItem>
+        <AttributeItem v-if="userOpUnpacked.paymaster">
+          <AttributeItemLabel value="Paymaster" />
+          <AttributeItemValue>
+            <LinkAddress :address="userOpUnpacked.paymaster" />
+          </AttributeItemValue>
+        </AttributeItem>
+        <AttributeItem v-if="userOpUnpacked.paymasterData">
+          <AttributeItemLabel value="Paymaster Data" />
+          <AttributeItemValue>
+            <ScopeTextView
+              :value="userOpUnpacked.paymasterData"
+              size="tiny"
+            />
+          </AttributeItemValue>
+        </AttributeItem>
+        <AttributeItem v-if="size(userOpUnpacked.signature) > 0">
+          <AttributeItemLabel value="Signature" />
+          <AttributeItemValue>
+            <ScopeTextView
+              :value="userOpUnpacked.signature"
+              size="tiny"
+            />
+          </AttributeItemValue>
+        </AttributeItem>
+      </AttributeList>
+      <AttributeList>
         <template v-if="calls">
           <template
             v-for="(call, index) in calls"
@@ -95,30 +121,8 @@
             />
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem v-if="userOpUnpacked.paymaster">
-          <AttributeItemLabel value="Paymaster" />
-          <AttributeItemValue>
-            <LinkAddress :address="userOpUnpacked.paymaster" />
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem v-if="userOpUnpacked.paymasterData">
-          <AttributeItemLabel value="Paymaster Data" />
-          <AttributeItemValue>
-            <ScopeTextView
-              :value="userOpUnpacked.paymasterData"
-              size="tiny"
-            />
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem v-if="size(userOpUnpacked.signature) > 0">
-          <AttributeItemLabel value="Signature" />
-          <AttributeItemValue>
-            <ScopeTextView
-              :value="userOpUnpacked.signature"
-              size="tiny"
-            />
-          </AttributeItemValue>
-        </AttributeItem>
+      </AttributeList>
+      <AttributeList>
         <AttributeItem>
           <AttributeItemLabel value="Pre-verification Gas" />
           <AttributeItemValue>
