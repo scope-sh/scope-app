@@ -1,32 +1,13 @@
-<svg width="266" height="266" viewBox="0 0 266 266" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <path fill-rule="evenodd" clip-rule="evenodd"
-    d="M133 10C65.069 10 10 65.069 10 133C10 200.931 65.069 256 133 256C200.931 256 256 200.931 256 133C256 65.069 200.931 10 133 10ZM0 133C0 59.5461 59.5461 0 133 0C206.454 0 266 59.5461 266 133C266 206.454 206.454 266 133 266C59.5461 266 0 206.454 0 133Z"
-    fill="#1A181B" />
-  <mask id="mask0_522_6069" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="10" y="10"
-    width="246" height="246">
-    <path
-      d="M256 133C256 200.931 200.931 256 133 256C65.069 256 10 200.931 10 133C10 65.069 65.069 10 133 10C200.931 10 256 65.069 256 133Z"
-      class="mask-fill"
-      fill="#ffffff" />
+<svg width="320" height="320" viewBox="0 0 320 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="320" height="320" rx="32" fill="#111111" />
+  <circle cx="160" cy="160" r="112" stroke="#EECF82" stroke-width="7" />
+  <mask id="mask0_137_78" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="48" y="48"
+    width="224" height="224">
+    <circle cx="160" cy="160" r="108" fill="#D9D9D9" stroke="#CCC0A4" stroke-width="8" />
   </mask>
-  <g mask="url(#mask0_522_6069)">
-    <path fill-rule="evenodd" clip-rule="evenodd"
-      d="M297 -23L-22.9999 297L-30.7781 289.222L289.222 -30.7782L297 -23Z" fill="#1A181B" />
-    <path fill-rule="evenodd" clip-rule="evenodd"
-      d="M267 -53L-52.9999 267L-60.7781 259.222L259.222 -60.7782L267 -53Z" fill="#1A181B" />
-    <path fill-rule="evenodd" clip-rule="evenodd"
-      d="M237 -83L-82.9999 237L-90.7781 229.222L229.222 -90.7782L237 -83Z" fill="#1A181B" />
+  <g mask="url(#mask0_137_78)">
+    <line x1="20.6716" y1="300.672" x2="300.672" y2="20.6716" stroke="#EECF82" stroke-width="8" />
+    <line x1="-5.57843" y1="274.422" x2="274.422" y2="-5.57842" stroke="#EECF82" stroke-width="8" />
+    <line x1="-31.8284" y1="248.172" x2="248.172" y2="-31.8284" stroke="#EECF82" stroke-width="8" />
   </g>
-
-  <style>
-    @media (prefers-color-scheme: dark) {
-    path {
-    fill: #ffffff;
-    }
-
-    .mask-fill {
-    fill: #ffffff;
-    }
-    }
-  </style>
 </svg>
