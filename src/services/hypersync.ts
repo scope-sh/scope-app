@@ -76,7 +76,7 @@ interface QueryTransaction {
   gas_price: Hex;
   hash: Hex;
   input: Hex;
-  to: Hex;
+  to: Hex | null;
   transaction_index: number;
   value: Hex;
   status: 1;
@@ -111,7 +111,7 @@ interface Transaction {
   gasPrice: bigint;
   hash: Hex;
   input: Hex;
-  to: Address | undefined;
+  to: Address | null;
   transactionIndex: number;
   value: bigint;
   status: number;

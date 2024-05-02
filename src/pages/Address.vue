@@ -542,7 +542,7 @@ const addresses = computed(() => {
   addresses.push(
     ...transactions.value
       .map((transaction) => transaction.to)
-      .filter((to): to is Address => to !== undefined),
+      .filter((to): to is Address => to !== null),
   );
   addresses.push(...logs.value.map((log) => log.address));
   addresses.push(...ops.value.map((op) => op.bundler));
