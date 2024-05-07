@@ -326,16 +326,23 @@ function unpackUserOp(
         };
   const paymasterDataUnpacked =
     size(userOp.paymasterAndData) > 0
-      ? {
-          paymaster: slice(userOp.paymasterAndData, 0, 20),
-          paymasterVerificationGasLimit: BigInt(
-            slice(userOp.paymasterAndData, 20, 36),
-          ),
-          paymasterPostOpGasLimit: BigInt(
-            slice(userOp.paymasterAndData, 36, 52),
-          ),
-          paymasterData: slice(userOp.paymasterAndData, 52),
-        }
+      ? size(userOp.paymasterAndData) > 20
+        ? {
+            paymaster: slice(userOp.paymasterAndData, 0, 20),
+            paymasterVerificationGasLimit: BigInt(
+              slice(userOp.paymasterAndData, 20, 36),
+            ),
+            paymasterPostOpGasLimit: BigInt(
+              slice(userOp.paymasterAndData, 36, 52),
+            ),
+            paymasterData: slice(userOp.paymasterAndData, 52),
+          }
+        : {
+            paymaster: slice(userOp.paymasterAndData, 0, 20),
+            paymasterVerificationGasLimit: null,
+            paymasterPostOpGasLimit: null,
+            paymasterData: null,
+          }
       : {
           paymaster: null,
           paymasterVerificationGasLimit: null,
