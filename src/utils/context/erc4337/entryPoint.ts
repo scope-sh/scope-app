@@ -18,6 +18,7 @@ import type { Log, Transaction } from '@/services/evm';
 import type { Chain } from '@/utils/chains';
 import { decodeCallData as decodeKernelV3CallData } from '@/utils/context/erc7579/kernelV3.js';
 
+import { decodeCallData as decodeDaimoCallData } from './daimo.js';
 import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
 
 interface UserOpEvent {
@@ -544,6 +545,15 @@ function decodeCalls(callData: Hex): Call[] | null {
       }));
     }
     return [decodedCallData];
+  }
+  if (selector === '0x34fcd5be') {
+    // Daimo "executeBatch" function
+    const decodedCallData = decodeDaimoCallData(callData);
+    return decodedCallData.map((call) => ({
+      to: call.dest,
+      callData: call.data,
+      value: call.value,
+    }));
   }
   return null;
 }
