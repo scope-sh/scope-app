@@ -5,12 +5,8 @@
       <AttributeItemValue>{{ accountId }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Module Types'" />
+      <AttributeItemLabel :value="'Supported Module Types'" />
       <AttributeItemValue>{{ moduleTypeSupportLabel }}</AttributeItemValue>
-    </AttributeItem>
-    <AttributeItem>
-      <AttributeItemLabel :value="'Execution'" />
-      <AttributeItemValue>{{ executionModeSupportLabel }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem v-if="rootValidator">
       <AttributeItemLabel :value="'Root Validator'" />
@@ -25,6 +21,12 @@
           :key="policy"
           :address="policy"
         />
+      </AttributeItemValue>
+    </AttributeItem>
+    <AttributeItem>
+      <AttributeItemLabel :value="'Modules'" />
+      <AttributeItemValue>
+        <div class="soon">coming soon</div>
       </AttributeItemValue>
     </AttributeItem>
   </LensBase>
@@ -43,18 +45,6 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 import useLabels from '@/composables/useLabels';
-import {
-  CALLTYPE_SINGLE,
-  CALLTYPE_BATCH,
-  CALLTYPE_STATIC,
-  CALLTYPE_DELEGATECALL,
-  EXECTYPE_DEFAULT,
-  EXECTYPE_TRY,
-  EXEC_MODE_DEFAULT,
-  formatCalltype,
-  formatExectype,
-  formatExecMode,
-} from '@/utils/context/erc7579/execution';
 import {
   TYPE_VALIDATION,
   TYPE_EXECUTION,
@@ -95,18 +85,6 @@ const isLoading = ref(true);
 const accountId = ref<string | null>(null);
 const rootValidatorId = ref<Hex | null>(null);
 const rootValidator = ref<RootValidator | null>(null);
-
-const executionModeSupportLabel = computed(() => {
-  const supportedCalltypes = [
-    CALLTYPE_SINGLE,
-    CALLTYPE_BATCH,
-    CALLTYPE_STATIC,
-    CALLTYPE_DELEGATECALL,
-  ];
-  const supportedExectypes = [EXECTYPE_DEFAULT, EXECTYPE_TRY];
-  const supportedExecModes = [EXEC_MODE_DEFAULT];
-  return `Call types: ${supportedCalltypes.map(formatCalltype).join(', ')}. Execution types: ${supportedExectypes.map(formatExectype).join(', ')}. Execution modes: ${supportedExecModes.map(formatExecMode).join(', ')}.`;
-});
 
 const moduleTypeSupportLabel = computed(() => {
   const supportedTypes = [
@@ -215,3 +193,9 @@ watch(
   },
 );
 </script>
+
+<style scoped>
+.soon {
+  font-style: italic;
+}
+</style>
