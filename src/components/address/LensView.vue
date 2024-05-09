@@ -1,6 +1,10 @@
 <template>
+  <DaimoAccount
+    v-if="labelTypeId === 'daimo-v1-account'"
+    :address="address"
+  />
   <Erc20Lens
-    v-if="labelTypeId === 'erc20' || labelTypeId === 'wrapped'"
+    v-else-if="labelTypeId === 'erc20' || labelTypeId === 'wrapped'"
     :address="address"
   />
   <SafeV1_4_1Lens
@@ -32,6 +36,7 @@ import { Address } from 'viem';
 
 import type { LabelId } from '@/services/api';
 
+import DaimoAccount from './lenses/DaimoAccount.vue';
 import Erc20Lens from './lenses/Erc20Lens.vue';
 import Erc7579ModuleLens from './lenses/Erc7579ModuleLens.vue';
 import KernelV3AccountLens from './lenses/KernelV3AccountLens.vue';
