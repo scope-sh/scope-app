@@ -95,7 +95,7 @@
                 <LinkAddress :address="call.to" />
               </AttributeItemValue>
             </AttributeItem>
-            <AttributeItem>
+            <AttributeItem v-if="call.value">
               <AttributeItemLabel :value="`Value ${index + 1}`" />
               <AttributeItemValue>
                 {{ formatEther(call.value) }}
