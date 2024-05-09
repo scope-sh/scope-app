@@ -1,7 +1,9 @@
 <template>
   <form @submit.prevent="handleSubmit">
-    <slot name="input" />
-    <LensButton @click="handleClick" />
+    <div class="input">
+      <slot name="input" />
+      <LensButton @click="handleClick" />
+    </div>
     <slot name="output"> &nbsp; </slot>
   </form>
 </template>
@@ -24,6 +26,13 @@ function handleSubmit(): void {
 
 <style scoped>
 form {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.input {
   display: flex;
   gap: var(--spacing-2);
   align-items: center;
