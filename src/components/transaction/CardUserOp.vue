@@ -49,7 +49,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Hex } from 'viem';
+import type { Address, Hex } from 'viem';
 import { size } from 'viem';
 import { computed } from 'vue';
 
@@ -74,6 +74,7 @@ import LinkUserOp from '../__common/LinkUserOp.vue';
 import ScopeCard from '../__common/ScopeCard.vue';
 
 const props = defineProps<{
+  entryPoint: Address | null;
   op: UserOp;
   transaction: Transaction;
   transactionReceipt: TransactionReceipt;
@@ -81,37 +82,41 @@ const props = defineProps<{
 
 const { id: chainId } = useChain();
 
-const entrypoint = computed(() => props.transaction.to);
-
 const hash = computed<Hex | null>(() => {
-  if (!entrypoint.value) {
+  if (!props.entryPoint) {
     return null;
   }
   if (!chainId.value) {
     return null;
   }
-  return getUserOpHash(chainId.value, entrypoint.value, props.op);
+  return getUserOpHash(chainId.value, props.entryPoint, props.op);
 });
 
 const userOpUnpacked = computed(() => {
+  console.log('userOpUnpacked 1');
   if (!hash.value) {
     return null;
   }
+  console.log('userOpUnpacked 2');
   if (!chainId.value) {
     return null;
   }
-  if (!entrypoint.value) {
+  console.log('userOpUnpacked 3');
+  if (!props.entryPoint) {
     return null;
   }
+  console.log('userOpUnpacked 4');
   const event = getUserOpEvent(
     chainId.value,
-    entrypoint.value,
+    props.entryPoint,
     props.transactionReceipt.logs,
     props.op,
   );
+  console.log('userOpUnpacked 5');
   if (!event) {
     return null;
   }
+  console.log('userOpUnpacked 6');
   return unpackUserOp(hash.value, props.op, event);
 });
 </script>

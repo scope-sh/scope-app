@@ -1,6 +1,7 @@
 import {
   type Address,
   type Hex,
+  type PublicClient,
   decodeFunctionData,
   encodeAbiParameters,
   keccak256,
@@ -8,9 +9,11 @@ import {
   slice,
   size,
 } from 'viem';
+import { readContract } from 'viem/actions';
 
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0';
+import pimlicoBundleBulkerAbi from '@/abi/pimlicoBundleBulker.js';
 import type { Log, Transaction } from '@/services/evm';
 import type { Chain } from '@/utils/chains';
 import { decodeCallData as decodeKernelV3CallData } from '@/utils/context/erc7579/kernelV3.js';
@@ -31,6 +34,7 @@ interface UserOpEvent {
 type TxType =
   | typeof TX_TYPE_ENTRY_POINT_0_6
   | typeof TX_TYPE_ENTRY_POINT_0_7
+  | typeof TX_TYPE_PIMLICO_BULKER
   | typeof TX_TYPE_UNKNOWN;
 
 interface UserOp_0_6 {
@@ -97,10 +101,12 @@ interface Call {
 
 const TX_TYPE_ENTRY_POINT_0_6 = 'Entry Point 0.6';
 const TX_TYPE_ENTRY_POINT_0_7 = 'Entry Point 0.7';
+const TX_TYPE_PIMLICO_BULKER = 'Pimlico Bulker';
 const TX_TYPE_UNKNOWN = 'Unknown';
 
 const ENTRY_POINT_0_6_ADDRESS = '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789';
 const ENTRY_POINT_0_7_ADDRESS = '0x0000000071727de22e5e9d8baf0edac6f37da032';
+const PIMLICO_BULKER_ADDRESS = '0x000000000091a1f34f51ce866bed8983db51a97e';
 
 function getTxType(transaction: Transaction): TxType {
   if (transaction.to === ENTRY_POINT_0_6_ADDRESS) {
@@ -109,7 +115,24 @@ function getTxType(transaction: Transaction): TxType {
   if (transaction.to === ENTRY_POINT_0_7_ADDRESS) {
     return TX_TYPE_ENTRY_POINT_0_7;
   }
+  if (transaction.to === PIMLICO_BULKER_ADDRESS) {
+    return TX_TYPE_PIMLICO_BULKER;
+  }
   return TX_TYPE_UNKNOWN;
+}
+
+function getEntryPoint(transaction: Transaction): Address | null {
+  const txType = getTxType(transaction);
+  if (txType === TX_TYPE_ENTRY_POINT_0_6) {
+    return ENTRY_POINT_0_6_ADDRESS;
+  }
+  if (txType === TX_TYPE_ENTRY_POINT_0_7) {
+    return ENTRY_POINT_0_7_ADDRESS;
+  }
+  if (TX_TYPE_PIMLICO_BULKER) {
+    return ENTRY_POINT_0_6_ADDRESS;
+  }
+  return null;
 }
 
 function getBeforeExecutionLog(logs: Log[]): Log | null {
@@ -206,7 +229,10 @@ function getUserOpEvent(
   return userOpEvent || null;
 }
 
-function getUserOps(transaction: Transaction): UserOp[] {
+async function getUserOps(
+  client: PublicClient,
+  transaction: Transaction,
+): Promise<UserOp[]> {
   const txType = getTxType(transaction);
   if (txType === TX_TYPE_ENTRY_POINT_0_6) {
     const { functionName, args } = decodeFunctionData({
@@ -227,6 +253,17 @@ function getUserOps(transaction: Transaction): UserOp[] {
       return [];
     }
     return args[0] as UserOp_0_7[];
+  }
+  if (txType === TX_TYPE_PIMLICO_BULKER) {
+    const bundle = await readContract(client, {
+      abi: pimlicoBundleBulkerAbi,
+      address: PIMLICO_BULKER_ADDRESS,
+      functionName: 'inflate',
+      args: [transaction.input],
+    });
+    return bundle[0].map((op) => ({
+      ...op,
+    }));
   }
   return [];
 }
@@ -518,6 +555,7 @@ export {
   TX_TYPE_ENTRY_POINT_0_7,
   TX_TYPE_UNKNOWN,
   getTxType,
+  getEntryPoint,
   getUserOpEvent,
   getUserOpEvents,
   getUserOps,

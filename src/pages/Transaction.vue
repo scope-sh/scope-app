@@ -117,6 +117,7 @@
         <CardUserOp
           v-for="(op, index) in userOps"
           :key="index"
+          :entry-point="entryPoint"
           :op="op"
           :transaction="transaction"
           :transaction-receipt="transactionReceipt"
@@ -181,7 +182,11 @@ import useToast from '@/composables/useToast';
 import EvmService, { Block } from '@/services/evm';
 import type { Transaction, TransactionReceipt } from '@/services/evm';
 import { Command } from '@/stores/commands';
-import { UserOp, getUserOps } from '@/utils/context/erc4337/entryPoint';
+import {
+  UserOp,
+  getEntryPoint,
+  getUserOps,
+} from '@/utils/context/erc4337/entryPoint';
 import { toRelativeTime } from '@/utils/conversion';
 import {
   formatEther,
@@ -424,9 +429,15 @@ const typeLabel = computed(() => {
   return map[transaction.value.type];
 });
 
-const userOps = computed<UserOp[] | null>(() =>
-  transaction.value ? getUserOps(transaction.value) : null,
-);
+const entryPoint = ref<Address | null>(null);
+const userOps = ref<UserOp[] | null>(null);
+watch(transaction, async () => {
+  if (!transaction.value) {
+    return;
+  }
+  entryPoint.value = getEntryPoint(transaction.value);
+  userOps.value = await getUserOps(client.value, transaction.value);
+});
 
 const addresses = computed(() => {
   if (!transaction.value || !transactionReceipt.value) {

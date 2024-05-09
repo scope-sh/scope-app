@@ -253,6 +253,7 @@ import {
   getBeneficiary,
   getUserOpLogs,
   unpackUserOp,
+  getEntryPoint,
 } from '@/utils/context/erc4337/entryPoint';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
@@ -395,26 +396,28 @@ const isLoading = ref(false);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
 
-const entryPoint = computed<Address | null>(() =>
-  transaction.value ? transaction.value.to : null,
-);
-const userOp = computed<UserOp | null>(() => {
+const entryPoint = ref<Address | null>(null);
+const userOp = ref<UserOp | null>(null);
+watch(transaction, async () => {
   if (!transaction.value) {
-    return null;
+    return;
   }
   const to = transaction.value.to;
   if (!to) {
-    return null;
+    return;
   }
   const chain = chainId.value;
   if (!chain) {
-    return null;
+    return;
   }
-  const userOps = getUserOps(transaction.value);
-  const userOp = userOps.find(
-    (op) => getUserOpHash(chain, to, op) === hash.value,
-  );
-  return userOp || null;
+  entryPoint.value = getEntryPoint(transaction.value);
+  const userOps = await getUserOps(client.value, transaction.value);
+  userOp.value =
+    userOps.find(
+      (op) =>
+        entryPoint.value &&
+        getUserOpHash(chain, entryPoint.value, op) === hash.value,
+    ) || null;
 });
 const userOpUnpacked = computed(() => {
   if (!chainId.value) {
