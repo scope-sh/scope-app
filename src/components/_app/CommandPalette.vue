@@ -124,9 +124,7 @@ const inputEl = ref<HTMLInputElement | null>(null);
 const contentEl = ref<MaybeElement>(null);
 const itemEls = ref<HTMLDivElement[]>([]);
 
-const { play: bouncePanel } = useAnimate(contentEl, [{ scale: 0.99 }], {
-  duration: 100,
-});
+let bouncePanel: () => void = () => {};
 
 const apiService = computed(() =>
   chainId.value ? new ApiService(chainId.value) : null,
@@ -161,6 +159,17 @@ function close(): void {
   activeCommand.value = TOP_LEVEL_COMMAND;
   commands.value = staticCommands.value;
   query.value = '';
+}
+
+watch(contentEl, () => {
+  updateBounceFunction();
+});
+
+function updateBounceFunction(): void {
+  const { play } = useAnimate(contentEl, [{ scale: 0.99 }], {
+    duration: 100,
+  });
+  bouncePanel = play;
 }
 
 const query = ref('');
