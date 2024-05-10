@@ -1,3 +1,4 @@
+import { useDebounceFn } from '@vueuse/core';
 import { Address } from 'viem';
 import { computed } from 'vue';
 
@@ -17,24 +18,42 @@ function useLabels(): UseLabels {
   const { id: chain } = useChain();
   const apiService = computed(() => new ApiService(chain.value));
 
-  async function requestLabels(addresses: Address[]): Promise<void> {
-    // Fetch a label for every address only once
-    const addressSet = new Set<Address>();
-    for (const address of addresses) {
-      const existingLabel = store.getLabel(chain.value, address);
-      if (!existingLabel) {
-        addressSet.add(address);
+  const pendingAddresses = new Set<Address>();
+
+  const fetchLabels = useDebounceFn(
+    async () => {
+      // Fetch a label for every address only once
+      const addressSet = new Set<Address>();
+      for (const address of pendingAddresses) {
+        const existingLabel = store.getLabel(chain.value, address);
+        if (!existingLabel) {
+          addressSet.add(address);
+        }
       }
+      const uniqueAddresses = Array.from(addressSet);
+      if (uniqueAddresses.length === 0) {
+        return;
+      }
+      const labels = await apiService.value.getLabels(uniqueAddresses);
+      if (Object.keys(labels).length === 0) {
+        return;
+      }
+      store.addLabels(chain.value, labels);
+    },
+    50,
+    {
+      maxWait: 500,
+    },
+  );
+
+  async function requestLabels(addresses: Address[]): Promise<void> {
+    for (const address of addresses) {
+      if (pendingAddresses.has(address)) {
+        continue;
+      }
+      pendingAddresses.add(address);
     }
-    const uniqueAddresses = Array.from(addressSet);
-    if (uniqueAddresses.length === 0) {
-      return;
-    }
-    const labels = await apiService.value.getLabels(uniqueAddresses);
-    if (Object.keys(labels).length === 0) {
-      return;
-    }
-    store.addLabels(chain.value, labels);
+    fetchLabels();
   }
 
   function getLabel(address: Address): Label | null {
