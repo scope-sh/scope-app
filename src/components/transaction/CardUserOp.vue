@@ -93,30 +93,24 @@ const hash = computed<Hex | null>(() => {
 });
 
 const userOpUnpacked = computed(() => {
-  console.log('userOpUnpacked 1');
   if (!hash.value) {
     return null;
   }
-  console.log('userOpUnpacked 2');
   if (!chainId.value) {
     return null;
   }
-  console.log('userOpUnpacked 3');
   if (!props.entryPoint) {
     return null;
   }
-  console.log('userOpUnpacked 4');
   const event = getUserOpEvent(
     chainId.value,
     props.entryPoint,
     props.transactionReceipt.logs,
     props.op,
   );
-  console.log('userOpUnpacked 5');
   if (!event) {
     return null;
   }
-  console.log('userOpUnpacked 6');
   return unpackUserOp(hash.value, props.op, event);
 });
 </script>
