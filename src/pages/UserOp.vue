@@ -489,10 +489,26 @@ async function fetch(): Promise<void> {
     isLoading.value = false;
     return;
   }
+  await Promise.all([
+    fetchTransaction(txHash),
+    fetchTransactionReceipt(txHash),
+  ]);
+  isLoading.value = false;
+}
+
+async function fetchTransaction(txHash: Address): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
   transaction.value = await evmService.value.getTransaction(txHash);
+}
+
+async function fetchTransactionReceipt(txHash: Address): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
   transactionReceipt.value =
     await evmService.value.getTransactionReceipt(txHash);
-  isLoading.value = false;
 }
 
 const actions = computed<Action[]>(() => {

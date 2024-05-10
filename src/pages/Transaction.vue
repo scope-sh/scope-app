@@ -152,7 +152,7 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, TransactionType } from 'viem';
+import { Address, Hex, TransactionType } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -357,16 +357,30 @@ async function fetch(): Promise<void> {
     return;
   }
   isLoading.value = true;
-  transaction.value = await evmService.value.getTransaction(hash.value);
-  transactionReceipt.value = await evmService.value.getTransactionReceipt(
-    hash.value,
-  );
+  await Promise.all([
+    fetchTransaction(hash.value),
+    fetchTransactionReceipt(hash.value),
+  ]);
   if (transaction.value && transaction.value.blockNumber) {
     block.value = await evmService.value.getBlock(
       transaction.value.blockNumber,
     );
   }
   isLoading.value = false;
+}
+
+async function fetchTransaction(hash: Hex): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
+  transaction.value = await evmService.value.getTransaction(hash);
+}
+
+async function fetchTransactionReceipt(hash: Hex): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
+  transactionReceipt.value = await evmService.value.getTransactionReceipt(hash);
 }
 
 const blockRelativeTime = computed(() => {
