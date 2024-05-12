@@ -1,16 +1,17 @@
 <template>
   <div class="link">
     <slot />
-    <LinkButtonCopy
+    <ButtonCopy
       v-if="type === 'normal'"
       :value
       class="button"
+      compact
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import LinkButtonCopy from './LinkButtonCopy.vue';
+import ButtonCopy from './ButtonCopy.vue';
 import { Type } from './ScopeLinkInternal.vue';
 
 defineProps<{
