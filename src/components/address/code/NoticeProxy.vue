@@ -4,9 +4,8 @@
       This is a proxy contract.
       <template v-if="implementation">
         Its implementation is
-        <LinkAddress :address="implementation" />
+        <LinkAddress :address="implementation" />.
       </template>
-      .
     </div>
     <div class="toggle">
       <ScopeCheckbox
