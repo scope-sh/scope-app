@@ -50,7 +50,7 @@ type Size = 'tiny' | 'regular' | 'large';
   border: 1px solid transparent;
   border-radius: var(--border-radius-s);
   background: var(--color-background-secondary);
-  color: var(--color-text-primary);
+  color: var(--color-text-secondary);
   font-family: var(--font-mono);
   font-size: var(--font-size-m);
   line-height: var(--line-height);
