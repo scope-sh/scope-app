@@ -53,6 +53,9 @@ watch(
 }
 
 .text {
+  --font-size: var(--font-size-m);
+  --line-number-digits: 4;
+
   width: 100%;
   height: 100%;
   padding: var(--spacing-7);
@@ -63,7 +66,7 @@ watch(
   background: #201e21;
   color: var(--color-text-primary);
   font-family: var(--font-mono);
-  font-size: var(--font-size-m);
+  font-size: var(--font-size);
 }
 
 .text :deep(pre) {
@@ -71,10 +74,22 @@ watch(
   background: inherit !important;
   word-break: break-all;
   white-space: pre-wrap;
+  counter-reset: step;
+  counter-increment: step 0;
 }
 
-.text :deep(span) {
+.text :deep(.line) {
   font-family: var(--font-mono);
+
+  &:not(:last-child)::before {
+    content: counter(step);
+    display: inline-block;
+    width: calc(var(--line-number-digits) * var(--font-size-m) / 2);
+    margin-right: 48px;
+    color: var(--color-text-secondary);
+    text-align: right;
+    counter-increment: step;
+  }
 }
 
 .button {
