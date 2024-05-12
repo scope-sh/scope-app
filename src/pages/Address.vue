@@ -136,12 +136,18 @@
         </div>
       </template>
     </ScopePanel>
+    <PanelCode
+      v-if="isContract && code"
+      ref="addressCodeEl"
+      :bytecode="code"
+      :address
+    />
   </ScopePage>
 </template>
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, slice } from 'viem';
+import { Address, Hex, slice } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -157,6 +163,7 @@ import TableTransactions, {
 } from '@/components/__common/TableTransactions.vue';
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
+import PanelCode from '@/components/address/PanelCode.vue';
 import TableUserOps, {
   UserOp as UserOpRow,
 } from '@/components/address/TableUserOps.vue';
@@ -191,23 +198,34 @@ const { getLabel, requestLabels } = useLabels();
 const addressPanelEl = ref<PanelEl | null>(null);
 const addressTransactionsEl = ref<PanelEl | null>(null);
 const addressLogsEl = ref<PanelEl | null>(null);
-const sections = computed<PanelSection[]>(() => [
-  {
-    label: 'Overview',
-    value: SECTION_OVERVIEW,
-    el: addressPanelEl.value,
-  },
-  {
-    label: 'Transactions',
-    value: SECTION_TRANSACTIONS,
-    el: addressTransactionsEl.value,
-  },
-  {
-    label: 'Logs',
-    value: SECTION_LOGS,
-    el: addressLogsEl.value,
-  },
-]);
+const addressCodeEl = ref<PanelEl | null>(null);
+const sections = computed<PanelSection[]>(() => {
+  const sections: PanelSection[] = [
+    {
+      label: 'Overview',
+      value: SECTION_OVERVIEW,
+      el: addressPanelEl.value,
+    },
+    {
+      label: 'Transactions',
+      value: SECTION_TRANSACTIONS,
+      el: addressTransactionsEl.value,
+    },
+    {
+      label: 'Logs',
+      value: SECTION_LOGS,
+      el: addressLogsEl.value,
+    },
+  ];
+  if (isContract.value && code.value) {
+    sections.push({
+      label: 'Code',
+      value: 'code',
+      el: addressCodeEl.value,
+    });
+  }
+  return sections;
+});
 function handleSectionUpdate(value: Section['value']): void {
   openSection(value);
 }
@@ -266,6 +284,13 @@ const commands = computed<Command[]>(() => [
       openSection(SECTION_LOGS);
     },
   },
+  {
+    icon: 'arrow-right',
+    label: 'Go to code',
+    act: (): void => {
+      openSection('code');
+    },
+  },
 ]);
 
 watch(
@@ -322,7 +347,7 @@ const isLoadingBalance = ref(false);
 const etherBalance = ref<bigint | undefined>(undefined);
 
 const isLoadingCode = ref(false);
-const code = ref<string | null>(null);
+const code = ref<Hex | null>(null);
 
 const isLoadingTransactions = ref(false);
 const transactions = ref<AddressTransaction[]>([]);
