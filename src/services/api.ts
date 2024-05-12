@@ -1,4 +1,4 @@
-import { Address, Hex } from 'viem';
+import { Abi, Address, Hex } from 'viem';
 
 import useEnv from '@/composables/useEnv';
 import { Chain } from '@/utils/chains';
@@ -71,6 +71,54 @@ interface Log {
   data: Hex;
 }
 
+type ContractLanguage = 'Solidity' | 'Vyper';
+type ContractCompiler = 'solc' | 'vyper';
+type Evm =
+  | 'default'
+  | 'byzantium'
+  | 'constantinople'
+  | 'petersburg'
+  | 'istanbul'
+  | 'berlin'
+  | 'london'
+  | 'shanghai'
+  | 'istanbul';
+
+interface SourceCode {
+  name: string;
+  entry: string;
+  files: Record<string, string>;
+  constructorArguments: string;
+  evm: Evm;
+  language: ContractLanguage;
+  compiler: {
+    type: ContractCompiler;
+    version: string;
+  };
+  compilation: {
+    optimization: {
+      runs: number;
+    } | null;
+  };
+}
+type Contract = ProxyContract | StaticContract;
+interface BaseContract {
+  source: SourceCode;
+  abi: Abi;
+  isProxy: boolean;
+}
+interface ProxyContract extends BaseContract {
+  isProxy: true;
+  implementation: {
+    address: Address;
+    abi: Abi;
+    source: SourceCode;
+  } | null;
+}
+interface StaticContract extends BaseContract {
+  isProxy: false;
+}
+
 const { apiEndpoint } = useEnv();
 
 class Service {
@@ -123,7 +171,19 @@ class Service {
     const labels: LabelWithAddress[] = await response.json();
     return labels;
   }
+
+  public async getContractSource(address: Address): Promise<Contract> {
+    const params: Record<string, string> = {
+      chain: this.chainId.toString(),
+      address,
+    };
+    const url = new URL(`${apiEndpoint}/contract/source`);
+    url.search = new URLSearchParams(params).toString();
+    const response = await fetch(url);
+    const source: Contract = await response.json();
+    return source;
+  }
 }
 
 export default Service;
-export type { Label, LabelId, Log, Transaction };
+export type { Label, LabelId, Log, Transaction, Contract, SourceCode };
