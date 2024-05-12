@@ -10,7 +10,7 @@
     <div class="toggle">
       <ScopeCheckbox
         :model-value="showAsProxy"
-        :label="'Show as proxy'"
+        label="Show as proxy"
         @update:model-value="handleToggleUpdate"
       />
     </div>
