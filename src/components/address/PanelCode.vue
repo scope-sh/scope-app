@@ -14,6 +14,10 @@
       v-model:show-as-proxy="showAsProxy"
       :implementation
     />
+    <SourceAttributes
+      v-if="source"
+      :source="source"
+    />
     <div class="code">
       <ScopeTabs
         v-if="source || abi"
@@ -54,12 +58,14 @@ import { computed, onMounted, ref, watch } from 'vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
-import CardSource from '@/components/address/code/CardSource.vue';
-import NoticeProxy from '@/components/address/code/NoticeProxy.vue';
-import SourceHighlighter from '@/components/address/code/SourceHighlighter.vue';
 import useChain from '@/composables/useChain';
 import ApiService from '@/services/api';
 import type { Contract } from '@/services/api';
+
+import CardSource from './code/CardSource.vue';
+import NoticeProxy from './code/NoticeProxy.vue';
+import SourceAttributes from './code/SourceAttributes.vue';
+import SourceHighlighter from './code/SourceHighlighter.vue';
 
 const props = defineProps<{
   address: Address;
