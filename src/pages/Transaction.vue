@@ -329,17 +329,9 @@ watch(hash, () => {
   fetch();
 });
 
-watch(
-  hash,
-  () => {
-    useHead({
-      title: `Transaction ${hash.value} on ${chainName.value} | Scope`,
-    });
-  },
-  {
-    immediate: true,
-  },
-);
+useHead({
+  title: () => `Transaction ${hash.value} on ${chainName.value} | Scope`,
+});
 
 const evmService = computed(() =>
   chainId.value && client.value

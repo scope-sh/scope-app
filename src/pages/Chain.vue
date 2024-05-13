@@ -72,17 +72,9 @@ const router = useRouter();
 const { setCommands } = useCommands(CHAIN_PAGE);
 const { send: sendToast } = useToast();
 
-watch(
-  chainName,
-  () => {
-    useHead({
-      title: `${chainName.value} | Scope`,
-    });
-  },
-  {
-    immediate: true,
-  },
-);
+useHead({
+  title: () => `${chainName.value} | Scope`,
+});
 
 const commands = computed<Command[]>(() => [
   {

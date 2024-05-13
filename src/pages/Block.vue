@@ -249,17 +249,9 @@ watch(number, () => {
   fetch();
 });
 
-watch(
-  number,
-  () => {
-    useHead({
-      title: `Block ${number.value} on ${chainName.value} | Scope`,
-    });
-  },
-  {
-    immediate: true,
-  },
-);
+useHead({
+  title: () => `Block ${number.value} on ${chainName.value} | Scope`,
+});
 
 const evmService = computed(() =>
   chainId.value && client.value

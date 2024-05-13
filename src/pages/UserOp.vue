@@ -371,17 +371,9 @@ watch(hash, () => {
   fetch();
 });
 
-watch(
-  hash,
-  () => {
-    useHead({
-      title: `UserOp ${hash.value} on ${chainName.value} | Scope`,
-    });
-  },
-  {
-    immediate: true,
-  },
-);
+useHead({
+  title: () => `UserOp ${hash.value} on ${chainName.value} | Scope`,
+});
 
 const evmService = computed(() =>
   chainId.value && client.value

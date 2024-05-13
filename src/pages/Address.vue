@@ -319,17 +319,9 @@ watch(address, () => {
   fetch();
 });
 
-watch(
-  address,
-  () => {
-    useHead({
-      title: `Address ${address.value} on ${chainName.value} | Scope`,
-    });
-  },
-  {
-    immediate: true,
-  },
-);
+useHead({
+  title: () => `Address ${address.value} on ${chainName.value} | Scope`,
+});
 
 const evmService = computed(() =>
   chainId.value && client.value
