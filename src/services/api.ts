@@ -88,7 +88,7 @@ interface SourceCode {
   name: string;
   entry: string;
   files: Record<string, string>;
-  constructorArguments: string;
+  constructorArguments: Hex;
   evm: Evm;
   language: ContractLanguage;
   compiler: {
