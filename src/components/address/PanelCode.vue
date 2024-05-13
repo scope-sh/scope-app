@@ -59,13 +59,22 @@ import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import useChain from '@/composables/useChain';
+import useCommands from '@/composables/useCommands';
+import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import type { Contract } from '@/services/api';
+import { Command } from '@/stores/commands';
 
 import CardSource from './code/CardSource.vue';
 import NoticeProxy from './code/NoticeProxy.vue';
 import SourceAttributes from './code/SourceAttributes.vue';
 import SourceHighlighter from './code/SourceHighlighter.vue';
+
+const PANEL_CODE = 'panel_code';
+
+const { id: chainId } = useChain();
+const { setCommands } = useCommands(PANEL_CODE);
+const { send: sendToast } = useToast();
 
 const props = defineProps<{
   address: Address;
@@ -80,8 +89,6 @@ const rootEl = computed(() => (panelEl.value ? panelEl.value.rootEl : null));
 defineExpose({
   rootEl,
 });
-
-const { id: chainId } = useChain();
 
 onMounted(() => {
   fetch();
@@ -129,6 +136,7 @@ const source = computed(() =>
 );
 
 async function fetch(): Promise<void> {
+  contract.value = null;
   if (!apiService.value) {
     return;
   }
@@ -152,6 +160,35 @@ const tabs = [
     value: 'bytecode',
   },
 ];
+
+const commands = computed<Command[]>(() => {
+  const commands: Command[] = [];
+  const storedAbi = abi.value;
+  if (storedAbi) {
+    commands.push({
+      icon: 'copy',
+      label: 'Copy ABI',
+      act: () => {
+        navigator.clipboard.writeText(JSON.stringify(storedAbi, null, 2));
+        sendToast({
+          type: 'success',
+          message: 'ABI copied to clipboard',
+        });
+      },
+    });
+  }
+  return commands;
+});
+
+watch(
+  commands,
+  () => {
+    setCommands(commands.value);
+  },
+  {
+    immediate: true,
+  },
+);
 </script>
 
 <style scoped>
