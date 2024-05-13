@@ -89,6 +89,9 @@ function getChainNames(chain: Chain): string[] {
       case OPTIMISM: {
         return ['optimism'];
       }
+      case OPTIMISM_SEPOLIA: {
+        return ['optimism sepolia'];
+      }
       case POLYGON_AMOY: {
         return ['amoy'];
       }
