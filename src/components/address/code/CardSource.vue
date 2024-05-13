@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import ScopeCard from '@/components/__common/ScopeCard.vue';
 import type { SourceCode } from '@/services/api';
@@ -30,6 +30,13 @@ import SourceHighlighter from './SourceHighlighter.vue';
 const props = defineProps<{
   source: SourceCode;
 }>();
+
+watch(
+  () => props.source,
+  () => {
+    selectedFileIndex.value = 0;
+  },
+);
 
 const files = computed(() =>
   Object.entries(props.source.files).map(([name, content]) => ({
