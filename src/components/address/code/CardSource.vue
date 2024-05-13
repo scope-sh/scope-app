@@ -12,7 +12,7 @@
       />
       <SourceHighlighter
         :value="selectedFile"
-        language="Solidity"
+        :language="source.language"
       />
     </div>
   </ScopeCard>
