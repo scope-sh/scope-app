@@ -17,7 +17,10 @@
     >
       <ScopeEmptyState label="Couldn't find this transaction">
         <template #actions>
-          <ScopeButton @click="handleOpenAsUserOpClick">
+          <ScopeButton
+            kind="primary"
+            @click="handleOpenAsUserOpClick"
+          >
             Open as UserOp
           </ScopeButton>
         </template>

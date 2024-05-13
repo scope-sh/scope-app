@@ -19,7 +19,10 @@
         label="Sorry, time traveler, but this block has not been produced yet"
       >
         <template #actions>
-          <ScopeButton @click="handleOpenLatestBlockClick">
+          <ScopeButton
+            kind="primary"
+            @click="handleOpenLatestBlockClick"
+          >
             Open latest
           </ScopeButton>
         </template>
