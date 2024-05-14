@@ -96,7 +96,9 @@ const files = computed<File[]>(() =>
 );
 const singleFile = computed(() => files.value.length === 1);
 
-const selectedFileIndex = ref<number>(0);
+const selectedFileIndex = ref<number>(
+  files.value.findIndex((file) => file.name === props.source.entry) || 0,
+);
 const selectedFile = computed(() => {
   return files.value[selectedFileIndex.value]?.content || '';
 });
