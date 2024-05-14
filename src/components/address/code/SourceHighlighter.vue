@@ -2,7 +2,9 @@
 <template>
   <div class="wrapper">
     <div
+      ref="textEl"
       class="text"
+      @scroll="handleScroll"
       v-html="html"
     />
     <ButtonCopy
@@ -13,36 +15,104 @@
 </template>
 
 <script setup lang="ts">
-import { getHighlighter } from 'shiki';
-import { ref, watch } from 'vue';
+import { transformerNotationWordHighlight } from '@shikijs/transformers';
+import { HighlighterGeneric, getHighlighter } from 'shiki';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import ButtonCopy from '@/components/__common/ButtonCopy.vue';
 
 type Language = 'Solidity' | 'Vyper' | 'JSON' | 'plaintext';
 
-const props = defineProps<{
-  value: string;
-  language: Language;
+const props = withDefaults(
+  defineProps<{
+    value: string;
+    language: Language;
+    initialLine?: number;
+    highlight?: string | null;
+  }>(),
+  {
+    initialLine: 1,
+    highlight: null,
+  },
+);
+
+const emit = defineEmits<{
+  scroll: [];
 }>();
 
-const html = ref<string>('');
+const textEl = ref<HTMLElement | null>(null);
+
+const highlighter = ref<HighlighterGeneric<'solidity', 'ayu-dark'> | null>(
+  null,
+);
+
+onMounted(async () => {
+  highlighter.value = await getHighlighter({
+    themes: ['ayu-dark'],
+    langs: ['solidity', 'vyper', 'json', 'plaintext'],
+  });
+});
+
+const html = computed(() => {
+  if (!highlighter.value) {
+    return '';
+  }
+  const source =
+    getHighlightSnippet(props.language, props.highlight) + props.value;
+  return highlighter.value.codeToHtml(source, {
+    lang: props.language.toLowerCase(),
+    theme: 'ayu-dark',
+    transformers: [transformerNotationWordHighlight()],
+  });
+});
 
 watch(
-  () => props.value,
-  async () => {
-    const highlighter = await getHighlighter({
-      themes: ['ayu-dark'],
-      langs: ['solidity', 'vyper', 'json', 'plaintext'],
-    });
-    html.value = highlighter.codeToHtml(props.value, {
-      lang: props.language.toLowerCase(),
-      theme: 'ayu-dark',
-    });
+  () => props.initialLine,
+  () => {
+    if (props.initialLine === 1) {
+      return;
+    }
+    scrollToLine(props.initialLine);
   },
   {
     immediate: true,
   },
 );
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function scrollToLine(line: number): Promise<void> {
+  if (!textEl.value) {
+    return;
+  }
+  await sleep(10);
+  const height = textEl.value.clientHeight;
+  const top = Math.max(16 * line - height / 2, 0);
+  textEl.value.scrollTo({
+    top,
+    behavior: 'instant',
+  });
+}
+
+function handleScroll(): void {
+  emit('scroll');
+}
+
+function getHighlightSnippet(language: Language, word: string | null): string {
+  if (!word) {
+    return '';
+  }
+  switch (language) {
+    case 'Solidity':
+      return `// [!code word:${word}]`;
+    case 'Vyper':
+      return `# [!code word:${word}]`;
+    default:
+      return '';
+  }
+}
 </script>
 
 <style scoped>
@@ -89,6 +159,10 @@ watch(
     color: var(--color-text-secondary);
     text-align: right;
     counter-increment: step;
+  }
+
+  .highlighted-word {
+    background: oklch(from var(--color-accent) l c h / 20%);
   }
 }
 

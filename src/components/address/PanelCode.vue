@@ -19,15 +19,26 @@
       :source="source"
     />
     <div class="code">
-      <ScopeTabs
-        v-if="source || abi"
-        v-model="activeTab"
-        :options="tabs"
-      />
+      <div class="code-header">
+        <ScopeTabs
+          v-if="source || abi"
+          v-model="activeTab"
+          :options="tabs"
+        />
+        <ScopeButton
+          v-if="source"
+          kind="minimal"
+          @click="toggleSearch"
+        >
+          Search
+        </ScopeButton>
+      </div>
       <CardSource
         v-if="activeTab === 'source' && source"
         :source
+        :is-searching
         class="card"
+        @close-search="handleCloseSearch"
       />
       <div
         v-else-if="activeTab === 'abi' && abi"
@@ -55,6 +66,7 @@
 import type { Address, Hex } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 
+import ScopeButton from '@/components/__common/ScopeButton.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
@@ -161,6 +173,14 @@ const tabs = [
   },
 ];
 
+const isSearching = ref(false);
+function toggleSearch(): void {
+  isSearching.value = !isSearching.value;
+}
+function handleCloseSearch(): void {
+  isSearching.value = false;
+}
+
 const commands = computed<Command[]>(() => {
   const commands: Command[] = [];
   const storedAbi = abi.value;
@@ -196,6 +216,12 @@ watch(
   display: flex;
   flex-direction: column;
   gap: var(--spacing-3);
+}
+
+.code-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .card,

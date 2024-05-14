@@ -16,11 +16,6 @@ import FileTreeDirectory, {
   FileSelection,
 } from './FileTreeDirectory.vue';
 
-interface File {
-  name: string;
-  content: string;
-}
-
 const props = defineProps<{
   files: File[];
   selectedFileIndex: number;
@@ -119,6 +114,15 @@ function getFullPath(directory: Directory): string {
     ? directory.name
     : `${parentPath}/${directory.name}`;
 }
+</script>
+
+<script lang="ts">
+interface File {
+  name: string;
+  content: string;
+}
+
+export type { File };
 </script>
 
 <style scoped>
