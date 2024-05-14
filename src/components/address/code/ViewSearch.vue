@@ -13,10 +13,7 @@
           @click="handleCrossIconClick"
         />
       </div>
-      <div
-        v-if="results.length > 0"
-        class="stats"
-      >
+      <div class="stats">
         {{ statsLabel }}
       </div>
     </div>
@@ -42,12 +39,6 @@
           {{ result.match }}
         </div>
       </div>
-    </div>
-    <div
-      v-else
-      class="results-empty"
-    >
-      No results found.
     </div>
   </div>
 </template>
@@ -93,6 +84,12 @@ const resultsByFile = computed(() => {
   return map;
 });
 const statsLabel = computed(() => {
+  if (query.value.length === 0) {
+    return '';
+  }
+  if (results.value.length === 0) {
+    return 'No results found.';
+  }
   const countSuffix = results.value.length === MAX_RESULTS ? '+' : '';
   return `${results.value.length}${countSuffix} results in ${Object.keys(resultsByFile).length}${countSuffix} files`;
 });
