@@ -11,7 +11,8 @@
       @close-search="handleCloseSearch"
     />
     <SourceHighlighter
-      :value="files[0]?.content || ''"
+      v-if="selectedFile"
+      :value="selectedFile.content"
       :language="source.language"
       :initial-line="initialLineNumber"
       :highlight="searchQuery"
@@ -32,13 +33,20 @@
         v-model:selectedFileIndex="selectedFileIndex"
         :files="files"
       />
-      <SourceHighlighter
-        :value="selectedFile"
-        :language="source.language"
-        :initial-line="initialLineNumber"
-        :highlight="searchQuery"
-        @scroll="handleSourceScroll"
-      />
+      <div
+        v-if="selectedFile"
+        class="pane"
+      >
+        <FilePathStrip :value="selectedFile.name" />
+        <SourceHighlighter
+          v-if="selectedFile"
+          :value="selectedFile.content"
+          :language="source.language"
+          :initial-line="initialLineNumber"
+          :highlight="searchQuery"
+          @scroll="handleSourceScroll"
+        />
+      </div>
     </div>
   </ScopeCard>
 </template>
@@ -49,6 +57,7 @@ import { computed, ref, watch } from 'vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
 import type { SourceCode } from '@/services/api';
 
+import FilePathStrip from './FilePathStrip.vue';
 import FileTree, { File } from './FileTree.vue';
 import SourceHighlighter from './SourceHighlighter.vue';
 import ViewSearch, { Result as SearchResult } from './ViewSearch.vue';
@@ -100,7 +109,7 @@ const selectedFileIndex = ref<number>(
   files.value.findIndex((file) => file.name === props.source.entry) || 0,
 );
 const selectedFile = computed(() => {
-  return files.value[selectedFileIndex.value]?.content || '';
+  return files.value[selectedFileIndex.value] || null;
 });
 const initialLineNumber = ref<number>(1);
 </script>
@@ -110,5 +119,12 @@ const initialLineNumber = ref<number>(1);
   display: flex;
   gap: var(--spacing-4);
   height: 100%;
+}
+
+.pane {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-direction: column;
+  width: 100%;
 }
 </style>

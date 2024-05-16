@@ -120,6 +120,7 @@ function getHighlightSnippet(language: Language, word: string | null): string {
   position: relative;
   width: 100%;
   height: 100%;
+  overflow: auto;
 }
 
 .text {
