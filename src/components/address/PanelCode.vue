@@ -72,6 +72,7 @@ import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
+import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import type { Contract } from '@/services/api';
@@ -86,6 +87,7 @@ const PANEL_CODE = 'panel_code';
 
 const { id: chainId } = useChain();
 const { setCommands } = useCommands(PANEL_CODE);
+const { requestLabels } = useLabels();
 const { send: sendToast } = useToast();
 
 const props = defineProps<{
@@ -205,6 +207,14 @@ watch(
     immediate: true,
   },
 );
+
+const addresses = computed(() =>
+  implementation.value ? [implementation.value] : [],
+);
+
+watch(addresses, () => {
+  requestLabels(addresses.value);
+});
 </script>
 
 <style scoped>
