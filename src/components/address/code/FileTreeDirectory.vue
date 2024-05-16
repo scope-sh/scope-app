@@ -1,5 +1,8 @@
 <template>
-  <div class="directory">
+  <div
+    v-if="directory.directories.length > 0 || directory.files.length > 0"
+    class="directory"
+  >
     <div
       v-if="directory.parent"
       class="header"

@@ -1,5 +1,9 @@
 <template>
   <div class="files">
+    <input
+      v-model="filter"
+      placeholder="Filter"
+    />
     <FileTreeDirectory
       :directory="rootDirectory"
       :selection="fileSelection"
@@ -9,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 import FileTreeDirectory, {
   Directory,
@@ -91,11 +95,16 @@ const rootDirectory = computed<Directory>(() => {
     if (!fileName) {
       return;
     }
+    if (!fileName.toLowerCase().includes(filter.value.toLowerCase())) {
+      return;
+    }
     current.files.push(fileName);
   });
 
   return root;
 });
+
+const filter = ref<string>('');
 
 function handleFileSelect(directory: Directory, fileIndex: number): void {
   const selectedFileIndex = props.files.findIndex(
@@ -127,7 +136,25 @@ export type { File };
 
 <style scoped>
 .files {
+  display: flex;
+  gap: var(--spacing-2);
+  flex-direction: column;
   width: 256px;
   overflow-y: scroll;
+}
+
+input {
+  width: 100%;
+  padding: var(--spacing-2) var(--spacing-2);
+  border: none;
+  border-radius: var(--border-radius-s);
+  outline: none;
+  background: var(--color-background-secondary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-s);
+
+  &::placeholder {
+    color: var(--color-text-placeholder);
+  }
 }
 </style>
