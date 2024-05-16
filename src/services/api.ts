@@ -101,22 +101,15 @@ interface SourceCode {
     } | null;
   };
 }
-type Contract = ProxyContract | StaticContract;
-interface BaseContract {
-  source: SourceCode;
-  abi: Abi;
-  isProxy: boolean;
-}
-interface ProxyContract extends BaseContract {
-  isProxy: true;
+
+interface Contract {
+  abi: Abi | null;
+  source: SourceCode | null;
   implementation: {
     address: Address;
-    abi: Abi;
-    source: SourceCode;
+    abi: Abi | null;
+    source: SourceCode | null;
   } | null;
-}
-interface StaticContract extends BaseContract {
-  isProxy: false;
 }
 
 const { apiEndpoint } = useEnv();

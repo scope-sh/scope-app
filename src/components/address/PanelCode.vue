@@ -122,26 +122,22 @@ const isLoading = ref(false);
 const showAsProxy = ref(true);
 const contract = ref<Contract | null>(null);
 
-const isProxy = computed(() => contract.value && contract.value.isProxy);
+const isProxy = computed(() => contract.value && contract.value.implementation);
 const implementation = computed(() =>
-  contract.value && contract.value.isProxy && contract.value.implementation
+  contract.value && contract.value.implementation
     ? contract.value.implementation.address
     : null,
 );
 const abi = computed(() =>
   contract.value
-    ? showAsProxy.value &&
-      contract.value.isProxy &&
-      contract.value.implementation
+    ? showAsProxy.value && contract.value.implementation
       ? contract.value.implementation.abi
       : contract.value.abi
     : null,
 );
 const source = computed(() =>
   contract.value
-    ? showAsProxy.value &&
-      contract.value.isProxy &&
-      contract.value.implementation
+    ? showAsProxy.value && contract.value.implementation
       ? contract.value.implementation.source
       : contract.value.source
     : null,
