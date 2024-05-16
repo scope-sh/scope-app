@@ -142,9 +142,7 @@ function getBeforeExecutionLog(logs: Log[]): Log | null {
       const event = decodeEventLog({
         abi: entryPointV0_6_0Abi,
         data: log.data,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        topics: log.topics,
+        topics: log.topics as [Hex, ...Hex[]],
       });
       if (event.eventName !== 'BeforeExecution') {
         continue;
@@ -154,9 +152,7 @@ function getBeforeExecutionLog(logs: Log[]): Log | null {
       const event = decodeEventLog({
         abi: entryPointV0_7_0Abi,
         data: log.data,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        topics: log.topics,
+        topics: log.topics as [Hex, ...Hex[]],
       });
       if (event.eventName !== 'BeforeExecution') {
         continue;
@@ -174,9 +170,7 @@ function getUserOpEvents(logs: Log[]): UserOpEvent[] {
       const event = decodeEventLog({
         abi: entryPointV0_6_0Abi,
         data: log.data,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        topics: log.topics,
+        topics: log.topics as [Hex, ...Hex[]],
       });
       if (event.eventName !== 'UserOperationEvent') {
         continue;
@@ -195,9 +189,7 @@ function getUserOpEvents(logs: Log[]): UserOpEvent[] {
       const event = decodeEventLog({
         abi: entryPointV0_7_0Abi,
         data: log.data,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        topics: log.topics,
+        topics: log.topics as [Hex, ...Hex[]],
       });
       if (event.eventName !== 'UserOperationEvent') {
         continue;
@@ -462,9 +454,7 @@ function getAccountDeployments(logs: Log[]): AccountDeployment[] {
       const event = decodeEventLog({
         abi: entryPointV0_6_0Abi,
         data: log.data,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        topics: log.topics,
+        topics: log.topics as [Hex, ...Hex[]],
       });
       if (event.eventName !== 'AccountDeployed') {
         continue;
@@ -477,9 +467,7 @@ function getAccountDeployments(logs: Log[]): AccountDeployment[] {
       const event = decodeEventLog({
         abi: entryPointV0_7_0Abi,
         data: log.data,
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        topics: log.topics,
+        topics: log.topics as [Hex, ...Hex[]],
       });
       if (event.eventName !== 'AccountDeployed') {
         continue;
