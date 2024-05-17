@@ -1,25 +1,25 @@
 <template>
   <label>
-    <CheckboxRoot
+    <Checkbox.Root
       :checked="modelValue"
       as-child
       @update:checked="handleModelValueUpdate"
     >
       <button class="root">
-        <CheckboxIndicator class="indicator">
+        <Checkbox.Indicator class="indicator">
           <ScopeIcon
             kind="check"
             class="icon"
           />
-        </CheckboxIndicator>
+        </Checkbox.Indicator>
       </button>
-    </CheckboxRoot>
+    </Checkbox.Root>
     <span class="label">{{ label }}</span>
   </label>
 </template>
 
 <script setup lang="ts">
-import { CheckboxIndicator, CheckboxRoot } from 'radix-vue';
+import { Checkbox } from 'radix-vue/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
