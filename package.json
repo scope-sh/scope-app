@@ -34,7 +34,7 @@
     "@vueuse/core": "^10.9.0",
     "evm-providers": "^0.4.3",
     "pinia": "^2.1.7",
-    "radix-vue": "^1.7.4",
+    "radix-vue": "^1.8.0",
     "shiki": "^1.5.1",
     "viem": "^2.9.15",
     "vue": "^3.4.19",
