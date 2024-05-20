@@ -137,8 +137,9 @@
       </template>
       <template v-else-if="section === SECTION_CODE">
         <PanelCode
-          v-if="isContract && code"
-          :bytecode="code"
+          v-if="isContract && bytecode"
+          :bytecode
+          :contract
           :address
         />
       </template>
@@ -173,6 +174,7 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
+import ApiService, { type Contract } from '@/services/api';
 import EvmService from '@/services/evm';
 import HypersyncService, {
   Log as AddressLog,
@@ -215,7 +217,7 @@ const sections = computed<Section[]>(() => {
       value: SECTION_OPS,
     });
   }
-  if (isContract.value && code.value) {
+  if (isContract.value && bytecode.value) {
     sections.push({
       label: 'Code',
       value: SECTION_CODE,
@@ -276,6 +278,9 @@ useHead({
   title: () => `Address ${address.value} on ${chainName.value} | Scope`,
 });
 
+const apiService = computed(() =>
+  chainId.value ? new ApiService(chainId.value) : null,
+);
 const evmService = computed(() =>
   chainId.value && client.value
     ? new EvmService(chainId.value, client.value)
@@ -292,7 +297,9 @@ const isLoadingBalance = ref(false);
 const etherBalance = ref<bigint | undefined>(undefined);
 
 const isLoadingCode = ref(false);
-const code = ref<Hex | null>(null);
+const isLoadingContract = ref(false);
+const bytecode = ref<Hex | null>(null);
+const contract = ref<Contract | null>(null);
 
 const isLoadingTransactions = ref(false);
 const transactions = ref<AddressTransaction[]>([]);
@@ -303,7 +310,7 @@ const logs = ref<AddressLog[]>([]);
 const isLoadingOps = ref(false);
 const ops = ref<UserOp[]>([]);
 
-const isContract = computed<boolean>(() => !!code.value);
+const isContract = computed<boolean>(() => !!bytecode.value);
 const addressLabel = computed(() => getLabel(address.value));
 const overviewPanelTitle = computed<string>(() => {
   if (!isContract.value) {
@@ -325,6 +332,7 @@ async function fetch(): Promise<void> {
   await Promise.all([
     fetchBalance(),
     fetchCode(),
+    fethcContract(),
     fetchTransactions(),
     fetchLogs(),
     fetchUserOps(),
@@ -345,8 +353,17 @@ async function fetchCode(): Promise<void> {
     return;
   }
   isLoadingCode.value = true;
-  code.value = await evmService.value.getCode(address.value);
+  bytecode.value = await evmService.value.getCode(address.value);
   isLoadingCode.value = false;
+}
+
+async function fethcContract(): Promise<void> {
+  if (!address.value || !apiService.value) {
+    return;
+  }
+  isLoadingContract.value = true;
+  contract.value = await apiService.value.getContractSource(address.value);
+  isLoadingContract.value = false;
 }
 
 const TRANSACTIONS_PER_PAGE = 20;
