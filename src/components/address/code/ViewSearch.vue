@@ -91,7 +91,10 @@ const statsLabel = computed(() => {
     return 'No results found.';
   }
   const countSuffix = results.value.length === MAX_RESULTS ? '+' : '';
-  return `${results.value.length}${countSuffix} results in ${Object.keys(resultsByFile).length}${countSuffix} files`;
+  const resultWord = results.value.length === 1 ? 'result' : 'results';
+  const fileWord =
+    Object.keys(resultsByFile.value).length === 1 ? 'file' : 'files';
+  return `${results.value.length}${countSuffix} ${resultWord} in ${Object.keys(resultsByFile.value).length}${countSuffix} ${fileWord}`;
 });
 
 watch(query, () => {
