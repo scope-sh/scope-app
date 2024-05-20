@@ -89,11 +89,13 @@ async function scrollToLine(line: number): Promise<void> {
     return;
   }
   await sleep(10);
-  const height = textEl.value.clientHeight;
-  const top = Math.max(16 * line - height / 2, 0);
-  textEl.value.scrollTo({
-    top,
-    behavior: 'instant',
+  const lineEls = textEl.value.getElementsByClassName('line');
+  const lineEl = lineEls[line - 1];
+  if (!lineEl) {
+    return;
+  }
+  lineEl.scrollIntoView({
+    block: 'center',
   });
 }
 
