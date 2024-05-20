@@ -47,6 +47,7 @@
         <SourceHighlighter
           :value="JSON.stringify(abi, null, 2)"
           language="JSON"
+          line-numbers
         />
       </div>
       <div
@@ -56,6 +57,7 @@
         <SourceHighlighter
           :value="bytecode"
           language="plaintext"
+          :line-numbers="false"
         />
       </div>
     </div>

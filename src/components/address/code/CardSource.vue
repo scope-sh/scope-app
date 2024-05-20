@@ -14,6 +14,7 @@
       v-if="selectedFile"
       :value="selectedFile.content"
       :language="source.language"
+      line-numbers
       :initial-line="initialLineNumber"
       :highlight="searchQuery"
       @scroll="handleSourceScroll"
@@ -42,6 +43,7 @@
           v-if="selectedFile"
           :value="selectedFile.content"
           :language="source.language"
+          line-numbers
           :initial-line="initialLineNumber"
           :highlight="searchQuery"
           @scroll="handleSourceScroll"

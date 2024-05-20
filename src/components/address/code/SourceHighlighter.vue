@@ -27,6 +27,7 @@ const props = withDefaults(
   defineProps<{
     value: string;
     language: Language;
+    lineNumbers: boolean;
     initialLine?: number;
     highlight?: string | null;
   }>(),
@@ -113,6 +114,10 @@ function getHighlightSnippet(language: Language, word: string | null): string {
       return '';
   }
 }
+
+const lineBeforeDisplay = computed(() =>
+  props.lineNumbers ? 'inline-block' : 'none',
+);
 </script>
 
 <style scoped>
@@ -154,7 +159,7 @@ function getHighlightSnippet(language: Language, word: string | null): string {
 
   &::before {
     content: counter(step);
-    display: inline-block;
+    display: v-bind('lineBeforeDisplay');
     width: calc(var(--line-number-digits) * var(--font-size-m) / 2);
     margin-right: 48px;
     color: var(--color-text-secondary);
