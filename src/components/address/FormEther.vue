@@ -3,7 +3,7 @@
     <FormLabel value="ether" />
     <div class="strip">
       <ScopeTextStrip
-        v-if="balance !== undefined"
+        v-if="balance !== null"
         :value="balance.toString()"
       />
       <ScopeIcon
@@ -29,7 +29,7 @@ import FormLabel from './FormLabel.vue';
 
 const props = defineProps<{
   address: Address;
-  balance?: bigint;
+  balance: bigint | null;
 }>();
 
 const emit = defineEmits<{

@@ -294,7 +294,7 @@ const hypersyncService = computed(() =>
 );
 
 const isLoadingBalance = ref(false);
-const etherBalance = ref<bigint | undefined>(undefined);
+const etherBalance = ref<bigint | null>(null);
 
 const isLoadingCode = ref(false);
 const isLoadingContract = ref(false);
@@ -340,6 +340,7 @@ async function fetch(): Promise<void> {
 }
 
 async function fetchBalance(): Promise<void> {
+  etherBalance.value = null;
   if (!address.value || !evmService.value) {
     return;
   }
@@ -349,6 +350,7 @@ async function fetchBalance(): Promise<void> {
 }
 
 async function fetchCode(): Promise<void> {
+  bytecode.value = null;
   if (!address.value || !evmService.value) {
     return;
   }
@@ -358,6 +360,7 @@ async function fetchCode(): Promise<void> {
 }
 
 async function fethcContract(): Promise<void> {
+  contract.value = null;
   if (!address.value || !apiService.value) {
     return;
   }
