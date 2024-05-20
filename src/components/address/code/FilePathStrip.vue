@@ -34,6 +34,7 @@ const name = computed(() => props.value.split('/').pop());
 .strip {
   display: flex;
   gap: var(--spacing-4);
+  flex-wrap: wrap;
 }
 
 .path {
@@ -41,6 +42,7 @@ const name = computed(() => props.value.split('/').pop());
 
   display: flex;
   gap: var(--spacing);
+  flex-wrap: wrap;
 }
 
 .dir {
