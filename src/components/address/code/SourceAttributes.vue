@@ -60,13 +60,17 @@ defineProps<{
 
 <style scoped>
 .stack {
+  --spacing: var(--spacing-5);
+
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-5);
+  gap: var(--spacing);
 }
 
 .sides {
   display: flex;
+  flex-wrap: wrap;
+  row-gap: var(--spacing);
 }
 
 .side {
