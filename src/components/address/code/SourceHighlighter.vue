@@ -152,7 +152,7 @@ function getHighlightSnippet(language: Language, word: string | null): string {
 .text :deep(.line) {
   font-family: var(--font-mono);
 
-  &:not(:last-child)::before {
+  &::before {
     content: counter(step);
     display: inline-block;
     width: calc(var(--line-number-digits) * var(--font-size-m) / 2);
