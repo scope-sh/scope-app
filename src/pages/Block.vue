@@ -1,17 +1,15 @@
 <template>
   <ScopePage
+    v-model:section="section"
     :sections="sections"
-    @update:section="handleSectionUpdate"
   >
     <ScopePanelLoading
       v-if="isLoading"
-      ref="blockPanelEl"
       title="Block"
       :subtitle="number.toString()"
     />
     <ScopePanel
       v-if="!isLoading && isFuture"
-      ref="blockPanelEl"
       title="Block"
       :subtitle="number.toString()"
     >
@@ -30,7 +28,6 @@
     </ScopePanel>
     <ScopePanel
       v-if="!isLoading && !isFuture"
-      ref="blockPanelEl"
       title="Block"
       :subtitle="number.toString()"
     >
@@ -71,31 +68,38 @@
         </AttributeItem>
       </AttributeList>
     </ScopePanel>
-    <ScopePanel
-      v-if="!isLoading && !isFuture"
-      ref="blockTransactionsEl"
-      title="Transactions"
-    >
-      <template #header>
-        <ScopePaginator
-          v-model="page"
-          :total="maxPage"
+    <template #section>
+      <template v-if="section === SECTION_TRANSACTIONS && !isFuture">
+        <ScopePanelLoading
+          v-if="isLoading"
+          title="Logs"
         />
-      </template>
-      <template #default>
-        <ScopeLabelEmptyState
-          v-if="!block?.transactions.length"
-          value="No transactions found"
-        />
-        <TableTransactions
+        <ScopePanel
           v-else
-          :transactions
-          :page="page - 1"
-          :per-page="TRANSACTIONS_PER_PAGE"
-          type="block"
-        />
+          title="Transactions"
+        >
+          <template #header>
+            <ScopePaginator
+              v-model="page"
+              :total="maxPage"
+            />
+          </template>
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="!block?.transactions.length"
+              value="No transactions found"
+            />
+            <TableTransactions
+              v-else
+              :transactions
+              :page="page - 1"
+              :per-page="TRANSACTIONS_PER_PAGE"
+              type="block"
+            />
+          </template>
+        </ScopePanel>
       </template>
-    </ScopePanel>
+    </template>
   </ScopePage>
 </template>
 
@@ -140,9 +144,18 @@ import {
 import { getRouteLocation } from '@/utils/routing';
 
 const PAGE_BLOCK = 'page_block';
-const SECTION_OVERVIEW = 'overview';
 const SECTION_TRANSACTIONS = 'transactions';
 const TRANSACTIONS_PER_PAGE = 20;
+
+const section = ref<string>(SECTION_TRANSACTIONS);
+const sections = computed<Section[]>(() => {
+  return [
+    {
+      label: 'Transactions',
+      value: SECTION_TRANSACTIONS,
+    },
+  ];
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -150,40 +163,6 @@ const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
 const { setCommands } = useCommands(PAGE_BLOCK);
 const { send: sendToast } = useToast();
-
-type PanelEl = InstanceType<typeof ScopePanel>;
-type PanelSection = Section & { el: PanelEl | null };
-
-const blockPanelEl = ref<PanelEl | null>(null);
-const blockTransactionsEl = ref<PanelEl | null>(null);
-const sections = computed<PanelSection[]>(() => [
-  {
-    label: 'Overview',
-    value: SECTION_OVERVIEW,
-    el: blockPanelEl.value,
-  },
-  {
-    label: 'Transactions',
-    value: SECTION_TRANSACTIONS,
-    el: blockTransactionsEl.value,
-  },
-]);
-function handleSectionUpdate(value: Section['value']): void {
-  openSection(value);
-}
-function openSection(value: Section['value']): void {
-  const panelSection = sections.value.find(
-    (section) => section.value === value,
-  );
-  if (!panelSection) {
-    return;
-  }
-  const el = panelSection.el;
-  if (!el || !el.rootEl) {
-    return;
-  }
-  el.rootEl.scrollIntoView({ behavior: 'smooth' });
-}
 
 const number = computed(() => toBigInt(route.params.number as string) || 0n);
 
@@ -197,20 +176,6 @@ const commands = computed<Command[]>(() => [
         type: 'success',
         message: 'Block number copied to clipboard',
       });
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to overview',
-    act: (): void => {
-      openSection(SECTION_OVERVIEW);
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to transactions',
-    act: (): void => {
-      openSection(SECTION_TRANSACTIONS);
     },
   },
   {

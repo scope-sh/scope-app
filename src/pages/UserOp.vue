@@ -1,17 +1,15 @@
 <template>
   <ScopePage
+    v-model:section="section"
     :sections="sections"
-    @update:section="handleSectionUpdate"
   >
     <ScopePanelLoading
       v-if="isLoading"
-      ref="opPanelEl"
       title="UserOp"
       :subtitle="hash"
     />
     <ScopePanel
       v-if="!isLoading && userOp === null"
-      ref="opPanelEl"
       title="UserOp"
       :subtitle="hash"
     >
@@ -28,7 +26,6 @@
     </ScopePanel>
     <ScopePanel
       v-else-if="userOpUnpacked"
-      ref="opPanelEl"
       title="UserOp"
       :subtitle="hash"
     >
@@ -150,67 +147,79 @@
         :actions
       />
     </ScopePanel>
-    <ScopePanel
-      v-if="!isLoading && transaction !== null"
-      ref="txPanelEl"
-      title="Transaction"
-    >
-      <AttributeList>
-        <AttributeItem v-if="transaction.blockNumber">
-          <AttributeItemLabel :value="'Block'" />
-          <AttributeItemValue>
-            <LinkBlock :number="transaction.blockNumber" />
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem>
-          <AttributeItemLabel :value="'Hash'" />
-          <AttributeItemValue>
-            <LinkTransaction :hash="transaction.hash" />
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem>
-          <AttributeItemLabel :value="'From'" />
-          <AttributeItemValue>
-            <LinkAddress :address="transaction.from" />
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem v-if="transaction.to">
-          <AttributeItemLabel :value="'To'" />
-          <AttributeItemValue>
-            <LinkAddress :address="transaction.to" />
-          </AttributeItemValue>
-        </AttributeItem>
-        <AttributeItem v-if="beneficiary">
-          <AttributeItemLabel :value="'Beneficiary'" />
-          <AttributeItemValue>
-            <LinkAddress :address="beneficiary" />
-          </AttributeItemValue>
-        </AttributeItem>
-      </AttributeList>
-    </ScopePanel>
-    <ScopePanel
-      v-if="!isLoading"
-      ref="logsPanelEl"
-      title="Logs"
-    >
-      <template #default>
-        <ScopeLabelEmptyState
-          v-if="!logs.length"
-          value="No logs found"
+    <template #section>
+      <template v-if="section === SECTION_TRANSACTION">
+        <ScopePanelLoading
+          v-if="isTransactionLoading"
+          title="Transaction"
         />
-        <div
-          v-else
-          class="logs"
+        <ScopePanel
+          v-else-if="transaction !== null"
+          title="Transaction"
         >
-          <CardLog
-            v-for="(log, index) in logs"
-            :key="index"
-            :log="log"
-            type="transaction"
-          />
-        </div>
+          <AttributeList>
+            <AttributeItem v-if="transaction.blockNumber">
+              <AttributeItemLabel :value="'Block'" />
+              <AttributeItemValue>
+                <LinkBlock :number="transaction.blockNumber" />
+              </AttributeItemValue>
+            </AttributeItem>
+            <AttributeItem>
+              <AttributeItemLabel :value="'Hash'" />
+              <AttributeItemValue>
+                <LinkTransaction :hash="transaction.hash" />
+              </AttributeItemValue>
+            </AttributeItem>
+            <AttributeItem>
+              <AttributeItemLabel :value="'From'" />
+              <AttributeItemValue>
+                <LinkAddress :address="transaction.from" />
+              </AttributeItemValue>
+            </AttributeItem>
+            <AttributeItem v-if="transaction.to">
+              <AttributeItemLabel :value="'To'" />
+              <AttributeItemValue>
+                <LinkAddress :address="transaction.to" />
+              </AttributeItemValue>
+            </AttributeItem>
+            <AttributeItem v-if="beneficiary">
+              <AttributeItemLabel :value="'Beneficiary'" />
+              <AttributeItemValue>
+                <LinkAddress :address="beneficiary" />
+              </AttributeItemValue>
+            </AttributeItem>
+          </AttributeList>
+        </ScopePanel>
       </template>
-    </ScopePanel>
+      <template v-if="section === SECTION_LOGS">
+        <ScopePanelLoading
+          v-if="isTransactionReceiptLoading"
+          title="Logs"
+        />
+        <ScopePanel
+          v-else
+          title="Logs"
+        >
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="!logs.length"
+              value="No logs found"
+            />
+            <div
+              v-else
+              class="logs"
+            >
+              <CardLog
+                v-for="(log, index) in logs"
+                :key="index"
+                :log="log"
+                type="transaction"
+              />
+            </div>
+          </template>
+        </ScopePanel>
+      </template>
+    </template>
   </ScopePage>
 </template>
 
@@ -263,15 +272,11 @@ import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 
 const PAGE_USEROP = 'page_userop';
-const SECTION_OVERVIEW = 'overview';
 const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
 
 const { setCommands } = useCommands(PAGE_USEROP);
 const { send: sendToast } = useToast();
-
-type PanelEl = InstanceType<typeof ScopePanel>;
-type PanelSection = Section & { el: PanelEl | null };
 
 const { indexerEndpoint } = useEnv();
 const route = useRoute();
@@ -279,42 +284,17 @@ const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels, getLabel } = useLabels();
 
-const opPanelEl = ref<PanelEl | null>(null);
-const txPanelEl = ref<PanelEl | null>(null);
-const logsPanelEl = ref<PanelEl | null>(null);
-const sections = computed<PanelSection[]>(() => [
-  {
-    label: 'Overview',
-    value: SECTION_OVERVIEW,
-    el: opPanelEl.value,
-  },
+const section = ref<Section['value']>(SECTION_TRANSACTION);
+const sections = computed<Section[]>(() => [
   {
     label: 'Transaction',
     value: SECTION_TRANSACTION,
-    el: txPanelEl.value,
   },
   {
     label: 'Logs',
     value: SECTION_LOGS,
-    el: logsPanelEl.value,
   },
 ]);
-function handleSectionUpdate(value: Section['value']): void {
-  openSection(value);
-}
-function openSection(value: Section['value']): void {
-  const panelSection = sections.value.find(
-    (section) => section.value === value,
-  );
-  if (!panelSection) {
-    return;
-  }
-  const el = panelSection.el;
-  if (!el || !el.rootEl) {
-    return;
-  }
-  el.rootEl.scrollIntoView({ behavior: 'smooth' });
-}
 
 const hash = computed(() => route.params.hash as Address);
 
@@ -331,27 +311,6 @@ const commands = computed<Command[]>(() => [
         type: 'success',
         message: 'UserOp hash copied to clipboard',
       });
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to overview',
-    act: (): void => {
-      openSection(SECTION_OVERVIEW);
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to transaction',
-    act: (): void => {
-      openSection(SECTION_TRANSACTION);
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to logs',
-    act: (): void => {
-      openSection(SECTION_LOGS);
     },
   },
 ]);
@@ -474,6 +433,8 @@ const logs = computed<Log[]>(() => {
   return getUserOpLogs(transactionReceipt.value.logs, hash.value);
 });
 
+const isTransactionLoading = ref(false);
+const isTransactionReceiptLoading = ref(false);
 async function fetch(): Promise<void> {
   if (!evmService.value || !indexerService.value) {
     return;
@@ -495,15 +456,19 @@ async function fetchTransaction(txHash: Address): Promise<void> {
   if (!evmService.value) {
     return;
   }
+  isTransactionLoading.value = true;
   transaction.value = await evmService.value.getTransaction(txHash);
+  isTransactionLoading.value = false;
 }
 
 async function fetchTransactionReceipt(txHash: Address): Promise<void> {
   if (!evmService.value) {
     return;
   }
+  isTransactionReceiptLoading.value = true;
   transactionReceipt.value =
     await evmService.value.getTransactionReceipt(txHash);
+  isTransactionReceiptLoading.value = false;
 }
 
 const actions = computed<Action[]>(() => {

@@ -1,8 +1,5 @@
 <template>
-  <div
-    ref="rootEl"
-    class="panel"
-  >
+  <div class="panel">
     <div class="header">
       <div class="header-side">
         <h2 class="title">{{ title }}</h2>
@@ -24,18 +21,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
 defineProps<{
   title: string;
   subtitle?: string;
 }>();
-
-const rootEl = ref<HTMLElement | null>(null);
-
-defineExpose({
-  rootEl,
-});
 </script>
 
 <style scoped>
@@ -43,6 +32,7 @@ defineExpose({
   display: flex;
   gap: var(--spacing-10);
   flex-direction: column;
+  width: 100%;
   padding: var(--spacing-8) var(--spacing-6);
   scroll-margin-top: var(--spacing-8);
   border: 1px solid var(--color-border-tertiary);

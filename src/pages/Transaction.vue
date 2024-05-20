@@ -1,17 +1,15 @@
 <template>
   <ScopePage
+    v-model:section="section"
     :sections="sections"
-    @update:section="handleSectionUpdate"
   >
     <ScopePanelLoading
       v-if="isLoading"
-      ref="txPanelEl"
       title="Transaction"
       :subtitle="hash"
     />
     <ScopePanel
       v-else-if="!isLoading && transaction === null"
-      ref="txPanelEl"
       title="Transaction"
       :subtitle="hash"
     >
@@ -28,7 +26,6 @@
     </ScopePanel>
     <ScopePanel
       v-else
-      ref="txPanelEl"
       title="Transaction"
       :subtitle="hash"
     >
@@ -108,48 +105,60 @@
         </AttributeItem>
       </AttributeList>
     </ScopePanel>
-    <ScopePanel
-      v-if="!isLoading && userOps && userOps.length > 0"
-      ref="txOpsEl"
-      title="UserOps"
-    >
-      <template
-        v-if="transaction && transactionReceipt"
-        #default
-      >
-        <CardUserOp
-          v-for="(op, index) in userOps"
-          :key="index"
-          :entry-point="entryPoint"
-          :op="op"
-          :transaction="transaction"
-          :transaction-receipt="transactionReceipt"
+    <template #section>
+      <template v-if="section === SECTION_OPS">
+        <ScopePanelLoading
+          v-if="isLoading"
+          title="UserOps"
         />
-      </template>
-    </ScopePanel>
-    <ScopePanel
-      v-if="!isLoading && transactionReceipt"
-      ref="txLogsEl"
-      title="Logs"
-    >
-      <template #default>
-        <ScopeLabelEmptyState
-          v-if="!transactionReceipt.logs.length"
-          value="No logs found"
-        />
-        <div
-          v-else
-          class="logs"
+        <ScopePanel
+          v-else-if="userOps && userOps.length > 0"
+          title="UserOps"
         >
-          <CardLog
-            v-for="(log, index) in transactionReceipt.logs"
-            :key="index"
-            :log="log"
-            type="transaction"
-          />
-        </div>
+          <template
+            v-if="transaction && transactionReceipt"
+            #default
+          >
+            <CardUserOp
+              v-for="(op, index) in userOps"
+              :key="index"
+              :entry-point="entryPoint"
+              :op="op"
+              :transaction="transaction"
+              :transaction-receipt="transactionReceipt"
+            />
+          </template>
+        </ScopePanel>
       </template>
-    </ScopePanel>
+      <template v-if="section === SECTION_LOGS">
+        <ScopePanelLoading
+          v-if="isLoading"
+          title="UserOps"
+        />
+        <ScopePanel
+          v-else-if="transactionReceipt"
+          title="Logs"
+        >
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="!transactionReceipt.logs.length"
+              value="No logs found"
+            />
+            <div
+              v-else
+              class="logs"
+            >
+              <CardLog
+                v-for="(log, index) in transactionReceipt.logs"
+                :key="index"
+                :log="log"
+                type="transaction"
+              />
+            </div>
+          </template>
+        </ScopePanel>
+      </template>
+    </template>
   </ScopePage>
 </template>
 
@@ -201,61 +210,32 @@ import {
 import { getRouteLocation } from '@/utils/routing';
 
 const PAGE_TRANSACTION = 'page_transaction';
-const SECTION_OVERVIEW = 'overview';
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
 
 const { setCommands } = useCommands(PAGE_TRANSACTION);
 const { send: sendToast } = useToast();
 
-type PanelEl = InstanceType<typeof ScopePanel>;
-type PanelSection = Section & { el: PanelEl | null };
-
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
 
-const txPanelEl = ref<PanelEl | null>(null);
-const txOpsEl = ref<PanelEl | null>(null);
-const txLogsEl = ref<PanelEl | null>(null);
-const sections = computed<PanelSection[]>(() => {
-  const list: PanelSection[] = [];
+const section = ref<Section['value']>(SECTION_LOGS);
+const sections = computed<Section[]>(() => {
+  const list: Section[] = [];
   list.push({
-    label: 'Overview',
-    value: SECTION_OVERVIEW,
-    el: txPanelEl.value,
+    label: 'Logs',
+    value: SECTION_LOGS,
   });
   if (userOps.value && userOps.value.length > 0) {
     list.push({
       label: 'UserOps',
       value: SECTION_OPS,
-      el: txOpsEl.value,
     });
   }
-  list.push({
-    label: 'Logs',
-    value: SECTION_LOGS,
-    el: txLogsEl.value,
-  });
   return list;
 });
-function handleSectionUpdate(value: Section['value']): void {
-  openSection(value);
-}
-function openSection(value: Section['value']): void {
-  const panelSection = sections.value.find(
-    (section) => section.value === value,
-  );
-  if (!panelSection) {
-    return;
-  }
-  const el = panelSection.el;
-  if (!el || !el.rootEl) {
-    return;
-  }
-  el.rootEl.scrollIntoView({ behavior: 'smooth' });
-}
 
 const hash = computed(() => route.params.hash as Address);
 
@@ -298,20 +278,13 @@ const commands = computed<Command[]>(() => [
       }
     },
   },
-  {
-    icon: 'arrow-right',
-    label: 'Go to overview',
-    act: (): void => {
-      openSection(SECTION_OVERVIEW);
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to logs',
-    act: (): void => {
-      openSection(SECTION_LOGS);
-    },
-  },
+  // {
+  //   icon: 'arrow-right',
+  //   label: 'Go to logs',
+  //   act: (): void => {
+  //     openSection(SECTION_LOGS);
+  //   },
+  // },
 ]);
 
 watch(

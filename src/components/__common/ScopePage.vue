@@ -1,14 +1,20 @@
 <template>
   <div class="page">
-    <div class="header">
-      <ScopeTabs
-        v-model="section"
-        :options="sections"
-      />
-    </div>
     <main>
       <slot />
     </main>
+    <div class="content">
+      <div
+        v-if="sections.length > 1"
+        class="sections"
+      >
+        <ScopeTabs
+          v-model="section"
+          :options="sections"
+        />
+      </div>
+      <slot name="section" />
+    </div>
   </div>
 </template>
 
@@ -44,16 +50,23 @@ export type { Section };
   }
 }
 
-.header {
-  display: flex;
-  justify-content: end;
-  width: 100%;
-}
-
 main {
   display: flex;
   gap: var(--spacing-10);
   flex-direction: column;
+  width: 100%;
+}
+
+.content {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-direction: column;
+  width: 100%;
+}
+
+.sections {
+  display: flex;
+  justify-content: start;
   width: 100%;
 }
 </style>

@@ -1,17 +1,15 @@
 <template>
   <ScopePage
+    v-model:section="section"
     :sections="sections"
-    @update:section="handleSectionUpdate"
   >
     <ScopePanelLoading
       v-if="isLoadingBalance || isLoadingCode"
-      ref="addressPanelEl"
       title="Address"
       :subtitle="address"
     />
     <ScopePanel
       v-else
-      ref="addressPanelEl"
       :title="overviewPanelTitle"
       :subtitle="address"
     >
@@ -41,107 +39,110 @@
         :address="address"
       />
     </ScopePanel>
-    <ScopePanelLoading
-      v-if="isLoadingOps"
-      ref="addressOpsEl"
-      title="UserOps"
-    />
-    <ScopePanel
-      v-else-if="ops.length > 0"
-      ref="addressOpsEl"
-      title="UserOps"
-    >
-      <template #header>
-        <ScopePaginator
-          v-if="opRows.length"
-          v-model="opPage"
-          :total="maxOpPage"
+    <template #section>
+      <template v-if="section === SECTION_OPS">
+        <ScopePanelLoading
+          v-if="isLoadingOps"
+          title="UserOps"
         />
-      </template>
-      <template #default>
-        <ScopeLabelEmptyState
-          v-if="!opRows.length"
-          value="No ops found"
-        />
-        <TableUserOps
-          v-else
-          :ops="opRows"
-          :per-page="OPS_PER_PAGE"
-          :page="opPage - 1"
-        />
-      </template>
-    </ScopePanel>
-    <ScopePanelLoading
-      v-if="isLoadingTransactions"
-      ref="addressTransactionsEl"
-      title="Transactions"
-    />
-    <ScopePanel
-      v-else
-      ref="addressTransactionsEl"
-      title="Transactions"
-    >
-      <template #header>
-        <ScopePaginator
-          v-if="transactionRows.length"
-          v-model="transactionPage"
-          :total="maxTransactionPage"
-        />
-      </template>
-      <ScopeLabelEmptyState
-        v-if="!transactionRows.length"
-        value="No transactions found"
-      />
-      <TableTransactions
-        v-else
-        :address="address"
-        :transactions="transactionRows"
-        :per-page="TRANSACTIONS_PER_PAGE"
-        :page="transactionPage - 1"
-        type="address"
-      />
-    </ScopePanel>
-    <ScopePanelLoading
-      v-if="isLoadingLogs"
-      ref="addressLogsEl"
-      title="Logs"
-    />
-    <ScopePanel
-      v-else
-      ref="addressLogsEl"
-      title="Logs"
-    >
-      <template #header>
-        <ScopePaginator
-          v-if="logRows.length"
-          v-model="logPage"
-          :total="maxLogPage"
-        />
-      </template>
-      <template #default>
-        <ScopeLabelEmptyState
-          v-if="!logRows.length"
-          value="No logs found"
-        />
-        <div
-          v-else
-          class="logs"
+        <ScopePanel
+          v-else-if="ops.length > 0"
+          title="UserOps"
         >
-          <CardLog
-            v-for="(log, index) in logRows"
-            :key="index"
-            :log="log"
+          <template #header>
+            <ScopePaginator
+              v-if="opRows.length"
+              v-model="opPage"
+              :total="maxOpPage"
+            />
+          </template>
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="!opRows.length"
+              value="No ops found"
+            />
+            <TableUserOps
+              v-else
+              :ops="opRows"
+              :per-page="OPS_PER_PAGE"
+              :page="opPage - 1"
+            />
+          </template>
+        </ScopePanel>
+      </template>
+      <template v-else-if="section === SECTION_TRANSACTIONS">
+        <ScopePanelLoading
+          v-if="isLoadingTransactions"
+          title="Transactions"
+        />
+        <ScopePanel
+          v-else
+          title="Transactions"
+        >
+          <template #header>
+            <ScopePaginator
+              v-if="transactionRows.length"
+              v-model="transactionPage"
+              :total="maxTransactionPage"
+            />
+          </template>
+          <ScopeLabelEmptyState
+            v-if="!transactionRows.length"
+            value="No transactions found"
+          />
+          <TableTransactions
+            v-else
+            :address="address"
+            :transactions="transactionRows"
+            :per-page="TRANSACTIONS_PER_PAGE"
+            :page="transactionPage - 1"
             type="address"
           />
-        </div>
+        </ScopePanel>
       </template>
-    </ScopePanel>
-    <PanelCode
-      v-if="isContract && code"
-      ref="addressCodeEl"
-      :bytecode="code"
-      :address
-    />
+      <template v-else-if="section === SECTION_LOGS">
+        <ScopePanelLoading
+          v-if="isLoadingLogs"
+          title="Logs"
+        />
+        <ScopePanel
+          v-else
+          title="Logs"
+        >
+          <template #header>
+            <ScopePaginator
+              v-if="logRows.length"
+              v-model="logPage"
+              :total="maxLogPage"
+            />
+          </template>
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="!logRows.length"
+              value="No logs found"
+            />
+            <div
+              v-else
+              class="logs"
+            >
+              <CardLog
+                v-for="(log, index) in logRows"
+                :key="index"
+                :log="log"
+                type="address"
+              />
+            </div>
+          </template>
+        </ScopePanel>
+      </template>
+      <template v-else-if="section === SECTION_CODE">
+        <PanelCode
+          v-if="isContract && code"
+          :bytecode="code"
+          :address
+        />
+      </template>
+    </template>
   </ScopePage>
 </template>
 
@@ -181,12 +182,10 @@ import IndexerService, { UserOp } from '@/services/indexer';
 import { Command } from '@/stores/commands';
 
 const PAGE_ADDRESS = 'page_address';
-const SECTION_OVERVIEW = 'overview';
+const SECTION_OPS = 'ops';
 const SECTION_TRANSACTIONS = 'transactions';
 const SECTION_LOGS = 'logs';
-
-type PanelEl = InstanceType<typeof ScopePanel>;
-type PanelSection = Section & { el: PanelEl | null };
+const SECTION_CODE = 'code';
 
 const { indexerEndpoint } = useEnv();
 const { setCommands } = useCommands(PAGE_ADDRESS);
@@ -195,53 +194,35 @@ const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
 const { getLabel, requestLabels } = useLabels();
 
-const addressPanelEl = ref<PanelEl | null>(null);
-const addressTransactionsEl = ref<PanelEl | null>(null);
-const addressLogsEl = ref<PanelEl | null>(null);
-const addressCodeEl = ref<PanelEl | null>(null);
-const sections = computed<PanelSection[]>(() => {
-  const sections: PanelSection[] = [
-    {
-      label: 'Overview',
-      value: SECTION_OVERVIEW,
-      el: addressPanelEl.value,
-    },
-    {
-      label: 'Transactions',
-      value: SECTION_TRANSACTIONS,
-      el: addressTransactionsEl.value,
-    },
-    {
-      label: 'Logs',
-      value: SECTION_LOGS,
-      el: addressLogsEl.value,
-    },
-  ];
+const section = ref<string>(SECTION_TRANSACTIONS);
+const sections = computed<Section[]>(() => {
+  const sections: Section[] = [];
+  sections.push(
+    ...[
+      {
+        label: 'Transactions',
+        value: SECTION_TRANSACTIONS,
+      },
+      {
+        label: 'Logs',
+        value: SECTION_LOGS,
+      },
+    ],
+  );
+  if (ops.value.length > 0) {
+    sections.push({
+      label: 'UserOps',
+      value: SECTION_OPS,
+    });
+  }
   if (isContract.value && code.value) {
     sections.push({
       label: 'Code',
-      value: 'code',
-      el: addressCodeEl.value,
+      value: SECTION_CODE,
     });
   }
   return sections;
 });
-function handleSectionUpdate(value: Section['value']): void {
-  openSection(value);
-}
-function openSection(value: Section['value']): void {
-  const panelSection = sections.value.find(
-    (section) => section.value === value,
-  );
-  if (!panelSection) {
-    return;
-  }
-  const el = panelSection.el;
-  if (!el || !el.rootEl) {
-    return;
-  }
-  el.rootEl.scrollIntoView({ behavior: 'smooth' });
-}
 
 const address = computed(() => {
   const address = route.params.address as string;
@@ -261,34 +242,6 @@ const commands = computed<Command[]>(() => [
         type: 'success',
         message: 'Address copied to clipboard',
       });
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to overview',
-    act: (): void => {
-      openSection(SECTION_OVERVIEW);
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to transactions',
-    act: (): void => {
-      openSection(SECTION_TRANSACTIONS);
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to logs',
-    act: (): void => {
-      openSection(SECTION_LOGS);
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Go to code',
-    act: (): void => {
-      openSection('code');
     },
   },
 ]);
