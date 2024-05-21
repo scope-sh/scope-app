@@ -3,12 +3,23 @@
     <div class="header">
       <div class="header-side">
         <h2 class="title">{{ title }}</h2>
-        <div
+        <ScopeTooltip
           v-if="subtitle"
-          class="subtitle"
+          disable-closing-trigger
         >
-          {{ subtitle }}
-        </div>
+          <template #trigger>
+            <div
+              class="subtitle"
+              @click="copyToClipboard(subtitle)"
+            >
+              {{ subtitle }}
+            </div>
+          </template>
+          <template #default>
+            <div v-if="ready">Click to copy</div>
+            <div v-else>Copied!</div>
+          </template>
+        </ScopeTooltip>
       </div>
       <div class="header-side">
         <slot name="header" />
@@ -21,10 +32,26 @@
 </template>
 
 <script setup lang="ts">
+import { useTimeout } from '@vueuse/core';
+import { onMounted } from 'vue';
+
+import ScopeTooltip from './ScopeTooltip.vue';
+
 defineProps<{
   title: string;
   subtitle?: string;
 }>();
+
+onMounted(() => {
+  stop();
+});
+
+const { ready, start, stop } = useTimeout(2000, { controls: true });
+
+function copyToClipboard(text: string): void {
+  navigator.clipboard.writeText(text);
+  start();
+}
 </script>
 
 <style scoped>
@@ -67,10 +94,12 @@ defineProps<{
 
 .subtitle {
   overflow: hidden;
+  color: var(--color-text-primary);
   font-size: var(--font-size-l);
   font-weight: var(--font-weight-light);
   text-overflow: ellipsis;
   white-space: nowrap;
+  cursor: pointer;
 }
 
 .content {
