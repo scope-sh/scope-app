@@ -23,7 +23,7 @@ const routes: RouteRecordRaw[] = [
     component: Block,
   },
   {
-    path: '/:chain/transaction/:hash',
+    path: '/:chain/tx/:hash',
     name: 'transaction',
     component: Transaction,
   },
