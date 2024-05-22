@@ -270,6 +270,8 @@ watch(address, () => {
   logPage.value = 1;
   ops.value = [];
   opPage.value = 1;
+  maxTransactionPage.value = Infinity;
+  maxLogPage.value = Infinity;
   // Fetch new data
   fetch();
 });
