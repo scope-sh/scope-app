@@ -97,10 +97,17 @@
         <AttributeItem v-if="transaction.input !== '0x'">
           <AttributeItemLabel :value="'Input'" />
           <AttributeItemValue>
-            <ScopeTextView
-              size="regular"
-              :value="transaction.input"
-            />
+            <div class="input">
+              <ScopeToggle
+                v-model="selectedCallDataView"
+                :options="callDataViewOptions"
+              />
+              <ViewCallData
+                :address="transaction.to"
+                :call-data="transaction.input"
+                :view="selectedCallDataView"
+              />
+            </div>
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
@@ -148,10 +155,15 @@
               v-else
               class="logs"
             >
+              <ScopeToggle
+                v-model="selectedLogView"
+                :options="logViewOptions"
+              />
               <CardLog
                 v-for="(log, index) in transactionReceipt.logs"
                 :key="index"
                 :log="log"
+                :view="selectedLogView"
                 type="transaction"
               />
             </div>
@@ -168,7 +180,7 @@ import { Address, Hex, TransactionType } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import CardLog from '@/components/__common/CardLog.vue';
+import CardLog, { LogView } from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
 import ScopeButton from '@/components/__common/ScopeButton.vue';
@@ -178,7 +190,12 @@ import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
-import ScopeTextView from '@/components/__common/ScopeTextView.vue';
+import ScopeToggle, {
+  Option as ToggleOption,
+} from '@/components/__common/ScopeToggle.vue';
+import ViewCallData, {
+  CallDataView,
+} from '@/components/__common/ViewCallData.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -187,10 +204,12 @@ import {
 } from '@/components/__common/attributes';
 import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
+import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
+import ApiService from '@/services/api';
 import EvmService, { Block } from '@/services/evm';
 import type { Transaction, TransactionReceipt } from '@/services/evm';
 import { Command } from '@/stores/commands';
@@ -220,6 +239,7 @@ const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
+const { addEventAbis, addFunctionAbis } = useAbi();
 
 const section = ref<Section['value']>(SECTION_LOGS);
 const sections = computed<Section[]>(() => {
@@ -278,13 +298,6 @@ const commands = computed<Command[]>(() => [
       }
     },
   },
-  // {
-  //   icon: 'arrow-right',
-  //   label: 'Go to logs',
-  //   act: (): void => {
-  //     openSection(SECTION_LOGS);
-  //   },
-  // },
 ]);
 
 watch(
@@ -309,6 +322,9 @@ useHead({
   title: () => `Transaction ${hash.value} on ${chainName.value} | Scope`,
 });
 
+const apiService = computed(() =>
+  chainId.value ? new ApiService(chainId.value) : null,
+);
 const evmService = computed(() =>
   chainId.value && client.value
     ? new EvmService(chainId.value, client.value)
@@ -335,6 +351,7 @@ async function fetch(): Promise<void> {
     );
   }
   isLoading.value = false;
+  await Promise.all([fetchEventAbis(), fetchFunctionAbis()]);
 }
 
 async function fetchTransaction(hash: Hex): Promise<void> {
@@ -350,6 +367,83 @@ async function fetchTransactionReceipt(hash: Hex): Promise<void> {
   }
   transactionReceipt.value = await evmService.value.getTransactionReceipt(hash);
 }
+
+async function fetchEventAbis(): Promise<void> {
+  if (!apiService.value) {
+    return;
+  }
+  const logs = transactionReceipt.value?.logs || [];
+  const selectors = logs
+    .map((log) => ({
+      address: log.address,
+      selector: log.topics[0],
+    }))
+    .reduce(
+      (acc, { address, selector }) => {
+        if (!selector) {
+          return acc;
+        }
+        if (!acc[address]) {
+          acc[address] = [];
+        }
+        const addressSelectors = acc[address];
+        if (!addressSelectors) {
+          return acc;
+        }
+        if (addressSelectors.includes(selector)) {
+          return acc;
+        }
+        addressSelectors.push(selector);
+        return acc;
+      },
+      {} as Record<Address, Hex[]>,
+    );
+  const eventAbis = await apiService.value.getContractEventAbis(selectors);
+  addEventAbis(eventAbis);
+}
+
+async function fetchFunctionAbis(): Promise<void> {
+  if (!apiService.value) {
+    return;
+  }
+  if (!transaction.value) {
+    return;
+  }
+  const address = transaction.value.to;
+  if (!address) {
+    return;
+  }
+  const input = transaction.value.input;
+  const selectors: Record<Address, Hex[]> = {
+    [address]: [input.slice(0, 10) as Hex],
+  };
+  const functionAbis =
+    await apiService.value.getContractFunctionAbis(selectors);
+  addFunctionAbis(functionAbis);
+}
+
+const selectedLogView = ref<LogView>('decoded');
+const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
+  {
+    value: 'decoded',
+    icon: 'text',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
+const selectedCallDataView = ref<CallDataView>('decoded');
+const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
+  {
+    value: 'decoded',
+    icon: 'text',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
 
 const blockRelativeTime = computed(() => {
   if (!block.value) {
@@ -474,5 +568,12 @@ function handleOpenAsUserOpClick(): void {
   display: flex;
   gap: var(--spacing-5);
   flex-direction: column;
+}
+
+.input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-2);
 }
 </style>
