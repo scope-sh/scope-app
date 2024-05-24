@@ -125,10 +125,15 @@
               v-else
               class="logs"
             >
+              <ScopeToggle
+                v-model="selectedLogView"
+                :options="logViewOptions"
+              />
               <CardLog
                 v-for="(log, index) in logRows"
                 :key="index"
                 :log="log"
+                :view="selectedLogView"
                 type="address"
               />
             </div>
@@ -149,17 +154,28 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, Hex, slice } from 'viem';
+import {
+  AbiEvent,
+  AbiFunction,
+  Address,
+  Hex,
+  slice,
+  toEventSelector,
+  toFunctionSelector,
+} from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import CardLog, { Log } from '@/components/__common/CardLog.vue';
+import CardLog, { Log, LogView } from '@/components/__common/CardLog.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
+import ScopeToggle, {
+  Option as ToggleOption,
+} from '@/components/__common/ScopeToggle.vue';
 import TableTransactions, {
   Transaction as TransactionRow,
 } from '@/components/__common/TableTransactions.vue';
@@ -169,6 +185,7 @@ import PanelCode from '@/components/address/PanelCode.vue';
 import TableUserOps, {
   UserOp as UserOpRow,
 } from '@/components/address/TableUserOps.vue';
+import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
@@ -195,6 +212,7 @@ const { send: sendToast } = useToast();
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
 const { getLabel, requestLabels } = useLabels();
+const { addEventAbis, addFunctionAbis } = useAbi();
 
 const section = ref<string>(SECTION_TRANSACTIONS);
 const sections = computed<Section[]>(() => {
@@ -370,6 +388,38 @@ async function fethcContract(): Promise<void> {
   contract.value = await apiService.value.getContractSource(address.value);
   isLoadingContract.value = false;
 }
+watch(contract, (contract) => {
+  if (!contract) {
+    return;
+  }
+  const abi = contract.implementation?.abi || contract.abi;
+  if (!abi) {
+    return;
+  }
+  const addressFunctions: [Hex, AbiFunction][] = abi
+    .filter((abi): abi is AbiFunction => abi.type === 'function')
+    .map((abi) => [toFunctionSelector(abi), abi]);
+  addFunctionAbis({
+    [address.value]: Object.fromEntries(addressFunctions),
+  });
+  const addressEvents: [Hex, AbiEvent][] = abi
+    .filter((abi): abi is AbiEvent => abi.type === 'event')
+    .map((abi) => [toEventSelector(abi), abi]);
+  addEventAbis({
+    [address.value]: Object.fromEntries(addressEvents),
+  });
+});
+const selectedLogView = ref<LogView>('decoded');
+const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
+  {
+    value: 'decoded',
+    icon: 'text',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
 
 const TRANSACTIONS_PER_PAGE = 20;
 const transactionPage = ref(1);
