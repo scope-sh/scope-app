@@ -1,4 +1,4 @@
-import { Abi, Address, Hex } from 'viem';
+import { Abi, AbiEvent, AbiFunction, Address, Hex } from 'viem';
 
 import useEnv from '@/composables/useEnv';
 import { Chain } from '@/utils/chains';
@@ -112,6 +112,14 @@ interface Contract {
   } | null;
 }
 
+interface ContractSelectors {
+  address: Address;
+  selectors: Hex[];
+}
+
+type EventAbis = Record<Address, Record<Hex, AbiEvent>>;
+type FunctionAbis = Record<Address, Record<Hex, AbiFunction>>;
+
 const { apiEndpoint } = useEnv();
 
 class Service {
@@ -176,7 +184,55 @@ class Service {
     const source: Contract = await response.json();
     return source;
   }
+
+  public async getContractEventAbis(
+    selectors: Record<Address, Hex[]>,
+  ): Promise<EventAbis> {
+    const params: Record<string, string> = {
+      chain: this.chainId.toString(),
+    };
+    const url = new URL(`${apiEndpoint}/contract/abi/events`);
+    url.search = new URLSearchParams(params).toString();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ selectors }),
+    });
+    const abis: EventAbis = await response.json();
+    return abis;
+  }
+
+  public async getContractFunctionAbis(
+    selectors: Record<Address, Hex[]>,
+  ): Promise<FunctionAbis> {
+    const params: Record<string, string> = {
+      chain: this.chainId.toString(),
+    };
+    const url = new URL(`${apiEndpoint}/contract/abi/functions`);
+    url.search = new URLSearchParams(params).toString();
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ selectors }),
+    });
+    const abis: FunctionAbis = await response.json();
+    return abis;
+  }
 }
 
 export default Service;
-export type { Label, LabelId, Log, Transaction, Contract, SourceCode };
+export type {
+  Label,
+  LabelId,
+  Log,
+  Transaction,
+  Contract,
+  SourceCode,
+  ContractSelectors,
+  EventAbis,
+  FunctionAbis,
+};
