@@ -5,8 +5,8 @@
   >
     <div class="name">{{ decoded.name }}</div>
     <div class="properties">
-      <PropertyTree
-        :tree="decoded.properties"
+      <ArgumentTree
+        :args="decoded.args"
         initial
       />
     </div>
@@ -24,8 +24,8 @@ import { computed } from 'vue';
 
 import useAbi from '@/composables/useAbi';
 
-import PropertyTree, { Properties } from './PropertyTree.vue';
 import ScopeTextView from './ScopeTextView.vue';
+import { ArgumentTree, Arguments } from './arguments';
 
 const props = defineProps<{
   address: Address | null;
@@ -37,7 +37,7 @@ const { getFunctionAbi } = useAbi();
 
 interface DecodedCallData {
   name: string;
-  properties: Properties;
+  args: Arguments;
 }
 
 const abi = computed<AbiFunction | null>(() => {
@@ -62,7 +62,7 @@ const decoded = computed<DecodedCallData | null>(() => {
 
   return {
     name: decodedCallData.functionName,
-    properties: decodedCallData.args[0] as Properties,
+    args: decodedCallData.args[0] as Arguments,
   };
 });
 </script>

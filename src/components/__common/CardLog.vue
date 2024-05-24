@@ -36,8 +36,8 @@
       >
         <div class="name">{{ decoded.name }}</div>
         <div class="properties">
-          <PropertyTree
-            :tree="decoded.properties"
+          <ArgumentTree
+            :args="decoded.args"
             initial
           />
         </div>
@@ -74,11 +74,9 @@ import { AbiEvent, Hex, decodeEventLog } from 'viem';
 import { computed } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
-import PropertyTree, {
-  Properties,
-} from '@/components/__common/PropertyTree.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
+import { ArgumentTree, Arguments } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
 import type { Log as TransactionLog } from '@/services/evm';
 import type { Log as AddressLog } from '@/services/hypersync';
@@ -98,7 +96,7 @@ const { getEventAbi } = useAbi();
 
 interface DecodedLog {
   name: string;
-  properties: Properties;
+  args: Arguments;
 }
 
 const date = computed<Date | null>(() => {
@@ -124,7 +122,7 @@ const decoded = computed<DecodedLog | null>(() => {
 
   return {
     name: decodedLog.eventName,
-    properties: decodedLog.args as Properties,
+    args: decodedLog.args as Arguments,
   };
 });
 </script>
