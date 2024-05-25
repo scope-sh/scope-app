@@ -1,19 +1,34 @@
 <template>
   <div class="branch">
     <div
-      v-for="(leaf, key) in args"
-      :key="key"
+      v-for="(arg, index) in args"
+      :key="arg.name"
       class="branch-part"
-      :class="{ terminal: typeof leaf !== 'object' }"
+      :class="{ terminal: isPrimitiveType(arg.type) }"
     >
-      <div class="key">{{ key }}</div>
+      <div class="key">
+        {{ arg.internalType || arg.type }} {{ arg.indexed ? 'indexed' : '' }}
+        {{ arg.name || index }}
+      </div>
+      <div
+        v-if="arg.type === 'tuple[]'"
+        class="tuple-array"
+      >
+        <template
+          v-for="(argItem, itemIndex) in arg.value as unknown[][]"
+          :key="itemIndex"
+        >
+          <div class="key">{{ itemIndex }}</div>
+          <ArgumentTreeBranch :args="getArguments(argItem)" />
+        </template>
+      </div>
       <ArgumentTreeBranch
-        v-if="typeof leaf === 'object' && leaf !== null"
-        :args="getArguments(leaf)"
+        v-else-if="arg.value instanceof Array"
+        :args="getArguments(arg.value as unknown[])"
       />
       <ArgumentTreeLeaf
         v-else
-        :value="leaf"
+        :value="arg.value"
       />
     </div>
   </div>
@@ -22,14 +37,14 @@
 <script setup lang="ts">
 import ArgumentTreeBranch from './ArgumentTreeBranch.vue';
 import ArgumentTreeLeaf from './ArgumentTreeLeaf.vue';
-import { Arguments } from './common';
+import { Argument, isPrimitiveType } from './common';
 
 defineProps<{
-  args: Arguments;
+  args: Argument[];
 }>();
 
-function getArguments(args: object): Arguments {
-  return args as Arguments;
+function getArguments(args: unknown[]): Argument[] {
+  return args as Argument[];
 }
 </script>
 
@@ -47,13 +62,29 @@ function getArguments(args: object): Arguments {
   &.terminal {
     flex-direction: row;
   }
+
+  & > .key {
+    min-width: 240px;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:not(.terminal) {
+    & > .key {
+      min-width: 100%;
+      max-width: 100%;
+    }
+  }
 }
 
-.key {
-  min-width: 160px;
-  max-width: 160px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.metadata {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
+.tuple-array {
+  margin-left: 20px;
 }
 </style>

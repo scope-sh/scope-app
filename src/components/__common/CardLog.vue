@@ -76,7 +76,11 @@ import { computed } from 'vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
-import { ArgumentTree, Arguments } from '@/components/__common/arguments';
+import {
+  ArgumentTree,
+  Argument,
+  getArguments,
+} from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
 import type { Log as TransactionLog } from '@/services/evm';
 import type { Log as AddressLog } from '@/services/hypersync';
@@ -96,7 +100,7 @@ const { getEventAbi } = useAbi();
 
 interface DecodedLog {
   name: string;
-  args: Arguments;
+  args: Argument[];
 }
 
 const date = computed<Date | null>(() => {
@@ -120,9 +124,14 @@ const decoded = computed<DecodedLog | null>(() => {
     topics: props.log.topics as [Hex, ...Hex[]],
   });
 
+  const args = getArguments(
+    abi.value.inputs,
+    decodedLog.args as Record<string, unknown>,
+  );
+
   return {
     name: decodedLog.eventName,
-    args: decodedLog.args as Arguments,
+    args,
   };
 });
 </script>

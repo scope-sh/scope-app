@@ -25,7 +25,7 @@ import { computed } from 'vue';
 import useAbi from '@/composables/useAbi';
 
 import ScopeTextView from './ScopeTextView.vue';
-import { ArgumentTree, Arguments } from './arguments';
+import { ArgumentTree, Argument, getArguments } from './arguments';
 
 const props = defineProps<{
   address: Address | null;
@@ -37,7 +37,7 @@ const { getFunctionAbi } = useAbi();
 
 interface DecodedCallData {
   name: string;
-  args: Arguments;
+  args: Argument[];
 }
 
 const abi = computed<AbiFunction | null>(() => {
@@ -58,11 +58,13 @@ const decoded = computed<DecodedCallData | null>(() => {
     data: props.callData,
   });
 
-  console.log(decodedCallData);
+  const args = getArguments(abi.value.inputs, decodedCallData.args);
+
+  console.log(args);
 
   return {
     name: decodedCallData.functionName,
-    args: decodedCallData.args[0] as Arguments,
+    args,
   };
 });
 </script>

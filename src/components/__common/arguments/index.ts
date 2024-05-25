@@ -1,5 +1,5 @@
 import ArgumentTree from './ArgumentTree.vue';
-import { Arguments } from './common';
+import { Argument, getArguments } from './common';
 
-export { ArgumentTree };
-export type { Arguments };
+export { ArgumentTree, getArguments };
+export type { Argument };

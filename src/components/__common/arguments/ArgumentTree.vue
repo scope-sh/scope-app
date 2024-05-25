@@ -7,10 +7,10 @@
 
 <script setup lang="ts">
 import ArgumentTreeBranch from './ArgumentTreeBranch.vue';
-import { Arguments } from './common';
+import { Argument } from './common';
 
 defineProps<{
-  args: Arguments;
+  args: Argument[];
 }>();
 </script>
 
