@@ -26,6 +26,11 @@
         v-else-if="arg.value instanceof Array"
         :args="getArguments(arg.value as unknown[])"
       />
+      <LinkAddress
+        v-else-if="arg.type === 'address'"
+        :address="getAddress(arg.value)"
+        type="minimal"
+      />
       <ArgumentTreeLeaf
         v-else
         :value="arg.value"
@@ -35,6 +40,10 @@
 </template>
 
 <script setup lang="ts">
+import { Address } from 'viem';
+
+import LinkAddress from '../LinkAddress.vue';
+
 import ArgumentTreeBranch from './ArgumentTreeBranch.vue';
 import ArgumentTreeLeaf from './ArgumentTreeLeaf.vue';
 import { Argument, isPrimitiveType } from './common';
@@ -45,6 +54,10 @@ defineProps<{
 
 function getArguments(args: unknown[]): Argument[] {
   return args as Argument[];
+}
+
+function getAddress(value: unknown): Address {
+  return (value as Address).toLowerCase() as Address;
 }
 </script>
 
