@@ -60,8 +60,6 @@ const decoded = computed<DecodedCallData | null>(() => {
 
   const args = getArguments(abi.value.inputs, decodedCallData.args);
 
-  console.log(args);
-
   return {
     name: decodedCallData.functionName,
     args,

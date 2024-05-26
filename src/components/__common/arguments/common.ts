@@ -84,9 +84,9 @@ function getArguments(
         value: getArguments(param.components, value as Values),
       };
     }
-    if (param.type === 'tuple[]' && 'components' in param) {
+    if (param.type.startsWith('tuple[') && 'components' in param) {
       return {
-        type: 'tuple[]',
+        type: param.type,
         internalType: getInternalType(param.internalType),
         name: param.name,
         value: (value as Values[]).map((v) =>

@@ -11,7 +11,7 @@
         {{ arg.name || index }}
       </div>
       <div
-        v-if="arg.type === 'tuple[]'"
+        v-if="arg.type && arg.type.startsWith('tuple[')"
         class="tuple-array"
       >
         <template
