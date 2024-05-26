@@ -117,8 +117,13 @@ interface ContractSelectors {
   selectors: Hex[];
 }
 
-type EventAbis = Record<Address, Record<Hex, AbiEvent>>;
-type FunctionAbis = Record<Address, Record<Hex, AbiFunction>>;
+type Abis = Record<
+  Address,
+  {
+    functions: Record<Hex, AbiFunction>;
+    events: Record<Hex, AbiEvent>;
+  }
+>;
 
 const { apiEndpoint } = useEnv();
 
@@ -185,41 +190,28 @@ class Service {
     return source;
   }
 
-  public async getContractEventAbis(
-    selectors: Record<Address, Hex[]>,
-  ): Promise<EventAbis> {
+  public async getContractAbi(
+    contracts: Record<
+      Address,
+      {
+        events: Hex[];
+        functions: Hex[];
+      }
+    >,
+  ): Promise<Abis> {
     const params: Record<string, string> = {
       chain: this.chainId.toString(),
     };
-    const url = new URL(`${apiEndpoint}/contract/abi/events`);
+    const url = new URL(`${apiEndpoint}/contract/abi`);
     url.search = new URLSearchParams(params).toString();
     const response = await fetch(url, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ selectors }),
+      body: JSON.stringify({ contracts }),
     });
-    const abis: EventAbis = await response.json();
-    return abis;
-  }
-
-  public async getContractFunctionAbis(
-    selectors: Record<Address, Hex[]>,
-  ): Promise<FunctionAbis> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-    };
-    const url = new URL(`${apiEndpoint}/contract/abi/functions`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ selectors }),
-    });
-    const abis: FunctionAbis = await response.json();
+    const abis: Abis = await response.json();
     return abis;
   }
 }
@@ -233,6 +225,5 @@ export type {
   Contract,
   SourceCode,
   ContractSelectors,
-  EventAbis,
-  FunctionAbis,
+  Abis,
 };

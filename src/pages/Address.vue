@@ -212,7 +212,7 @@ const { send: sendToast } = useToast();
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
 const { getLabel, requestLabels } = useLabels();
-const { addEventAbis, addFunctionAbis } = useAbi();
+const { addAbis } = useAbi();
 
 const section = ref<string>(SECTION_TRANSACTIONS);
 const sections = computed<Section[]>(() => {
@@ -399,14 +399,14 @@ watch(contract, (contract) => {
   const addressFunctions: [Hex, AbiFunction][] = abi
     .filter((abi): abi is AbiFunction => abi.type === 'function')
     .map((abi) => [toFunctionSelector(abi), abi]);
-  addFunctionAbis({
-    [address.value]: Object.fromEntries(addressFunctions),
-  });
   const addressEvents: [Hex, AbiEvent][] = abi
     .filter((abi): abi is AbiEvent => abi.type === 'event')
     .map((abi) => [toEventSelector(abi), abi]);
-  addEventAbis({
-    [address.value]: Object.fromEntries(addressEvents),
+  addAbis({
+    [address.value]: {
+      functions: Object.fromEntries(addressFunctions),
+      events: Object.fromEntries(addressEvents),
+    },
   });
 });
 const selectedLogView = ref<LogView>('decoded');

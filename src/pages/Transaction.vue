@@ -239,7 +239,7 @@ const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
 const { requestLabels } = useLabels();
-const { addEventAbis, addFunctionAbis } = useAbi();
+const { addAbis } = useAbi();
 
 const section = ref<Section['value']>(SECTION_LOGS);
 const sections = computed<Section[]>(() => {
@@ -351,7 +351,7 @@ async function fetch(): Promise<void> {
     );
   }
   isLoading.value = false;
-  await Promise.all([fetchEventAbis(), fetchFunctionAbis()]);
+  await fetchAbis();
 }
 
 async function fetchTransaction(hash: Hex): Promise<void> {
@@ -368,41 +368,7 @@ async function fetchTransactionReceipt(hash: Hex): Promise<void> {
   transactionReceipt.value = await evmService.value.getTransactionReceipt(hash);
 }
 
-async function fetchEventAbis(): Promise<void> {
-  if (!apiService.value) {
-    return;
-  }
-  const logs = transactionReceipt.value?.logs || [];
-  const selectors = logs
-    .map((log) => ({
-      address: log.address,
-      selector: log.topics[0],
-    }))
-    .reduce(
-      (acc, { address, selector }) => {
-        if (!selector) {
-          return acc;
-        }
-        if (!acc[address]) {
-          acc[address] = [];
-        }
-        const addressSelectors = acc[address];
-        if (!addressSelectors) {
-          return acc;
-        }
-        if (addressSelectors.includes(selector)) {
-          return acc;
-        }
-        addressSelectors.push(selector);
-        return acc;
-      },
-      {} as Record<Address, Hex[]>,
-    );
-  const eventAbis = await apiService.value.getContractEventAbis(selectors);
-  addEventAbis(eventAbis);
-}
-
-async function fetchFunctionAbis(): Promise<void> {
+async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
     return;
   }
@@ -413,13 +379,57 @@ async function fetchFunctionAbis(): Promise<void> {
   if (!address) {
     return;
   }
+  if (!transactionReceipt.value) {
+    return;
+  }
+  const logs = transactionReceipt.value.logs;
+  const contracts: Record<
+    Address,
+    {
+      functions: Hex[];
+      events: Hex[];
+    }
+  > = {};
+  for (const log of logs) {
+    if (!log.address) {
+      continue;
+    }
+    if (!contracts[log.address]) {
+      contracts[log.address] = {
+        functions: [],
+        events: [],
+      };
+    }
+    const contract = contracts[log.address];
+    if (!contract) {
+      continue;
+    }
+    if (log.topics.length === 0) {
+      continue;
+    }
+    const topic = log.topics[0];
+    if (!topic) {
+      continue;
+    }
+    if (contract.events.includes(topic)) {
+      continue;
+    }
+    contract.events.push(topic);
+  }
   const input = transaction.value.input;
-  const selectors: Record<Address, Hex[]> = {
-    [address]: [input.slice(0, 10) as Hex],
-  };
-  const functionAbis =
-    await apiService.value.getContractFunctionAbis(selectors);
-  addFunctionAbis(functionAbis);
+  if (!contracts[address]) {
+    contracts[address] = {
+      functions: [],
+      events: [],
+    };
+  }
+  const contract = contracts[address];
+  if (!contract) {
+    return;
+  }
+  contract.functions.push(input.slice(0, 10) as Hex);
+  const abis = await apiService.value.getContractAbi(contracts);
+  addAbis(abis);
 }
 
 const selectedLogView = ref<LogView>('decoded');

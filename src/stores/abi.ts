@@ -2,22 +2,15 @@ import { defineStore } from 'pinia';
 import { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import { ref } from 'vue';
 
+import { Abis } from '@/services/api';
 import { Chain } from '@/utils/chains';
 import { merge } from '@/utils/misc';
 
 const store = defineStore('abi', () => {
-  const eventAbis = ref<
-    Partial<Record<Chain, Record<Address, Record<Hex, AbiEvent>>>>
-  >({});
-  const functionAbis = ref<
-    Partial<Record<Chain, Record<Address, Record<Hex, AbiFunction>>>>
-  >({});
+  const abis = ref<Partial<Record<Chain, Abis>>>({});
 
-  function addEventAbis(
-    chain: Chain,
-    value: Record<Address, Record<Hex, AbiEvent>>,
-  ): void {
-    eventAbis.value = merge(eventAbis.value, { [chain]: value });
+  function addAbis(chain: Chain, value: Abis): void {
+    abis.value = merge(abis.value, { [chain]: value });
   }
 
   function getEventAbi(
@@ -25,7 +18,7 @@ const store = defineStore('abi', () => {
     address: Address,
     signature: Hex,
   ): AbiEvent | null {
-    const chainAbis = eventAbis.value[chain];
+    const chainAbis = abis.value[chain];
     if (!chainAbis) {
       return null;
     }
@@ -33,14 +26,7 @@ const store = defineStore('abi', () => {
     if (!addressAbis) {
       return null;
     }
-    return addressAbis[signature] || null;
-  }
-
-  function addFunctionAbis(
-    chain: Chain,
-    value: Record<Address, Record<Hex, AbiFunction>>,
-  ): void {
-    functionAbis.value = merge(functionAbis.value, { [chain]: value });
+    return addressAbis.events[signature] || null;
   }
 
   function getFunctionAbi(
@@ -48,7 +34,7 @@ const store = defineStore('abi', () => {
     address: Address,
     signature: Hex,
   ): AbiFunction | null {
-    const chainAbis = functionAbis.value[chain];
+    const chainAbis = abis.value[chain];
     if (!chainAbis) {
       return null;
     }
@@ -56,13 +42,12 @@ const store = defineStore('abi', () => {
     if (!addressAbis) {
       return null;
     }
-    return addressAbis[signature] || null;
+    return addressAbis.functions[signature] || null;
   }
 
   return {
-    addEventAbis,
+    addAbis,
     getEventAbi,
-    addFunctionAbis,
     getFunctionAbi,
   };
 });
