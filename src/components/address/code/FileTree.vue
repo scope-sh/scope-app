@@ -107,9 +107,14 @@ const rootDirectory = computed<Directory>(() => {
 const filter = ref<string>('');
 
 function handleFileSelect(directory: Directory, fileIndex: number): void {
+  const fileName = directory.files[fileIndex];
+  if (!fileName) {
+    return;
+  }
+  const path = getFullPath(directory);
+  const filePath = path === '' ? fileName : `${path}/${fileName}`;
   const selectedFileIndex = props.files.findIndex(
-    (file) =>
-      file.name === `${getFullPath(directory)}/${directory.files[fileIndex]}`,
+    (file) => file.name === filePath,
   );
   emit('update:selectedFileIndex', selectedFileIndex);
 }
@@ -118,10 +123,9 @@ function getFullPath(directory: Directory): string {
   if (directory.parent === null) {
     return directory.name;
   }
-  const parentPath = getFullPath(directory.parent);
   return directory.parent.parent === null
     ? directory.name
-    : `${parentPath}/${directory.name}`;
+    : `${getFullPath(directory.parent)}/${directory.name}`;
 }
 </script>
 
