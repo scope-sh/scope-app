@@ -66,26 +66,18 @@
 
 <script setup lang="ts">
 import type { Address, Hex } from 'viem';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 
 import ScopeButton from '@/components/__common/ScopeButton.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
-import useCommands from '@/composables/useCommands';
-import useToast from '@/composables/useToast';
 import type { Contract } from '@/services/api';
-import { Command } from '@/stores/commands';
 
 import CardSource from './code/CardSource.vue';
 import NoticeProxy from './code/NoticeProxy.vue';
 import SourceAttributes from './code/SourceAttributes.vue';
 import SourceHighlighter from './code/SourceHighlighter.vue';
-
-const PANEL_CODE = 'panel_code';
-
-const { setCommands } = useCommands(PANEL_CODE);
-const { send: sendToast } = useToast();
 
 const props = defineProps<{
   address: Address;
@@ -141,35 +133,6 @@ function toggleSearch(): void {
 function handleCloseSearch(): void {
   isSearching.value = false;
 }
-
-const commands = computed<Command[]>(() => {
-  const commands: Command[] = [];
-  const storedAbi = abi.value;
-  if (storedAbi) {
-    commands.push({
-      icon: 'copy',
-      label: 'Copy ABI',
-      act: () => {
-        navigator.clipboard.writeText(JSON.stringify(storedAbi, null, 2));
-        sendToast({
-          type: 'success',
-          message: 'ABI copied to clipboard',
-        });
-      },
-    });
-  }
-  return commands;
-});
-
-watch(
-  commands,
-  () => {
-    setCommands(commands.value);
-  },
-  {
-    immediate: true,
-  },
-);
 </script>
 
 <style scoped>

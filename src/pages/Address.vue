@@ -249,33 +249,6 @@ const address = computed(() => {
   return address.toLowerCase() as Address;
 });
 
-const commands = computed<Command[]>(() => [
-  {
-    icon: 'copy',
-    label: 'Copy address',
-    act: (): void => {
-      if (!address.value) {
-        return;
-      }
-      navigator.clipboard.writeText(address.value);
-      sendToast({
-        type: 'success',
-        message: 'Address copied to clipboard',
-      });
-    },
-  },
-]);
-
-watch(
-  commands,
-  () => {
-    setCommands(commands.value);
-  },
-  {
-    immediate: true,
-  },
-);
-
 onMounted(() => {
   fetch();
   requestLabel(address.value);
@@ -578,6 +551,57 @@ const opRows = computed<UserOpRow[]>(() => {
     };
   });
 });
+
+const commands = computed<Command[]>(() => {
+  const commands: Command[] = [
+    {
+      icon: 'copy',
+      label: 'Copy address',
+      act: (): void => {
+        if (!address.value) {
+          return;
+        }
+        navigator.clipboard.writeText(address.value);
+        sendToast({
+          type: 'success',
+          message: 'Address copied to clipboard',
+        });
+      },
+    },
+  ];
+  const contractAbi =
+    contract.value?.implementation?.abi || contract.value?.abi;
+  console.log(
+    contract.value?.implementation?.abi,
+    contract.value?.abi,
+    contractAbi,
+  );
+  if (contractAbi) {
+    console.log('Adding copy ABI command');
+    commands.push({
+      icon: 'copy',
+      label: 'Copy ABI',
+      act: () => {
+        navigator.clipboard.writeText(JSON.stringify(contractAbi, null, 2));
+        sendToast({
+          type: 'success',
+          message: 'ABI copied to clipboard',
+        });
+      },
+    });
+  }
+  return commands;
+});
+
+watch(
+  commands,
+  () => {
+    setCommands(commands.value);
+  },
+  {
+    immediate: true,
+  },
+);
 </script>
 
 <style scoped>
