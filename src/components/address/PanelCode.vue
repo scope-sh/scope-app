@@ -73,7 +73,6 @@ import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import useCommands from '@/composables/useCommands';
-import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import type { Contract } from '@/services/api';
 import { Command } from '@/stores/commands';
@@ -86,7 +85,6 @@ import SourceHighlighter from './code/SourceHighlighter.vue';
 const PANEL_CODE = 'panel_code';
 
 const { setCommands } = useCommands(PANEL_CODE);
-const { requestLabels } = useLabels();
 const { send: sendToast } = useToast();
 
 const props = defineProps<{
@@ -172,14 +170,6 @@ watch(
     immediate: true,
   },
 );
-
-const addresses = computed(() =>
-  implementation.value ? [implementation.value] : [],
-);
-
-watch(addresses, () => {
-  requestLabels(addresses.value);
-});
 </script>
 
 <style scoped>

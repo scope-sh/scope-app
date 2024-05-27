@@ -44,7 +44,6 @@ import {
   AttributeItemValue,
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
-import useLabels from '@/composables/useLabels';
 import {
   TYPE_VALIDATION,
   TYPE_EXECUTION,
@@ -74,7 +73,6 @@ const TYPE_VALIDATOR = '0x01';
 const TYPE_PERMISSION = '0x02';
 
 const { client } = useChain();
-const { requestLabels } = useLabels();
 
 const props = defineProps<{
   address: Address;
@@ -169,29 +167,6 @@ async function fetch(): Promise<void> {
 
   isLoading.value = false;
 }
-
-const addresses = computed<Address[]>(() => {
-  if (!rootValidator.value) {
-    return [];
-  }
-  if (rootValidator.value.type === 'validator') {
-    return [rootValidator.value.address];
-  }
-  if (rootValidator.value.type === 'permission') {
-    return [rootValidator.value.signer, ...rootValidator.value.policies];
-  }
-  return [];
-});
-
-watch(
-  () => addresses.value,
-  () => {
-    requestLabels(addresses.value);
-  },
-  {
-    immediate: true,
-  },
-);
 </script>
 
 <style scoped>

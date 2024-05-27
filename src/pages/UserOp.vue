@@ -282,7 +282,7 @@ const { indexerEndpoint } = useEnv();
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
-const { requestLabels, getLabel } = useLabels();
+const { getLabel } = useLabels();
 
 const section = ref<Section['value']>(SECTION_TRANSACTION);
 const sections = computed<Section[]>(() => [
@@ -505,52 +505,6 @@ const actions = computed<Action[]>(() => {
     ] as Action[];
   }
   return [];
-});
-
-const addresses = computed(() => {
-  const list: Address[] = [];
-  if (userOpUnpacked.value) {
-    if (userOpUnpacked.value.factory) {
-      list.push(userOpUnpacked.value.factory);
-    }
-    list.push(userOpUnpacked.value.sender);
-    if (calls.value) {
-      for (const call of calls.value) {
-        list.push(call.to);
-      }
-    }
-    if (userOpUnpacked.value.paymaster) {
-      list.push(userOpUnpacked.value.paymaster);
-    }
-  }
-  if (transaction.value) {
-    list.push(transaction.value.from);
-    if (transaction.value.to) {
-      list.push(transaction.value.to);
-    }
-  }
-  if (beneficiary.value) {
-    list.push(beneficiary.value);
-  }
-  if (logs.value) {
-    logs.value.forEach((log) => {
-      list.push(log.address);
-    });
-  }
-  if (actions.value && actions.value.length > 0) {
-    actions.value.forEach((action) => {
-      action.forEach((part) => {
-        if (part.type === 'address') {
-          list.push(part.address);
-        }
-      });
-    });
-  }
-  return list;
-});
-
-watch(addresses, async () => {
-  requestLabels(addresses.value);
 });
 
 function handleOpenAsTransactionClick(): void {

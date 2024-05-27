@@ -105,7 +105,7 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, slice, zeroAddress } from 'viem';
+import { slice, zeroAddress } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -130,7 +130,6 @@ import {
 import BlockStatus from '@/components/block/BlockStatus.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
-import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import EvmService from '@/services/evm';
 import type { BlockWithTransactions } from '@/services/evm';
@@ -160,7 +159,6 @@ const sections = computed<Section[]>(() => {
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
-const { requestLabels } = useLabels();
 const { setCommands } = useCommands(PAGE_BLOCK);
 const { send: sendToast } = useToast();
 
@@ -304,22 +302,4 @@ async function handleOpenLatestBlockClick(): Promise<void> {
   const block = await evmService.value.getLatestBlock();
   router.push(getRouteLocation({ name: 'block', number: block }));
 }
-
-const addresses = computed(() => {
-  if (!block.value) {
-    return [];
-  }
-  const blockProducer = block.value.producer;
-  const fromAddresses = block.value.transactions.map(
-    (transaction) => transaction.from,
-  );
-  const toAddresses = block.value.transactions
-    .map((transaction) => transaction.to)
-    .filter((to): to is Address => to !== null);
-  return [blockProducer, ...fromAddresses, ...toAddresses];
-});
-
-watch(addresses, async () => {
-  requestLabels(addresses.value);
-});
 </script>

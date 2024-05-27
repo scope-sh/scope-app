@@ -163,7 +163,7 @@ import {
   toEventSelector,
   toFunctionSelector,
 } from 'viem';
-import { computed, ref, onMounted, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import CardLog, { Log, LogView } from '@/components/__common/CardLog.vue';
@@ -211,7 +211,7 @@ const { setCommands } = useCommands(PAGE_ADDRESS);
 const { send: sendToast } = useToast();
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
-const { getLabel, requestLabels } = useLabels();
+const { getLabel, requestLabel } = useLabels();
 const { addAbis } = useAbi();
 
 const section = ref<string>(SECTION_TRANSACTIONS);
@@ -278,6 +278,7 @@ watch(
 
 onMounted(() => {
   fetch();
+  requestLabel(address.value);
 });
 
 watch(address, () => {
@@ -292,6 +293,7 @@ watch(address, () => {
   maxLogPage.value = Infinity;
   // Fetch new data
   fetch();
+  requestLabel(address.value);
 });
 
 useHead({
@@ -576,31 +578,6 @@ const opRows = computed<UserOpRow[]>(() => {
     };
   });
 });
-
-const addresses = computed(() => {
-  const addresses: Address[] = [];
-  addresses.push(address.value);
-  addresses.push(...transactions.value.map((transaction) => transaction.from));
-  addresses.push(
-    ...transactions.value
-      .map((transaction) => transaction.to)
-      .filter((to): to is Address => to !== null),
-  );
-  addresses.push(...logs.value.map((log) => log.address));
-  addresses.push(...ops.value.map((op) => op.bundler));
-  addresses.push(...ops.value.map((op) => op.paymaster));
-  return addresses;
-});
-
-watch(
-  addresses,
-  async () => {
-    requestLabels(addresses.value);
-  },
-  {
-    immediate: true,
-  },
-);
 </script>
 
 <style scoped>

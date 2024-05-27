@@ -50,7 +50,6 @@ import {
   AttributeItemValue,
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
-import useLabels from '@/composables/useLabels';
 import { fromWei } from '@/utils/conversion';
 
 import LensBase from './common/LensBase.vue';
@@ -67,7 +66,6 @@ interface Composition {
 }
 
 const { client } = useChain();
-const { requestLabels } = useLabels();
 
 const props = defineProps<{
   address: Address;
@@ -200,20 +198,4 @@ async function fetch(): Promise<void> {
 
   isLoading.value = false;
 }
-
-const addresses = computed(() =>
-  [token0.value, token1.value, factory.value].filter(
-    (address): address is Address => !!address,
-  ),
-);
-
-watch(
-  addresses,
-  () => {
-    requestLabels(addresses.value);
-  },
-  {
-    immediate: true,
-  },
-);
 </script>

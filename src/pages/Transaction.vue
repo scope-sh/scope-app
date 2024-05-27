@@ -207,7 +207,6 @@ import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
-import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService, { Block } from '@/services/evm';
@@ -238,7 +237,6 @@ const { send: sendToast } = useToast();
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
-const { requestLabels } = useLabels();
 const { addAbis } = useAbi();
 
 const section = ref<Section['value']>(SECTION_LOGS);
@@ -523,25 +521,6 @@ watch(transaction, async () => {
   }
   entryPoint.value = getEntryPoint(transaction.value);
   userOps.value = await getUserOps(client.value, transaction.value);
-});
-
-const addresses = computed(() => {
-  if (!transaction.value || !transactionReceipt.value) {
-    return [];
-  }
-  const fromAddress = transaction.value.from;
-  const toAddress = transaction.value.to;
-  const logAddresses = transactionReceipt.value.logs.map((log) => log.address);
-  const addresses = [fromAddress];
-  if (toAddress) {
-    addresses.push(toAddress);
-  }
-  addresses.push(...logAddresses);
-  return addresses;
-});
-
-watch(addresses, async () => {
-  requestLabels(addresses.value);
 });
 
 async function openBlockTransaction(

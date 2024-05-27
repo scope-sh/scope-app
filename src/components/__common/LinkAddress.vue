@@ -19,14 +19,14 @@
 
 <script setup lang="ts">
 import { Address } from 'viem';
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 
 import useLabels from '@/composables/useLabels.js';
 
 import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
-const { getLabelText } = useLabels();
+const { getLabelText, requestLabel } = useLabels();
 
 const props = withDefaults(
   defineProps<{
@@ -36,6 +36,14 @@ const props = withDefaults(
   {
     type: 'normal',
   },
+);
+
+watch(
+  () => props.address,
+  (value) => {
+    requestLabel(value);
+  },
+  { immediate: true },
 );
 
 const labelText = computed(() => getLabelText(props.address));

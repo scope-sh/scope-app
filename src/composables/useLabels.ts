@@ -1,4 +1,3 @@
-import { useDebounceFn } from '@vueuse/core';
 import { Address } from 'viem';
 import { computed } from 'vue';
 
@@ -8,7 +7,7 @@ import useStore from '@/stores/labels.js';
 import useChain from './useChain';
 
 interface UseLabels {
-  requestLabels: (addresses: Address[]) => Promise<void>;
+  requestLabel: (address: Address) => Promise<void>;
   getLabel: (address: Address) => Label | null;
   getLabelText: (address: Address) => string | null;
 }
@@ -18,42 +17,28 @@ function useLabels(): UseLabels {
   const { id: chain } = useChain();
   const apiService = computed(() => new ApiService(chain.value));
 
-  const pendingAddresses = new Set<Address>();
+  async function requestLabel(address: Address): Promise<void> {
+    store.requestLabel(address, handleLabelFetch);
+  }
 
-  const fetchLabels = useDebounceFn(
-    async () => {
-      // Fetch a label for every address only once
-      const addressSet = new Set<Address>();
-      for (const address of pendingAddresses) {
-        const existingLabel = store.getLabel(chain.value, address);
-        if (!existingLabel) {
-          addressSet.add(address);
-        }
-      }
-      const uniqueAddresses = Array.from(addressSet);
-      if (uniqueAddresses.length === 0) {
-        return;
-      }
-      const labels = await apiService.value.getLabels(uniqueAddresses);
-      if (Object.keys(labels).length === 0) {
-        return;
-      }
-      store.addLabels(chain.value, labels);
-    },
-    50,
-    {
-      maxWait: 500,
-    },
-  );
-
-  async function requestLabels(addresses: Address[]): Promise<void> {
+  async function handleLabelFetch(addresses: Set<Address>): Promise<void> {
+    // Fetch a label for every address only once
+    const addressSet = new Set<Address>();
     for (const address of addresses) {
-      if (pendingAddresses.has(address)) {
-        continue;
+      const existingLabel = store.getLabel(chain.value, address);
+      if (!existingLabel) {
+        addressSet.add(address);
       }
-      pendingAddresses.add(address);
     }
-    fetchLabels();
+    const uniqueAddresses = Array.from(addressSet);
+    if (uniqueAddresses.length === 0) {
+      return;
+    }
+    const labels = await apiService.value.getLabels(uniqueAddresses);
+    if (Object.keys(labels).length === 0) {
+      return;
+    }
+    store.addLabels(chain.value, labels);
   }
 
   function getLabel(address: Address): Label | null {
@@ -70,7 +55,7 @@ function useLabels(): UseLabels {
   }
 
   return {
-    requestLabels,
+    requestLabel,
     getLabel,
     getLabelText,
   };
