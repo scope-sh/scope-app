@@ -5,7 +5,8 @@
       placeholder="Filter"
     />
     <FileTreeDirectory
-      :directory="rootDirectory"
+      v-if="filteredDirectory"
+      :directory="filteredDirectory"
       :selection="fileSelection"
       @select="handleFileSelect"
     />
@@ -95,9 +96,6 @@ const rootDirectory = computed<Directory>(() => {
     if (!fileName) {
       return;
     }
-    if (!fileName.toLowerCase().includes(filter.value.toLowerCase())) {
-      return;
-    }
     current.files.push(fileName);
   });
 
@@ -105,6 +103,30 @@ const rootDirectory = computed<Directory>(() => {
 });
 
 const filter = ref<string>('');
+const filteredDirectory = computed<Directory | null>(() => {
+  return filterDirectory(rootDirectory.value, filter.value);
+});
+function filterDirectory(
+  directory: Directory,
+  filter: string,
+): Directory | null {
+  const files = directory.files.filter((file) =>
+    file.toLowerCase().includes(filter.toLowerCase()),
+  );
+  const directories = directory.directories
+    .map((dir) => filterDirectory(dir, filter))
+    .filter((dir): dir is Directory => dir !== null);
+  if (files.length === 0 && directories.length === 0) {
+    return null;
+  }
+  const filteredDirectory: Directory = {
+    name: directory.name,
+    parent: directory.parent,
+    files,
+    directories,
+  };
+  return filteredDirectory;
+}
 
 function handleFileSelect(directory: Directory, fileIndex: number): void {
   const fileName = directory.files[fileIndex];
