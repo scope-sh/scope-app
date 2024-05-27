@@ -94,9 +94,18 @@ async function scrollToLine(line: number): Promise<void> {
   if (!lineEl) {
     return;
   }
-  lineEl.scrollIntoView({
-    block: 'center',
-  });
+
+  const containerRect = textEl.value.getBoundingClientRect();
+  const elementRect = lineEl.getBoundingClientRect();
+
+  const offsetTop =
+    elementRect.top -
+    containerRect.top +
+    textEl.value.scrollTop -
+    textEl.value.clientHeight / 2 +
+    elementRect.height / 2;
+
+  textEl.value.scrollTop = offsetTop;
 }
 
 function handleScroll(): void {
