@@ -209,10 +209,15 @@
               v-else
               class="logs"
             >
+              <ScopeToggle
+                v-model="selectedLogView"
+                :options="logViewOptions"
+              />
               <CardLog
                 v-for="(log, index) in logs"
                 :key="index"
                 :log="log"
+                :view="selectedLogView"
                 type="transaction"
               />
             </div>
@@ -225,11 +230,11 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { Address, Log, Transaction, TransactionReceipt, size } from 'viem';
+import { Address, Hex, Log, Transaction, TransactionReceipt, size } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import CardLog from '@/components/__common/CardLog.vue';
+import CardLog, { LogView } from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
 import LinkTransaction from '@/components/__common/LinkTransaction.vue';
@@ -240,6 +245,9 @@ import ScopePage, { Section } from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
+import ScopeToggle, {
+  Option as ToggleOption,
+} from '@/components/__common/ScopeToggle.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -248,11 +256,13 @@ import {
 } from '@/components/__common/attributes';
 import CardActions, { Action } from '@/components/user-op/CardActions.vue';
 import UserOpStatus from '@/components/user-op/UserOpStatus.vue';
+import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
+import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
 import IndexerService from '@/services/indexer';
 import { Command } from '@/stores/commands';
@@ -282,6 +292,7 @@ const { indexerEndpoint } = useEnv();
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
+const { addAbis } = useAbi();
 const { getLabel } = useLabels();
 
 const section = ref<Section['value']>(SECTION_TRANSACTION);
@@ -337,6 +348,9 @@ useHead({
   title: () => `UserOp ${hash.value} on ${chainName.value} | Scope`,
 });
 
+const apiService = computed(() =>
+  chainId.value ? new ApiService(chainId.value) : null,
+);
 const evmService = computed(() =>
   chainId.value && client.value
     ? new EvmService(chainId.value, client.value)
@@ -450,6 +464,7 @@ async function fetch(): Promise<void> {
     fetchTransactionReceipt(txHash),
   ]);
   isLoading.value = false;
+  await fetchAbis();
 }
 
 async function fetchTransaction(txHash: Address): Promise<void> {
@@ -470,6 +485,70 @@ async function fetchTransactionReceipt(txHash: Address): Promise<void> {
     await evmService.value.getTransactionReceipt(txHash);
   isTransactionReceiptLoading.value = false;
 }
+
+async function fetchAbis(): Promise<void> {
+  if (!apiService.value) {
+    return;
+  }
+  if (!transaction.value) {
+    return;
+  }
+  const address = transaction.value.to;
+  if (!address) {
+    return;
+  }
+  if (!transactionReceipt.value) {
+    return;
+  }
+  const logs = transactionReceipt.value.logs;
+  const contracts: Record<
+    Address,
+    {
+      functions: Hex[];
+      events: Hex[];
+    }
+  > = {};
+  for (const log of logs) {
+    if (!log.address) {
+      continue;
+    }
+    if (!contracts[log.address]) {
+      contracts[log.address] = {
+        functions: [],
+        events: [],
+      };
+    }
+    const contract = contracts[log.address];
+    if (!contract) {
+      continue;
+    }
+    if (log.topics.length === 0) {
+      continue;
+    }
+    const topic = log.topics[0];
+    if (!topic) {
+      continue;
+    }
+    if (contract.events.includes(topic)) {
+      continue;
+    }
+    contract.events.push(topic);
+  }
+  const abis = await apiService.value.getContractAbi(contracts);
+  addAbis(abis);
+}
+
+const selectedLogView = ref<LogView>('decoded');
+const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
+  {
+    value: 'decoded',
+    icon: 'text',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
 
 const actions = computed<Action[]>(() => {
   const opData = userOpUnpacked.value;
