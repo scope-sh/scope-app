@@ -412,7 +412,7 @@ async function fetchTransactions(): Promise<void> {
   isLoadingTransactions.value = true;
   // Define the start block based on the last transaction in the list
   const lastTransaction = transactions.value.at(-1);
-  const startBlock = lastTransaction ? lastTransaction.blockNumber : 0;
+  const startBlock = lastTransaction ? lastTransaction.blockNumber + 1 : 0;
   const addressTransactions =
     await hypersyncService.value.getAddressTransactions(
       address.value,
@@ -471,7 +471,7 @@ async function fetchLogs(): Promise<void> {
   isLoadingLogs.value = true;
   // Define the start block based on the last transaction in the list
   const lastLog = logs.value.at(-1);
-  const startBlock = lastLog ? lastLog.blockNumber : 0;
+  const startBlock = lastLog ? lastLog.blockNumber + 1 : 0;
   const addressLogs = await hypersyncService.value.getAddressLogs(
     address.value,
     startBlock,
