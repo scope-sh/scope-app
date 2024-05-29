@@ -571,13 +571,7 @@ const commands = computed<Command[]>(() => {
   ];
   const contractAbi =
     contract.value?.implementation?.abi || contract.value?.abi;
-  console.log(
-    contract.value?.implementation?.abi,
-    contract.value?.abi,
-    contractAbi,
-  );
   if (contractAbi) {
-    console.log('Adding copy ABI command');
     commands.push({
       icon: 'copy',
       label: 'Copy ABI',
