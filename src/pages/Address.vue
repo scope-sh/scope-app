@@ -196,6 +196,7 @@ import EvmService from '@/services/evm';
 import HypersyncService, {
   Log as AddressLog,
   Transaction as AddressTransaction,
+  Pagination,
   Sort,
 } from '@/services/hypersync';
 import IndexerService, { UserOp } from '@/services/indexer';
@@ -263,8 +264,14 @@ watch(address, () => {
   logPage.value = 1;
   ops.value = [];
   opPage.value = 1;
-  maxTransactionPage.value = Infinity;
-  maxLogPage.value = Infinity;
+  transactionPagination.value = {
+    cursor: null,
+    height: null,
+  };
+  logPagination.value = {
+    cursor: null,
+    height: null,
+  };
   // Fetch new data
   fetch();
   requestLabel(address.value);
@@ -406,7 +413,18 @@ const sort = computed<Sort | null>(() => {
 
 const TRANSACTIONS_PER_PAGE = 20;
 const transactionPage = ref(1);
-const maxTransactionPage = ref(Infinity);
+const transactionPagination = ref<Pagination>({
+  cursor: null,
+  height: null,
+});
+const maxTransactionPage = computed(() =>
+  getMaxPage(
+    sort.value,
+    transactionPagination.value,
+    transactions.value.length,
+    TRANSACTIONS_PER_PAGE,
+  ),
+);
 watch(transactionPage, (page) => {
   if (transactionRows.value.length >= page * TRANSACTIONS_PER_PAGE) {
     return;
@@ -418,19 +436,12 @@ async function fetchTransactions(): Promise<void> {
     return;
   }
   isLoadingTransactions.value = true;
-  // Define the start block based on the last transaction in the list
-  const lastTransaction = transactions.value.at(-1);
-  const cursor = lastTransaction
-    ? sort.value === 'asc'
-      ? lastTransaction.blockNumber + 1
-      : lastTransaction.blockNumber - 1
-    : undefined;
   const addressTransactions =
     await hypersyncService.value.getAddressTransactions(
       address.value,
+      transactionPagination.value.cursor,
       TRANSACTIONS_PER_PAGE + 1,
       sort.value,
-      cursor,
     );
   const newTransactions = addressTransactions.transactions;
   // Append newly fetched transactions to the end of the list
@@ -442,11 +453,7 @@ async function fetchTransactions(): Promise<void> {
         .map((transaction) => [transaction.hash, transaction]),
     ).values(),
   ];
-  if (!addressTransactions.hasNextPage) {
-    maxTransactionPage.value = Math.ceil(
-      transactions.value.length / TRANSACTIONS_PER_PAGE,
-    );
-  }
+  transactionPagination.value = addressTransactions.pagination;
   isLoadingTransactions.value = false;
 }
 const transactionRows = computed<TransactionRow[]>(() => {
@@ -470,7 +477,13 @@ const transactionRows = computed<TransactionRow[]>(() => {
 
 const LOGS_PER_PAGE = 20;
 const logPage = ref(1);
-const maxLogPage = ref(Infinity);
+const logPagination = ref<Pagination>({
+  cursor: null,
+  height: null,
+});
+const maxLogPage = computed(() =>
+  getMaxPage(sort.value, logPagination.value, logs.value.length, LOGS_PER_PAGE),
+);
 watch(logPage, (page) => {
   if (logs.value.length >= page * LOGS_PER_PAGE) {
     return;
@@ -482,18 +495,11 @@ async function fetchLogs(): Promise<void> {
     return;
   }
   isLoadingLogs.value = true;
-  // Define the start block based on the last transaction in the list
-  const lastLog = logs.value.at(-1);
-  const cursor = lastLog
-    ? sort.value === 'asc'
-      ? lastLog.blockNumber + 1
-      : lastLog.blockNumber - 1
-    : undefined;
   const addressLogs = await hypersyncService.value.getAddressLogs(
     address.value,
+    logPagination.value.cursor,
     LOGS_PER_PAGE + 1,
     sort.value,
-    cursor,
   );
   const newLogs = addressLogs.logs;
   // Append newly fetched logs to the end of the list
@@ -505,9 +511,7 @@ async function fetchLogs(): Promise<void> {
         .map((log) => [`${log.transactionHash}-${log.logIndex}`, log]),
     ).values(),
   ];
-  if (!addressLogs.hasNextPage) {
-    maxLogPage.value = Math.ceil(logs.value.length / LOGS_PER_PAGE);
-  }
+  logPagination.value = addressLogs.pagination;
   isLoadingLogs.value = false;
 }
 const logRows = computed<Log[]>(() => {
@@ -525,6 +529,28 @@ const logRows = computed<Log[]>(() => {
     })
     .slice((logPage.value - 1) * LOGS_PER_PAGE, logPage.value * LOGS_PER_PAGE);
 });
+
+function getMaxPage(
+  sort: Sort | null,
+  pagination: Pagination,
+  count: number,
+  perPage: number,
+): number {
+  if (!pagination.height) {
+    return Infinity;
+  }
+  if (!pagination.cursor) {
+    return Infinity;
+  }
+  const maxPage = Math.ceil(count / perPage);
+  return sort === 'asc'
+    ? pagination.cursor < pagination.height
+      ? Infinity
+      : maxPage
+    : pagination.cursor > 0
+      ? Infinity
+      : maxPage;
+}
 
 const OPS_PER_PAGE = 20;
 const opPage = ref(1);

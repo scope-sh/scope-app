@@ -99,14 +99,19 @@ interface QueryLog {
   topic3: null;
 }
 
+interface Pagination {
+  cursor: number | null;
+  height: number | null;
+}
+
 interface AddressTransactions {
   transactions: Transaction[];
-  hasNextPage: boolean;
+  pagination: Pagination;
 }
 
 interface AddressLogs {
   logs: Log[];
-  hasNextPage: boolean;
+  pagination: Pagination;
 }
 
 interface Transaction {
@@ -147,9 +152,9 @@ class Service {
 
   async getAddressTransactions(
     address: Address,
+    startCursor: number | null,
     limit: number,
     sort: Sort,
-    startCursor?: number,
   ): Promise<AddressTransactions> {
     const transactions: Transaction[] = [];
     let cursor = startCursor;
@@ -160,9 +165,9 @@ class Service {
     ) {
       const response = await this.#getAddressTransactionsPartial(
         address,
+        cursor,
         limit,
         sort,
-        cursor,
       );
       const data = response.data;
       const newTransactions = data
@@ -195,26 +200,24 @@ class Service {
           : response.prev_block || 0;
       height = response.archive_height;
     }
-    const hasNextPage = cursor
-      ? sort === 'asc'
-        ? cursor < height
-        : cursor > 0
-      : false;
     return {
       transactions,
-      hasNextPage,
+      pagination: {
+        cursor,
+        height,
+      },
     };
   }
 
   async #getAddressTransactionsPartial(
     address: Address,
+    cursor: number | null,
     limit: number,
     sort: Sort,
-    cursor?: number,
   ): Promise<QueryResponse> {
     const query: Query = {
       from_block: sort === 'asc' ? cursor || 0 : undefined,
-      to_block: sort === 'desc' ? cursor : undefined,
+      to_block: sort === 'desc' ? cursor || undefined : undefined,
       transactions: [
         {
           from: [address],
@@ -254,9 +257,9 @@ class Service {
 
   async getAddressLogs(
     address: Address,
+    startCursor: number | null,
     limit: number,
     sort: Sort,
-    startCursor?: number,
   ): Promise<AddressLogs> {
     const logs: Log[] = [];
     let cursor = startCursor;
@@ -264,9 +267,9 @@ class Service {
     while (logs.length < limit && this.#withInBounds(sort, height, cursor)) {
       const response = await this.#getAddressLogsPartial(
         address,
+        cursor,
         limit,
         sort,
-        cursor,
       );
       const data = response.data;
       const newLogs = data
@@ -298,26 +301,24 @@ class Service {
           : response.prev_block || 0;
       height = response.archive_height;
     }
-    const hasNextPage = cursor
-      ? sort === 'asc'
-        ? cursor < height
-        : cursor > 0
-      : false;
     return {
       logs,
-      hasNextPage,
+      pagination: {
+        cursor,
+        height,
+      },
     };
   }
 
   async #getAddressLogsPartial(
     address: Address,
+    cursor: number | null,
     limit: number,
     sort: Sort,
-    cursor?: number,
   ): Promise<QueryResponse> {
     const query: Query = {
       from_block: sort === 'asc' ? cursor || 0 : undefined,
-      to_block: sort === 'desc' ? cursor : undefined,
+      to_block: sort === 'desc' ? cursor || undefined : undefined,
       logs: [
         {
           address: [address],
@@ -352,8 +353,8 @@ class Service {
     return json;
   }
 
-  #withInBounds(sort: Sort, height: number, cursor?: number): boolean {
-    if (!cursor) {
+  #withInBounds(sort: Sort, height: number, cursor: number | null): boolean {
+    if (cursor === null) {
       return true;
     }
     if (sort === 'asc') {
@@ -390,4 +391,4 @@ class Service {
 }
 
 export default Service;
-export type { Transaction, Log, Sort };
+export type { Transaction, Log, Pagination, Sort };
