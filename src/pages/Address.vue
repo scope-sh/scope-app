@@ -196,6 +196,7 @@ import EvmService from '@/services/evm';
 import HypersyncService, {
   Log as AddressLog,
   Transaction as AddressTransaction,
+  Sort,
 } from '@/services/hypersync';
 import IndexerService, { UserOp } from '@/services/indexer';
 import { Command } from '@/stores/commands';
@@ -396,6 +397,13 @@ const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
   },
 ]);
 
+const sort = computed<Sort | null>(() => {
+  if (!hypersyncService.value) {
+    return null;
+  }
+  return hypersyncService.value.getSort();
+});
+
 const TRANSACTIONS_PER_PAGE = 20;
 const transactionPage = ref(1);
 const maxTransactionPage = ref(Infinity);
@@ -406,18 +414,23 @@ watch(transactionPage, (page) => {
   fetchTransactions();
 });
 async function fetchTransactions(): Promise<void> {
-  if (!address.value || !hypersyncService.value) {
+  if (!address.value || !hypersyncService.value || !sort.value) {
     return;
   }
   isLoadingTransactions.value = true;
   // Define the start block based on the last transaction in the list
   const lastTransaction = transactions.value.at(-1);
-  const startBlock = lastTransaction ? lastTransaction.blockNumber + 1 : 0;
+  const cursor = lastTransaction
+    ? sort.value === 'asc'
+      ? lastTransaction.blockNumber + 1
+      : lastTransaction.blockNumber - 1
+    : undefined;
   const addressTransactions =
     await hypersyncService.value.getAddressTransactions(
       address.value,
-      startBlock,
       TRANSACTIONS_PER_PAGE + 1,
+      sort.value,
+      cursor,
     );
   const newTransactions = addressTransactions.transactions;
   // Append newly fetched transactions to the end of the list
@@ -465,17 +478,22 @@ watch(logPage, (page) => {
   fetchLogs();
 });
 async function fetchLogs(): Promise<void> {
-  if (!address.value || !hypersyncService.value) {
+  if (!address.value || !hypersyncService.value || !sort.value) {
     return;
   }
   isLoadingLogs.value = true;
   // Define the start block based on the last transaction in the list
   const lastLog = logs.value.at(-1);
-  const startBlock = lastLog ? lastLog.blockNumber + 1 : 0;
+  const cursor = lastLog
+    ? sort.value === 'asc'
+      ? lastLog.blockNumber + 1
+      : lastLog.blockNumber - 1
+    : undefined;
   const addressLogs = await hypersyncService.value.getAddressLogs(
     address.value,
-    startBlock,
     LOGS_PER_PAGE + 1,
+    sort.value,
+    cursor,
   );
   const newLogs = addressLogs.logs;
   // Append newly fetched logs to the end of the list

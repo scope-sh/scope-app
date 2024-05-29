@@ -14,6 +14,8 @@ import {
   SEPOLIA,
 } from '@/utils/chains';
 
+type Sort = 'asc' | 'desc';
+
 type BlockFieldSelection = 'number' | 'timestamp';
 type TransactionFieldSelection =
   | 'block_number'
@@ -37,7 +39,8 @@ type LogFieldSelection =
   | 'topic3';
 
 interface Query {
-  from_block: number;
+  from_block?: number;
+  to_block?: number;
   logs?: {
     address?: Address[];
     topics?: Hex[];
@@ -48,6 +51,7 @@ interface Query {
   }[];
   max_num_transactions?: number;
   max_num_logs?: number;
+  sort?: Sort;
   field_selection: {
     block?: BlockFieldSelection[];
     transaction?: TransactionFieldSelection[];
@@ -61,7 +65,8 @@ interface QueryResponse {
     transactions?: QueryTransaction[];
     logs?: QueryLog[];
   }[];
-  next_block: number;
+  next_block?: number;
+  prev_block?: number;
   archive_height: number;
 }
 
@@ -136,19 +141,28 @@ class Service {
     this.endpointUrl = this.#getEndpoint(chain);
   }
 
+  getSort(): Sort {
+    return 'asc';
+  }
+
   async getAddressTransactions(
     address: Address,
-    fromBlock: number,
     limit: number,
+    sort: Sort,
+    startCursor?: number,
   ): Promise<AddressTransactions> {
     const transactions: Transaction[] = [];
-    let nextBlock = fromBlock;
+    let cursor = startCursor;
     let height: number = Infinity;
-    while (transactions.length < limit && nextBlock < height) {
+    while (
+      transactions.length < limit &&
+      this.#withInBounds(sort, height, cursor)
+    ) {
       const response = await this.#getAddressTransactionsPartial(
         address,
-        nextBlock,
         limit,
+        sort,
+        cursor,
       );
       const data = response.data;
       const newTransactions = data
@@ -175,22 +189,32 @@ class Service {
         })
         .flat();
       transactions.push(...newTransactions);
-      nextBlock = response.next_block;
+      cursor =
+        sort === 'asc'
+          ? response.next_block || Infinity
+          : response.prev_block || 0;
       height = response.archive_height;
     }
+    const hasNextPage = cursor
+      ? sort === 'asc'
+        ? cursor < height
+        : cursor > 0
+      : false;
     return {
       transactions,
-      hasNextPage: nextBlock < height,
+      hasNextPage,
     };
   }
 
   async #getAddressTransactionsPartial(
     address: Address,
-    fromBlock: number,
     limit: number,
+    sort: Sort,
+    cursor?: number,
   ): Promise<QueryResponse> {
     const query: Query = {
-      from_block: fromBlock,
+      from_block: sort === 'asc' ? cursor || 0 : undefined,
+      to_block: sort === 'desc' ? cursor : undefined,
       transactions: [
         {
           from: [address],
@@ -200,6 +224,7 @@ class Service {
         },
       ],
       max_num_transactions: limit,
+      sort,
       field_selection: {
         block: ['number', 'timestamp'],
         transaction: [
@@ -229,17 +254,19 @@ class Service {
 
   async getAddressLogs(
     address: Address,
-    fromBlock: number,
     limit: number,
+    sort: Sort,
+    startCursor?: number,
   ): Promise<AddressLogs> {
     const logs: Log[] = [];
-    let nextBlock = fromBlock;
+    let cursor = startCursor;
     let height: number = Infinity;
-    while (logs.length < limit && nextBlock < height) {
+    while (logs.length < limit && this.#withInBounds(sort, height, cursor)) {
       const response = await this.#getAddressLogsPartial(
         address,
-        nextBlock,
         limit,
+        sort,
+        cursor,
       );
       const data = response.data;
       const newLogs = data
@@ -265,28 +292,39 @@ class Service {
         })
         .flat();
       logs.push(...newLogs);
-      nextBlock = response.next_block;
+      cursor =
+        sort === 'asc'
+          ? response.next_block || Infinity
+          : response.prev_block || 0;
       height = response.archive_height;
     }
+    const hasNextPage = cursor
+      ? sort === 'asc'
+        ? cursor < height
+        : cursor > 0
+      : false;
     return {
       logs,
-      hasNextPage: nextBlock < height,
+      hasNextPage,
     };
   }
 
   async #getAddressLogsPartial(
     address: Address,
-    fromBlock: number,
     limit: number,
+    sort: Sort,
+    cursor?: number,
   ): Promise<QueryResponse> {
     const query: Query = {
-      from_block: fromBlock,
+      from_block: sort === 'asc' ? cursor || 0 : undefined,
+      to_block: sort === 'desc' ? cursor : undefined,
       logs: [
         {
           address: [address],
         },
       ],
       max_num_logs: limit,
+      sort,
       field_selection: {
         block: ['number', 'timestamp'],
         log: [
@@ -312,6 +350,17 @@ class Service {
     });
     const json = (await response.json()) as QueryResponse;
     return json;
+  }
+
+  #withInBounds(sort: Sort, height: number, cursor?: number): boolean {
+    if (!cursor) {
+      return true;
+    }
+    if (sort === 'asc') {
+      return cursor < height;
+    } else {
+      return cursor > 0;
+    }
   }
 
   #getEndpoint(chain: Chain): string {
@@ -341,4 +390,4 @@ class Service {
 }
 
 export default Service;
-export type { Transaction, Log };
+export type { Transaction, Log, Sort };
