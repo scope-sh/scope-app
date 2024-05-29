@@ -43,7 +43,7 @@ interface Query {
   to_block?: number;
   logs?: {
     address?: Address[];
-    topics?: Hex[];
+    topics?: Hex[][];
   }[];
   transactions?: {
     from?: Address[];
