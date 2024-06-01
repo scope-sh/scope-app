@@ -1,6 +1,7 @@
 <template>
   <ArgumentTreeBranch
     :args
+    :top-level="true"
     class="tree"
   />
 </template>

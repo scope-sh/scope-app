@@ -7,8 +7,7 @@
       :class="{ terminal: isPrimitiveType(arg.type) }"
     >
       <div class="key">
-        {{ arg.internalType || arg.type }} {{ arg.indexed ? 'indexed' : '' }}
-        {{ arg.name || index }}
+        {{ getKey(arg, index) }}
       </div>
       <div
         v-if="arg.type && arg.type.startsWith('tuple[')"
@@ -19,12 +18,16 @@
           :key="itemIndex"
         >
           <div class="key">{{ itemIndex }}</div>
-          <ArgumentTreeBranch :args="getArguments(argItem)" />
+          <ArgumentTreeBranch
+            :args="getArguments(argItem)"
+            :top-level="false"
+          />
         </template>
       </div>
       <ArgumentTreeBranch
         v-else-if="arg.value instanceof Array"
         :args="getArguments(arg.value as unknown[])"
+        :top-level="false"
       />
       <LinkAddress
         v-else-if="arg.type === 'address'"
@@ -48,8 +51,9 @@ import ArgumentTreeBranch from './ArgumentTreeBranch.vue';
 import ArgumentTreeLeaf from './ArgumentTreeLeaf.vue';
 import { Argument, isPrimitiveType } from './common';
 
-defineProps<{
+const props = defineProps<{
   args: Argument[];
+  topLevel: boolean;
 }>();
 
 function getArguments(args: unknown[]): Argument[] {
@@ -58,6 +62,16 @@ function getArguments(args: unknown[]): Argument[] {
 
 function getAddress(value: unknown): Address {
   return (value as Address).toLowerCase() as Address;
+}
+
+function getKey(arg: Argument, index: number): string {
+  const type = props.topLevel
+    ? arg.internalType || arg.type
+    : arg.name
+      ? arg.internalType || arg.type
+      : '';
+  const name = props.topLevel ? arg.name : arg.name || index;
+  return `${type} ${arg.indexed ? 'indexed' : ''} ${name}`;
 }
 </script>
 
