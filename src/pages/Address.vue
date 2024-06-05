@@ -253,7 +253,7 @@ const address = computed(() => {
 
 onMounted(() => {
   fetch();
-  requestLabel(address.value);
+  requestLabel(address.value, 'all');
 });
 
 watch(address, () => {
@@ -274,7 +274,7 @@ watch(address, () => {
   };
   // Fetch new data
   fetch();
-  requestLabel(address.value);
+  requestLabel(address.value, 'all');
 });
 
 useHead({

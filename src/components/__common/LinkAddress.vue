@@ -41,7 +41,7 @@ const props = withDefaults(
 watch(
   () => props.address,
   (value) => {
-    requestLabel(value);
+    requestLabel(value, 'primary');
   },
   { immediate: true },
 );

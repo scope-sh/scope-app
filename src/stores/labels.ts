@@ -6,16 +6,61 @@ import { ref } from 'vue';
 import { Label } from '@/services/api.js';
 import { Chain } from '@/utils/chains';
 
-const store = defineStore('labels', () => {
-  const labels = ref<Partial<Record<Chain, Record<Address, Label>>>>({});
-  const pendingAddresses = new Set<Address>();
+type RequestType = 'primary' | 'all';
 
-  function addLabels(chain: Chain, value: Record<Address, Label>): void {
+interface AddressLabels {
+  value: Label[];
+  type: RequestType;
+}
+
+type Requests = Map<Address, RequestType>;
+
+const store = defineStore('labels', () => {
+  const labels = ref<Partial<Record<Chain, Record<Address, AddressLabels>>>>(
+    {},
+  );
+  const requests: Requests = new Map();
+
+  function addPrimaryLabels(chain: Chain, value: Record<Address, Label>): void {
+    if (Object.keys(value).length === 0) {
+      return;
+    }
     const chainLabels = labels.value[chain] || {};
-    labels.value[chain] = { ...chainLabels, ...value };
+    const primaryLabels = Object.fromEntries(
+      Object.entries(value).map(([address, label]) => [
+        address,
+        { value: [label], type: 'primary' },
+      ]),
+    ) as Record<Address, AddressLabels>;
+    labels.value[chain] = { ...chainLabels, ...primaryLabels };
   }
 
-  function getLabel(chain: Chain, address: Address): Label | null {
+  function addAllLabels(chain: Chain, address: Address, value: Label[]): void {
+    if (value.length === 0) {
+      return;
+    }
+    const chainLabels = labels.value[chain] || {};
+    const addressLabels = chainLabels[address] || { value, type: 'all' };
+    chainLabels[address] = addressLabels;
+    labels.value[chain] = chainLabels;
+  }
+
+  function getLabels(chain: Chain, address: Address): Label[] {
+    const chainLabels = labels.value[chain];
+    if (!chainLabels) {
+      return [];
+    }
+    const addressLabels = chainLabels[address];
+    if (!addressLabels) {
+      return [];
+    }
+    return addressLabels.value;
+  }
+
+  function getAddressLabels(
+    chain: Chain,
+    address: Address,
+  ): AddressLabels | null {
     const chainLabels = labels.value[chain];
     if (!chainLabels) {
       return null;
@@ -24,9 +69,9 @@ const store = defineStore('labels', () => {
   }
 
   const debouncedFn = useDebounceFn(
-    (onFetch: (addresses: Set<Address>) => void) => {
-      onFetch(pendingAddresses);
-      pendingAddresses.clear();
+    (onFetch: (requests: Requests) => void) => {
+      onFetch(requests);
+      requests.clear();
     },
     50,
     { maxWait: 500 },
@@ -34,20 +79,28 @@ const store = defineStore('labels', () => {
 
   async function requestLabel(
     address: Address,
-    onFetch: (addresses: Set<Address>) => void,
+    type: RequestType,
+    onFetch: (requests: Requests) => void,
   ): Promise<void> {
-    if (pendingAddresses.has(address)) {
-      return;
-    }
-    pendingAddresses.add(address);
+    // If we receive two requests for the same address (primary and all), make sure to fetch all labels
+    const oldRequestType = requests.get(address);
+    const newRequestType = oldRequestType
+      ? oldRequestType === 'primary'
+        ? type
+        : 'all'
+      : type;
+    requests.set(address, newRequestType);
     debouncedFn(onFetch);
   }
 
   return {
-    addLabels,
-    getLabel,
+    addPrimaryLabels,
+    addAllLabels,
+    getLabels,
+    getAddressLabels,
     requestLabel,
   };
 });
 
 export default store;
+export type { Requests, RequestType };

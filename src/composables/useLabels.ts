@@ -2,12 +2,12 @@ import { Address } from 'viem';
 import { computed } from 'vue';
 
 import ApiService, { Label } from '@/services/api';
-import useStore from '@/stores/labels.js';
+import useStore, { Requests, RequestType } from '@/stores/labels.js';
 
 import useChain from './useChain';
 
 interface UseLabels {
-  requestLabel: (address: Address) => Promise<void>;
+  requestLabel: (address: Address, type: RequestType) => Promise<void>;
   getLabel: (address: Address) => Label | null;
   getLabelText: (address: Address) => string | null;
 }
@@ -17,32 +17,56 @@ function useLabels(): UseLabels {
   const { id: chain } = useChain();
   const apiService = computed(() => new ApiService(chain.value));
 
-  async function requestLabel(address: Address): Promise<void> {
-    store.requestLabel(address, handleLabelFetch);
+  async function requestLabel(
+    address: Address,
+    type: RequestType,
+  ): Promise<void> {
+    store.requestLabel(address, type, handleLabelFetch);
   }
 
-  async function handleLabelFetch(addresses: Set<Address>): Promise<void> {
+  async function handleLabelFetch(requests: Requests): Promise<void> {
     // Fetch a label for every address only once
-    const addressSet = new Set<Address>();
-    for (const address of addresses) {
-      const existingLabel = store.getLabel(chain.value, address);
-      if (!existingLabel) {
-        addressSet.add(address);
+    const primaryLabelAddresses = new Set<Address>();
+    const allLabelAddresses = new Set<Address>();
+    for (const [address, type] of requests) {
+      const existingLabels = store.getAddressLabels(chain.value, address);
+      if (existingLabels && existingLabels.type === 'all') {
+        continue;
+      }
+      if (type === 'primary') {
+        if (existingLabels && existingLabels.type === 'primary') {
+          continue;
+        }
+        primaryLabelAddresses.add(address);
+      } else {
+        allLabelAddresses.add(address);
       }
     }
-    const uniqueAddresses = Array.from(addressSet);
-    if (uniqueAddresses.length === 0) {
+    fetchPrimaryLabels([...primaryLabelAddresses]);
+    fetchAllLabels([...allLabelAddresses]);
+  }
+
+  async function fetchPrimaryLabels(addresses: Address[]): Promise<void> {
+    if (addresses.length === 0) {
       return;
     }
-    const labels = await apiService.value.getLabels(uniqueAddresses);
-    if (Object.keys(labels).length === 0) {
-      return;
+    // Fetch primary labels in a single request
+    const primaryLabels =
+      await apiService.value.getPrimaryAddressLabels(addresses);
+    store.addPrimaryLabels(chain.value, primaryLabels);
+  }
+
+  async function fetchAllLabels(addresses: Address[]): Promise<void> {
+    // Fetch all labels for each address
+    for (const address of addresses) {
+      const labels = await apiService.value.getAllAddressLabels(address);
+      store.addAllLabels(chain.value, address, labels);
     }
-    store.addLabels(chain.value, labels);
   }
 
   function getLabel(address: Address): Label | null {
-    return store.getLabel(chain.value, address);
+    const allLabels = store.getLabels(chain.value, address);
+    return allLabels[0] || null;
   }
 
   function getLabelText(address: Address): string | null {
