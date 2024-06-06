@@ -220,6 +220,7 @@ export default Service;
 export type {
   Label,
   LabelId,
+  LabelType,
   Log,
   Transaction,
   Contract,

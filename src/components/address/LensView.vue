@@ -1,32 +1,33 @@
 <template>
+  <!-- Generally, the list should go from the list generic type to the most one -->
   <DaimoAccount
-    v-if="labelTypeId === 'daimo-v1-account'"
+    v-if="hasLabelTypeId('daimo-v1-account')"
     :address="address"
   />
-  <Erc20Lens
-    v-else-if="labelTypeId === 'erc20' || labelTypeId === 'wrapped'"
+  <KernelV3AccountLens
+    v-else-if="hasLabelTypeId('kernel-v3-account')"
     :address="address"
   />
   <SafeV1_4_1Lens
-    v-if="labelTypeId === 'safe-v1.4.1-account'"
+    v-if="hasLabelTypeId('safe-v1.4.1-account')"
     :address="address"
   />
   <UniswapV2PoolLens
-    v-else-if="labelTypeId === 'uniswap-v2-pool'"
+    v-else-if="hasLabelTypeId('uniswap-v2-pool')"
     :address="address"
   />
   <UniswapV3PoolLens
-    v-else-if="labelTypeId === 'uniswap-v3-pool'"
+    v-else-if="hasLabelTypeId('uniswap-v3-pool')"
     :address="address"
   />
   <Erc7579ModuleLens
     v-else-if="
-      labelTypeId === 'erc7579-module' || labelTypeId === 'rhinestone-v1-module'
+      hasLabelTypeId('erc7579-module') || hasLabelTypeId('rhinestone-v1-module')
     "
     :address="address"
   />
-  <KernelV3AccountLens
-    v-else-if="labelTypeId === 'kernel-v3-account'"
+  <Erc20Lens
+    v-else-if="hasLabelTypeId('erc20') || hasLabelTypeId('wrapped')"
     :address="address"
   />
 </template>
@@ -44,8 +45,12 @@ import SafeV1_4_1Lens from './lenses/SafeV1_4_1Lens.vue';
 import UniswapV2PoolLens from './lenses/UniswapV2PoolLens.vue';
 import UniswapV3PoolLens from './lenses/UniswapV3PoolLens.vue';
 
-defineProps<{
-  labelTypeId: LabelId;
+const props = defineProps<{
+  labelTypes: LabelId[];
   address: Address;
 }>();
+
+function hasLabelTypeId(labelTypeId: LabelId): boolean {
+  return props.labelTypes.includes(labelTypeId);
+}
 </script>

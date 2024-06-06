@@ -60,8 +60,8 @@
       </div>
       <LensView
         v-if="address && isContract && primaryLabel && primaryLabel.type"
-        :label-type-id="primaryLabel.type.id"
-        :address="address"
+        :label-types
+        :address
       />
     </ScopePanel>
     <template #section>
@@ -218,7 +218,7 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
-import ApiService, { type Contract } from '@/services/api';
+import ApiService, { type Contract, LabelType } from '@/services/api';
 import EvmService from '@/services/evm';
 import HypersyncService, {
   Log as AddressLog,
@@ -343,6 +343,12 @@ const ops = ref<UserOp[]>([]);
 const isContract = computed<boolean>(() => !!bytecode.value);
 const addressLabels = computed(() => getLabels(address.value));
 const primaryLabel = computed(() => addressLabels.value[0] || null);
+const labelTypes = computed(() =>
+  addressLabels.value
+    .map((label) => label.type)
+    .filter((type): type is LabelType => !!type)
+    .map((type) => type.id),
+);
 const overviewPanelTitle = computed<string>(() => {
   if (!isContract.value) {
     return 'Address';
