@@ -9,6 +9,7 @@ import useChain from './useChain';
 interface UseLabels {
   requestLabel: (address: Address, type: RequestType) => Promise<void>;
   getLabel: (address: Address) => Label | null;
+  getLabels: (address: Address) => Label[];
   getLabelText: (address: Address) => string | null;
 }
 
@@ -69,6 +70,11 @@ function useLabels(): UseLabels {
     return allLabels[0] || null;
   }
 
+  function getLabels(address: Address): Label[] {
+    const allLabels = store.getLabels(chain.value, address);
+    return allLabels;
+  }
+
   function getLabelText(address: Address): string | null {
     const label = getLabel(address);
     return label
@@ -81,6 +87,7 @@ function useLabels(): UseLabels {
   return {
     requestLabel,
     getLabel,
+    getLabels,
     getLabelText,
   };
 }

@@ -19,23 +19,48 @@
         :address="address"
       />
       <div
-        v-if="addressLabel"
+        v-if="primaryLabel"
         class="label"
       >
         <div class="label-icon"></div>
         <div class="label-details">
           <div
-            v-if="addressLabel.namespace"
+            v-if="primaryLabel.namespace"
             class="label-namespace"
           >
-            {{ addressLabel.namespace.value }}
+            {{ primaryLabel.namespace.value }}
           </div>
-          <div class="label-value">{{ addressLabel.value }}</div>
+          <div class="label-value">{{ primaryLabel.value }}</div>
         </div>
+        <ScopePopover v-if="addressLabels.length > 1">
+          <template #trigger>
+            <ScopeIcon
+              class="icon"
+              kind="chevron-down"
+            />
+          </template>
+          <template #default>
+            <div class="panel-known-labels">
+              <h3 class="panel-known-labels header">All known names</h3>
+              <ul class="panel-known-labels list">
+                <li
+                  v-for="(label, index) in addressLabels"
+                  :key="index"
+                  class="panel-known-labels item"
+                >
+                  <template v-if="label.namespace">
+                    {{ label.namespace.value }}:
+                  </template>
+                  {{ label.value }}
+                </li>
+              </ul>
+            </div>
+          </template>
+        </ScopePopover>
       </div>
       <LensView
-        v-if="address && isContract && addressLabel && addressLabel.type"
-        :label-type-id="addressLabel.type.id"
+        v-if="address && isContract && primaryLabel && primaryLabel.type"
+        :label-type-id="primaryLabel.type.id"
         :address="address"
       />
     </ScopePanel>
@@ -167,12 +192,14 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import CardLog, { Log, LogView } from '@/components/__common/CardLog.vue';
+import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
+import ScopePopover from '@/components/__common/ScopePopover.vue';
 import ScopeToggle, {
   Option as ToggleOption,
 } from '@/components/__common/ScopeToggle.vue';
@@ -213,7 +240,7 @@ const { setCommands } = useCommands(PAGE_ADDRESS);
 const { send: sendToast } = useToast();
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
-const { getLabel, requestLabel } = useLabels();
+const { getLabels, requestLabel } = useLabels();
 const { addAbis } = useAbi();
 
 const section = ref<string>(SECTION_TRANSACTIONS);
@@ -314,18 +341,19 @@ const isLoadingOps = ref(false);
 const ops = ref<UserOp[]>([]);
 
 const isContract = computed<boolean>(() => !!bytecode.value);
-const addressLabel = computed(() => getLabel(address.value));
+const addressLabels = computed(() => getLabels(address.value));
+const primaryLabel = computed(() => addressLabels.value[0] || null);
 const overviewPanelTitle = computed<string>(() => {
   if (!isContract.value) {
     return 'Address';
   }
-  if (!addressLabel.value) {
+  if (!primaryLabel.value) {
     return 'Contract';
   }
-  if (!addressLabel.value.type) {
+  if (!primaryLabel.value.type) {
     return 'Contract';
   }
-  return `Contract — ${addressLabel.value.type.value}`;
+  return `Contract — ${primaryLabel.value.type.value}`;
 });
 
 async function fetch(): Promise<void> {
@@ -671,6 +699,37 @@ watch(
 .label-value {
   display: flex;
   font-size: var(--font-size-l);
+}
+
+.icon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.6;
+  color: var(--color-text-primary);
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.panel-known-labels {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-direction: column;
+
+  & .header {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: var(--font-size-s);
+    font-weight: var(--font-weight-regular);
+  }
+
+  & .list {
+    gap: var(--spacing-2);
+    margin: 0;
+    padding-left: 0;
+    list-style-type: none;
+  }
 }
 
 .logs {
