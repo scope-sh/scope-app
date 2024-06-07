@@ -321,13 +321,6 @@ thead {
   background: var(--color-background-secondary);
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
-  font-size: var(--font-size-m);
-}
-
-@media (width >= 768px) {
-  thead {
-    font-size: var(--font-size-s);
-  }
 }
 
 th,
