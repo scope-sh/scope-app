@@ -22,7 +22,7 @@ defineProps<{
 
 <style scoped>
 .link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   gap: var(--spacing-2);
 
