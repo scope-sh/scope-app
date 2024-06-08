@@ -22,15 +22,10 @@
         v-if="primaryLabel"
         class="label"
       >
-        <div
-          v-if="primaryLabel.iconUrl"
+        <LabelIcon
+          :url="primaryLabel.iconUrl || null"
           class="label-icon"
-        >
-          <img
-            :src="primaryLabel.iconUrl"
-            alt="Address icon"
-          />
-        </div>
+        />
         <div class="label-details">
           <div
             v-if="primaryLabel.namespace"
@@ -200,6 +195,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import CardLog, { Log, LogView } from '@/components/__common/CardLog.vue';
+import LabelIcon from '@/components/__common/LabelIcon.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
@@ -694,8 +690,6 @@ watch(
 .label-icon {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
-  background: var(--color-background-secondary);
 }
 
 .label-details {

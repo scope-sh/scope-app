@@ -12,10 +12,8 @@
     >
       <slot>
         <div class="address">
-          <img
-            v-if="labelIcon"
-            :src="labelIcon"
-            alt="Address icon"
+          <LabelIcon
+            :url="labelIcon"
             class="icon"
           />
           <span>{{ labelText || address }}</span>
@@ -31,6 +29,7 @@ import { computed, watch } from 'vue';
 
 import useLabels from '@/composables/useLabels.js';
 
+import LabelIcon from './LabelIcon.vue';
 import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
