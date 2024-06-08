@@ -3,9 +3,9 @@
     <div class="content">
       <div class="header">
         <template v-if="date">
-          <span>
+          <div>
             {{ formatRelativeTime(toRelativeTime(new Date(), date)) }}
-          </span>
+          </div>
           ·
         </template>
         <template v-if="log.blockNumber">
@@ -15,7 +15,7 @@
           />
           ·
         </template>
-        <span>
+        <div>
           <LinkAddress
             v-if="type === 'transaction'"
             :address="log.address"
@@ -26,9 +26,9 @@
             :hash="log.transactionHash"
             type="minimal"
           />
-        </span>
+        </div>
         ·
-        <span class="index">#{{ log.logIndex }}</span>
+        <div class="index">#{{ log.logIndex }}</div>
       </div>
       <div
         v-if="view === 'decoded' && decoded"
@@ -151,6 +151,8 @@ export type { Log, LogView };
 }
 
 .header {
+  display: flex;
+  gap: var(--spacing-2);
   font-size: var(--font-size-s);
 }
 
