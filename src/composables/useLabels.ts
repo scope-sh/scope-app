@@ -11,6 +11,7 @@ interface UseLabels {
   getLabel: (address: Address) => Label | null;
   getLabels: (address: Address) => Label[];
   getLabelText: (address: Address) => string | null;
+  getLabelIcon: (address: Address) => string | null;
 }
 
 function useLabels(): UseLabels {
@@ -84,11 +85,23 @@ function useLabels(): UseLabels {
       : null;
   }
 
+  function getLabelIcon(address: Address): string | null {
+    const label = getLabel(address);
+    if (!label) {
+      return null;
+    }
+    if (!label.iconUrl) {
+      return null;
+    }
+    return label.iconUrl;
+  }
+
   return {
     requestLabel,
     getLabel,
     getLabels,
     getLabelText,
+    getLabelIcon,
   };
 }
 

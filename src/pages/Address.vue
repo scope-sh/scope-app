@@ -22,7 +22,15 @@
         v-if="primaryLabel"
         class="label"
       >
-        <div class="label-icon"></div>
+        <div
+          v-if="primaryLabel.iconUrl"
+          class="label-icon"
+        >
+          <img
+            :src="primaryLabel.iconUrl"
+            alt="Address icon"
+          />
+        </div>
         <div class="label-details">
           <div
             v-if="primaryLabel.namespace"

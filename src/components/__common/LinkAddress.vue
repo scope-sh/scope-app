@@ -11,7 +11,15 @@
       :type
     >
       <slot>
-        {{ labelText || address }}
+        <div class="address">
+          <img
+            v-if="labelIcon"
+            :src="labelIcon"
+            alt="Address icon"
+            class="icon"
+          />
+          <span>{{ labelText || address }}</span>
+        </div>
       </slot>
     </ScopeLinkInternal>
   </LinkBase>
@@ -26,7 +34,7 @@ import useLabels from '@/composables/useLabels.js';
 import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { Type } from './ScopeLinkInternal.vue';
 
-const { getLabelText, requestLabel } = useLabels();
+const { getLabelIcon, getLabelText, requestLabel } = useLabels();
 
 const props = withDefaults(
   defineProps<{
@@ -47,4 +55,18 @@ watch(
 );
 
 const labelText = computed(() => getLabelText(props.address));
+const labelIcon = computed(() => getLabelIcon(props.address));
 </script>
+
+<style scoped>
+.address {
+  display: flex;
+  gap: var(--spacing-2);
+  align-items: center;
+}
+
+.icon {
+  width: 1em;
+  height: 1em;
+}
+</style>
