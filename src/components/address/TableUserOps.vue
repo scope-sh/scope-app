@@ -84,16 +84,12 @@
               v-else-if="cell.column.id === 'bundler'"
               :address="cell.getValue() as Address"
               type="minimal"
-            >
-              {{ getAddress(cell.getValue() as Address) }}
-            </LinkAddress>
+            />
             <LinkAddress
               v-else-if="isPaymaster(cell)"
               :address="cell.getValue() as Address"
               type="minimal"
-            >
-              {{ getAddress(cell.getValue() as Address) }}
-            </LinkAddress>
+            />
             <FlexRender
               v-else
               :render="cell.column.columnDef.cell"
@@ -123,15 +119,12 @@ import LinkBlock from '@/components/__common/LinkBlock.vue';
 import LinkTransaction from '@/components/__common/LinkTransaction.vue';
 import LinkUserOp from '@/components/__common/LinkUserOp.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import useLabels from '@/composables/useLabels.js';
 import {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
 import { toRelativeTime } from '@/utils/conversion';
 import { formatRelativeTime } from '@/utils/formatting';
-
-const { getLabelText } = useLabels();
 
 const props = defineProps<{
   ops: UserOp[];
@@ -221,11 +214,6 @@ watch(
     table.setPageIndex(props.page);
   },
 );
-
-function getAddress(value: Address): string {
-  const labelText = getLabelText(value);
-  return labelText ? labelText : value;
-}
 
 function isPaymaster(cell: Cell<UserOp, unknown>): boolean {
   return cell.column.id === 'paymaster' && cell.getValue() !== zeroAddress;
