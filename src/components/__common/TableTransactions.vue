@@ -80,9 +80,7 @@
                 v-if="cell.getValue() !== address"
                 :address="cell.getValue() as Address"
                 type="minimal"
-              >
-                {{ getAddress(cell.getValue() as Address) }}
-              </LinkAddress>
+              />
               <span v-else>
                 {{ getAddress(cell.getValue() as Address) }}
               </span>
@@ -93,9 +91,7 @@
                   v-if="cell.getValue() !== address"
                   :address="cell.getValue() as Address"
                   type="minimal"
-                >
-                  {{ getAddress(cell.getValue() as Address) }}
-                </LinkAddress>
+                />
                 <span v-else>
                   {{ getAddress(cell.getValue() as Address) }}
                 </span>
