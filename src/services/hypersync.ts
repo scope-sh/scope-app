@@ -1,18 +1,6 @@
 import { Address, Hex } from 'viem';
 
-import {
-  ARBITRUM,
-  ARBITRUM_SEPOLIA,
-  BASE,
-  BASE_SEPOLIA,
-  Chain,
-  ETHEREUM,
-  OPTIMISM,
-  OPTIMISM_SEPOLIA,
-  POLYGON,
-  POLYGON_AMOY,
-  SEPOLIA,
-} from '@/utils/chains';
+import { Chain } from '@/utils/chains';
 
 type Sort = 'asc' | 'desc';
 
@@ -365,28 +353,7 @@ class Service {
   }
 
   #getEndpoint(chain: Chain): string {
-    switch (chain) {
-      case ETHEREUM:
-        return 'https://eth.hypersync.xyz/query';
-      case SEPOLIA:
-        return 'https://sepolia.hypersync.xyz/query';
-      case OPTIMISM:
-        return 'https://optimism.hypersync.xyz/query';
-      case OPTIMISM_SEPOLIA:
-        return 'https://optimism-sepolia.hypersync.xyz/query';
-      case BASE:
-        return 'https://base.hypersync.xyz/query';
-      case BASE_SEPOLIA:
-        return 'https://base-sepolia.hypersync.xyz/query';
-      case POLYGON:
-        return 'https://polygon.hypersync.xyz/query';
-      case POLYGON_AMOY:
-        return 'https://amoy.hypersync.xyz/query';
-      case ARBITRUM:
-        return 'https://arbitrum.hypersync.xyz/query';
-      case ARBITRUM_SEPOLIA:
-        return 'https://arbitrum-sepolia.hypersync.xyz/query';
-    }
+    return `https://${chain}.hypersync.xyz/query`;
   }
 }
 
