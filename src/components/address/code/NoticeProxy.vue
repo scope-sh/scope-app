@@ -48,4 +48,10 @@ function handleToggleUpdate(newValue: boolean): void {
   color: var(--color-text-secondary);
   font-size: var(--font-size-s);
 }
+
+.info {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
 </style>
