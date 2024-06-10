@@ -34,7 +34,15 @@
         v-if="view === 'decoded' && decoded"
         class="decoded"
       >
-        <div class="name">{{ decoded.name }}</div>
+        <div class="name">
+          {{ decoded.name }}
+          <ButtonCopy
+            v-if="log.topics[0]"
+            :value="log.topics[0]"
+            compact
+            class="copy"
+          />
+        </div>
         <div class="properties">
           <ArgumentTree
             :args="decoded.args"
@@ -87,6 +95,7 @@ import type { Log as AddressLog } from '@/services/hypersync';
 import { toRelativeTime } from '@/utils/conversion';
 import { formatRelativeTime } from '@/utils/formatting';
 
+import ButtonCopy from './ButtonCopy.vue';
 import LinkBlock from './LinkBlock.vue';
 import LinkTransaction from './LinkTransaction.vue';
 
@@ -182,7 +191,14 @@ export type { Log, LogView };
 }
 
 .name {
+  display: flex;
+  gap: var(--spacing-2);
   font-size: var(--font-size-l);
+
+  .copy {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .properties {
