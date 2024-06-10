@@ -3,7 +3,14 @@
     v-if="view === 'decoded' && decoded"
     class="decoded"
   >
-    <div class="name">{{ decoded.name }}</div>
+    <div class="name">
+      {{ decoded.name }}
+      <ButtonCopy
+        :value="signature"
+        compact
+        class="copy"
+      />
+    </div>
     <div class="properties">
       <ArgumentTree
         :args="decoded.args"
@@ -24,6 +31,7 @@ import { computed } from 'vue';
 
 import useAbi from '@/composables/useAbi';
 
+import ButtonCopy from './ButtonCopy.vue';
 import ScopeTextView from './ScopeTextView.vue';
 import { ArgumentTree, Argument, getArguments } from './arguments';
 
@@ -40,13 +48,14 @@ interface DecodedCallData {
   args: Argument[];
 }
 
+const signature = computed<Hex>(() => props.callData.substring(0, 10) as Hex);
+
 const abi = computed<AbiFunction | null>(() => {
   if (!props.address) {
     return null;
   }
-  const signature = props.callData.substring(0, 10) as Hex;
-  return size(signature) === 4
-    ? getFunctionAbi(props.address, signature)
+  return size(signature.value) === 4
+    ? getFunctionAbi(props.address, signature.value)
     : null;
 });
 
@@ -88,7 +97,14 @@ export type { CallDataView };
 }
 
 .name {
+  display: flex;
+  gap: var(--spacing-2);
   font-size: var(--font-size-l);
+
+  .copy {
+    width: 16px;
+    height: 16px;
+  }
 }
 
 .properties {
