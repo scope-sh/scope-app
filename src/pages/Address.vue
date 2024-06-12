@@ -23,7 +23,7 @@
         class="label"
       >
         <LabelIcon
-          :url="primaryLabel.iconUrl || null"
+          :uri="primaryLabel.iconUrl || null"
           class="label-icon"
         />
         <div class="label-details">

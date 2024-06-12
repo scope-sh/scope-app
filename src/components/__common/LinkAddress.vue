@@ -13,7 +13,7 @@
       <slot>
         <div class="address">
           <LabelIcon
-            :url="labelIcon"
+            :uri="labelIcon"
             class="icon"
           />
           <span>{{ labelText || address }}</span>
