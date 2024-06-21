@@ -222,7 +222,7 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
-import ApiService, { type Contract, LabelType } from '@/services/api';
+import ApiService, { type Contract } from '@/services/api';
 import EvmService from '@/services/evm';
 import HypersyncService, {
   Log as AddressLog,
@@ -350,7 +350,7 @@ const primaryLabel = computed(() => addressLabels.value[0] || null);
 const labelTypes = computed(() =>
   addressLabels.value
     .map((label) => label.type)
-    .filter((type): type is LabelType => !!type)
+    .filter((type) => !!type)
     .map((type) => type.id),
 );
 const overviewPanelTitle = computed<string>(() => {
@@ -418,10 +418,10 @@ watch(contract, (contract) => {
     return;
   }
   const addressFunctions: [Hex, AbiFunction][] = abi
-    .filter((abi): abi is AbiFunction => abi.type === 'function')
+    .filter((abi) => abi.type === 'function')
     .map((abi) => [toFunctionSelector(abi), abi]);
   const addressEvents: [Hex, AbiEvent][] = abi
-    .filter((abi): abi is AbiEvent => abi.type === 'event')
+    .filter((abi) => abi.type === 'event')
     .map((abi) => [toEventSelector(abi), abi]);
   addAbis({
     [address.value]: {

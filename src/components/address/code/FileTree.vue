@@ -115,7 +115,7 @@ function filterDirectory(
   );
   const directories = directory.directories
     .map((dir) => filterDirectory(dir, filter))
-    .filter((dir): dir is Directory => dir !== null);
+    .filter((dir) => dir !== null);
   if (files.length === 0 && directories.length === 0) {
     return null;
   }

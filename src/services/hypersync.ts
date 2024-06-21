@@ -276,7 +276,7 @@ class Service {
               address: log.address,
               data: log.data,
               topics: [log.topic0, log.topic1, log.topic2, log.topic3].filter(
-                (topic): topic is Hex => topic !== null,
+                (topic) => topic !== null,
               ),
             };
           });
