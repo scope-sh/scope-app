@@ -5,15 +5,24 @@ import type { Chain } from '@/utils/chains.js';
 
 type LabelId =
   | 'erc20'
+  | 'erc721'
+  | 'erc1155'
   | 'aave-v2-atoken'
   | 'aave-v2-variable-debt-token'
   | 'aave-v2-stable-debt-token'
   | 'aave-v3-atoken'
   | 'aave-v3-vtoken'
   | 'aave-v3-stoken'
+  | 'alchemy-v1-multi-owner-modular-account'
+  | 'alchemy-v1.0-light-account'
+  | 'alchemy-v1.0-light-account'
+  | 'alchemy-v1.1-light-account'
+  | 'alchemy-v2-light-account'
+  | 'alchemy-v2-multi-owner-light-account'
   | 'biconomy-v2-account'
   | 'coinbase-smart-wallet-v1-account'
   | 'daimo-v1-account'
+  | 'kernel-v1-account'
   | 'kernel-v2-account'
   | 'kernel-v3-account'
   | 'erc7579-module'
@@ -24,6 +33,7 @@ type LabelId =
   | 'rhinestone-v1-module'
   | 'safe-v1.3.0-account'
   | 'safe-v1.4.1-account'
+  | 'thirdweb-v1-managed-account'
   | 'uniswap-v2-pool'
   | 'uniswap-v3-pool';
 
