@@ -27,7 +27,7 @@
     :address="address"
   />
   <Erc20Lens
-    v-else-if="hasLabelTypeId('erc20') || hasLabelTypeId('wrapped')"
+    v-else-if="hasLabelTypeId('erc20')"
     :address="address"
   />
 </template>

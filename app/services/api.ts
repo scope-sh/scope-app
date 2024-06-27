@@ -4,7 +4,6 @@ import useEnv from '@/composables/useEnv';
 import type { Chain } from '@/utils/chains.js';
 
 type LabelId =
-  | 'wrapped'
   | 'erc20'
   | 'aave-v2-atoken'
   | 'aave-v2-variable-debt-token'
