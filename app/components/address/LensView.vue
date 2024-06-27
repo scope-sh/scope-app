@@ -43,14 +43,14 @@ import SafeV1_4_1Lens from './lenses/SafeV1_4_1Lens.vue';
 import UniswapV2PoolLens from './lenses/UniswapV2PoolLens.vue';
 import UniswapV3PoolLens from './lenses/UniswapV3PoolLens.vue';
 
-import type { LabelId } from '@/services/api.js';
+import type { LabelTypeId } from '@/services/api.js';
 
 const props = defineProps<{
-  labelTypes: LabelId[];
+  labelTypes: LabelTypeId[];
   address: Address;
 }>();
 
-function hasLabelTypeId(labelTypeId: LabelId): boolean {
+function hasLabelTypeId(labelTypeId: LabelTypeId): boolean {
   return props.labelTypes.includes(labelTypeId);
 }
 </script>

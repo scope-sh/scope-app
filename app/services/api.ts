@@ -3,7 +3,7 @@ import type { Abi, AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import useEnv from '@/composables/useEnv';
 import type { Chain } from '@/utils/chains.js';
 
-type LabelId =
+type LabelTypeId =
   | 'erc20'
   | 'erc721'
   | 'erc1155'
@@ -38,7 +38,7 @@ type LabelId =
   | 'uniswap-v3-pool';
 
 interface LabelType {
-  id: LabelId;
+  id: LabelTypeId;
   value: string;
 }
 
@@ -228,8 +228,8 @@ class Service {
 export default Service;
 export type {
   Label,
-  LabelId,
   LabelType,
+  LabelTypeId,
   Log,
   Transaction,
   Contract,
