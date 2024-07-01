@@ -662,15 +662,9 @@ const commands = computed<Command[]>(() => {
   return commands;
 });
 
-watch(
-  commands,
-  () => {
-    setCommands(commands.value);
-  },
-  {
-    immediate: true,
-  },
-);
+watch(commands, () => {
+  setCommands(commands.value);
+});
 </script>
 
 <style scoped>
