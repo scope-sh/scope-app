@@ -9,6 +9,10 @@ export default defineNuxtConfig({
     compatibilityVersion: 4,
   },
 
+  devServer: {
+    port: 5173,
+  },
+
   ssr: false,
 
   app: {
@@ -28,5 +32,5 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@vueuse/nuxt', '@pinia/nuxt', '@nuxt/eslint', "nuxt-shiki"],
+  modules: ['@vueuse/nuxt', '@pinia/nuxt', '@nuxt/eslint', 'nuxt-shiki'],
 });
