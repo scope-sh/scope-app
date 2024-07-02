@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { transformerNotationWordHighlight } from '@shikijs/transformers';
-import { type HighlighterGeneric, getHighlighter } from 'shiki';
+import { type HighlighterGeneric, createHighlighter } from 'shiki';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import ButtonCopy from '@/components/__common/ButtonCopy.vue';
@@ -48,7 +48,7 @@ const highlighter = ref<HighlighterGeneric<'solidity', 'ayu-dark'> | null>(
 );
 
 onMounted(async () => {
-  highlighter.value = await getHighlighter({
+  highlighter.value = await createHighlighter({
     themes: ['ayu-dark'],
     langs: ['solidity', 'vyper', 'json', 'plaintext'],
   });
@@ -118,9 +118,9 @@ function getHighlightSnippet(language: Language, word: string | null): string {
   }
   switch (language) {
     case 'Solidity':
-      return `// [!code word:${word}]`;
+      return `// [!code word:${word}]\n`;
     case 'Vyper':
-      return `# [!code word:${word}]`;
+      return `# [!code word:${word}]\n`;
     default:
       return '';
   }
@@ -152,7 +152,6 @@ const lineBeforeDisplay = computed(() =>
   border-radius: var(--border-radius-m);
   background: #201e21;
   color: var(--color-text-primary);
-  font-family: var(--font-mono);
   font-size: var(--font-size);
 }
 
@@ -167,20 +166,20 @@ const lineBeforeDisplay = computed(() =>
 
 .text :deep(.line) {
   font-family: var(--font-mono);
+}
 
-  &::before {
-    content: counter(step);
-    display: v-bind('lineBeforeDisplay');
-    width: calc(var(--line-number-digits) * var(--font-size-m) / 2);
-    margin-right: 48px;
-    color: var(--color-text-secondary);
-    text-align: right;
-    counter-increment: step;
-  }
+.text :deep(.line)::before {
+  content: counter(step);
+  display: v-bind('lineBeforeDisplay');
+  width: calc(var(--line-number-digits) * var(--font-size-m) / 2);
+  margin-right: 48px;
+  color: var(--color-text-secondary);
+  text-align: right;
+  counter-increment: step;
+}
 
-  .highlighted-word {
-    background: oklch(from var(--color-accent) l c h / 20%);
-  }
+.text :deep(.line) .highlighted-word {
+  background: oklch(from var(--color-accent) l c h / 20%);
 }
 
 .button {
