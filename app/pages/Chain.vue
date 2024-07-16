@@ -258,9 +258,13 @@ function handleChainUpdate(value: Chain): void {
   align-items: center;
   transition: all 0.25s ease-in-out;
   font-size: var(--font-size-s);
-}
 
-.latest-block.loading {
-  opacity: 0.6;
+  &.loading {
+    opacity: 0.6;
+  }
+
+  & span {
+    padding: 2px 0;
+  }
 }
 </style>
