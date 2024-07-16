@@ -25,13 +25,18 @@ type Command = SimpleCommand | NestedCommand;
 const store = defineStore('commands', () => {
   const commands = ref<Record<string, Command[]>>({});
 
-  function setCommands(scope: string, newCommands: Command[]): void {
-    commands.value[scope] = newCommands;
+  function setCommands(id: string, newCommands: Command[]): void {
+    commands.value[id] = newCommands;
+  }
+
+  function removeCommands(id: string): void {
+    commands.value[id] = [];
   }
 
   return {
     commands,
     setCommands,
+    removeCommands,
   };
 });
 

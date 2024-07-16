@@ -284,11 +284,10 @@ import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kern
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 
-const PAGE_USEROP = 'page_userop';
 const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
 
-const { setCommands } = useCommands(PAGE_USEROP);
+const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
 const { indexerEndpoint } = useEnv();

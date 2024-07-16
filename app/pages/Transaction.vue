@@ -223,11 +223,10 @@ import {
 } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 
-const PAGE_TRANSACTION = 'page_transaction';
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
 
-const { setCommands } = useCommands(PAGE_TRANSACTION);
+const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
 const route = useRoute();

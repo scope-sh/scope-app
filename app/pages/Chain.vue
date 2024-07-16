@@ -64,12 +64,10 @@ import {
   isTransactionHash,
 } from '@/utils/validation/pattern';
 
-const CHAIN_PAGE = 'page_chain';
-
 const { id: chainId, name: chainName, client } = useChain();
 const { alchemyApiKey, indexerEndpoint } = useEnv();
 const router = useRouter();
-const { setCommands } = useCommands(CHAIN_PAGE);
+const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
 useHead({

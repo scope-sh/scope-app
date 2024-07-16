@@ -1,4 +1,4 @@
-import { computed, onUnmounted } from 'vue';
+import { computed, onUnmounted, ref } from 'vue';
 import type { Ref } from 'vue';
 
 import useCommandStore, { type Command } from '@/stores/commands.js';
@@ -8,35 +8,26 @@ interface UseCommands {
   setCommands: (newCommands: Command[]) => void;
 }
 
-function useCommands(scope?: string): UseCommands {
+function useCommands(): UseCommands {
   const commandStore = useCommandStore();
+
+  const id = ref<string>(generateId());
 
   const commands = computed<Command[]>(() =>
     Object.values<Command[]>(commandStore.commands).flat(1),
   );
 
   function setCommands(newCommands: Command[]): void {
-    if (!scope) {
-      console.warn('Scope is required to set commands');
-      return;
-    }
-    const scopeCommands = commandStore.commands[scope];
-    if (scopeCommands && scopeCommands.length > 0) {
-      console.warn(
-        'Trying to set commands for a scope that already has commands',
-      );
-      return;
-    }
-    commandStore.setCommands(scope, newCommands);
+    commandStore.setCommands(id.value, newCommands);
   }
 
   onUnmounted(() => {
-    if (!scope) {
-      console.warn('Scope is required to remove commands');
-      return;
-    }
-    commandStore.setCommands(scope, []);
+    commandStore.removeCommands(id.value);
   });
+
+  function generateId(): string {
+    return Math.random().toString(16).slice(2);
+  }
 
   return { commands, setCommands };
 }

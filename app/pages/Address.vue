@@ -226,14 +226,13 @@ import type { UserOp } from '@/services/indexer';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
 
-const PAGE_ADDRESS = 'page_address';
 const SECTION_OPS = 'ops';
 const SECTION_TRANSACTIONS = 'transactions';
 const SECTION_LOGS = 'logs';
 const SECTION_CODE = 'code';
 
 const { indexerEndpoint } = useEnv();
-const { setCommands } = useCommands(PAGE_ADDRESS);
+const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 const route = useRoute();
 const { id: chainId, name: chainName, client } = useChain();
@@ -644,8 +643,10 @@ const commands = computed<Command[]>(() => {
       },
     },
   ];
+  console.log('commands computed 1', contract.value);
   const contractAbi =
     contract.value?.implementation?.abi || contract.value?.abi;
+  console.log('commands computed 2', contractAbi);
   if (contractAbi) {
     commands.push({
       icon: 'copy',
@@ -662,9 +663,16 @@ const commands = computed<Command[]>(() => {
   return commands;
 });
 
-watch(commands, () => {
-  setCommands(commands.value);
-});
+watch(
+  commands,
+  () => {
+    console.log('Address page commands', commands.value);
+    setCommands(commands.value);
+  },
+  {
+    immediate: true,
+  },
+);
 </script>
 
 <style scoped>

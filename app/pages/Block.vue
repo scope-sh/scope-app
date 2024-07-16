@@ -142,7 +142,6 @@ import {
 } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 
-const PAGE_BLOCK = 'page_block';
 const SECTION_TRANSACTIONS = 'transactions';
 const TRANSACTIONS_PER_PAGE = 20;
 
@@ -159,7 +158,7 @@ const sections = computed<Section[]>(() => {
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client } = useChain();
-const { setCommands } = useCommands(PAGE_BLOCK);
+const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
 const number = computed(() => toBigInt(route.params.number as string) || 0n);
