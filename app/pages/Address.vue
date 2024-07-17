@@ -643,10 +643,8 @@ const commands = computed<Command[]>(() => {
       },
     },
   ];
-  console.log('commands computed 1', contract.value);
   const contractAbi =
     contract.value?.implementation?.abi || contract.value?.abi;
-  console.log('commands computed 2', contractAbi);
   if (contractAbi) {
     commands.push({
       icon: 'copy',
@@ -666,7 +664,6 @@ const commands = computed<Command[]>(() => {
 watch(
   commands,
   () => {
-    console.log('Address page commands', commands.value);
     setCommands(commands.value);
   },
   {
