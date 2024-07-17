@@ -29,7 +29,7 @@
         @query-change="handleQueryChange"
         @close-search="handleCloseSearch"
       />
-      <FileTree
+      <FileView
         v-else
         v-model:selectedFileIndex="selectedFileIndex"
         :files="files"
@@ -57,7 +57,7 @@
 import { computed, ref, watch } from 'vue';
 
 import FilePathStrip from './FilePathStrip.vue';
-import FileTree, { type File } from './FileTree.vue';
+import FileView, { type File } from './FileView.vue';
 import SourceHighlighter from './SourceHighlighter.vue';
 import ViewSearch, { type Result as SearchResult } from './ViewSearch.vue';
 

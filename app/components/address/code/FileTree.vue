@@ -1,20 +1,21 @@
 <template>
-  <div class="files">
-    <input
-      v-model="filter"
-      placeholder="Filter"
-    />
+  <Tree.Root
+    :items="[directory]"
+    :get-key="(item) => item.id"
+    :default-expanded="directoryIds"
+    class="root"
+  >
     <FileTreeDirectory
-      v-if="filteredDirectory"
-      :directory="filteredDirectory"
-      :selection="fileSelection"
-      @select="handleFileSelect"
+      :directory="directory"
+      :selection
+      @select="handleSelect"
     />
-  </div>
+  </Tree.Root>
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { Tree } from 'radix-vue/namespaced';
+import { computed } from 'vue';
 
 import FileTreeDirectory, {
   type Directory,
@@ -22,166 +23,39 @@ import FileTreeDirectory, {
 } from './FileTreeDirectory.vue';
 
 const props = defineProps<{
-  files: File[];
-  selectedFileIndex: number;
+  directory: Directory;
+  selection: FileSelection | null;
 }>();
 
 const emit = defineEmits<{
-  'update:selectedFileIndex': [index: number];
+  select: [directory: Directory, index: number];
 }>();
 
-const fileSelection = computed<FileSelection | null>(() => {
-  const file = props.files[props.selectedFileIndex];
-  if (!file) {
-    return null;
-  }
-  const path = file.name.split('/');
-  let current: Directory = rootDirectory.value;
+function handleSelect(directory: Directory, index: number): void {
+  emit('select', directory, index);
+}
 
-  for (let i = 0; i < path.length - 1; i += 1) {
-    const name = path[i];
-    const directory = current.directories.find((dir) => dir.name === name);
+const directoryIds = computed<string[]>(() => {
+  const ids = new Set<string>();
+  const stack = [props.directory];
 
-    if (!directory) {
-      return null;
+  while (stack.length > 0) {
+    const current = stack.pop();
+    if (!current) {
+      continue;
     }
-    current = directory;
+    ids.add(current.id);
+    stack.push(...current.directories);
   }
 
-  const fileName = path.at(-1);
-  if (!fileName) {
-    return null;
-  }
-  const fileIndex = current.files.findIndex((f) => f === fileName);
-  if (fileIndex === -1) {
-    return null;
-  }
-  return {
-    directory: current,
-    fileIndex,
-  };
+  return [...ids];
 });
-const rootDirectory = computed<Directory>(() => {
-  const root: Directory = {
-    name: '',
-    parent: null,
-    files: [],
-    directories: [],
-  };
-
-  props.files.forEach((file) => {
-    const path = file.name.split('/');
-    let current = root;
-
-    for (let i = 0; i < path.length - 1; i += 1) {
-      const name = path[i] || '';
-      const directory = current.directories.find((dir) => dir.name === name);
-
-      if (directory) {
-        current = directory;
-      } else {
-        const newDirectory: Directory = {
-          name,
-          parent: current,
-          files: [],
-          directories: [],
-        };
-
-        current.directories.push(newDirectory);
-        current = newDirectory;
-      }
-    }
-
-    const fileName = path.at(-1);
-    if (!fileName) {
-      return;
-    }
-    current.files.push(fileName);
-  });
-
-  return root;
-});
-
-const filter = ref<string>('');
-const filteredDirectory = computed<Directory | null>(() => {
-  return filterDirectory(rootDirectory.value, filter.value);
-});
-function filterDirectory(
-  directory: Directory,
-  filter: string,
-): Directory | null {
-  const files = directory.files.filter((file) =>
-    file.toLowerCase().includes(filter.toLowerCase()),
-  );
-  const directories = directory.directories
-    .map((dir) => filterDirectory(dir, filter))
-    .filter((dir) => dir !== null);
-  if (files.length === 0 && directories.length === 0) {
-    return null;
-  }
-  const filteredDirectory: Directory = {
-    name: directory.name,
-    parent: directory.parent,
-    files,
-    directories,
-  };
-  return filteredDirectory;
-}
-
-function handleFileSelect(directory: Directory, fileIndex: number): void {
-  const fileName = directory.files[fileIndex];
-  if (!fileName) {
-    return;
-  }
-  const path = getFullPath(directory);
-  const filePath = path === '' ? fileName : `${path}/${fileName}`;
-  const selectedFileIndex = props.files.findIndex(
-    (file) => file.name === filePath,
-  );
-  emit('update:selectedFileIndex', selectedFileIndex);
-}
-
-function getFullPath(directory: Directory): string {
-  if (directory.parent === null) {
-    return directory.name;
-  }
-  return directory.parent.parent === null
-    ? directory.name
-    : `${getFullPath(directory.parent)}/${directory.name}`;
-}
-</script>
-
-<script lang="ts">
-interface File {
-  name: string;
-  content: string;
-}
-
-// eslint-disable-next-line import/prefer-default-export
-export type { File };
 </script>
 
 <style scoped>
-.files {
-  display: flex;
-  gap: var(--spacing-2);
-  flex-direction: column;
-  width: 256px;
-  overflow-y: scroll;
-}
-
-input {
-  width: 100%;
-  padding: var(--spacing-2) var(--spacing-2);
-  border: none;
-  border-radius: var(--border-radius-s);
-  outline: none;
-  background: var(--color-background-secondary);
-  color: var(--color-text-primary);
-  font-size: var(--font-size-s);
-
-  &::placeholder {
-    color: var(--color-text-placeholder);
-  }
+.root {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
 }
 </style>

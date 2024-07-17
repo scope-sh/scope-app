@@ -1,72 +1,77 @@
 <template>
-  <div
-    v-if="directory.directories.length > 0 || directory.files.length > 0"
-    class="directory"
-  >
-    <div
-      v-if="directory.parent"
-      class="header"
-      @click="toggle"
+  <li class="directory">
+    <Tree.Item
+      v-slot="{ isExpanded }"
+      as-child
+      :level="level"
+      :value="directory"
+      class="item"
     >
-      <div class="icon">
-        <ScopeIcon :kind="isToggled ? 'chevron-right' : 'chevron-down'" />
-      </div>
-      <div
-        v-if="directory.name"
-        class="name"
+      <button>
+        <div
+          v-if="directory.parent"
+          class="label"
+        >
+          <div class="icon">
+            <ScopeIcon :kind="!isExpanded ? 'chevron-right' : 'chevron-down'" />
+          </div>
+          <div
+            v-if="directory.name"
+            class="name"
+          >
+            {{ directory.name }}
+          </div>
+        </div>
+      </button>
+
+      <ul
+        v-if="isExpanded && directory.directories.length > 0"
+        class="directories"
       >
-        {{ directory.name }}
-      </div>
-    </div>
-    <div
-      v-if="!isToggled && directory.directories.length > 0"
-      class="directories"
-    >
-      <FileTreeDirectory
-        v-for="(dir, index) in directory.directories"
-        :key="index"
-        :directory="dir"
-        :selection="selection"
-        @select="handleInnerSelect"
-      />
-    </div>
-    <div
-      v-if="!isToggled && directory.files.length > 0"
-      class="files"
-    >
-      <FileTreeItem
-        v-for="(file, index) in directory.files"
-        :key="index"
-        :file="file"
-        :is-selected="isFileSelected(index)"
-        @select="handleFileSelect(index)"
-      />
-    </div>
-  </div>
+        <FileTreeDirectory
+          v-for="dir in directory.directories"
+          :key="dir.id"
+          :directory="dir"
+          :selection
+          :level="level + 1"
+          @select="handleInnerSelect"
+        />
+      </ul>
+      <ul
+        v-if="isExpanded && directory.files.length > 0"
+        class="files"
+      >
+        <li
+          v-for="(file, index) in directory.files"
+          :key="file.id"
+          :class="{ selected: isFileSelected(index) }"
+          class="item"
+          @click="handleFileSelect(index)"
+        >
+          {{ file.name }}
+        </li>
+      </ul>
+    </Tree.Item>
+  </li>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-
-// eslint-disable-next-line import/no-self-import
-import FileTreeDirectory from './FileTreeDirectory.vue';
-import FileTreeItem from './FileTreeItem.vue';
+import { Tree } from 'radix-vue/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
-const props = defineProps<{
-  directory: Directory;
-  selection: FileSelection | null;
-}>();
+const props = withDefaults(
+  defineProps<{
+    directory: Directory;
+    selection: FileSelection | null;
+    level?: number;
+  }>(),
+  { level: 0 },
+);
 
 const emit = defineEmits<{
   select: [directory: Directory, index: number];
 }>();
-
-const isToggled = ref<boolean>(false);
-function toggle(): void {
-  isToggled.value = !isToggled.value;
-}
 
 function handleFileSelect(index: number): void {
   emit('select', props.directory, index);
@@ -77,9 +82,15 @@ function handleInnerSelect(directory: Directory, fileIndex: number): void {
 }
 
 function isFileSelected(index: number): boolean {
+  console.log('isFileSelected 1', index, props.selection);
   if (!props.selection) {
     return false;
   }
+  console.log(
+    'isFileSelected 2',
+    isSameDirectory(props.directory, props.selection.directory),
+    index === props.selection.fileIndex,
+  );
   return (
     isSameDirectory(props.directory, props.selection.directory) &&
     index === props.selection.fileIndex
@@ -101,11 +112,18 @@ function isSameDirectory(a: Directory, b: Directory): boolean {
 </script>
 
 <script lang="ts">
-interface Directory {
-  name: string;
+interface Directory extends Item {
   parent: Directory | null;
-  files: string[];
+  files: File[];
   directories: Directory[];
+  children: (File | Directory)[];
+}
+
+interface File extends Item {}
+
+interface Item {
+  name: string;
+  id: string;
 }
 
 interface FileSelection {
@@ -119,20 +137,21 @@ export type { Directory, FileSelection };
 <style scoped>
 .directory {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-2);
+  flex-direction: column;
 }
 
-.header {
+button {
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+.label {
   display: flex;
   gap: var(--spacing-1);
   align-items: center;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-}
-
-.header:hover {
-  color: var(--color-text-primary);
 }
 
 .icon {
@@ -140,16 +159,13 @@ export type { Directory, FileSelection };
   height: 12px;
 }
 
-.name {
-  font-size: var(--font-size-s);
-  font-weight: var(--font-weight-light);
-}
-
 .directories,
 .files {
   display: flex;
-  gap: var(--spacing-2);
   flex-direction: column;
+  padding: 0;
+  list-style: none;
+  gap: var(--spacing-2);
 }
 
 .directories {
@@ -158,5 +174,22 @@ export type { Directory, FileSelection };
 
 .files {
   margin-left: var(--spacing-8);
+}
+
+.item {
+  list-style-type: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-light);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.item.selected {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-heavy);
 }
 </style>
