@@ -46,7 +46,7 @@ export type { Section };
   align-items: center;
   padding: var(--spacing-5) 8px;
 
-  @media (width > 768px) {
+  @media (width >= 992px) {
     padding: var(--spacing-10) 96px 48px;
   }
 }

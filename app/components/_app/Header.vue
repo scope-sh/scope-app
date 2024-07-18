@@ -48,7 +48,7 @@ header {
   padding: var(--spacing-5) 8px;
   border-bottom: 1px solid var(--color-border-tertiary);
 
-  @media (width > 768px) {
+  @media (width >= 992px) {
     padding: var(--spacing-5) 96px;
   }
 }

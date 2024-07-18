@@ -26,7 +26,7 @@ defineProps<{
   overflow-x: hidden;
   text-overflow: ellipsis;
 
-  @media (width > 768px) {
+  @media (width >= 768px) {
     overflow-x: initial;
     text-overflow: initial;
   }
