@@ -15,6 +15,12 @@ export default defineNuxtConfig({
 
   ssr: false,
 
+  vite: {
+    css: {
+      transformer: 'lightningcss',
+    },
+  },
+
   app: {
     head: {
       charset: 'utf-8',
