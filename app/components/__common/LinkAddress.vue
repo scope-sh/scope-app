@@ -16,7 +16,13 @@
             :uri="labelIcon"
             class="icon"
           />
-          <span>{{ labelText || address }}</span>
+          <div v-if="labelText">{{ labelText }}</div>
+          <div
+            v-else
+            class="label-address"
+          >
+            {{ address }}
+          </div>
         </div>
       </slot>
     </ScopeLinkInternal>
@@ -67,5 +73,11 @@ const labelIcon = computed(() => getLabelIcon(props.address));
 .icon {
   width: 1em;
   height: 1em;
+}
+
+.label-address {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

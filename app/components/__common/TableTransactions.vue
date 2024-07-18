@@ -81,9 +81,12 @@
                 :address="cell.getValue() as Address"
                 type="minimal"
               />
-              <span v-else>
+              <div
+                v-else
+                class="address-value"
+              >
                 {{ getAddress(cell.getValue() as Address) }}
-              </span>
+              </div>
             </template>
             <template v-else-if="cell.column.id === 'to'">
               <template v-if="cell.getValue()">
@@ -92,9 +95,12 @@
                   :address="cell.getValue() as Address"
                   type="minimal"
                 />
-                <span v-else>
+                <div
+                  v-else
+                  class="address-value"
+                >
                   {{ getAddress(cell.getValue() as Address) }}
-                </span>
+                </div>
               </template>
               <span v-else>—</span>
             </template>
@@ -394,6 +400,7 @@ tbody {
 }
 
 .address {
+  display: block;
   width: 250px;
 }
 
@@ -407,5 +414,11 @@ tbody {
 
 .value {
   width: 100px;
+}
+
+.address-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 </style>

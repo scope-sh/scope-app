@@ -38,12 +38,15 @@ export type { Type };
 .root {
   --color-accent-toned-down: oklch(from var(--color-accent) l calc(c * 0.6) h);
 
-  display: inline-flex;
+  display: block;
   padding: 2px;
+  overflow: hidden;
   transition: all 0.2s ease-in-out;
   border-radius: var(--border-radius-xs);
   background: oklch(from var(--color-accent) l c h / 5%);
   color: var(--color-accent);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
   &:hover {
     background: oklch(from var(--color-accent) l c h / 10%);
