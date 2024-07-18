@@ -63,7 +63,13 @@ input {
   background: transparent;
   box-shadow: inset 2px 2px 2px rgb(0 0 0 / 40%);
   color: var(--color-text-primary);
-  font-size: var(--font-size-s);
+  font-size: var(--font-size-l);
+}
+
+@media (width >= 768px) {
+  input {
+    font-size: var(--font-size-s);
+  }
 }
 
 input:disabled {
