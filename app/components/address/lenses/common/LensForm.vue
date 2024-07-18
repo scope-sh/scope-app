@@ -35,6 +35,13 @@ form {
 .input {
   display: flex;
   gap: var(--spacing-2);
+  flex-wrap: wrap;
   align-items: center;
+}
+
+@media (width >= 768px) {
+  .input {
+    flex-wrap: nowrap;
+  }
 }
 </style>
