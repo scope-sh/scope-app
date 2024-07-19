@@ -188,6 +188,7 @@ export type { Log, LogView };
   gap: var(--spacing-2);
   flex-direction: column;
   font-family: var(--font-mono);
+  word-break: break-all;
 }
 
 .name {
