@@ -2,7 +2,7 @@
   <form @submit.prevent="handleSubmit">
     <div class="input">
       <slot name="input" />
-      <LensButton @click="handleClick" />
+      <LensButton />
     </div>
     <slot name="output"> &nbsp; </slot>
   </form>
@@ -14,10 +14,6 @@ import LensButton from './LensButton.vue';
 const emit = defineEmits<{
   query: [];
 }>();
-
-function handleClick(): void {
-  emit('query');
-}
 
 function handleSubmit(): void {
   emit('query');
