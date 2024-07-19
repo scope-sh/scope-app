@@ -11,7 +11,10 @@
     <AttributeItem>
       <AttributeItemLabel :value="'Key'" />
       <AttributeItemValue>
-        <LensForm @query="fetchKey">
+        <LensForm
+          :loading="isKeyLoading"
+          @query="fetchKey"
+        >
           <template #input>
             <LensInput
               v-model="keyIndex"
@@ -53,6 +56,7 @@ const props = defineProps<{
 }>();
 
 const isLoading = ref(true);
+const isKeyLoading = ref(false);
 
 const keyIndex = ref<string>('');
 
@@ -96,6 +100,7 @@ async function fetch(): Promise<void> {
 }
 
 async function fetchKey(): Promise<void> {
+  isKeyLoading.value = true;
   key.value = null;
   if (!client.value || !keyIndex.value) return;
 
@@ -116,6 +121,8 @@ async function fetchKey(): Promise<void> {
       },
     ],
   });
+
+  isKeyLoading.value = false;
   const keyPartLeft = result[0].status === 'success' ? result[0].result : null;
   const keyPartRight = result[1].status === 'success' ? result[1].result : null;
   key.value =

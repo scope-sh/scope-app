@@ -19,7 +19,10 @@
     <AttributeItem>
       <AttributeItemLabel :value="'Balance'" />
       <AttributeItemValue>
-        <LensForm @query="fetchBalance">
+        <LensForm
+          :loading="isBalanceLoading"
+          @query="fetchBalance"
+        >
           <template #input>
             <LensInput
               v-model="balanceOwner"
@@ -38,7 +41,10 @@
     <AttributeItem>
       <AttributeItemLabel :value="'Allowance'" />
       <AttributeItemValue>
-        <LensForm @query="fetchAllowance">
+        <LensForm
+          :loading="isAllowanceLoading"
+          @query="fetchAllowance"
+        >
           <template #input>
             <LensInput
               v-model="allowanceOwner"
@@ -85,6 +91,8 @@ const props = defineProps<{
 }>();
 
 const isLoading = ref(true);
+const isBalanceLoading = ref(false);
+const isAllowanceLoading = ref(false);
 
 const balanceOwner = ref<string>('');
 const allowanceOwner = ref<string>('');
@@ -147,6 +155,7 @@ async function fetch(): Promise<void> {
 }
 
 async function fetchBalance(): Promise<void> {
+  isBalanceLoading.value = true;
   balance.value = null;
   if (!client.value || !balanceOwner.value) return;
 
@@ -157,12 +166,14 @@ async function fetchBalance(): Promise<void> {
     args: [balanceOwner.value as Address],
   });
 
+  isBalanceLoading.value = false;
   balance.value = decimals.value
     ? fromWei(result, decimals.value).toString()
     : result.toString();
 }
 
 async function fetchAllowance(): Promise<void> {
+  isAllowanceLoading.value = true;
   allowance.value = null;
   if (!client.value || !allowanceOwner.value || !allowanceSpender.value) return;
 
@@ -173,6 +184,7 @@ async function fetchAllowance(): Promise<void> {
     args: [allowanceOwner.value as Address, allowanceSpender.value as Address],
   });
 
+  isAllowanceLoading.value = false;
   allowance.value = decimals.value
     ? fromWei(result, decimals.value).toString()
     : result.toString();

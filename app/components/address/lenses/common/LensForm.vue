@@ -2,7 +2,7 @@
   <form @submit.prevent="handleSubmit">
     <div class="input">
       <slot name="input" />
-      <LensButton />
+      <LensButton :loading />
     </div>
     <slot name="output"> &nbsp; </slot>
   </form>
@@ -10,6 +10,10 @@
 
 <script setup lang="ts">
 import LensButton from './LensButton.vue';
+
+defineProps<{
+  loading: boolean;
+}>();
 
 const emit = defineEmits<{
   query: [];
