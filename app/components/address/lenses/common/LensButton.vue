@@ -18,11 +18,11 @@ function handleClick(): void {
 
 <style scoped>
 button {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   padding: 0;
   border: none;
-  opacity: 0.8;
+  opacity: 0.4;
   background: transparent;
   color: var(--color-text-primary);
   cursor: pointer;
