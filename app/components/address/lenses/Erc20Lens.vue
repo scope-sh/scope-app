@@ -150,7 +150,7 @@ async function fetchBalance(): Promise<void> {
   balance.value = null;
   if (!client.value || !balanceOwner.value) return;
 
-  const result = await client.value.readContract({
+  const result = await client.value.readContractWithNames({
     address: props.address as Address,
     abi: ABI_ERC20,
     functionName: 'balanceOf',
@@ -166,7 +166,7 @@ async function fetchAllowance(): Promise<void> {
   allowance.value = null;
   if (!client.value || !allowanceOwner.value || !allowanceSpender.value) return;
 
-  const result = await client.value.readContract({
+  const result = await client.value.readContractWithNames({
     address: props.address as Address,
     abi: ABI_ERC20,
     functionName: 'allowance',

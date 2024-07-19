@@ -12,11 +12,12 @@ import {
   getEndpointUrl,
 } from '@/utils/chains.js';
 import type { Chain } from '@/utils/chains.js';
+import { ensActions } from '@/utils/viem.js';
 
 interface UseChain {
   id: Ref<Chain>;
   name: Ref<string>;
-  client: Ref<ReturnType<typeof createPublicClient>>;
+  client: Ref<ReturnType<typeof createClient>>;
 }
 
 function parseChain(value?: string | string[]): Chain | null {
@@ -59,14 +60,17 @@ function useChain(): UseChain {
     },
   );
 
-  const client = computed(() =>
-    createPublicClient({
-      chain: getChainData(id.value),
-      transport: http(getEndpointUrl(id.value, alchemyApiKey)),
-    }),
-  );
+  const client = computed(() => createClient(id.value, alchemyApiKey));
 
   return { id, name, client };
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function createClient(chainId: Chain, alchemyApiKey: string) {
+  return createPublicClient({
+    chain: getChainData(chainId),
+    transport: http(getEndpointUrl(chainId, alchemyApiKey)),
+  }).extend(ensActions());
 }
 
 export default useChain;
