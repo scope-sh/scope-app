@@ -162,6 +162,7 @@ export type { Log, LogView };
 .header {
   display: flex;
   gap: var(--spacing-2);
+  flex-wrap: wrap;
   font-size: var(--font-size-s);
 }
 

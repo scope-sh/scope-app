@@ -23,8 +23,9 @@ defineProps<{
 <style scoped>
 .link {
   display: flex;
-  align-items: center;
   gap: var(--spacing-2);
+  align-items: center;
+  max-width: 100%;
 
   .button {
     opacity: 0.4;

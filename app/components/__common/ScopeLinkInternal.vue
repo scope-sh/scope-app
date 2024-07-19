@@ -39,6 +39,7 @@ export type { Type };
   --color-accent-toned-down: oklch(from var(--color-accent) l calc(c * 0.6) h);
 
   display: block;
+  flex: 1;
   padding: 2px;
   overflow: hidden;
   transition: all 0.2s ease-in-out;

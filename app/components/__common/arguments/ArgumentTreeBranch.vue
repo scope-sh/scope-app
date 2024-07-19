@@ -33,6 +33,7 @@
         v-else-if="arg.type === 'address'"
         :address="getAddress(arg.value)"
         type="minimal"
+        class="value"
       />
       <ArgumentTreeLeaf
         v-else
@@ -93,11 +94,18 @@ function getKey(arg: Argument, index: number): string {
   }
 
   & > .key {
-    min-width: 240px;
-    max-width: 240px;
+    min-width: 160px;
+    max-width: 160px;
     overflow: hidden;
     text-overflow: ellipsis;
-    white-space: nowrap;
+  }
+
+  @media (width >= 768px) {
+    & > .key {
+      min-width: 240px;
+      max-width: 240px;
+      white-space: nowrap;
+    }
   }
 
   &:not(.terminal) {
@@ -105,6 +113,10 @@ function getKey(arg: Argument, index: number): string {
       min-width: 100%;
       max-width: 100%;
     }
+  }
+
+  & > .value {
+    overflow: hidden;
   }
 }
 

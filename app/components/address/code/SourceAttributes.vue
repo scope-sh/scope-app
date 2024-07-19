@@ -69,8 +69,15 @@ defineProps<{
 
 .sides {
   display: flex;
-  flex-wrap: wrap;
+  flex-flow: column wrap;
   row-gap: var(--spacing);
+}
+
+@media (width >= 768px) {
+  .sides {
+    flex-direction: row;
+    font-size: var(--font-size-m);
+  }
 }
 
 .side {
