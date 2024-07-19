@@ -2,7 +2,7 @@
   <ScopeDialog
     :open="isOpen"
     title="Command Palette"
-    :with-context="!!activeCommand.context"
+    :with-context="!!activeCommand.label"
     @update:open="handleOpen"
   >
     <div
@@ -13,18 +13,18 @@
       @keydown.esc.prevent="close"
     >
       <div
-        v-if="activeCommand.context"
+        v-if="activeCommand.label"
         class="context"
       >
         <span class="context-label">
-          {{ activeCommand.context }}
+          {{ activeCommand.label }}
         </span>
       </div>
       <div class="input-wrapper">
         <input
           ref="inputEl"
           v-model="query"
-          :class="{ 'with-context': !!activeCommand.context }"
+          :class="{ 'with-context': !!activeCommand.label }"
           :placeholder="activeCommand.placeholder"
           @input="handleInput"
           @keyup.delete="handleDelete"
@@ -570,7 +570,7 @@ const staticCommands = computed(() => [
 
 const TOP_LEVEL_COMMAND: NestedCommand = {
   icon: 'arrow-right',
-  label: 'Top level',
+  label: '',
   placeholder: 'Search anything or enter a command',
   isTopLevel: true,
   isAsync: (query: string): boolean => {

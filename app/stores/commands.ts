@@ -13,7 +13,6 @@ interface SimpleCommand extends BaseCommand {
 }
 
 interface NestedCommand extends BaseCommand {
-  context?: string;
   placeholder: string;
   isTopLevel?: true;
   isAsync: (query: string) => boolean;
