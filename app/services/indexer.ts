@@ -1,3 +1,4 @@
+import ky, { type KyInstance } from 'ky';
 import type { Address, Hex } from 'viem';
 
 import type { Chain } from '@/utils/chains.js';
@@ -39,12 +40,14 @@ interface UserOp {
 }
 
 class Service {
-  endpointUrl: string;
   chainId: Chain;
+  client: KyInstance;
 
   constructor(endpointUrl: string, chainId: Chain) {
-    this.endpointUrl = endpointUrl;
     this.chainId = chainId;
+    this.client = ky.create({
+      prefixUrl: endpointUrl,
+    });
   }
 
   public async getTxHashByUserOpHash(hash: Hex): Promise<Hex | null> {
@@ -59,12 +62,8 @@ class Service {
       }
     }`;
 
-    const response = await fetch(this.endpointUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
+    const response = await this.client.post('', {
+      json: { query },
     });
 
     const json = (await response.json()) as HashUserOpResponse;
@@ -109,12 +108,8 @@ class Service {
       }
     }`;
 
-    const response = await fetch(this.endpointUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ query }),
+    const response = await this.client.post('', {
+      json: { query },
     });
 
     const json = (await response.json()) as UserOpsResponse;

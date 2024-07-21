@@ -1,3 +1,4 @@
+import ky, { type KyInstance } from 'ky';
 import type { Address, Hex } from 'viem';
 
 import type { Chain } from '@/utils/chains.js';
@@ -127,11 +128,13 @@ interface Log {
 
 class Service {
   chain: Chain;
-  endpointUrl: string;
+  client: KyInstance;
 
   constructor(chain: Chain) {
     this.chain = chain;
-    this.endpointUrl = this.#getEndpoint(chain);
+    this.client = ky.create({
+      prefixUrl: this.#getEndpoint(chain),
+    });
   }
 
   getSort(): Sort {
@@ -232,12 +235,8 @@ class Service {
       },
     };
 
-    const response = await fetch(this.endpointUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(query),
+    const response = await this.client.post('query', {
+      json: query,
     });
     const json = (await response.json()) as QueryResponse;
     return json;
@@ -330,12 +329,8 @@ class Service {
       },
     };
 
-    const response = await fetch(this.endpointUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(query),
+    const response = await this.client.post('query', {
+      json: query,
     });
     const json = (await response.json()) as QueryResponse;
     return json;
@@ -353,7 +348,7 @@ class Service {
   }
 
   #getEndpoint(chain: Chain): string {
-    return `https://${chain}.hypersync.xyz/query`;
+    return `https://${chain}.hypersync.xyz`;
   }
 }
 

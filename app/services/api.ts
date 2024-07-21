@@ -1,3 +1,4 @@
+import ky, { type KyInstance } from 'ky';
 import type { Abi, AbiEvent, AbiFunction, Address, Hex } from 'viem';
 
 import useEnv from '@/composables/useEnv';
@@ -140,65 +141,57 @@ const { apiEndpoint } = useEnv();
 
 class Service {
   chainId: Chain;
+  client: KyInstance;
 
   constructor(chainId: Chain) {
     this.chainId = chainId;
+    this.client = ky.create({
+      prefixUrl: apiEndpoint,
+    });
   }
 
   public async getAllAddressLabels(address: Address): Promise<Label[]> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-      address,
-    };
-    const url = new URL(`${apiEndpoint}/label/all`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url);
-    const labels: Label[] = await response.json();
-    return labels;
+    const response = await this.client.get('label/all', {
+      searchParams: {
+        chain: this.chainId,
+        address,
+      },
+    });
+    return response.json<Label[]>();
   }
 
   public async getPrimaryAddressLabels(
     addresses: Address[],
   ): Promise<Record<Address, Label>> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-    };
-    const body = JSON.stringify({ addresses });
-    const url = new URL(`${apiEndpoint}/label/primary`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await this.client.post('label/primary', {
+      searchParams: {
+        chain: this.chainId,
       },
-      body,
+      json: {
+        addresses,
+      },
     });
-    const labels: Record<Address, Label> = await response.json();
-    return labels;
+    return response.json<Record<Address, Label>>();
   }
 
   public async searchLabels(query: string): Promise<LabelWithAddress[]> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-      query,
-    };
-    const url = new URL(`${apiEndpoint}/label/search`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url);
-    const labels: LabelWithAddress[] = await response.json();
-    return labels;
+    const response = await this.client.get('label/search', {
+      searchParams: {
+        chain: this.chainId,
+        query,
+      },
+    });
+    return response.json<LabelWithAddress[]>();
   }
 
   public async getContractSource(address: Address): Promise<Contract> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-      address,
-    };
-    const url = new URL(`${apiEndpoint}/contract/source`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url);
-    const source: Contract = await response.json();
-    return source;
+    const response = await this.client.get('contract/source', {
+      searchParams: {
+        chain: this.chainId,
+        address,
+      },
+    });
+    return response.json<Contract>();
   }
 
   public async getContractAbi(
@@ -210,20 +203,15 @@ class Service {
       }
     >,
   ): Promise<Abis> {
-    const params: Record<string, string> = {
-      chain: this.chainId.toString(),
-    };
-    const url = new URL(`${apiEndpoint}/contract/abi`);
-    url.search = new URLSearchParams(params).toString();
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await this.client.post('contract/abi', {
+      searchParams: {
+        chain: this.chainId,
       },
-      body: JSON.stringify({ contracts }),
+      json: {
+        contracts,
+      },
     });
-    const abis: Abis = await response.json();
-    return abis;
+    return response.json<Abis>();
   }
 }
 
