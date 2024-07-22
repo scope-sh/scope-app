@@ -19,6 +19,11 @@
             <LensInput
               v-model="keyIndex"
               placeholder="Slot"
+              :invalid="
+                validatedKeyInputs.length === 1 &&
+                !isInputValid(validatedKeyInputs, 0)
+              "
+              :disabled="isKeyLoading"
             />
           </template>
           <template
@@ -34,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Address, concat } from 'viem';
+import { type Address, concat, zeroAddress } from 'viem';
 import { ref, watch } from 'vue';
 
 import LensBase from './common/LensBase.vue';
@@ -48,6 +53,12 @@ import {
   AttributeItemValue,
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
+import {
+  validate as validateInputs,
+  isValid as areInputsValid,
+  isInputValid,
+} from '@/utils/validation/inputs';
+import type { ValidatedInput } from '~/utils/validation';
 
 const { client } = useChain();
 
@@ -57,6 +68,7 @@ const props = defineProps<{
 
 const isLoading = ref(true);
 const isKeyLoading = ref(false);
+const validatedKeyInputs = ref<ValidatedInput[]>([]);
 
 const keyIndex = ref<string>('');
 
@@ -71,6 +83,13 @@ watch(
   },
   {
     immediate: true,
+  },
+);
+
+watch(
+  () => keyIndex.value,
+  () => {
+    validatedKeyInputs.value = [];
   },
 );
 
@@ -105,6 +124,17 @@ async function fetchKey(): Promise<void> {
   if (!client.value || !keyIndex.value) return;
 
   const index = parseInt(keyIndex.value);
+  validatedKeyInputs.value = validateInputs({
+    address: zeroAddress,
+    abi: ABI_DAIMO_ACCOUNT,
+    functionName: 'keys',
+    args: [index, 0n],
+  });
+  const isValid = areInputsValid(validatedKeyInputs.value);
+  if (!isValid) {
+    isKeyLoading.value = false;
+    return;
+  }
   const result = await client.value.multicall({
     contracts: [
       {

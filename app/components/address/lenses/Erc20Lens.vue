@@ -26,6 +26,11 @@
           <template #input>
             <LensInput
               v-model="balanceOwner"
+              :invalid="
+                validatedBalanceInputs.length === 1 &&
+                !isInputValid(validatedBalanceInputs, 0)
+              "
+              :disabled="isBalanceLoading"
               placeholder="Owner"
             />
           </template>
@@ -48,10 +53,20 @@
           <template #input>
             <LensInput
               v-model="allowanceOwner"
+              :invalid="
+                validatedAllowanceInputs.length === 2 &&
+                !isInputValid(validatedAllowanceInputs, 0)
+              "
+              :disabled="isAllowanceLoading"
               placeholder="Owner"
             />
             <LensInput
               v-model="allowanceSpender"
+              :invalid="
+                validatedAllowanceInputs.length === 2 &&
+                !isInputValid(validatedAllowanceInputs, 1)
+              "
+              :disabled="isAllowanceLoading"
               placeholder="Spender"
             />
           </template>
@@ -68,7 +83,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Address } from 'viem';
+import { zeroAddress, type Address } from 'viem';
 import { ref, watch } from 'vue';
 
 import LensBase from './common/LensBase.vue';
@@ -83,6 +98,12 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 import { fromWei } from '@/utils/conversion';
+import {
+  validate as validateInputs,
+  isValid as areInputsValid,
+  isInputValid,
+} from '@/utils/validation/inputs';
+import type { ValidatedInput } from '~/utils/validation';
 
 const { client } = useChain();
 
@@ -93,6 +114,8 @@ const props = defineProps<{
 const isLoading = ref(true);
 const isBalanceLoading = ref(false);
 const isAllowanceLoading = ref(false);
+const validatedBalanceInputs = ref<ValidatedInput[]>([]);
+const validatedAllowanceInputs = ref<ValidatedInput[]>([]);
 
 const balanceOwner = ref<string>('');
 const allowanceOwner = ref<string>('');
@@ -112,6 +135,25 @@ watch(
   },
   {
     immediate: true,
+  },
+);
+
+watch(
+  () => balanceOwner.value,
+  () => {
+    validatedBalanceInputs.value = [];
+  },
+);
+watch(
+  () => allowanceOwner.value,
+  () => {
+    validatedAllowanceInputs.value = [];
+  },
+);
+watch(
+  () => allowanceSpender.value,
+  () => {
+    validatedAllowanceInputs.value = [];
   },
 );
 
@@ -159,6 +201,17 @@ async function fetchBalance(): Promise<void> {
   balance.value = null;
   if (!client.value || !balanceOwner.value) return;
 
+  validatedBalanceInputs.value = validateInputs({
+    address: zeroAddress,
+    abi: ABI_ERC20,
+    functionName: 'balanceOf',
+    args: [balanceOwner.value as Address],
+  });
+  const isValid = areInputsValid(validatedBalanceInputs.value);
+  if (!isValid) {
+    isBalanceLoading.value = false;
+    return;
+  }
   const result = await client.value.readContractWithNames({
     address: props.address as Address,
     abi: ABI_ERC20,
@@ -177,6 +230,17 @@ async function fetchAllowance(): Promise<void> {
   allowance.value = null;
   if (!client.value || !allowanceOwner.value || !allowanceSpender.value) return;
 
+  validatedAllowanceInputs.value = validateInputs({
+    address: zeroAddress,
+    abi: ABI_ERC20,
+    functionName: 'allowance',
+    args: [allowanceOwner.value as Address, allowanceSpender.value as Address],
+  });
+  const isValid = areInputsValid(validatedAllowanceInputs.value);
+  if (!isValid) {
+    isAllowanceLoading.value = false;
+    return;
+  }
   const result = await client.value.readContractWithNames({
     address: props.address as Address,
     abi: ABI_ERC20,

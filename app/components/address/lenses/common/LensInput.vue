@@ -1,6 +1,8 @@
 <template>
   <input
     v-model="value"
+    :disabled="disabled"
+    :class="{ invalid }"
     :placeholder
   />
 </template>
@@ -12,6 +14,8 @@ const value = defineModel<string>({
 
 defineProps<{
   placeholder: string;
+  invalid: boolean;
+  disabled: boolean;
 }>();
 </script>
 
@@ -19,6 +23,7 @@ defineProps<{
 input {
   width: 100%;
   padding: 1px 6px;
+  transition: border-color 0.2s;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);
   outline: none;
@@ -28,6 +33,15 @@ input {
 
   &:focus {
     border-color: var(--color-border-quaternary);
+  }
+
+  &[disabled] {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  &.invalid {
+    border-color: var(--color-error);
   }
 }
 
