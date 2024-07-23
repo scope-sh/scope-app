@@ -82,15 +82,9 @@ function handleInnerSelect(directory: Directory, fileIndex: number): void {
 }
 
 function isFileSelected(index: number): boolean {
-  console.log('isFileSelected 1', index, props.selection);
   if (!props.selection) {
     return false;
   }
-  console.log(
-    'isFileSelected 2',
-    isSameDirectory(props.directory, props.selection.directory),
-    index === props.selection.fileIndex,
-  );
   return (
     isSameDirectory(props.directory, props.selection.directory) &&
     index === props.selection.fileIndex
