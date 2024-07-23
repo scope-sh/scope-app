@@ -1,4 +1,4 @@
-import { createPublicClient, http } from 'viem';
+import { createPublicClient, http, type PublicClient } from 'viem';
 import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
@@ -12,12 +12,11 @@ import {
   getEndpointUrl,
 } from '@/utils/chains.js';
 import type { Chain } from '@/utils/chains.js';
-import { ensActions } from '@/utils/viem.js';
 
 interface UseChain {
   id: Ref<Chain>;
   name: Ref<string>;
-  client: Ref<ReturnType<typeof createClient>>;
+  client: Ref<PublicClient>;
 }
 
 function parseChain(value?: string | string[]): Chain | null {
@@ -60,17 +59,14 @@ function useChain(): UseChain {
     },
   );
 
-  const client = computed(() => createClient(id.value, alchemyApiKey));
+  const client = computed(() =>
+    createPublicClient({
+      chain: getChainData(id.value),
+      transport: http(getEndpointUrl(id.value, alchemyApiKey)),
+    }),
+  );
 
   return { id, name, client };
-}
-
-// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-function createClient(chainId: Chain, alchemyApiKey: string) {
-  return createPublicClient({
-    chain: getChainData(chainId),
-    transport: http(getEndpointUrl(chainId, alchemyApiKey)),
-  }).extend(ensActions());
 }
 
 export default useChain;
