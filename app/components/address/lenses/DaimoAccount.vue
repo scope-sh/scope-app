@@ -12,23 +12,15 @@
       <AttributeItemLabel :value="'Key'" />
       <AttributeItemValue>
         <LensForm
-          :loading="isKeyLoading"
-          @query="fetchKey"
-        >
-          <template #input>
-            <LensInput
-              v-model="keyIndex"
-              placeholder="Slot"
-              :disabled="isKeyLoading"
-            />
-          </template>
-          <template
-            v-if="key"
-            #output
-          >
-            {{ key }}
-          </template>
-        </LensForm>
+          :abi-inputs="[
+            {
+              type: 'uint256',
+              name: 'index',
+            },
+          ]"
+          :is-loading="isKeyLoading"
+          @submit="fetchKey"
+        />
       </AttributeItemValue>
     </AttributeItem>
   </LensBase>
@@ -40,7 +32,6 @@ import { ref, watch } from 'vue';
 
 import LensBase from './common/LensBase.vue';
 import LensForm from './common/LensForm.vue';
-import LensInput from './common/LensInput.vue';
 
 import ABI_DAIMO_ACCOUNT from '@/abi/daimoAccount';
 import {

@@ -20,21 +20,17 @@
       <AttributeItemLabel :value="'Balance'" />
       <AttributeItemValue>
         <LensForm
-          :loading="isBalanceLoading"
-          @query="fetchBalance"
+          :abi-inputs="[
+            {
+              type: 'address',
+              name: 'owner',
+            },
+          ]"
+          :is-loading="isBalanceLoading"
+          @submit="fetchBalance"
         >
-          <template #input>
-            <LensInput
-              v-model="balanceOwner"
-              :disabled="isBalanceLoading"
-              placeholder="Owner"
-            />
-          </template>
-          <template
-            v-if="balance"
-            #output
-          >
-            {{ balance }}
+          <template #output>
+            <div>{{ balance }}</div>
           </template>
         </LensForm>
       </AttributeItemValue>
@@ -43,26 +39,21 @@
       <AttributeItemLabel :value="'Allowance'" />
       <AttributeItemValue>
         <LensForm
-          :loading="isAllowanceLoading"
-          @query="fetchAllowance"
+          :abi-inputs="[
+            {
+              type: 'address',
+              name: 'owner',
+            },
+            {
+              type: 'address',
+              name: 'spender',
+            },
+          ]"
+          :is-loading="isAllowanceLoading"
+          @submit="fetchAllowance"
         >
-          <template #input>
-            <LensInput
-              v-model="allowanceOwner"
-              :disabled="isAllowanceLoading"
-              placeholder="Owner"
-            />
-            <LensInput
-              v-model="allowanceSpender"
-              :disabled="isAllowanceLoading"
-              placeholder="Spender"
-            />
-          </template>
-          <template
-            v-if="allowance"
-            #output
-          >
-            {{ allowance }}
+          <template #output>
+            <div>{{ allowance }}</div>
           </template>
         </LensForm>
       </AttributeItemValue>
@@ -76,7 +67,6 @@ import { ref, watch } from 'vue';
 
 import LensBase from './common/LensBase.vue';
 import LensForm from './common/LensForm.vue';
-import LensInput from './common/LensInput.vue';
 
 import ABI_ERC20 from '@/abi/erc20';
 import {
@@ -96,10 +86,6 @@ const props = defineProps<{
 const isLoading = ref(true);
 const isBalanceLoading = ref(false);
 const isAllowanceLoading = ref(false);
-
-const balanceOwner = ref<string>('');
-const allowanceOwner = ref<string>('');
-const allowanceSpender = ref<string>('');
 
 const symbol = ref<string | null>(null);
 const name = ref<string | null>(null);
@@ -157,16 +143,17 @@ async function fetch(): Promise<void> {
   isLoading.value = false;
 }
 
-async function fetchBalance(): Promise<void> {
+async function fetchBalance(inputs: unknown[]): Promise<void> {
+  const [owner] = inputs as [owner: string];
   isBalanceLoading.value = true;
   balance.value = null;
-  if (!client.value || !balanceOwner.value) return;
+  if (!client.value || !owner) return;
 
   const result = await client.value.readContract({
     address: props.address as Address,
     abi: ABI_ERC20,
     functionName: 'balanceOf',
-    args: [balanceOwner.value as Address],
+    args: [owner as Address],
   });
 
   isBalanceLoading.value = false;
@@ -175,16 +162,17 @@ async function fetchBalance(): Promise<void> {
     : result.toString();
 }
 
-async function fetchAllowance(): Promise<void> {
+async function fetchAllowance(inputs: unknown[]): Promise<void> {
+  const [owner, spender] = inputs as [owner: string, spender: string];
   isAllowanceLoading.value = true;
   allowance.value = null;
-  if (!client.value || !allowanceOwner.value || !allowanceSpender.value) return;
+  if (!client.value || !owner || !spender) return;
 
   const result = await client.value.readContract({
     address: props.address as Address,
     abi: ABI_ERC20,
     functionName: 'allowance',
-    args: [allowanceOwner.value as Address, allowanceSpender.value as Address],
+    args: [owner as Address, spender as Address],
   });
 
   isAllowanceLoading.value = false;
