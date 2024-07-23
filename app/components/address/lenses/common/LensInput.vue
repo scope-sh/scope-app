@@ -2,7 +2,6 @@
   <input
     v-model="value"
     :disabled="disabled"
-    :class="{ invalid }"
     :placeholder
   />
 </template>
@@ -14,7 +13,6 @@ const value = defineModel<string>({
 
 defineProps<{
   placeholder: string;
-  invalid: boolean;
   disabled: boolean;
 }>();
 </script>
@@ -38,10 +36,6 @@ input {
   &[disabled] {
     opacity: 0.4;
     pointer-events: none;
-  }
-
-  &.invalid {
-    border-color: var(--color-error);
   }
 }
 
