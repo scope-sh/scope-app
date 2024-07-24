@@ -77,7 +77,7 @@ input {
 @media (width >= 768px) {
   input {
     width: initial;
-    font-size: var(--font-size-s);
+    font-size: var(--font-size-m);
   }
 }
 </style>
