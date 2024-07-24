@@ -20,7 +20,14 @@
           ]"
           :is-loading="isKeyLoading"
           @submit="fetchKey"
-        />
+        >
+          <template
+            v-if="key"
+            #output
+          >
+            {{ key }}
+          </template>
+        </LensForm>
       </AttributeItemValue>
     </AttributeItem>
   </LensBase>
