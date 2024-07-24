@@ -746,5 +746,6 @@ export type {
   Input,
   TupleInput,
   TupleArrayInput,
+  PrimitiveInput,
   PrimitiveInputType,
 };
