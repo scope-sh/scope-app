@@ -1,49 +1,74 @@
 <template>
   <div class="root">
-    <AbiForm.Root
-      :abi-inputs
-      :is-loading
-      class="form"
-      @submit="handleSubmit"
-    >
-      <template #inputs>
-        <div class="list">
-          <AbiForm.Inputs>
-            <template #primitive="{ abiInput }">
-              <AbiForm.InputPrimitive
-                :placeholder="abiInput.name || ''"
-                class="input"
-              />
-            </template>
-          </AbiForm.Inputs>
-        </div>
-      </template>
-      <template #submit="{ disabled }">
-        <button :disabled="disabled">
-          <ScopeIcon :kind="'arrow-right'" />
-        </button>
-      </template>
-    </AbiForm.Root>
+    <form @submit.prevent="handleSubmit">
+      <div class="list">
+        <LensFormInput
+          v-for="(abiInput, index) in abiInputs"
+          :key="index"
+          :abi-input="abiInput"
+          :input="inputs[index]"
+          :is-container-blurred="!focused"
+          @update:input="(newValue) => handleInputUpdate(index, newValue)"
+        />
+      </div>
+      <button
+        type="submit"
+        :disabled="isLoading || !isValid"
+      >
+        <ScopeIcon :kind="'arrow-right'" />
+      </button>
+    </form>
     <slot name="output" />
   </div>
 </template>
 
 <script setup lang="ts">
-import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import { AbiForm } from '@/components/__common/abi-form';
-import type { Input as AbiInput } from '@/utils/validation/abi';
+import { useFocusWithin } from '@vueuse/core';
+import { computed, onMounted, ref } from 'vue';
 
-defineProps<{
+import LensFormInput from './LensFormInput.vue';
+
+import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import useChain from '@/composables/useChain';
+import {
+  getInitialValue,
+  isValid as isAbiValid,
+  normalize,
+  type Input as AbiInput,
+} from '@/utils/validation/abi';
+
+const props = defineProps<{
   abiInputs: readonly AbiInput[];
   isLoading: boolean;
 }>();
 
 const emit = defineEmits<{
-  submit: [unknown[]];
+  submit: [inputs: unknown[]];
 }>();
 
-function handleSubmit(inputs: unknown[]): void {
-  emit('submit', inputs);
+const { client } = useChain();
+
+const inputs = ref<unknown[]>([]);
+const isValid = computed(() => isAbiValid(inputs.value, props.abiInputs));
+
+onMounted(() => {
+  inputs.value = props.abiInputs.map((input) => getInitialValue(input));
+});
+
+const el = ref();
+const { focused } = useFocusWithin(el);
+
+function handleInputUpdate(index: number, newValue: unknown): void {
+  inputs.value[index] = newValue;
+}
+
+async function handleSubmit(): Promise<void> {
+  const normalizedInputs = await normalize(
+    inputs.value,
+    props.abiInputs,
+    client.value,
+  );
+  emit('submit', normalizedInputs);
 }
 </script>
 
@@ -53,7 +78,7 @@ function handleSubmit(inputs: unknown[]): void {
   gap: var(--spacing-4);
 }
 
-.form {
+form {
   display: flex;
   gap: var(--spacing-2);
   align-items: center;
@@ -82,38 +107,6 @@ button {
 
   &:disabled {
     opacity: 0.1;
-  }
-}
-
-.input {
-  width: 100%;
-  padding: 1px 6px;
-  transition: border-color 0.2s;
-  border: 1px solid var(--color-border-tertiary);
-  border-radius: var(--border-radius-s);
-  outline: none;
-  background: transparent;
-  color: var(--color-text-primary);
-  font-size: var(--font-size-l);
-
-  &:focus {
-    border-color: var(--color-border-quaternary);
-  }
-
-  &[disabled] {
-    opacity: 0.4;
-    pointer-events: none;
-  }
-
-  &.invalid {
-    border-color: var(--color-error);
-  }
-}
-
-@media (width >= 768px) {
-  .input {
-    width: initial;
-    font-size: var(--font-size-s);
   }
 }
 </style>
