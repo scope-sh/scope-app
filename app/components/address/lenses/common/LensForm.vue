@@ -94,7 +94,7 @@ button {
   width: 16px;
   height: 16px;
   padding: 0;
-  transition: opacity 0.2s;
+  transition: opacity 0.5s;
   border: none;
   opacity: 0.4;
   background: transparent;
