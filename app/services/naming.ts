@@ -108,6 +108,7 @@ class Service {
         const name = names[Math.floor(i / coinTypes.length)];
         if (!name) return acc;
         if (!address) return acc;
+        if (acc[name]) return acc;
         acc[name] = address;
         return acc;
       },
