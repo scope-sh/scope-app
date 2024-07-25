@@ -118,8 +118,9 @@ const indexerService = computed(() =>
     ? new IndexerService(indexerEndpoint, chainId.value)
     : null,
 );
-
-const nameService = new NamingService(alchemyApiKey);
+const namingService = computed(() =>
+  chainId.value ? new NamingService(alchemyApiKey, chainId.value) : null,
+);
 
 const search = ref('');
 function handleSearchSubmit(): void {
@@ -145,8 +146,11 @@ function handleSearchSubmit(): void {
 
 const isEnsResolving = ref(false);
 async function openEnsAddress(name: string): Promise<void> {
+  if (!namingService.value) {
+    return;
+  }
   isEnsResolving.value = true;
-  const address = await nameService.resolveEns(name);
+  const address = await namingService.value.resolveEns(name);
   isEnsResolving.value = false;
   if (address) {
     router.push(getRouteLocation({ name: 'address', address }));

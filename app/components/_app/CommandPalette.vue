@@ -136,7 +136,9 @@ const evmService = computed(() =>
 const indexerService = computed(() =>
   chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
 );
-const namingService = new NamingService(alchemyApiKey);
+const namingService = computed(() =>
+  chainId.value ? new NamingService(alchemyApiKey, chainId.value) : null,
+);
 
 function handleOpen(value: boolean): void {
   if (!value) {
@@ -289,10 +291,13 @@ const globalCommands = computed<Command[]>(() => {
     placeholder: 'Enter name',
     isAsync: (query): boolean => isEnsAddress(query),
     getItems: async (query): Promise<Command[]> => {
+      if (!namingService.value) {
+        return [];
+      }
       if (!isEnsAddress(query)) {
         return [];
       }
-      const address = await namingService.resolveEns(query);
+      const address = await namingService.value.resolveEns(query);
       if (!address) {
         return [];
       }
@@ -394,7 +399,10 @@ async function getGoToItems(
   }
 
   async function getOpenEnsCommand(name: string): Promise<Command | null> {
-    const address = await namingService.resolveEns(name);
+    if (!namingService.value) {
+      return null;
+    }
+    const address = await namingService.value.resolveEns(name);
     if (!address) {
       return null;
     }
