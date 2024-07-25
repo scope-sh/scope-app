@@ -2,6 +2,7 @@
   <div>
     <ToggleGroup.Root
       :model-value="modelValue"
+      type="single"
       class="list"
       @update:model-value="handleModelValueUpdate"
     >
@@ -35,8 +36,8 @@ defineProps<{
 
 const modelValue = defineModel<string>();
 
-function handleModelValueUpdate(value: string | undefined): void {
-  if (!value) {
+function handleModelValueUpdate(value: string | string[]): void {
+  if (Array.isArray(value)) {
     return;
   }
   modelValue.value = value;
