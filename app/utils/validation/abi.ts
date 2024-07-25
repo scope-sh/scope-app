@@ -147,6 +147,16 @@ function getTupleArrayItemInput(arrayInput: TupleArrayInput): TupleInput {
   return { type: 'tuple', components: arrayInput.components };
 }
 
+function getArrayLength(input: ArrayInput | TupleArrayInput): number | null {
+  const arrayRegex = /\w*\[(\d*)\]/;
+  const match = input.type.match(arrayRegex);
+  if (!match) {
+    throw new Error('Invalid array input type');
+  }
+  const [, length] = match;
+  return length ? parseInt(length) : null;
+}
+
 // Coerce numberish values to bigints
 // Resolves ENS names and replaces them with the resolved addresses
 async function normalize(
@@ -733,6 +743,7 @@ export {
   getArrayItemInput,
   getInitialValue,
   getTupleArrayItemInput,
+  getArrayLength,
   isArrayInput,
   isPrimitiveInput,
   isPrimitiveValid,
