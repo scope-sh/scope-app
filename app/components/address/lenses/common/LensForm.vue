@@ -30,6 +30,8 @@ import LensFormInput from './LensFormInput.vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useChain from '@/composables/useChain';
+import useEnv from '@/composables/useEnv';
+import NamingService from '@/services/naming.js';
 import {
   getInitialValue,
   isValid as isAbiValid,
@@ -46,7 +48,12 @@ const emit = defineEmits<{
   submit: [inputs: unknown[]];
 }>();
 
-const { client } = useChain();
+const { id: chainId } = useChain();
+const { alchemyApiKey } = useEnv();
+
+const namingService = computed(() =>
+  chainId.value ? new NamingService(alchemyApiKey, chainId.value) : null,
+);
 
 const inputs = ref<unknown[]>([]);
 const isValid = computed(() => isAbiValid(inputs.value, props.abiInputs));
@@ -63,10 +70,13 @@ function handleInputUpdate(index: number, newValue: unknown): void {
 }
 
 async function handleSubmit(): Promise<void> {
+  if (!namingService.value) {
+    return;
+  }
   const normalizedInputs = await normalize(
     inputs.value,
     props.abiInputs,
-    client.value,
+    namingService.value,
   );
   emit('submit', normalizedInputs);
 }

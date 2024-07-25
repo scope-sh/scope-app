@@ -1,4 +1,6 @@
-import type { Address, PublicClient } from 'viem';
+import type { Address } from 'viem';
+
+import type NamingService from '@/services/naming.js';
 
 type Input = ArrayInput | TupleInput | TupleArrayInput | PrimitiveInput;
 
@@ -162,10 +164,10 @@ function getArrayLength(input: ArrayInput | TupleArrayInput): number | null {
 async function normalize(
   inputs: unknown[],
   abiInputs: readonly Input[],
-  client: PublicClient,
+  namingService: NamingService,
 ): Promise<unknown[]> {
   const coerced = coerce(inputs, abiInputs);
-  return resolveNames(coerced, client);
+  return resolveNames(coerced, namingService);
 }
 
 function coerce(inputs: unknown[], abiInputs: readonly Input[]): unknown[] {
@@ -254,25 +256,13 @@ function coerceUint(input: string): unknown {
 
 async function resolveNames(
   inputs: unknown[],
-  client: PublicClient,
+  namingService: NamingService,
 ): Promise<unknown[]> {
   // Get the list of all ENS names
   const ensNames = inputs.map((arg) => getInputNames(arg)).flat();
   const uniqueEnsNames = [...new Set(ensNames)];
   // Resolve each ENS name to an address
-  const resolvedAddresses = await Promise.all(
-    uniqueEnsNames.map((name) => client.getEnsAddress({ name })),
-  );
-  const nameMap = uniqueEnsNames.reduce(
-    (acc, name, index) => {
-      const resolvedAddres = resolvedAddresses[index];
-      if (resolvedAddres) {
-        acc[name] = resolvedAddres;
-      }
-      return acc;
-    },
-    {} as Record<string, Address>,
-  );
+  const nameMap = await namingService.resolveEnsMany(uniqueEnsNames);
   // Replace the ENS names with the resolved addresses
   const resolvedInputs = inputs.map((input) => replaceNames(input, nameMap));
   return resolvedInputs;
