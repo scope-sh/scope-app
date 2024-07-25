@@ -147,6 +147,7 @@ class Service {
     this.chainId = chainId;
     this.client = ky.create({
       prefixUrl: apiEndpoint,
+      timeout: false,
     });
   }
 
