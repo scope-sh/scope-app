@@ -129,9 +129,7 @@ const apiService = computed(() =>
   chainId.value ? new ApiService(chainId.value) : null,
 );
 const evmService = computed(() =>
-  chainId.value && client.value
-    ? new EvmService(chainId.value, client.value)
-    : null,
+  client.value ? new EvmService(client.value) : null,
 );
 const indexerService = computed(() =>
   chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,

@@ -36,12 +36,10 @@ const emit = defineEmits<{
   'update:balance': [value: bigint];
 }>();
 
-const { id: chainId, client } = useChain();
+const { client } = useChain();
 
 const ethereumService = computed(() =>
-  chainId.value && client.value
-    ? new EvmService(chainId.value, client.value)
-    : null,
+  client.value ? new EvmService(client.value) : null,
 );
 
 const isLoading = ref(false);

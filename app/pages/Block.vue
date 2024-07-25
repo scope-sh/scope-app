@@ -157,7 +157,7 @@ const sections = computed<Section[]>(() => {
 
 const route = useRoute();
 const router = useRouter();
-const { id: chainId, name: chainName, client } = useChain();
+const { name: chainName, client } = useChain();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
@@ -219,9 +219,7 @@ useHead({
 });
 
 const evmService = computed(() =>
-  chainId.value && client.value
-    ? new EvmService(chainId.value, client.value)
-    : null,
+  client.value ? new EvmService(client.value) : null,
 );
 
 const isLoading = ref(false);

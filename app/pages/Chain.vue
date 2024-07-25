@@ -109,9 +109,7 @@ useIntervalFn(
 );
 
 const evmService = computed(() =>
-  chainId.value && client.value
-    ? new EvmService(chainId.value, client.value)
-    : null,
+  client.value ? new EvmService(client.value) : null,
 );
 const indexerService = computed(() =>
   chainId.value && client.value

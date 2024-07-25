@@ -7,8 +7,6 @@ import type {
   TransactionReceipt,
 } from 'viem';
 
-import type { Chain } from '@/utils/chains';
-
 type BlockStatus = 'executed';
 type TransactionStatus = 'success' | 'reverted';
 
@@ -29,11 +27,9 @@ interface BlockWithTransactions extends BaseBlock {
 }
 
 class Service {
-  chainId: Chain;
   client: PublicClient;
 
-  constructor(chainId: Chain, client: PublicClient) {
-    this.chainId = chainId;
+  constructor(client: PublicClient) {
     this.client = client;
   }
 
