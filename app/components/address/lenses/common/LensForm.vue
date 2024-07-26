@@ -1,6 +1,9 @@
 <template>
   <div class="root">
-    <form @submit.prevent="handleSubmit">
+    <form
+      autocomplete="off"
+      @submit.prevent="handleSubmit"
+    >
       <div class="list">
         <LensFormInput
           v-for="(abiInput, index) in abiInputs"

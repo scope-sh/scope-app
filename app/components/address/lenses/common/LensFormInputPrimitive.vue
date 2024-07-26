@@ -4,6 +4,7 @@
     v-model="model"
     :placeholder="abiInput.name"
     :class="{ invalid: !isValid }"
+    @keydown.enter="handleEnter"
     @input="handleInput"
     @blur="handleBlur"
   />
@@ -38,6 +39,10 @@ const isValid = computed(() =>
     ? isValueValid.value && model.value !== ''
     : isValueValid.value,
 );
+
+function handleEnter(): void {
+  isValueValid.value = isPrimitiveValid(model.value, props.abiInput.type);
+}
 
 function handleInput(): void {
   isValueValid.value = true;
