@@ -34,9 +34,10 @@ class Service {
   chain: Chain;
 
   constructor(alchemyApiKey: string, chain: Chain) {
+    const ensChain = getFallbackChain(chain);
     this.ethereumClient = createPublicClient({
-      chain: getChainData(ETHEREUM),
-      transport: http(getEndpointUrl(ETHEREUM, alchemyApiKey)),
+      chain: getChainData(ensChain),
+      transport: http(getEndpointUrl(ensChain, alchemyApiKey)),
     });
     this.chain = chain;
   }
