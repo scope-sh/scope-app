@@ -12,6 +12,7 @@
       <ScopeIcon
         class="icon"
         kind="arrow-right"
+        @click="handleClick"
       />
     </div>
   </div>
@@ -44,6 +45,10 @@ function handleInput(event: Event): void {
 }
 
 function handleSubmit(): void {
+  emit('submit');
+}
+
+function handleClick(): void {
   emit('submit');
 }
 </script>
