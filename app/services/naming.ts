@@ -144,6 +144,7 @@ function getFallbackChain(chain: Chain): Chain {
 
 function convertEvmChainIdToCoinType(chainId: number): number {
   if (chainId === ETHEREUM) return 60;
+  if (chainId === SEPOLIA) return 60;
   return (0x80000000 | chainId) >>> 0;
 }
 
