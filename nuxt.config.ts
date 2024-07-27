@@ -21,6 +21,10 @@ export default defineNuxtConfig({
     },
   },
 
+  nitro: {
+    preset: 'vercel-edge',
+  },
+
   app: {
     head: {
       charset: 'utf-8',
