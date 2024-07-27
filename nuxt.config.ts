@@ -23,6 +23,9 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: 'vercel-edge',
+    externals: {
+      inline: ['@envio-dev/hypersync-client'],
+    },
   },
 
   app: {
