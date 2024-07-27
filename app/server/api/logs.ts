@@ -1,9 +1,19 @@
 import { HypersyncClient, type Query } from '@envio-dev/hypersync-client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineEventHandler, getQuery } from 'h3';
-import type { Address } from 'viem';
+import type { Address, Hex } from 'viem';
 
 import { type Sort } from './common';
+
+interface Log {
+  blockNumber: number;
+  blockTimestamp: number;
+  transactionHash: Hex;
+  logIndex: number;
+  address: Address;
+  topics: Hex[];
+  data: Hex;
+}
 
 export default defineEventHandler(async (event) => {
   const {
@@ -57,14 +67,33 @@ export default defineEventHandler(async (event) => {
     reverse: sort === 'desc',
     maxNumLogs: limit,
   });
-  const logs = [];
+  const logs: Log[] = [];
 
   for (;;) {
     const res = await receiver.recv();
     if (res === null) {
       break;
     }
-    logs.push(...res.data.logs);
+    const pageBlocks = res.data.blocks;
+    const pageLogs = res.data.logs.map((log) => {
+      const logBlock = pageBlocks.find(
+        (block) => block.number === log.blockNumber,
+      );
+      const timestamp = logBlock?.timestamp || '0x';
+      return {
+        blockNumber: log.blockNumber as number,
+        blockTimestamp: 1000 * parseInt(timestamp),
+        logIndex: log.logIndex as number,
+        transactionHash: log.transactionHash as Hex,
+        address: log.address as Address,
+        data: log.data as Hex,
+        topics: log.topics.filter(
+          (topic) => topic !== null && topic !== undefined,
+        ) as Hex[],
+      };
+    });
+    logs.push(...pageLogs);
+
     nextBlock = res.nextBlock;
     height = res.archiveHeight || null;
     if (logs.length >= limit) {

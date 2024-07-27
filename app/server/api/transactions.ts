@@ -1,9 +1,22 @@
 import { HypersyncClient, type Query } from '@envio-dev/hypersync-client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineEventHandler, getQuery } from 'h3';
-import type { Address } from 'viem';
+import { type Address, type Hex } from 'viem';
 
 import { type Sort } from './common';
+
+interface Transaction {
+  blockNumber: number;
+  blockTimestamp: number;
+  from: Address;
+  gasPrice: string;
+  hash: Hex;
+  input: Hex;
+  to: Address | null;
+  transactionIndex: number;
+  value: string;
+  status: number;
+}
 
 export default defineEventHandler(async (event) => {
   const {
@@ -60,14 +73,33 @@ export default defineEventHandler(async (event) => {
     reverse: sort === 'desc',
     maxNumTransactions: limit,
   });
-  const transactions = [];
+  const transactions: Transaction[] = [];
 
   for (;;) {
     const res = await receiver.recv();
     if (res === null) {
       break;
     }
-    transactions.push(...res.data.transactions);
+    const pageBlocks = res.data.blocks;
+    const pageTransactions = res.data.transactions.map((tx) => {
+      const transactionBlock = pageBlocks.find(
+        (block) => block.number === tx.blockNumber,
+      );
+      const timestamp = transactionBlock?.timestamp || '0x';
+      return {
+        blockNumber: tx.blockNumber as number,
+        blockTimestamp: 1000 * parseInt(timestamp),
+        from: tx.from as Address,
+        gasPrice: tx.gasPrice || '0x',
+        hash: tx.hash as Hex,
+        input: tx.input as Hex,
+        to: (tx.to as Address | undefined) || null,
+        transactionIndex: tx.transactionIndex as number,
+        value: tx.value as string,
+        status: tx.status as number,
+      };
+    });
+    transactions.push(...pageTransactions);
     nextBlock = res.nextBlock;
     height = res.archiveHeight || null;
     if (transactions.length >= limit) {
