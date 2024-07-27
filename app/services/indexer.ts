@@ -94,6 +94,9 @@ class Service {
           sender: {
             _eq: "${address}"
           }
+        },
+        order_by: {
+          blockTimestamp: desc
         }
       ) {
         success
