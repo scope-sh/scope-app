@@ -471,7 +471,6 @@ async function fetchTransactions(): Promise<void> {
       TRANSACTIONS_PER_PAGE + 1,
       sort.value,
     );
-  console.log('addressTransactions', addressTransactions);
   const newTransactions = addressTransactions.transactions;
   // Append newly fetched transactions to the end of the list
   // Make sure there are no duplicates
