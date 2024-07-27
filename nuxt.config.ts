@@ -23,6 +23,9 @@ export default defineNuxtConfig({
 
   nitro: {
     preset: 'vercel',
+    vercel: {
+      regions: ['fra1'],
+    },
   },
 
   app: {
