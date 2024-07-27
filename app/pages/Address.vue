@@ -231,7 +231,7 @@ const SECTION_TRANSACTIONS = 'transactions';
 const SECTION_LOGS = 'logs';
 const SECTION_CODE = 'code';
 
-const { indexerEndpoint } = useEnv();
+const { appBaseUrl, indexerEndpoint } = useEnv();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 const route = useRoute();
@@ -314,7 +314,7 @@ const indexerService = computed(() =>
   chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
 );
 const hypersyncService = computed(() =>
-  chainId.value ? new HypersyncService(chainId.value) : null,
+  chainId.value ? new HypersyncService(chainId.value, appBaseUrl) : null,
 );
 
 const isLoadingBalance = ref(false);
@@ -471,6 +471,7 @@ async function fetchTransactions(): Promise<void> {
       TRANSACTIONS_PER_PAGE + 1,
       sort.value,
     );
+  console.log('addressTransactions', addressTransactions);
   const newTransactions = addressTransactions.transactions;
   // Append newly fetched transactions to the end of the list
   // Make sure there are no duplicates

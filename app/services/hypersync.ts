@@ -65,10 +65,10 @@ class Service {
   chain: Chain;
   client: KyInstance;
 
-  constructor(chain: Chain) {
+  constructor(chain: Chain, appBaseUrl: string) {
     this.chain = chain;
     this.client = ky.create({
-      prefixUrl: 'http://localhost:5173/api',
+      prefixUrl: `${appBaseUrl}/api`,
     });
   }
 
