@@ -54,23 +54,32 @@ export default defineEventHandler(async (event) => {
     },
   };
 
+  let nextBlock: number | null = null;
+  let height: number | null = null;
   const receiver = await client.stream(query, {
     reverse: sort === 'desc',
     maxNumTransactions: limit,
   });
-  const txs = [];
+  const transactions = [];
 
   for (;;) {
     const res = await receiver.recv();
     if (res === null) {
       break;
     }
-    txs.push(...res.data.transactions);
-    if (txs.length >= limit) {
+    transactions.push(...res.data.transactions);
+    nextBlock = res.nextBlock;
+    height = res.archiveHeight || null;
+    if (transactions.length >= limit) {
       break;
     }
   }
 
-  // Don't return more than 10 worth of pages
-  return txs.slice(0, 10 * limit);
+  return {
+    transactions,
+    pagination: {
+      cursor: nextBlock,
+      height,
+    },
+  };
 });

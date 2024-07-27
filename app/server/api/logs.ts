@@ -51,6 +51,8 @@ export default defineEventHandler(async (event) => {
     },
   };
 
+  let nextBlock: number | null = null;
+  let height: number | null = null;
   const receiver = await client.stream(query, {
     reverse: sort === 'desc',
     maxNumLogs: limit,
@@ -63,11 +65,18 @@ export default defineEventHandler(async (event) => {
       break;
     }
     logs.push(...res.data.logs);
+    nextBlock = res.nextBlock;
+    height = res.archiveHeight || null;
     if (logs.length >= limit) {
       break;
     }
   }
 
-  // Don't return more than 10 worth of pages
-  return logs.slice(0, 10 * limit);
+  return {
+    logs,
+    pagination: {
+      cursor: nextBlock,
+      height,
+    },
+  };
 });
