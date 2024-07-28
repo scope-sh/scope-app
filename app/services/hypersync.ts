@@ -69,6 +69,7 @@ class Service {
     this.chain = chain;
     this.client = ky.create({
       prefixUrl: `${appBaseUrl}/api`,
+      timeout: false,
     });
   }
 
