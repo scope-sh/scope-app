@@ -463,6 +463,13 @@ async function fetchTransactions(): Promise<void> {
   if (!address.value || !hypersyncService.value || !sort.value) {
     return;
   }
+  if (
+    sort.value === 'desc' &&
+    transactionPagination.value.cursor &&
+    transactionPagination.value.cursor < 0
+  ) {
+    return;
+  }
   isLoadingTransactions.value = true;
   const addressTransactions =
     await hypersyncService.value.getAddressTransactions(
@@ -522,6 +529,13 @@ async function fetchLogs(): Promise<void> {
   if (!address.value || !hypersyncService.value || !sort.value) {
     return;
   }
+  if (
+    sort.value === 'desc' &&
+    logPagination.value.cursor &&
+    logPagination.value.cursor < 0
+  ) {
+    return;
+  }
   isLoadingLogs.value = true;
   const addressLogs = await hypersyncService.value.getAddressLogs(
     address.value,
@@ -575,7 +589,7 @@ function getMaxPage(
     ? pagination.cursor < pagination.height
       ? Infinity
       : maxPage
-    : pagination.cursor > 0
+    : pagination.cursor >= 0
       ? Infinity
       : maxPage;
 }

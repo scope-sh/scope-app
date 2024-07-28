@@ -61,7 +61,6 @@ export default defineEventHandler(async (event) => {
     },
   };
 
-  let nextBlock: number | null = null;
   let height: number | null = null;
   const receiver = await client.stream(query, {
     reverse: sort === 'desc',
@@ -94,17 +93,19 @@ export default defineEventHandler(async (event) => {
     });
     logs.push(...pageLogs);
 
-    nextBlock = res.nextBlock;
     height = res.archiveHeight || null;
     if (logs.length >= limit) {
       break;
     }
   }
+  const lastLog = logs.at(-1);
+  const prevBlock =
+    logs.length >= limit && lastLog ? lastLog.blockNumber - 1 : -1;
 
   return {
     logs,
     pagination: {
-      cursor: nextBlock,
+      cursor: prevBlock,
       height,
     },
   };
