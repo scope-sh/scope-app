@@ -45,6 +45,12 @@ export default defineNuxtConfig({
     },
   },
 
-  modules: ['@vueuse/nuxt', '@pinia/nuxt', '@nuxt/eslint', 'nuxt-shiki'],
+  modules: [
+    '@vueuse/nuxt',
+    '@pinia/nuxt',
+    '@nuxt/eslint',
+    'nuxt-shiki',
+    "nuxt-posthog"
+  ],
   compatibilityDate: '2024-07-16',
 });
