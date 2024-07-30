@@ -10,7 +10,6 @@ interface ImportMeta {
     VITE_ALCHEMY_API_KEY?: string;
     VITE_APP_BASE_URL?: string;
     VITE_API_ENDPOINT?: string;
-    VITE_APP_PASSPHRASE?: string;
     VITE_INDEXER_ENDPOINT?: string;
   };
 }

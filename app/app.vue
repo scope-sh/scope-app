@@ -1,9 +1,5 @@
 <template>
-  <LockScreen v-if="locked" />
-  <div
-    v-else
-    id="app"
-  >
+  <div id="app">
     <AppHeader v-if="!isChainPage" />
     <NuxtPage />
     <AppFooter v-if="!isChainPage" />
@@ -18,22 +14,16 @@
 <script setup lang="ts">
 import '@fontsource-variable/inter';
 import '@fontsource/inconsolata/400.css';
-import { useStorage } from '@vueuse/core';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
-
-import useEnv from './composables/useEnv.js';
 
 import CommandPalette from '@/components/_app/CommandPalette.vue';
 import AppFooter from '@/components/_app/Footer.vue';
 import AppHeader from '@/components/_app/Header.vue';
-import LockScreen from '@/components/_app/LockScreen.vue';
 import Toast from '@/components/_app/Toast.vue';
 import useToast from '@/composables/useToast.js';
 
 const route = useRoute();
-const { appPassphrase } = useEnv();
-const locked = useStorage('scope-locked', appPassphrase.length > 0);
 
 const { active: activeToast, hide: hideToast } = useToast();
 
