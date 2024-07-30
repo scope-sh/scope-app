@@ -17,7 +17,6 @@ import '@fontsource/inconsolata/400.css';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import { useSeoMeta } from '#imports';
 import CommandPalette from '@/components/_app/CommandPalette.vue';
 import AppFooter from '@/components/_app/Footer.vue';
 import AppHeader from '@/components/_app/Header.vue';
@@ -29,15 +28,6 @@ const route = useRoute();
 const { active: activeToast, hide: hideToast } = useToast();
 
 const isChainPage = computed(() => route.name === 'chain');
-
-useSeoMeta({
-  title: 'scope',
-  ogTitle: 'scope',
-  description: 'block explorer for builders in aa',
-  ogDescription: 'block explorer for builders in aa',
-  ogImage: 'https://alpha.scope.sh/social.png',
-  twitterCard: 'summary_large_image',
-});
 </script>
 
 <style>
