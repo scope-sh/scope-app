@@ -33,7 +33,7 @@
     "@pinia/nuxt": "^0.5.2",
     "@shikijs/transformers": "^1.12.0",
     "@tanstack/vue-table": "^8.19.3",
-    "@unhead/vue": "1.9.4",
+    "@unhead/vue": "^1.9.16",
     "@vueuse/core": "^10.11.0",
     "@vueuse/nuxt": "^10.11.0",
     "abitype": "1.0.2",
