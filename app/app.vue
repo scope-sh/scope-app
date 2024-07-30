@@ -6,6 +6,7 @@
   >
     <AppHeader v-if="!isChainPage" />
     <NuxtPage />
+    <AppFooter v-if="!isChainPage" />
     <CommandPalette />
     <Toast
       :value="activeToast"
@@ -24,6 +25,7 @@ import { useRoute } from 'vue-router';
 import useEnv from './composables/useEnv.js';
 
 import CommandPalette from '@/components/_app/CommandPalette.vue';
+import AppFooter from '@/components/_app/Footer.vue';
 import AppHeader from '@/components/_app/Header.vue';
 import LockScreen from '@/components/_app/LockScreen.vue';
 import Toast from '@/components/_app/Toast.vue';
