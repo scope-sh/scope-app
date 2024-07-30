@@ -31,7 +31,7 @@
     "@fontsource-variable/inter": "^5.0.19",
     "@fontsource/inconsolata": "^5.0.18",
     "@pinia/nuxt": "^0.5.2",
-    "@shikijs/transformers": "1.10.0",
+    "@shikijs/transformers": "^1.12.0",
     "@tanstack/vue-table": "8.15.3",
     "@unhead/vue": "1.9.4",
     "@vueuse/core": "^10.11.0",
