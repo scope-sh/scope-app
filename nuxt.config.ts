@@ -41,7 +41,33 @@ export default defineNuxtConfig({
           sizes: '180x180',
         },
       ],
-      title: 'Scope',
+      title: 'scope',
+      meta: [
+        { name: 'title', content: 'scope' },
+        {
+          name: 'description',
+          content: 'block explorer for aa builders',
+        },
+        { property: 'og:type', content: 'website' },
+        { property: 'og:url', content: 'https://alpha.scope.sh/' },
+        { property: 'og:title', content: 'scope' },
+        {
+          property: 'og:description',
+          content: 'block explorer for aa builders',
+        },
+        { property: 'og:image', content: 'https://alpha.scope.sh/social.png' },
+        { property: 'twitter:card', content: 'summary_large_image' },
+        { property: 'twitter:url', content: 'https://alpha.scope.sh/' },
+        { property: 'twitter:title', content: 'scope' },
+        {
+          property: 'twitter:description',
+          content: 'block explorer for aa builders',
+        },
+        {
+          property: 'twitter:image',
+          content: 'https://alpha.scope.sh/social.png',
+        },
+      ],
     },
   },
 
@@ -50,7 +76,7 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/eslint',
     'nuxt-shiki',
-    "nuxt-posthog"
+    'nuxt-posthog',
   ],
   compatibilityDate: '2024-07-16',
 });
