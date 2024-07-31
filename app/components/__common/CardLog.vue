@@ -15,7 +15,7 @@
           />
           ·
         </template>
-        <div>
+        <div class="header-link">
           <LinkAddress
             v-if="type === 'transaction'"
             :address="log.address"
@@ -164,6 +164,10 @@ export type { Log, LogView };
   gap: var(--spacing-2);
   flex-wrap: wrap;
   font-size: var(--font-size-s);
+}
+
+.header-link {
+  max-width: 100%;
 }
 
 .index {
