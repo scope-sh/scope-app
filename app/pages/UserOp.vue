@@ -300,12 +300,12 @@ const { getLabel } = useLabels();
 const section = ref<Section['value']>(SECTION_LOGS);
 const sections = computed<Section[]>(() => [
   {
-    label: 'Transaction',
-    value: SECTION_TRANSACTION,
-  },
-  {
     label: 'Logs',
     value: SECTION_LOGS,
+  },
+  {
+    label: 'Transaction',
+    value: SECTION_TRANSACTION,
   },
 ]);
 
