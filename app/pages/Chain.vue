@@ -220,7 +220,7 @@ function handleChainUpdate(value: Chain): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 15vh;
+  padding-top: 15vh;
 }
 
 .content {
