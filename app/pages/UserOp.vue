@@ -148,6 +148,39 @@
       />
     </ScopePanel>
     <template #section>
+      <template v-if="section === SECTION_LOGS">
+        <ScopePanelLoading
+          v-if="isTransactionReceiptLoading"
+          title="Logs"
+        />
+        <ScopePanel
+          v-else
+          title="Logs"
+        >
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="!logs.length"
+              value="No logs found"
+            />
+            <div
+              v-else
+              class="logs"
+            >
+              <ScopeToggle
+                v-model="selectedLogView"
+                :options="logViewOptions"
+              />
+              <CardLog
+                v-for="(log, index) in logs"
+                :key="index"
+                :log="log"
+                :view="selectedLogView"
+                type="transaction"
+              />
+            </div>
+          </template>
+        </ScopePanel>
+      </template>
       <template v-if="section === SECTION_TRANSACTION">
         <ScopePanelLoading
           v-if="isTransactionLoading"
@@ -189,39 +222,6 @@
               </AttributeItemValue>
             </AttributeItem>
           </AttributeList>
-        </ScopePanel>
-      </template>
-      <template v-if="section === SECTION_LOGS">
-        <ScopePanelLoading
-          v-if="isTransactionReceiptLoading"
-          title="Logs"
-        />
-        <ScopePanel
-          v-else
-          title="Logs"
-        >
-          <template #default>
-            <ScopeLabelEmptyState
-              v-if="!logs.length"
-              value="No logs found"
-            />
-            <div
-              v-else
-              class="logs"
-            >
-              <ScopeToggle
-                v-model="selectedLogView"
-                :options="logViewOptions"
-              />
-              <CardLog
-                v-for="(log, index) in logs"
-                :key="index"
-                :log="log"
-                :view="selectedLogView"
-                type="transaction"
-              />
-            </div>
-          </template>
         </ScopePanel>
       </template>
     </template>
@@ -297,7 +297,7 @@ const { id: chainId, name: chainName, client } = useChain();
 const { addAbis } = useAbi();
 const { getLabel } = useLabels();
 
-const section = ref<Section['value']>(SECTION_TRANSACTION);
+const section = ref<Section['value']>(SECTION_LOGS);
 const sections = computed<Section[]>(() => [
   {
     label: 'Transaction',
