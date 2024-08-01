@@ -16,6 +16,7 @@ import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
 
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0.js';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0.js';
+import klasterPaymasterAbi from '@/abi/klasterPaymaster.js';
 import pimlicoBundleBulkerAbi from '@/abi/pimlicoBundleBulker.js';
 import type { Log, Transaction } from '@/services/evm.js';
 import type { Chain } from '@/utils/chains.js';
@@ -36,6 +37,7 @@ type TxType =
   | typeof TX_TYPE_ENTRY_POINT_0_6
   | typeof TX_TYPE_ENTRY_POINT_0_7
   | typeof TX_TYPE_PIMLICO_BULKER
+  | typeof TX_TYPE_KLASTER_PAYMASTER
   | typeof TX_TYPE_UNKNOWN;
 
 interface UserOp_0_6 {
@@ -103,11 +105,13 @@ interface Call {
 const TX_TYPE_ENTRY_POINT_0_6 = 'Entry Point 0.6';
 const TX_TYPE_ENTRY_POINT_0_7 = 'Entry Point 0.7';
 const TX_TYPE_PIMLICO_BULKER = 'Pimlico Bulker';
+const TX_TYPE_KLASTER_PAYMASTER = 'Klaster Paymaster';
 const TX_TYPE_UNKNOWN = 'Unknown';
 
 const ENTRY_POINT_0_6_ADDRESS = '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789';
 const ENTRY_POINT_0_7_ADDRESS = '0x0000000071727de22e5e9d8baf0edac6f37da032';
 const PIMLICO_BULKER_ADDRESS = '0x000000000091a1f34f51ce866bed8983db51a97e';
+const KLASTER_PAYMASTER_ADDRESS = '0xc31ad82a88609ee88e87d382509060f3490a8eb2';
 
 function getTxType(transaction: Transaction): TxType {
   if (transaction.to === ENTRY_POINT_0_6_ADDRESS) {
@@ -118,6 +122,9 @@ function getTxType(transaction: Transaction): TxType {
   }
   if (transaction.to === PIMLICO_BULKER_ADDRESS) {
     return TX_TYPE_PIMLICO_BULKER;
+  }
+  if (transaction.to === KLASTER_PAYMASTER_ADDRESS) {
+    return TX_TYPE_KLASTER_PAYMASTER;
   }
   return TX_TYPE_UNKNOWN;
 }
@@ -131,6 +138,9 @@ function getEntryPoint(transaction: Transaction): Address | null {
     return ENTRY_POINT_0_7_ADDRESS;
   }
   if (TX_TYPE_PIMLICO_BULKER) {
+    return ENTRY_POINT_0_6_ADDRESS;
+  }
+  if (TX_TYPE_KLASTER_PAYMASTER) {
     return ENTRY_POINT_0_6_ADDRESS;
   }
   return null;
@@ -257,6 +267,16 @@ async function getUserOps(
     return bundle[0].map((op) => ({
       ...op,
     }));
+  }
+  if (txType === TX_TYPE_KLASTER_PAYMASTER) {
+    const { functionName, args } = decodeFunctionData({
+      abi: klasterPaymasterAbi,
+      data: transaction.input,
+    });
+    if (functionName !== 'handleOps') {
+      return [];
+    }
+    return args[0] as UserOp_0_6[];
   }
   return [];
 }
