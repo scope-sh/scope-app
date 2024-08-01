@@ -1,35 +1,38 @@
 <template>
   <div class="page">
     <div class="content">
-      <div class="icons">
-        <IconBrand class="icon" />
-        <ScopeIcon
-          class="icon-x"
-          kind="cross"
-        />
-        <PopoverChain
-          :model-value="chainId"
-          @update:model-value="handleChainUpdate"
-        />
-      </div>
-      <div class="main">
-        <InputSearch
-          v-model="search"
-          :is-loading="isEnsResolving"
-          @submit="handleSearchSubmit"
-        />
-        <div
-          class="latest-block"
-          :class="{ loading: isLoading }"
-        >
-          Latest block
-          <LinkBlock
-            v-if="latestBlock"
-            :number="latestBlock"
+      <div class="header">
+        <div class="icons">
+          <IconBrand class="icon" />
+          <ScopeIcon
+            class="icon-x"
+            kind="cross"
           />
-          <span v-else>…</span>
+          <PopoverChain
+            :model-value="chainId"
+            @update:model-value="handleChainUpdate"
+          />
+        </div>
+        <div class="main">
+          <InputSearch
+            v-model="search"
+            :is-loading="isEnsResolving"
+            @submit="handleSearchSubmit"
+          />
+          <div
+            class="latest-block"
+            :class="{ loading: isLoading }"
+          >
+            Latest block
+            <LinkBlock
+              v-if="latestBlock"
+              :number="latestBlock"
+            />
+            <span v-else>…</span>
+          </div>
         </div>
       </div>
+      <ExampleList v-if="chainId === ETHEREUM" />
     </div>
   </div>
 </template>
@@ -44,6 +47,7 @@ import { useRouter } from 'vue-router';
 import IconBrand from '@/components/__common/IconBrand.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import ExampleList from '@/components/chain/ExampleList.vue';
 import InputSearch from '@/components/chain/InputSearch.vue';
 import PopoverChain from '@/components/chain/PopoverChain.vue';
 import useChain from '@/composables/useChain';
@@ -54,7 +58,7 @@ import EvmService from '@/services/evm';
 import IndexerService from '@/services/indexer';
 import NamingService from '@/services/naming';
 import type { Command } from '@/stores/commands';
-import type { Chain } from '@/utils/chains';
+import { ETHEREUM, type Chain } from '@/utils/chains';
 import { toBigInt } from '@/utils/conversion';
 import { getRouteLocation } from '@/utils/routing';
 import {
@@ -216,16 +220,30 @@ function handleChainUpdate(value: Chain): void {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 60vh;
+  margin-top: 15vh;
 }
 
 .content {
   display: flex;
-  gap: var(--spacing-10);
+  gap: 200px;
   flex-direction: column;
   align-items: center;
   width: 820px;
   margin: 8px;
+}
+
+@media (width >= 768px) {
+  .content {
+    gap: 320px;
+  }
+}
+
+.header {
+  display: flex;
+  gap: var(--spacing-10);
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .icons {
