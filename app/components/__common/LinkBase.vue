@@ -2,7 +2,7 @@
   <div class="link">
     <slot />
     <ButtonCopy
-      v-if="type === 'normal'"
+      v-if="type !== 'minimal'"
       :value
       class="button"
       compact

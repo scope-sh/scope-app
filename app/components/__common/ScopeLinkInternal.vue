@@ -2,7 +2,7 @@
   <router-link
     :to="to"
     class="root"
-    :class="{ minimal: type === 'minimal' }"
+    :class="{ trimmed: type !== 'normal' }"
   >
     <slot />
   </router-link>
@@ -28,7 +28,7 @@ const to = computed(() => getRouteLocation(props.route));
 </script>
 
 <script lang="ts">
-type Type = 'minimal' | 'normal';
+type Type = 'minimal' | 'copyable' | 'normal';
 
 // eslint-disable-next-line import/prefer-default-export
 export type { Type };
@@ -53,7 +53,7 @@ export type { Type };
     background: oklch(from var(--color-accent) l c h / 10%);
   }
 
-  &.minimal {
+  &.trimmed {
     padding: 0;
     background: none;
     color: var(--color-accent-toned-down);
