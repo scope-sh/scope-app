@@ -1,11 +1,5 @@
 <template>
-  <ScopePanelLoading
-    v-if="isLoading"
-    ref="panelEl"
-    title="Code"
-  />
   <ScopePanel
-    v-else
     ref="panelEl"
     title="Code"
   >
@@ -75,7 +69,6 @@ import SourceHighlighter from './code/SourceHighlighter.vue';
 
 import ScopeButton from '@/components/__common/ScopeButton.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
-import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import type { Contract } from '@/services/api';
 
@@ -84,8 +77,6 @@ const props = defineProps<{
   bytecode: Hex | null;
   contract: Contract | null;
 }>();
-
-const isLoading = ref(false);
 
 const showAsProxy = ref(true);
 
