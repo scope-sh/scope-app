@@ -23,6 +23,7 @@ type Kind =
   | 'loop'
   | 'magnifying-glass'
   | 'minus'
+  | 'plus'
   | 'reload'
   | 'text';
 

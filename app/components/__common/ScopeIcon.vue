@@ -23,6 +23,7 @@
   <IconLoop v-else-if="kind === 'loop'" />
   <IconMagnifyingGlass v-else-if="kind === 'magnifying-glass'" />
   <IconMinus v-else-if="kind === 'minus'" />
+  <IconPlus v-else-if="kind === 'plus'" />
   <IconReload v-else-if="kind === 'reload'" />
   <IconText v-else-if="kind === 'text'" />
 </template>
@@ -53,6 +54,7 @@ import IconJson from './icon/general/Json.vue';
 import IconLoop from './icon/general/Loop.vue';
 import IconMagnifyingGlass from './icon/general/MagnifyingGlass.vue';
 import IconMinus from './icon/general/Minus.vue';
+import IconPlus from './icon/general/Plus.vue';
 import IconReload from './icon/general/Reload.vue';
 import IconText from './icon/general/Text.vue';
 
