@@ -32,7 +32,7 @@
       <LinkAddress
         v-else-if="arg.type === 'address'"
         :address="getAddress(arg.value)"
-        type="minimal"
+        type="copyable"
         class="value"
       />
       <ArgumentTreeLeaf
