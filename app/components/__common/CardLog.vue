@@ -43,12 +43,7 @@
             class="copy"
           />
         </div>
-        <div class="properties">
-          <ArgumentTree
-            :args="decoded.args"
-            initial
-          />
-        </div>
+        <ArgumentTree :args="decoded.args" />
       </div>
       <div
         v-else
@@ -192,23 +187,18 @@ export type { Log, LogView };
   display: flex;
   gap: var(--spacing-2);
   flex-direction: column;
-  font-family: var(--font-mono);
   word-break: break-all;
 }
 
 .name {
   display: flex;
   gap: var(--spacing-2);
+  font-family: var(--font-mono);
   font-size: var(--font-size-l);
 
   .copy {
     width: 16px;
     height: 16px;
   }
-}
-
-.properties {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-m);
 }
 </style>

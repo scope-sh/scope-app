@@ -11,12 +11,7 @@
         class="copy"
       />
     </div>
-    <div class="properties">
-      <ArgumentTree
-        :args="decoded.args"
-        initial
-      />
-    </div>
+    <ArgumentTree :args="decoded.args" />
   </div>
   <ScopeTextView
     v-else
@@ -99,23 +94,18 @@ export type { CallDataView };
   overflow-y: auto;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);
-  font-family: var(--font-mono);
   word-break: break-all;
 }
 
 .name {
   display: flex;
   gap: var(--spacing-2);
+  font-family: var(--font-mono);
   font-size: var(--font-size-l);
 
   .copy {
     width: 16px;
     height: 16px;
   }
-}
-
-.properties {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-m);
 }
 </style>
