@@ -22,6 +22,7 @@ type Kind =
   | 'json'
   | 'loop'
   | 'magnifying-glass'
+  | 'minus'
   | 'reload'
   | 'text';
 
