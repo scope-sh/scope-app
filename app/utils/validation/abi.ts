@@ -3,6 +3,7 @@ import type { Address } from 'viem';
 import type NamingService from '@/services/naming.js';
 
 type Input = ArrayInput | TupleInput | TupleArrayInput | PrimitiveInput;
+type Output = Input;
 
 interface BaseInput {
   readonly name?: string;
@@ -749,4 +750,5 @@ export type {
   TupleArrayInput,
   PrimitiveInput,
   PrimitiveInputType,
+  Output,
 };
