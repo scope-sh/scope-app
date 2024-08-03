@@ -5,6 +5,7 @@
       tiny: props.size === 'tiny',
       regular: props.size === 'regular',
       large: props.size === 'large',
+      error: props.type === 'error',
     }"
   >
     {{ value }}
@@ -12,15 +13,23 @@
 </template>
 
 <script setup lang="ts">
-const props = defineProps<{
-  value: string;
-  size: Size;
-  label?: string;
-}>();
+const props = withDefaults(
+  defineProps<{
+    value: string;
+    size: Size;
+    type?: Type;
+    label?: string;
+  }>(),
+  {
+    type: 'text',
+    label: undefined,
+  },
+);
 </script>
 
 <script lang="ts">
 type Size = 'tiny' | 'regular' | 'large';
+type Type = 'text' | 'error';
 </script>
 
 <style scoped>
@@ -56,5 +65,9 @@ type Size = 'tiny' | 'regular' | 'large';
   line-height: var(--line-height);
   word-break: break-all;
   white-space: pre-wrap;
+
+  &.error {
+    border-color: var(--color-error);
+  }
 }
 </style>
