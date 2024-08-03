@@ -187,7 +187,7 @@ export type { File };
 input {
   width: 100%;
   padding: var(--spacing-2) var(--spacing-2);
-  border: none;
+  border: 1px solid transparent;
   border-radius: var(--border-radius-s);
   outline: none;
   background: var(--color-background-secondary);
@@ -196,6 +196,10 @@ input {
 
   &::placeholder {
     color: var(--color-text-placeholder);
+  }
+
+  &:focus {
+    border-color: var(--color-border-tertiary);
   }
 }
 </style>
