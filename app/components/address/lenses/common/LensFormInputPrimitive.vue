@@ -6,7 +6,6 @@
     :class="{ invalid: !isValid }"
     @keydown.enter="handleEnter"
     @input="handleInput"
-    @blur="handleBlur"
   />
 </template>
 
@@ -31,10 +30,6 @@ function handleEnter(): void {
 
 function handleInput(): void {
   isValid.value = true;
-}
-
-function handleBlur(): void {
-  isValid.value = isPrimitiveValid(model.value, props.abiInput.type);
 }
 </script>
 
