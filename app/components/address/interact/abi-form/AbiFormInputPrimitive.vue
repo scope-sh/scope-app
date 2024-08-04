@@ -1,0 +1,107 @@
+<template>
+  <fieldset>
+    <input
+      :id="id"
+      v-model="model"
+      :placeholder="abiInput.type"
+      :class="{ invalid: !isValid }"
+      @keydown.enter="handleEnter"
+      @input="handleInput"
+    />
+    <label
+      v-if="abiInput.name"
+      :for="id"
+      :class="{ invalid: !isValid }"
+    >
+      {{ abiInput.name }}
+    </label>
+  </fieldset>
+</template>
+
+<script setup lang="ts">
+import { computed, ref } from 'vue';
+
+import type { PrimitiveInput } from '@/utils/validation/abi';
+import { isPrimitiveValid } from '@/utils/validation/abi';
+
+const model = defineModel<unknown>();
+
+const props = defineProps<{
+  abiInput: PrimitiveInput;
+}>();
+
+const id = computed(
+  () => `input-${Math.random().toString(36).substring(2, 15)}`,
+);
+
+const isValid = ref<boolean>(true);
+
+function handleEnter(): void {
+  isValid.value = isPrimitiveValid(model.value, props.abiInput.type);
+}
+
+function handleInput(): void {
+  isValid.value = true;
+}
+</script>
+
+<style scoped>
+fieldset {
+  all: unset;
+  position: relative;
+  gap: var(--spacing-2);
+  flex-direction: column;
+  width: 320px;
+}
+
+label {
+  position: absolute;
+  top: -6px;
+  left: 8px;
+  padding: 0 var(--spacing-2);
+  transition: color 0.25s ease-in;
+  background: var(--color-background-primary);
+  color: var(--color-border-secondary);
+  font-size: var(--font-size-s);
+  font-weight: 400;
+
+  &.invalid {
+    color: var(--color-error);
+  }
+}
+
+input {
+  display: inline-flex;
+  box-sizing: border-box;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--spacing-4) var(--spacing-3);
+  transition: border-color 0.25s ease-in;
+  border: 1px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-s);
+  outline: none;
+  background: none;
+  box-shadow: inset 2px 2px 2px rgb(0 0 0 / 80%);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-regular);
+  gap: var(--spacing-2);
+
+  &:focus ~ label:not(.invalid) {
+    color: var(--color-border-primary);
+  }
+
+  &:focus {
+    border-color: var(--color-border-primary);
+  }
+
+  &.invalid {
+    border-color: var(--color-error);
+  }
+
+  &::placeholder {
+    color: var(--color-text-placeholder);
+  }
+}
+</style>
