@@ -88,7 +88,7 @@ function removeItem(index: number): void {
 <style scoped>
 .root {
   display: flex;
-  gap: var(--spacing-4);
+  gap: var(--spacing-3);
   flex-direction: column;
 }
 
@@ -100,14 +100,14 @@ function removeItem(index: number): void {
 
 .items {
   display: flex;
-  gap: var(--spacing-2);
+  gap: var(--spacing-3);
   flex-direction: column;
   margin-left: var(--spacing-6);
 }
 
 .item {
   display: flex;
-  gap: var(--spacing-4);
+  gap: var(--spacing-3);
   align-items: center;
 }
 
