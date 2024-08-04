@@ -714,6 +714,11 @@ function isAddress(value: string): boolean {
 }
 
 function isInt(value: string, bits: number): boolean {
+  const decimalRegex = /^-?\d+$/;
+  const hexRegex = /^-?0x[0-9a-fA-F]+$/;
+  if (!value.match(decimalRegex) && !value.match(hexRegex)) {
+    return false;
+  }
   const number = parseInt(value);
   if (isNaN(number)) {
     return false;
@@ -723,6 +728,11 @@ function isInt(value: string, bits: number): boolean {
 }
 
 function isUint(value: string, bits: number): boolean {
+  const decimalRegex = /^-?\d+$/;
+  const hexRegex = /^-?0x[0-9a-fA-F]+$/;
+  if (!value.match(decimalRegex) && !value.match(hexRegex)) {
+    return false;
+  }
   const number = parseInt(value);
   if (isNaN(number)) {
     return false;
