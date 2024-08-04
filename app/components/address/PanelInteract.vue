@@ -329,7 +329,7 @@ h3 {
 
 .list {
   display: flex;
-  gap: var(--spacing-6);
+  gap: var(--spacing-8);
   flex-direction: column;
 }
 
