@@ -1,32 +1,38 @@
 <template>
-  <div class="items">
-    <div
-      v-for="(itemModelValue, index) in modelValue"
-      :key="index"
-      class="item"
-    >
-      <AbiFormInputPrimitive
-        :model-value="itemModelValue"
-        :abi-input="getArrayItemInput(abiInput)"
-        :type="getArrayItemInput(abiInput).type"
-        @update:model-value="(newValue) => handleModelUpdate(index, newValue)"
-      />
-      <button
-        v-if="!length"
-        type="button"
-        @click="removeItem(index)"
-      >
-        <ScopeIcon kind="minus" />
-      </button>
+  <div class="root">
+    <div class="name">
+      {{ abiInput.internalType || 'tuple' }} {{ abiInput.name }}
     </div>
+    <div class="items">
+      <div
+        v-for="(itemModelValue, index) in modelValue"
+        :key="index"
+        class="item"
+      >
+        <AbiFormInputPrimitive
+          :model-value="itemModelValue"
+          :abi-input="getArrayItemInput(abiInput)"
+          :type="getArrayItemInput(abiInput).type"
+          @update:model-value="(newValue) => handleModelUpdate(index, newValue)"
+        />
+        <button
+          v-if="!length"
+          type="button"
+          @click="removeItem(index)"
+        >
+          <ScopeIcon kind="minus" />
+        </button>
+      </div>
+    </div>
+    <button
+      v-if="!length"
+      type="button"
+      class="add"
+      @click="addItem"
+    >
+      <ScopeIcon kind="plus" />
+    </button>
   </div>
-  <button
-    v-if="!length"
-    type="button"
-    @click="addItem"
-  >
-    <ScopeIcon kind="plus" />
-  </button>
 </template>
 
 <script setup lang="ts">
@@ -80,10 +86,23 @@ function removeItem(index: number): void {
 </script>
 
 <style scoped>
+.root {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-direction: column;
+}
+
+.name {
+  color: var(--color-text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--font-size-m);
+}
+
 .items {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-2);
+  flex-direction: column;
+  margin-left: var(--spacing-6);
 }
 
 .item {
@@ -110,6 +129,10 @@ button {
 
   &:disabled {
     opacity: 0.1;
+  }
+
+  &.add {
+    margin-left: var(--spacing-6);
   }
 }
 </style>
