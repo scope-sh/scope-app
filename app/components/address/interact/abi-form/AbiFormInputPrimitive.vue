@@ -20,7 +20,9 @@
 
 <script setup lang="ts">
 import { whenever } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { computed, inject, ref } from 'vue';
+
+import { injectionKey, type Injection } from './AbiForm.vue';
 
 import type { PrimitiveInput } from '@/utils/validation/abi';
 import { isPrimitiveValid } from '@/utils/validation/abi';
@@ -29,19 +31,19 @@ const model = defineModel<unknown>();
 
 const props = defineProps<{
   abiInput: PrimitiveInput;
-  containerValidated: boolean;
 }>();
 
-const emit = defineEmits<{
-  request: [];
-}>();
-
-whenever(
-  () => props.containerValidated,
-  () => {
-    inputValidated.value = true;
+const { validated: containerValidated, requestValidation } = inject<Injection>(
+  injectionKey,
+  {
+    validated: ref<boolean>(false),
+    requestValidation: () => {},
   },
 );
+
+whenever(containerValidated, () => {
+  inputValidated.value = true;
+});
 
 const id = computed(
   () => `input-${Math.random().toString(36).substring(2, 15)}`,
@@ -57,7 +59,7 @@ const isValid = computed<boolean>(() =>
 
 function handleEnter(): void {
   inputValidated.value = true;
-  emit('request');
+  requestValidation();
 }
 
 function handleInput(): void {

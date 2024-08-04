@@ -12,8 +12,6 @@
         <AbiFormInputPrimitive
           :model-value="itemModelValue"
           :abi-input="getArrayItemInput(abiInput, index)"
-          :container-validated
-          @request="handleRequest"
           @update:model-value="(newValue) => handleModelUpdate(index, newValue)"
         />
         <button
@@ -51,14 +49,9 @@ import {
 
 const props = defineProps<{
   abiInput: AbiArrayInput;
-  containerValidated: boolean;
 }>();
 
 const model = defineModel<unknown[]>();
-
-const emit = defineEmits<{
-  request: [];
-}>();
 
 const length = computed(() => getArrayLength(props.abiInput));
 
@@ -68,10 +61,6 @@ onMounted(() => {
     ? Array.from({ length: length.value }, () => initialValue)
     : [initialValue];
 });
-
-function handleRequest(): void {
-  emit('request');
-}
 
 function handleModelUpdate(index: number, newValue: unknown): void {
   if (!model.value) {
