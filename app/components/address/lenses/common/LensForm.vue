@@ -10,7 +10,6 @@
           :key="index"
           :abi-input="abiInput"
           :input="inputs[index]"
-          :is-container-blurred="!focused"
           @update:input="(newValue) => handleInputUpdate(index, newValue)"
         />
       </div>
@@ -26,7 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import { useFocusWithin } from '@vueuse/core';
 import { computed, onMounted, ref } from 'vue';
 
 import LensFormInput from './LensFormInput.vue';
@@ -64,9 +62,6 @@ const isValid = computed(() => isAbiValid(inputs.value, props.abiInputs));
 onMounted(() => {
   inputs.value = props.abiInputs.map((input) => getInitialValue(input));
 });
-
-const el = ref();
-const { focused } = useFocusWithin(el);
 
 function handleInputUpdate(index: number, newValue: unknown): void {
   inputs.value[index] = newValue;

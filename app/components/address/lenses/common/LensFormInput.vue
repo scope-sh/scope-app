@@ -4,7 +4,6 @@
       v-if="isPrimitiveInput(abiInput) && abiInput.type !== 'bool'"
       :id="id"
       v-model="model"
-      :is-container-blurred="isContainerBlurred"
       :abi-input="abiInput"
     />
   </div>
@@ -22,7 +21,6 @@ import {
 
 defineProps<{
   abiInput: AbiInput;
-  isContainerBlurred: boolean;
 }>();
 
 const model = defineModel<unknown>('input');

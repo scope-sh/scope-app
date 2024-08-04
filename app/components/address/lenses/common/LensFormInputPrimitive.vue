@@ -11,8 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { whenever } from '@vueuse/core';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 
 import type { PrimitiveInput as PrimitiveAbiInput } from '@/utils/validation/abi';
 import { isPrimitiveValid } from '@/utils/validation/abi';
@@ -22,35 +21,20 @@ const model = defineModel<unknown>();
 const props = defineProps<{
   id?: string;
   abiInput: PrimitiveAbiInput;
-  isContainerBlurred: boolean;
 }>();
 
-const containerBeenBlurred = ref<boolean>(false);
-whenever(
-  () => props.isContainerBlurred,
-  () => {
-    containerBeenBlurred.value = true;
-  },
-);
-
-const isValueValid = ref<boolean>(true);
-const isValid = computed(() =>
-  containerBeenBlurred.value
-    ? isValueValid.value &&
-      (model.value !== '' || props.abiInput.type === 'string')
-    : isValueValid.value,
-);
+const isValid = ref<boolean>(true);
 
 function handleEnter(): void {
-  isValueValid.value = isPrimitiveValid(model.value, props.abiInput.type);
+  isValid.value = isPrimitiveValid(model.value, props.abiInput.type);
 }
 
 function handleInput(): void {
-  isValueValid.value = true;
+  isValid.value = true;
 }
 
 function handleBlur(): void {
-  isValueValid.value = isPrimitiveValid(model.value, props.abiInput.type);
+  isValid.value = isPrimitiveValid(model.value, props.abiInput.type);
 }
 </script>
 
