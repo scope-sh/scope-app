@@ -16,6 +16,8 @@
             (model as Record<string, unknown>)[component.name || index]
           "
           :abi-input="component"
+          :container-validated
+          @request="handleRequest"
         />
       </template>
     </div>
@@ -29,9 +31,18 @@ import type { TupleInput as AbiTupleInput } from '@/utils/validation/abi';
 
 defineProps<{
   abiInput: AbiTupleInput;
+  containerValidated: boolean;
 }>();
 
 const model = defineModel<unknown>();
+
+const emit = defineEmits<{
+  request: [];
+}>();
+
+function handleRequest(): void {
+  emit('request');
+}
 </script>
 
 <style scoped>

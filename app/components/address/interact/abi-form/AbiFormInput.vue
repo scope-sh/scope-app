@@ -3,6 +3,8 @@
     v-if="isPrimitiveInput(abiInput) && abiInput.type !== 'bool'"
     v-model="model"
     :abi-input
+    :container-validated
+    @request="handleRequest"
   />
   <AbiFormInputBool
     v-else-if="abiInput.type === 'bool'"
@@ -13,16 +15,22 @@
     v-else-if="isArrayInput(abiInput) && isUnknownArray(model)"
     v-model="model"
     :abi-input
+    :container-validated
+    @request="handleRequest"
   />
   <AbiFormInputTuple
     v-else-if="isTupleInput(abiInput)"
     v-model="model"
     :abi-input
+    :container-validated
+    @request="handleRequest"
   />
   <AbiFormInputTupleArray
     v-else-if="isTupleArrayInput(abiInput) && isUnknownArray(model)"
     v-model="model"
     :abi-input
+    :container-validated
+    @request="handleRequest"
   />
 </template>
 
@@ -43,9 +51,18 @@ import {
 
 defineProps<{
   abiInput: AbiInput;
+  containerValidated: boolean;
 }>();
 
 const model = defineModel<unknown>('input');
+
+const emit = defineEmits<{
+  request: [];
+}>();
+
+function handleRequest(): void {
+  emit('request');
+}
 
 function isUnknownArray(value: unknown): value is unknown[] {
   return Array.isArray(value);

@@ -10,6 +10,8 @@
           :key="index"
           :abi-input="abiInput"
           :input="inputs[index]"
+          :container-validated="validated"
+          @request="handleRequest"
           @update:input="(newValue) => handleInputUpdate(index, newValue)"
         />
       </div>
@@ -37,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 
 import AbiFormInput from './AbiFormInput.vue';
 import AbiFormOutput from './AbiFormOutput.vue';
@@ -76,13 +78,26 @@ const namingService = computed(() =>
 
 const inputs = ref<unknown[]>([]);
 const isValid = computed(() => isAbiValid(inputs.value, props.abiInputs));
+const validated = ref<boolean>(false);
 
 onMounted(() => {
   inputs.value = props.abiInputs.map((input) => getInitialValue(input));
 });
 
+watch(
+  inputs,
+  () => {
+    validated.value = false;
+  },
+  { deep: true },
+);
+
 function handleInputUpdate(index: number, newValue: unknown): void {
   inputs.value[index] = newValue;
+}
+
+function handleRequest(): void {
+  validated.value = true;
 }
 
 async function handleSubmit(): Promise<void> {

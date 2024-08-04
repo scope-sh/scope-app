@@ -19,6 +19,7 @@
 </template>
 
 <script setup lang="ts">
+import { whenever } from '@vueuse/core';
 import { computed, ref } from 'vue';
 
 import type { PrimitiveInput } from '@/utils/validation/abi';
@@ -28,20 +29,39 @@ const model = defineModel<unknown>();
 
 const props = defineProps<{
   abiInput: PrimitiveInput;
+  containerValidated: boolean;
 }>();
+
+const emit = defineEmits<{
+  request: [];
+}>();
+
+whenever(
+  () => props.containerValidated,
+  () => {
+    inputValidated.value = true;
+  },
+);
 
 const id = computed(
   () => `input-${Math.random().toString(36).substring(2, 15)}`,
 );
 
-const isValid = ref<boolean>(true);
+const inputValidated = ref<boolean>(false);
+const isInputValid = computed(() =>
+  isPrimitiveValid(model.value, props.abiInput.type),
+);
+const isValid = computed<boolean>(() =>
+  inputValidated.value ? isInputValid.value : true,
+);
 
 function handleEnter(): void {
-  isValid.value = isPrimitiveValid(model.value, props.abiInput.type);
+  inputValidated.value = true;
+  emit('request');
 }
 
 function handleInput(): void {
-  isValid.value = true;
+  inputValidated.value = false;
 }
 </script>
 

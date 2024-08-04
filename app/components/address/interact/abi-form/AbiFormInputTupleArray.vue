@@ -13,7 +13,9 @@
           :model-value="model ? model[index] : undefined"
           :abi-input="getTupleArrayItemInput(abiInput)"
           :type="getTupleArrayItemInput(abiInput).type"
+          :container-validated
           @update:model-value="(newValue) => handleModelUpdate(index, newValue)"
+          @request="handleRequest"
         />
         <button
           v-if="!length"
@@ -50,9 +52,14 @@ import {
 
 const props = defineProps<{
   abiInput: AbiTupleArrayInput;
+  containerValidated: boolean;
 }>();
 
 const model = defineModel<unknown[]>();
+
+const emit = defineEmits<{
+  request: [];
+}>();
 
 const length = computed(() => getArrayLength(props.abiInput));
 
@@ -68,6 +75,10 @@ function handleModelUpdate(index: number, newValue: unknown): void {
     return;
   }
   model.value[index] = newValue;
+}
+
+function handleRequest(): void {
+  emit('request');
 }
 
 function addItem(): void {
