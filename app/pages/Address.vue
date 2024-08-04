@@ -176,6 +176,13 @@
           :address
         />
       </template>
+      <template v-else-if="section === SECTION_INTERACT">
+        <PanelInteract
+          v-if="isContract"
+          :contract
+          :address
+        />
+      </template>
     </template>
   </ScopePage>
 </template>
@@ -205,6 +212,7 @@ import TableTransactions from '@/components/__common/TableTransactions.vue';
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
 import PanelCode from '@/components/address/PanelCode.vue';
+import PanelInteract from '@/components/address/PanelInteract.vue';
 import type { UserOp as UserOpRow } from '@/components/address/TableUserOps.vue';
 import TableUserOps from '@/components/address/TableUserOps.vue';
 import useAbi from '@/composables/useAbi';
@@ -230,6 +238,7 @@ const SECTION_OPS = 'ops';
 const SECTION_TRANSACTIONS = 'transactions';
 const SECTION_LOGS = 'logs';
 const SECTION_CODE = 'code';
+const SECTION_INTERACT = 'interact';
 
 const { appBaseUrl, indexerEndpoint } = useEnv();
 const { setCommands } = useCommands();
@@ -264,6 +273,10 @@ const sections = computed<Section[]>(() => {
     sections.push({
       label: 'Code',
       value: SECTION_CODE,
+    });
+    sections.push({
+      label: 'Read',
+      value: SECTION_INTERACT,
     });
   }
   return sections;
