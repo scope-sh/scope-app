@@ -37,6 +37,7 @@ const isChainPage = computed(() => route.name === 'chain');
   --color-text-placeholder: oklch(55.55% 0 0deg);
   --color-background-primary: oklch(21.26% 0.007 314.68deg);
   --color-background-secondary: oklch(25.16% 0.008 308.11deg);
+  --color-background-tertiary: oklch(27% 0.009 308deg);
   --color-border-primary: oklch(81.03% 0.04 87.57deg);
   --color-border-secondary: oklch(63.03% 0.021 90.62deg);
   --color-border-tertiary: oklch(35.83% 0.014 280.02deg);
