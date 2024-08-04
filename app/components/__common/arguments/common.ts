@@ -118,4 +118,4 @@ function getArguments(
 }
 
 export { getArguments, isPrimitiveType };
-export type { Argument };
+export type { Argument, Values };

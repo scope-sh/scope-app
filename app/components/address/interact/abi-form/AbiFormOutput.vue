@@ -13,7 +13,11 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-import { ArgumentTree, getArguments } from '@/components/__common/arguments';
+import {
+  ArgumentTree,
+  getArguments,
+  type Values,
+} from '@/components/__common/arguments';
 import { type Output as AbiOutput } from '@/utils/validation/abi';
 
 const props = defineProps<{
@@ -25,8 +29,11 @@ const args = computed(() => {
   if (props.value === null) {
     return null;
   }
-  const values = Array.isArray(props.value) ? props.value : [props.value];
-  return getArguments(props.abiOutputs, values);
+  if (props.value === undefined) {
+    return null;
+  }
+  const values = props.abiOutputs.length > 1 ? props.value : [props.value];
+  return getArguments(props.abiOutputs, values as Values);
 });
 </script>
 
