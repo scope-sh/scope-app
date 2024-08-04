@@ -7,6 +7,7 @@ type Output = Input;
 
 interface BaseInput {
   readonly name?: string;
+  readonly internalType?: string;
 }
 
 interface ArrayInput extends BaseInput {
