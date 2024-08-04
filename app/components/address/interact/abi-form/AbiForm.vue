@@ -107,7 +107,7 @@ form {
 
 .inputs {
   display: flex;
-  gap: var(--spacing-6);
+  gap: var(--spacing-3);
   flex-direction: column;
 }
 
