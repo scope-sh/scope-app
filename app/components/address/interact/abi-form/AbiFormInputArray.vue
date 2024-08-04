@@ -11,7 +11,7 @@
       >
         <AbiFormInputPrimitive
           :model-value="itemModelValue"
-          :abi-input="getArrayItemInput(abiInput)"
+          :abi-input="getArrayItemInput(abiInput, index)"
           :type="getArrayItemInput(abiInput).type"
           @update:model-value="(newValue) => handleModelUpdate(index, newValue)"
         />

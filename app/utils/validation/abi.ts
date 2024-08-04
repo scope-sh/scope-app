@@ -127,7 +127,10 @@ function isPrimitiveInput(input: Input): input is PrimitiveInput {
   );
 }
 
-function getArrayItemInput(arrayInput: ArrayInput): PrimitiveInput {
+function getArrayItemInput(
+  arrayInput: ArrayInput,
+  index?: number,
+): PrimitiveInput {
   const match = arrayInput.type.match(/(\w*)\[(\d*)\]/);
   if (!match) {
     throw new Error('Invalid array input type');
@@ -136,7 +139,7 @@ function getArrayItemInput(arrayInput: ArrayInput): PrimitiveInput {
   if (!itemType) {
     throw new Error('Invalid array input');
   }
-  return { type: itemType as PrimitiveInputType };
+  return { type: itemType as PrimitiveInputType, name: index?.toString() };
 }
 
 function getTupleArrayItemInput(arrayInput: TupleArrayInput): TupleInput {
