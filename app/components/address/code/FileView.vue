@@ -198,6 +198,10 @@ input {
     color: var(--color-text-placeholder);
   }
 
+  &:hover {
+    background: var(--color-background-tertiary);
+  }
+
   &:focus {
     border-color: var(--color-border-tertiary);
   }
