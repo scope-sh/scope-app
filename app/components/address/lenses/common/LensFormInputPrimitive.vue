@@ -36,7 +36,8 @@ whenever(
 const isValueValid = ref<boolean>(true);
 const isValid = computed(() =>
   containerBeenBlurred.value
-    ? isValueValid.value && model.value !== ''
+    ? isValueValid.value &&
+      (model.value !== '' || props.abiInput.type === 'string')
     : isValueValid.value,
 );
 
