@@ -52,7 +52,6 @@ import {
   getConstants,
   getParamlessFunctions,
   getReadFunctions,
-  isParamless,
   getNonpayableFunctions,
   getPayableFunctions,
 } from '@/utils/context/evm';
@@ -74,12 +73,12 @@ const filterValue = ref<Option | undefined>(undefined);
 const filterOptions = computed(() => {
   return [
     {
-      label: 'Paramless functions',
-      options: paramlessFunctions.value.map((f) => getFragmentName(f)),
-    },
-    {
       label: 'Constants',
       options: constants.value.map((f) => getFragmentName(f)),
+    },
+    {
+      label: 'Paramless functions',
+      options: paramlessFunctions.value.map((f) => getFragmentName(f)),
     },
     {
       label: 'Read functions',
@@ -128,8 +127,8 @@ const nonpayableFunctions = computed(() =>
 const payableFunctions = computed(() => getPayableFunctions(abi.value || []));
 const functions = computed(() => {
   return [
-    ...paramlessFunctions.value,
     ...constants.value,
+    ...paramlessFunctions.value,
     ...readFunctions.value,
     ...nonpayableFunctions.value,
     ...payableFunctions.value,
@@ -197,20 +196,19 @@ async function fetchParamless(): Promise<void> {
   if (!errors.value) {
     errors.value = {};
   }
-  for (const fragment of paramlessFunctions.value) {
-    if (isParamless(fragment)) {
-      isFunctionLoading.value[toFunctionSelector(fragment)] = true;
-    }
+  const queryableFunctions = [...constants.value, ...paramlessFunctions.value];
+  for (const fragment of queryableFunctions) {
+    isFunctionLoading.value[toFunctionSelector(fragment)] = true;
   }
   const callResults = await multicall(client.value, {
-    contracts: paramlessFunctions.value.map((f) => ({
+    contracts: queryableFunctions.map((f) => ({
       address: props.address,
       abi: [f],
       functionName: f.name,
       args: [],
     })),
   });
-  for (const [i, fragment] of paramlessFunctions.value.entries()) {
+  for (const [i, fragment] of queryableFunctions.entries()) {
     isFunctionLoading.value[toFunctionSelector(fragment)] = false;
     const callResult = callResults[i];
     if (!callResult) {

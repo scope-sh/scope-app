@@ -64,7 +64,7 @@ function getConstants(abi: Abi): AbiFunction[] {
   return constants;
 }
 function getParamlessFunctions(abi: Abi): AbiFunction[] {
-  const functions = getReadFunctions(abi);
+  const functions = getFunctions(abi);
   const paramlessFunctions = functions.filter((f) => isParamless(f));
   return paramlessFunctions;
 }
@@ -85,10 +85,18 @@ function getPayableFunctions(abi: Abi): AbiFunction[] {
 }
 
 function isConstant(func: AbiFunction): boolean {
-  return func.name === func.name.toUpperCase() && isParamless(func);
+  return (
+    isReadable(func) &&
+    func.inputs.length === 0 &&
+    func.name === func.name.toUpperCase()
+  );
 }
 function isParamless(func: AbiFunction): boolean {
-  return func.inputs.length === 0 && isReadable(func);
+  return (
+    isReadable(func) &&
+    func.inputs.length === 0 &&
+    func.name !== func.name.toUpperCase()
+  );
 }
 function isReadFunction(func: AbiFunction): boolean {
   return isReadable(func) && !isConstant(func) && !isParamless(func);
