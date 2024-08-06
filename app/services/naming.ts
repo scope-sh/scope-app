@@ -30,14 +30,15 @@ import {
 } from '@/utils/chains.js';
 
 class Service {
+  ensChain: Chain;
   ethereumClient: PublicClient;
   chain: Chain;
 
   constructor(alchemyApiKey: string, chain: Chain) {
-    const ensChain = getFallbackChain(chain);
+    this.ensChain = getFallbackChain(chain);
     this.ethereumClient = createPublicClient({
-      chain: getChainData(ensChain),
-      transport: http(getEndpointUrl(ensChain, alchemyApiKey)),
+      chain: getChainData(this.ensChain),
+      transport: http(getEndpointUrl(this.ensChain, alchemyApiKey)),
     });
     this.chain = chain;
   }
@@ -53,7 +54,7 @@ class Service {
   public async resolveEnsMany(
     names: string[],
   ): Promise<Record<string, Address>> {
-    const ethereumChainData = getChainData(ETHEREUM);
+    const ethereumChainData = getChainData(this.ensChain);
     const ensUniversalResolver =
       ethereumChainData.contracts?.ensUniversalResolver;
     if (!ensUniversalResolver) {
