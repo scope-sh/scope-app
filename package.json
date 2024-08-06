@@ -43,7 +43,7 @@
     "nuxt-posthog": "^1.5.1",
     "nuxt-shiki": "^0.3.0",
     "pinia": "^2.2.0",
-    "radix-vue": "^1.9.2",
+    "radix-vue": "^1.9.3",
     "shiki": "^1.12.0",
     "viem": "^2.18.5",
     "vue": "3.4.19",
