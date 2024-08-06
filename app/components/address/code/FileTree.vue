@@ -1,7 +1,8 @@
 <template>
   <Tree.Root
-    :items="[directory]"
+    :items
     :get-key="(item) => item.id"
+    :get-children="getChildren"
     :default-expanded="directoryIds"
     class="root"
   >
@@ -19,6 +20,7 @@ import { computed } from 'vue';
 
 import FileTreeDirectory, {
   type Directory,
+  type Node,
   type FileSelection,
 } from './FileTreeDirectory.vue';
 
@@ -33,6 +35,19 @@ const emit = defineEmits<{
 
 function handleSelect(directory: Directory, index: number): void {
   emit('select', directory, index);
+}
+
+const items = computed<Node[]>(() => [props.directory]);
+
+function getChildren(item: Node): Node[] | undefined {
+  if (!('files' in item)) {
+    return undefined;
+  }
+  return !item.files
+    ? item.directories
+    : !item.directories
+      ? item.files
+      : [...item.directories, ...item.files];
 }
 
 const directoryIds = computed<string[]>(() => {

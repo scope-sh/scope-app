@@ -110,10 +110,11 @@ interface Directory extends Item {
   parent: Directory | null;
   files: File[];
   directories: Directory[];
-  children: (File | Directory)[];
 }
 
 interface File extends Item {}
+
+type Node = File | Directory;
 
 interface Item {
   name: string;
@@ -125,7 +126,7 @@ interface FileSelection {
   fileIndex: number;
 }
 
-export type { Directory, FileSelection };
+export type { Directory, FileSelection, Node };
 </script>
 
 <style scoped>

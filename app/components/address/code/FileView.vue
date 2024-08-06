@@ -65,7 +65,6 @@ const rootDirectory = computed<Directory>(() => {
     parent: null,
     files: [],
     directories: [],
-    children: [],
     id: generateId(),
   };
 
@@ -85,12 +84,10 @@ const rootDirectory = computed<Directory>(() => {
           parent: current,
           files: [],
           directories: [],
-          children: [],
           id: generateId(),
         };
 
         current.directories.push(newDirectory);
-        current.children = [...current.children, newDirectory];
         current = newDirectory;
       }
     }
@@ -103,7 +100,6 @@ const rootDirectory = computed<Directory>(() => {
       name: fileName,
       id: generateId(),
     };
-    current.children = [...current.children, directoryFile];
     current.files.push(directoryFile);
   });
 
@@ -136,7 +132,6 @@ function filterDirectory(
     parent: directory.parent,
     files,
     directories,
-    children: directory.children,
     id: directory.id,
   };
   return filteredDirectory;
