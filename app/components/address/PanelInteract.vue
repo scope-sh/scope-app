@@ -258,8 +258,6 @@ async function handleSubmit(
       functionName: fragment.name,
       args,
       account: account || undefined,
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-ignore
       value: amount || 0n,
     });
     results.value[toFunctionSelector(fragment)] = result;
