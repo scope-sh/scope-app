@@ -1,45 +1,70 @@
 <template>
   <div class="root">
-    <form
-      autocomplete="off"
-      @submit.prevent="handleSubmit"
-    >
-      <div class="inputs">
-        <AbiFormInput
-          v-for="(abiInput, index) in abiInputs"
-          :key="index"
-          :abi-input="abiInput"
-          :input="inputs[index]"
-          @update:input="(newValue) => handleInputUpdate(index, newValue)"
-        />
-      </div>
-      <div class="query">
-        <button
-          type="submit"
-          :disabled="isLoading || !isValid"
+    <h3>{{ getFragmentName(fragment) }}</h3>
+    <div class="form">
+      <form
+        autocomplete="off"
+        @submit.prevent="handleSubmit"
+      >
+        <div
+          v-if="abiInputs.length > 0"
+          class="inputs"
         >
-          <ScopeIcon :kind="result === null ? 'arrow-right' : 'reload'" />
-        </button>
-        <ScopeTextView
-          v-if="isErrored"
-          :value="'Unable to fetch'"
-          :type="'error'"
-          :size="'tiny'"
-        />
-        <AbiFormOutput
-          v-else
-          :abi-outputs="abiOutputs"
-          :value="result"
-        />
-      </div>
-    </form>
+          <AbiFormInput
+            v-for="(abiInput, index) in abiInputs"
+            :key="index"
+            :abi-input="abiInput"
+            :input="inputs[index]"
+            @update:input="(newValue) => handleInputUpdate(index, newValue)"
+          />
+        </div>
+        <div
+          v-if="isWriteFunction"
+          class="context"
+        >
+          <div class="context-name">context</div>
+          <div class="context-inputs">
+            <AbiFormInputPrimitive
+              v-model="accountString"
+              :abi-input="{ type: 'address', name: 'sender' }"
+            />
+            <AbiFormInputPrimitive
+              v-if="isPayable"
+              v-model="amountString"
+              :abi-input="{ type: 'uint256', name: 'value' }"
+            />
+          </div>
+        </div>
+        <div class="query">
+          <button
+            type="submit"
+            :disabled="isLoading || !isValid"
+          >
+            <ScopeIcon :kind="result === null ? 'arrow-right' : 'reload'" />
+          </button>
+          <ScopeTextView
+            v-if="errorLabel"
+            :value="errorLabel"
+            :type="'error'"
+            :size="'tiny'"
+          />
+          <AbiFormOutput
+            v-else
+            :abi-outputs="abiOutputs"
+            :value="result"
+          />
+        </div>
+      </form>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { AbiFunction, Address } from 'abitype';
 import { computed, onMounted, provide, ref, watch, type Ref } from 'vue';
 
 import AbiFormInput from './AbiFormInput.vue';
+import AbiFormInputPrimitive from './AbiFormInputPrimitive.vue';
 import AbiFormOutput from './AbiFormOutput.vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
@@ -47,6 +72,12 @@ import ScopeTextView from '@/components/__common/ScopeTextView.vue';
 import useChain from '@/composables/useChain';
 import useEnv from '@/composables/useEnv';
 import NamingService from '@/services/naming';
+import {
+  getFragmentName,
+  isPayable as isFragmentPayable,
+  isNonpayable as isFragmentNonpayable,
+  type QueryError,
+} from '@/utils/context/evm';
 import {
   type Input as AbiInput,
   type Output as AbiOutput,
@@ -56,15 +87,20 @@ import {
 } from '@/utils/validation/abi';
 
 const props = defineProps<{
-  abiInputs: readonly AbiInput[];
-  abiOutputs: readonly AbiOutput[];
+  fragment: AbiFunction;
   isLoading: boolean;
-  isErrored: boolean;
   result: unknown;
+  error: QueryError | null;
 }>();
 
 const emit = defineEmits<{
-  submit: [args: unknown[]];
+  submit: [
+    {
+      args: unknown[];
+      account?: Address;
+      amount?: bigint;
+    },
+  ];
 }>();
 
 const { id: chainId } = useChain();
@@ -74,9 +110,51 @@ const namingService = computed(() =>
   chainId.value ? new NamingService(alchemyApiKey, chainId.value) : null,
 );
 
+const abiInputs = computed(() => props.fragment.inputs as AbiInput[]);
+const abiOutputs = computed(() => props.fragment.outputs as AbiOutput[]);
+const isPayable = computed(() => isFragmentPayable(props.fragment));
+const isNonpayable = computed(() => isFragmentNonpayable(props.fragment));
+const isWriteFunction = computed(() => isPayable.value || isNonpayable.value);
+
+const accountString = ref<string>('');
+const amountString = ref<string>('');
+
 const inputs = ref<unknown[]>([]);
-const isValid = computed(() => isAbiValid(inputs.value, props.abiInputs));
+const isValid = computed(() => {
+  if (isWriteFunction.value) {
+    if (
+      !isAbiValid([accountString.value], [{ type: 'address', name: 'account' }])
+    ) {
+      return false;
+    }
+  }
+  if (isPayable.value) {
+    if (
+      !isAbiValid([amountString.value], [{ type: 'uint256', name: 'value' }])
+    ) {
+      return false;
+    }
+  }
+  return isAbiValid(inputs.value, abiInputs.value);
+});
 const validated = ref<boolean>(false);
+const errorLabel = computed(() => {
+  if (!props.error) {
+    return null;
+  }
+  if (props.error.type === 'fetch') {
+    return 'Fetch failed';
+  }
+  if (props.error.type === 'revert') {
+    return `Call reverted: ${props.error.reason}`;
+  }
+  if (props.error.type === 'ens') {
+    return props.error.name
+      ? `Unable to resolve ${props.error.name}`
+      : 'ENS resolution failed';
+  }
+  return 'Unknown error';
+});
 
 function requestValidation(): void {
   validated.value = true;
@@ -88,7 +166,7 @@ provide(injectionKey, {
 });
 
 onMounted(() => {
-  inputs.value = props.abiInputs.map((input) => getInitialValue(input));
+  inputs.value = abiInputs.value.map((input) => getInitialValue(input));
 });
 
 watch(
@@ -107,12 +185,28 @@ async function handleSubmit(): Promise<void> {
   if (!namingService.value) {
     return;
   }
-  const normalizedInputs = await normalize(
+  const args = await normalize(
     inputs.value,
-    props.abiInputs,
+    abiInputs.value,
     namingService.value,
   );
-  emit('submit', normalizedInputs);
+  const context = isWriteFunction.value
+    ? await normalize(
+        [accountString.value, amountString.value],
+        [
+          { type: 'address', name: 'account' },
+          { type: 'uint256', name: 'amount' },
+        ],
+        namingService.value,
+      )
+    : null;
+  const account = context ? (context[0] as Address) : undefined;
+  const amount = context ? BigInt(context[1] as string) : undefined;
+  emit('submit', {
+    args,
+    account: account,
+    amount: amount,
+  });
 }
 </script>
 
@@ -129,9 +223,22 @@ export type { Injection };
 </script>
 
 <style scoped>
+.root {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-direction: column;
+}
+
+h3 {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-s);
+  font-weight: var(--font-weight-light);
+}
+
 form {
   display: flex;
-  gap: var(--spacing-3);
+  gap: var(--spacing-6);
   flex-direction: column;
 }
 
@@ -139,6 +246,24 @@ form {
   display: flex;
   gap: var(--spacing-3);
   flex-direction: column;
+}
+
+.context {
+  display: flex;
+  gap: var(--spacing-4);
+  flex-direction: column;
+
+  & .context-name {
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    font-size: var(--font-size-m);
+  }
+
+  & .context-inputs {
+    display: flex;
+    gap: var(--spacing-3);
+    flex-direction: column;
+  }
 }
 
 .query {
