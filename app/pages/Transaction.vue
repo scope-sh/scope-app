@@ -489,6 +489,7 @@ const typeIndexLabel = computed(() => {
     eip2930: 1,
     eip1559: 2,
     eip4844: 3,
+    eip7702: 4,
   };
   return map[transaction.value.type];
 });
@@ -502,6 +503,7 @@ const typeLabel = computed(() => {
     eip2930: 'EIP2930',
     eip1559: 'EIP1559',
     eip4844: 'EIP4844',
+    eip7702: 'EIP7702',
   };
   return map[transaction.value.type];
 });
