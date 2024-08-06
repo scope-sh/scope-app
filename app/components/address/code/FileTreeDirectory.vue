@@ -149,6 +149,12 @@ button {
   align-items: center;
 }
 
+.name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .icon {
   width: 12px;
   height: 12px;
