@@ -36,6 +36,8 @@ type Type = 'text' | 'error';
 .view {
   --line-height: 1.2;
   --padding: var(--spacing-6);
+  --border: 1px;
+  --font-size: var(--font-size-m);
 
   &.tiny {
     --row-count: 1;
@@ -51,17 +53,17 @@ type Type = 'text' | 'error';
 
   width: 100%;
   height: calc(
-    var(--row-count) * var(--font-size-m) + (var(--row-count) - 1) *
-      (var(--line-height) - 1) * var(--font-size-m) + var(--padding) * 2
+    2 * var(--padding) + 2 * var(--border) + var(--row-count) *
+      round(down, calc(var(--font-size) * var(--line-height)), 1px)
   );
   padding: var(--padding);
   overflow: auto;
-  border: 1px solid transparent;
+  border: var(--border) solid transparent;
   border-radius: var(--border-radius-s);
   background: var(--color-background-secondary);
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
-  font-size: var(--font-size-m);
+  font-size: var(--font-size);
   line-height: var(--line-height);
   word-break: break-all;
   white-space: pre-wrap;
