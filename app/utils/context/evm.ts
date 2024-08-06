@@ -1,3 +1,10 @@
+import type {
+  Abi,
+  AbiConstructor,
+  AbiFallback,
+  AbiFunction,
+  AbiReceive,
+} from 'abitype';
 import {
   BaseError,
   ContractFunctionExecutionError,
@@ -29,6 +36,72 @@ type QueryError =
   | RevertQueryError
   | EnsQueryError
   | UnknownQueryError;
+
+type AbiFragment = AbiFunction | AbiConstructor | AbiFallback | AbiReceive;
+
+function getFragmentName(fragment: AbiFragment): string {
+  if (fragment.type === 'constructor') {
+    return 'constructor';
+  }
+  if (fragment.type === 'fallback') {
+    return 'fallback';
+  }
+  if (fragment.type === 'receive') {
+    return 'receive';
+  }
+  return fragment.name;
+}
+
+function getFunctions(abi: Abi): AbiFunction[] {
+  return abi.filter(
+    (fragment): fragment is AbiFunction => fragment.type === 'function',
+  );
+}
+
+function getConstants(abi: Abi): AbiFunction[] {
+  const functions = getFunctions(abi);
+  const constants = functions.filter((f) => isConstant(f));
+  return constants;
+}
+function getParamlessFunctions(abi: Abi): AbiFunction[] {
+  const functions = getReadFunctions(abi);
+  const paramlessFunctions = functions.filter((f) => isParamless(f));
+  return paramlessFunctions;
+}
+function getReadFunctions(abi: Abi): AbiFunction[] {
+  const functions = getFunctions(abi);
+  const readFunctions = functions.filter((f) => isReadFunction(f));
+  return readFunctions;
+}
+function getNonpayableFunctions(abi: Abi): AbiFunction[] {
+  const functions = getFunctions(abi);
+  const writeFunctions = functions.filter((f) => isNonpayable(f));
+  return writeFunctions;
+}
+function getPayableFunctions(abi: Abi): AbiFunction[] {
+  const functions = getFunctions(abi);
+  const payableFunctions = functions.filter((f) => isPayable(f));
+  return payableFunctions;
+}
+
+function isConstant(func: AbiFunction): boolean {
+  return func.name === func.name.toUpperCase() && isParamless(func);
+}
+function isParamless(func: AbiFunction): boolean {
+  return func.inputs.length === 0 && isReadable(func);
+}
+function isReadFunction(func: AbiFunction): boolean {
+  return isReadable(func) && !isConstant(func) && !isParamless(func);
+}
+function isNonpayable(func: AbiFunction): boolean {
+  return func.stateMutability === 'nonpayable';
+}
+function isPayable(func: AbiFunction): boolean {
+  return func.stateMutability === 'payable';
+}
+function isReadable(func: AbiFunction): boolean {
+  return func.stateMutability === 'view' || func.stateMutability === 'pure';
+}
 
 function getQueryError(e: unknown): QueryError {
   if (!(e instanceof BaseError)) {
@@ -73,5 +146,16 @@ function getQueryError(e: unknown): QueryError {
   };
 }
 
-export { getQueryError };
-export type { FetchQueryError, RevertQueryError, QueryError };
+export {
+  isParamless,
+  isPayable,
+  isNonpayable,
+  getQueryError,
+  getFragmentName,
+  getConstants,
+  getParamlessFunctions,
+  getReadFunctions,
+  getNonpayableFunctions,
+  getPayableFunctions,
+};
+export type { AbiFragment, FetchQueryError, RevertQueryError, QueryError };
