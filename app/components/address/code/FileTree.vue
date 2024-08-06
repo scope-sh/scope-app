@@ -1,9 +1,9 @@
 <template>
   <Tree.Root
+    v-model:expanded="directoryIds"
     :items
     :get-key="(item) => item.id"
     :get-children="getChildren"
-    :default-expanded="directoryIds"
     class="root"
   >
     <FileTreeDirectory
@@ -16,7 +16,7 @@
 
 <script setup lang="ts">
 import { Tree } from 'radix-vue/namespaced';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import FileTreeDirectory, {
   type Directory,
@@ -50,21 +50,27 @@ function getChildren(item: Node): Node[] | undefined {
       : [...item.directories, ...item.files];
 }
 
-const directoryIds = computed<string[]>(() => {
-  const ids = new Set<string>();
-  const stack = [props.directory];
+const directoryIds = ref<string[]>([]);
 
-  while (stack.length > 0) {
-    const current = stack.pop();
-    if (!current) {
-      continue;
+watch(
+  () => props.directory,
+  () => {
+    const ids = new Set<string>();
+    const stack = [props.directory];
+
+    while (stack.length > 0) {
+      const current = stack.pop();
+      if (!current) {
+        continue;
+      }
+      ids.add(current.id);
+      stack.push(...current.directories);
     }
-    ids.add(current.id);
-    stack.push(...current.directories);
-  }
 
-  return [...ids];
-});
+    directoryIds.value = [...ids];
+  },
+  { immediate: true },
+);
 </script>
 
 <style scoped>
