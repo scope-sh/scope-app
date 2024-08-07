@@ -62,18 +62,18 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T">
 import { Combobox } from 'radix-vue/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
 defineProps<{
-  options: OptionGroup[];
+  options: OptionGroup<T>[];
 }>();
 
-const model = defineModel<Option | undefined>();
+const model = defineModel<Option<T> | undefined>();
 
-function filterOptions(options: Option[], query: string): Option[] {
+function filterOptions(options: Option<T>[], query: string): Option<T>[] {
   return options.filter((option) =>
     option.label.toLowerCase().includes(query.toLowerCase()),
   );
@@ -81,13 +81,13 @@ function filterOptions(options: Option[], query: string): Option[] {
 </script>
 
 <script lang="ts">
-interface OptionGroup {
+interface OptionGroup<T> {
   label: string;
-  options: Option[];
+  options: Option<T>[];
 }
 
-interface Option {
-  value: string;
+interface Option<T> {
+  value: T;
   label: string;
 }
 

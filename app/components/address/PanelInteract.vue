@@ -69,7 +69,7 @@ const isFunctionLoading = ref<Record<Hex, boolean>>();
 const errors = ref<Record<Hex, QueryError | null>>();
 const results = ref<Record<Hex, unknown>>();
 
-const filterValue = ref<Option | undefined>(undefined);
+const filterValue = ref<Option<AbiFunction> | undefined>(undefined);
 const filterOptions = computed(() => {
   return [
     {
@@ -94,9 +94,9 @@ const filterOptions = computed(() => {
     },
   ];
 });
-function getOption(fragment: AbiFunction): Option {
+function getOption(fragment: AbiFunction): Option<AbiFunction> {
   return {
-    value: toFunctionSelector(fragment),
+    value: fragment,
     label: getFragmentName(fragment),
   };
 }
@@ -145,7 +145,7 @@ const activeFunctions = computed(() => {
   if (!filter) {
     return functions.value;
   }
-  return functions.value.filter((f) => filter.value === toFunctionSelector(f));
+  return functions.value.filter((f) => filter.value === f);
 });
 
 watch(
