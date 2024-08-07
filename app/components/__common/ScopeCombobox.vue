@@ -4,6 +4,7 @@
       v-model="model"
       class="root"
       :filter-function="filterOptions"
+      :display-value="(val) => val.label"
     >
       <Combobox.Anchor class="anchor">
         <Combobox.Input
@@ -47,7 +48,7 @@
                 />
               </Combobox.ItemIndicator>
               <span>
-                {{ option }}
+                {{ option.label }}
               </span>
             </Combobox.Item>
             <Combobox.Separator
@@ -72,15 +73,9 @@ defineProps<{
 
 const model = defineModel<Option | undefined>();
 
-// function filterOptions(options: Option[], query: string): Option[] {
-//   return options.filter((option) =>
-//     option.label.toLowerCase().includes(query.toLowerCase()),
-//   );
-// }
-
-function filterOptions(options: Option[], query: string): string[] {
+function filterOptions(options: Option[], query: string): Option[] {
   return options.filter((option) =>
-    option.toLowerCase().includes(query.toLowerCase()),
+    option.label.toLowerCase().includes(query.toLowerCase()),
   );
 }
 </script>
@@ -91,12 +86,10 @@ interface OptionGroup {
   options: Option[];
 }
 
-// interface Option {
-//   value: string;
-//   label: string;
-// }
-
-type Option = string;
+interface Option {
+  value: string;
+  label: string;
+}
 
 export type { OptionGroup, Option };
 </script>

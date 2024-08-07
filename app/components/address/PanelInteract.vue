@@ -74,26 +74,32 @@ const filterOptions = computed(() => {
   return [
     {
       label: 'Constants',
-      options: constants.value.map((f) => getFragmentName(f)),
+      options: constants.value.map((f) => getOption(f)),
     },
     {
       label: 'Paramless functions',
-      options: paramlessFunctions.value.map((f) => getFragmentName(f)),
+      options: paramlessFunctions.value.map((f) => getOption(f)),
     },
     {
       label: 'Read functions',
-      options: readFunctions.value.map((f) => getFragmentName(f)),
+      options: readFunctions.value.map((f) => getOption(f)),
     },
     {
       label: 'Non-payable functions',
-      options: nonpayableFunctions.value.map((f) => getFragmentName(f)),
+      options: nonpayableFunctions.value.map((f) => getOption(f)),
     },
     {
       label: 'Payable functions',
-      options: payableFunctions.value.map((f) => getFragmentName(f)),
+      options: payableFunctions.value.map((f) => getOption(f)),
     },
   ];
 });
+function getOption(fragment: AbiFunction): Option {
+  return {
+    value: toFunctionSelector(fragment),
+    label: getFragmentName(fragment),
+  };
+}
 
 function isLoading(fragment: AbiFunction): boolean {
   if (!isFunctionLoading.value) {
@@ -139,9 +145,7 @@ const activeFunctions = computed(() => {
   if (!filter) {
     return functions.value;
   }
-  return functions.value.filter((f) =>
-    filter.toLowerCase().includes(getFragmentName(f).toLowerCase()),
-  );
+  return functions.value.filter((f) => filter.value === toFunctionSelector(f));
 });
 
 watch(
