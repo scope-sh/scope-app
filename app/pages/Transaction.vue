@@ -35,67 +35,100 @@
       />
       <AttributeList v-if="transaction && transactionReceipt">
         <AttributeItem v-if="transaction.blockNumber">
-          <AttributeItemLabel :value="'Block'" />
+          <AttributeItemLabel
+            value="Block"
+            note="The number of the block in which the transaction was included"
+          />
           <AttributeItemValue>
             <LinkBlock :number="transaction.blockNumber" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="block && block.timestamp">
-          <AttributeItemLabel :value="'Timestamp'" />
+          <AttributeItemLabel
+            value="Timestamp"
+            note="The Unix epoch time at which the transaction was mined, indicating when this transaction was confirmed on the blockchain"
+          />
           <AttributeItemValue :note="blockRelativeTimeLabel">
             {{ formatTime(block.timestamp) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'From'" />
+          <AttributeItemLabel
+            value="From"
+            note="The address of the account that initiated the transaction"
+          />
           <AttributeItemValue>
             <LinkAddress :address="transaction.from" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="transaction.to">
-          <AttributeItemLabel :value="'To'" />
+          <AttributeItemLabel
+            value="To"
+            note="The address of the account or contract that is the recipient of the transaction"
+          />
           <AttributeItemValue>
             <LinkAddress :address="transaction.to" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'Value'" />
+          <AttributeItemLabel
+            value="Value"
+            note="The amount of natuve currency transferred from the sender to the recipient"
+          />
           <AttributeItemValue>
             {{ formatEther(transaction.value) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'Gas used'" />
+          <AttributeItemLabel
+            value="Gas used"
+            note="The total amount of gas consumed by the transaction execution"
+          />
           <AttributeItemValue :note="formatShare(gasUsedShare)">
             {{ transactionReceipt.gasUsed }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'Gas limit'" />
+          <AttributeItemLabel
+            value="Gas limit"
+            note="The maximum amount of gas the sender is willing to pay for executing the transaction"
+          />
           <AttributeItemValue>
             {{ transaction.gas }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="transaction.gasPrice">
-          <AttributeItemLabel :value="'Gas price'" />
+          <AttributeItemLabel
+            value="Gas price"
+            note="The amount of ether the sender is willing to pay per unit of gas"
+          />
           <AttributeItemValue>
             {{ formatGasPrice(transaction.gasPrice) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="fee">
-          <AttributeItemLabel :value="'Fee'" />
+          <AttributeItemLabel
+            value="Fee"
+            note="The total transaction fee paid by the sender, calculated as gas used multiplied by gas price"
+          />
           <AttributeItemValue>
             {{ formatEther(fee) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'Type'" />
+          <AttributeItemLabel
+            value="Type"
+            note="The format or category of the transaction"
+          />
           <AttributeItemValue :note="typeLabel">
             {{ typeIndexLabel }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="transaction.input !== '0x'">
-          <AttributeItemLabel :value="'Input'" />
+          <AttributeItemLabel
+            value="Input"
+            note="The additional data sent along with the transaction, often used to invoke functions on contracts."
+          />
           <AttributeItemValue>
             <div class="input">
               <ScopeToggle
