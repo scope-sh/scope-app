@@ -1,5 +1,5 @@
 <template>
-  <Tooltip.Provider :disable-closing-trigger="disableClosingTrigger">
+  <Tooltip.Provider>
     <Tooltip.Root>
       <Tooltip.Trigger as-child>
         <button class="trigger">
@@ -22,10 +22,6 @@
 
 <script setup lang="ts">
 import { Tooltip } from 'radix-vue/namespaced';
-
-defineProps<{
-  disableClosingTrigger?: boolean;
-}>();
 </script>
 
 <style scoped>
