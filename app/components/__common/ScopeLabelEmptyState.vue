@@ -1,11 +1,21 @@
 <template>
-  <div>{{ value }}</div>
+  <div :class="{ small: size === 'small' }">{{ value }}</div>
 </template>
 
 <script setup lang="ts">
-defineProps<{
-  value: string;
-}>();
+withDefaults(
+  defineProps<{
+    value: string;
+    size?: Size;
+  }>(),
+  {
+    size: 'medium',
+  },
+);
+</script>
+
+<script lang="ts">
+type Size = 'small' | 'medium';
 </script>
 
 <style scoped>
@@ -14,5 +24,10 @@ div {
   color: var(--color-text-secondary);
   font-size: var(--font-size-m);
   text-align: center;
+
+  &.small {
+    margin: var(--spacing-4) 0;
+    font-size: var(--font-size-s);
+  }
 }
 </style>
