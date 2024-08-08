@@ -62,5 +62,6 @@ export type { Action };
 .item {
   display: flex;
   gap: var(--spacing-2);
+  align-items: center;
 }
 </style>
