@@ -13,7 +13,7 @@
             :type="'minimal'"
           />
           <LinkAddress
-            :address="'0x88e6a0c2ddd26feeb64f039a2c41296fcb3f5640'"
+            :address="'0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc'"
             :type="'minimal'"
           />
         </div>
