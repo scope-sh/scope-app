@@ -37,31 +37,46 @@
       />
       <AttributeList v-if="block">
         <AttributeItem>
-          <AttributeItemLabel :value="'Timestamp'" />
+          <AttributeItemLabel
+            value="Timestamp"
+            note="The Unix epoch time at which the block was mined, indicating when this block was added to the blockchain"
+          />
           <AttributeItemValue :note="blockRelativeTimeLabel">
             {{ formatTime(block.timestamp) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'Transactions'" />
+          <AttributeItemLabel
+            value="Transactions"
+            note="All transactions included in the block"
+          />
           <AttributeItemValue>
             {{ block.transactions.length }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="block.producer !== zeroAddress">
-          <AttributeItemLabel :value="'Producer'" />
+          <AttributeItemLabel
+            value="Producer"
+            note="Address of the entity (miner or validator) that created the block"
+          />
           <AttributeItemValue>
             <LinkAddress :address="block.producer" />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'Gas used'" />
+          <AttributeItemLabel
+            value="Gas used"
+            note="Total amount of gas that was consumed by all transactions in the block"
+          />
           <AttributeItemValue :note="formatShare(gasUsedShare)">
             {{ block.gasUsed.toString() }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
-          <AttributeItemLabel :value="'Gas limit'" />
+          <AttributeItemLabel
+            value="Gas limit"
+            note="Maximum amount of gas that can be consumed by all transactions in a single block"
+          />
           <AttributeItemValue>
             {{ block.gasLimit.toString() }}
           </AttributeItemValue>
