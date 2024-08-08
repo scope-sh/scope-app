@@ -11,12 +11,15 @@
           class="input"
           placeholder="Search functions…"
         />
-        <ScopeIcon
+        <Combobox.Cancel
           v-if="model"
-          kind="cross"
-          class="icon-close"
           @click="model = undefined"
-        />
+        >
+          <ScopeIcon
+            kind="cross"
+            class="icon-close"
+          />
+        </Combobox.Cancel>
         <Combobox.Trigger>
           <ScopeIcon
             kind="chevron-down"
@@ -27,7 +30,12 @@
 
       <Combobox.Content class="content">
         <Combobox.Viewport class="viewport">
-          <Combobox.Empty class="empty" />
+          <Combobox.Empty>
+            <ScopeLabelEmptyState
+              value="No functions found"
+              size="small"
+            />
+          </Combobox.Empty>
 
           <Combobox.Group
             v-for="(group, groupIndex) of options"
@@ -64,6 +72,8 @@
 
 <script setup lang="ts" generic="T">
 import { Combobox } from 'radix-vue/namespaced';
+
+import ScopeLabelEmptyState from './ScopeLabelEmptyState.vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
@@ -160,13 +170,6 @@ input {
 
 .viewport {
   padding: var(--spacing-3);
-}
-
-.empty {
-  padding: var(--spacing-4);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-s);
-  text-align: center;
 }
 
 .item {
