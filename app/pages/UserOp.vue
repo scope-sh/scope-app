@@ -277,6 +277,8 @@ import { size } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import type { Action } from '@/components/__common/CardActions.vue';
+import CardActions from '@/components/__common/CardActions.vue';
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -298,8 +300,6 @@ import {
   AttributeItemValue,
   AttributeList,
 } from '@/components/__common/attributes';
-import type { Action } from '@/components/user-op/CardActions.vue';
-import CardActions from '@/components/user-op/CardActions.vue';
 import UserOpStatus from '@/components/user-op/UserOpStatus.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';

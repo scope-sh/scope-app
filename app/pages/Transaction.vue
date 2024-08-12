@@ -223,6 +223,8 @@ import {
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
+import type { Action } from '@/components/__common/CardActions.vue';
+import CardActions from '@/components/__common/CardActions.vue';
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -246,8 +248,6 @@ import {
 } from '@/components/__common/attributes';
 import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
-import type { Action } from '@/components/user-op/CardActions.vue';
-import CardActions from '@/components/user-op/CardActions.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
