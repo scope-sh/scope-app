@@ -144,6 +144,10 @@
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
+      <CardActions
+        v-if="actions.length > 0"
+        :actions
+      />
     </ScopePanel>
     <template #section>
       <template v-if="section === SECTION_OPS">
@@ -209,7 +213,13 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import type { Address, Hex, TransactionType } from 'viem';
+import {
+  getContractAddress,
+  size,
+  type Address,
+  type Hex,
+  type TransactionType,
+} from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -236,6 +246,8 @@ import {
 } from '@/components/__common/attributes';
 import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
+import type { Action } from '@/components/user-op/CardActions.vue';
+import CardActions from '@/components/user-op/CardActions.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -549,6 +561,36 @@ watch(transaction, async () => {
   }
   entryPoint.value = getEntryPoint(transaction.value);
   userOps.value = await getUserOps(client.value, transaction.value);
+});
+
+const actions = computed<Action[]>(() => {
+  if (!transaction.value) {
+    return [];
+  }
+  const toAddress = transaction.value.to;
+  const input = transaction.value.input;
+  if (!toAddress || size(input) > 0) {
+    const from = transaction.value.from;
+    const nonce = BigInt(transaction.value.nonce);
+    // Contract deployment transaction
+    const contractAddress = getContractAddress({
+      from,
+      nonce,
+    });
+    return [
+      [
+        {
+          type: 'text',
+          value: 'Contract deployed at',
+        },
+        {
+          type: 'address',
+          address: contractAddress.toLowerCase() as Address,
+        },
+      ],
+    ];
+  }
+  return [];
 });
 
 async function openBlockTransaction(
