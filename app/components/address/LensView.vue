@@ -28,6 +28,10 @@
     "
     :address="address"
   />
+  <MorphoVault
+    v-else-if="hasLabelTypeId('morpho-vault')"
+    :address="address"
+  />
   <Erc7579ModuleLens
     v-else-if="
       hasLabelTypeId('erc7579-module') || hasLabelTypeId('rhinestone-v1-module')
@@ -48,6 +52,7 @@ import DaimoAccount from './lenses/DaimoAccount.vue';
 import Erc20Lens from './lenses/Erc20Lens.vue';
 import Erc7579ModuleLens from './lenses/Erc7579ModuleLens.vue';
 import KernelV3AccountLens from './lenses/KernelV3AccountLens.vue';
+import MorphoVault from './lenses/MorphoVault.vue';
 import SafeV1_4_1Lens from './lenses/SafeV1_4_1Lens.vue';
 import UniswapV2PoolLens from './lenses/UniswapV2PoolLens.vue';
 import UniswapV3PoolLens from './lenses/UniswapV3PoolLens.vue';
