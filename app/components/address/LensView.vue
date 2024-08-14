@@ -20,6 +20,14 @@
     v-else-if="hasLabelTypeId('uniswap-v3-pool')"
     :address="address"
   />
+  <AaveV3Token
+    v-else-if="
+      hasLabelTypeId('aave-v3-atoken') ||
+      hasLabelTypeId('aave-v3-stoken') ||
+      hasLabelTypeId('aave-v3-vtoken')
+    "
+    :address="address"
+  />
   <Erc7579ModuleLens
     v-else-if="
       hasLabelTypeId('erc7579-module') || hasLabelTypeId('rhinestone-v1-module')
@@ -33,8 +41,9 @@
 </template>
 
 <script setup lang="ts">
-import { type Address } from 'viem';
+import type { Address } from 'viem';
 
+import AaveV3Token from './lenses/AaveV3Token.vue';
 import DaimoAccount from './lenses/DaimoAccount.vue';
 import Erc20Lens from './lenses/Erc20Lens.vue';
 import Erc7579ModuleLens from './lenses/Erc7579ModuleLens.vue';
