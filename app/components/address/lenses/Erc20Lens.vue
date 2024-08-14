@@ -48,7 +48,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Address } from 'viem';
+import type { Address } from 'viem';
 import { ref, watch } from 'vue';
 
 import LensBase from './common/LensBase.vue';
