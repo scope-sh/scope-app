@@ -18,7 +18,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Address } from 'viem';
+import type { Address } from 'viem';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCheckbox from '@/components/__common/ScopeCheckbox.vue';

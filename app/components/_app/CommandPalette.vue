@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { useDebounceFn, useMagicKeys, useAnimate } from '@vueuse/core';
-import { type Address, type Hex } from 'viem';
+import type { Address, Hex } from 'viem';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 

@@ -19,7 +19,7 @@
 import ScopeShortcut from './ScopeShortcut.vue';
 import ScopeTooltip from './ScopeTooltip.vue';
 
-import { type Shortcut } from '@/utils/shortcuts.js';
+import type { Shortcut } from '@/utils/shortcuts.js';
 
 defineProps<{
   label: string;

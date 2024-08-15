@@ -57,7 +57,7 @@ import IconBase from './icon/chain/Base.vue';
 import IconEthereum from './icon/chain/Ethereum.vue';
 import IconOptimism from './icon/chain/Optimism.vue';
 import IconPolygon from './icon/chain/Polygon.vue';
-import { type Kind } from './icon/chain/kind.js';
+import type { Kind } from './icon/chain/kind.js';
 
 import {
   type Chain,

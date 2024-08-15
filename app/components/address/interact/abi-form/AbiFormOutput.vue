@@ -18,7 +18,7 @@ import {
   getArguments,
   type Values,
 } from '@/components/__common/arguments';
-import { type Output as AbiOutput } from '@/utils/validation/abi';
+import type { Output as AbiOutput } from '@/utils/validation/abi';
 
 const props = defineProps<{
   abiOutputs: readonly AbiOutput[];

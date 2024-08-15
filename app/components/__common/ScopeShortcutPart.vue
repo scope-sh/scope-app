@@ -16,7 +16,7 @@
 </template>
 
 <script setup lang="ts">
-import { type ShortcutPart } from '@/utils/shortcuts';
+import type { ShortcutPart } from '@/utils/shortcuts';
 
 type Size = 'small' | 'regular';
 

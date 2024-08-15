@@ -1,5 +1,5 @@
 import { alchemy } from 'evm-providers';
-import { type Chain as ChainData } from 'viem';
+import type { Chain as ChainData } from 'viem';
 import {
   mainnet,
   sepolia,

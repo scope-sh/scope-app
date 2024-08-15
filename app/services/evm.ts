@@ -89,7 +89,7 @@ class Service {
         hash,
       });
       return transaction || null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -104,7 +104,7 @@ class Service {
         index,
       });
       return transaction;
-    } catch (e) {
+    } catch {
       return null;
     }
   }
@@ -117,7 +117,7 @@ class Service {
         hash,
       });
       return receipt || null;
-    } catch (e) {
+    } catch {
       return null;
     }
   }

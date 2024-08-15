@@ -1,9 +1,9 @@
 import { HypersyncClient, type Query } from '@envio-dev/hypersync-client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineEventHandler, getQuery } from 'h3';
-import { type Address, type Hex } from 'viem';
+import type { Address, Hex } from 'viem';
 
-import { type Sort } from './common';
+import type { Sort } from './common';
 
 interface Transaction {
   blockNumber: number;

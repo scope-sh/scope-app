@@ -12,7 +12,7 @@
 
 <script setup lang="ts">
 import ButtonCopy from './ButtonCopy.vue';
-import { type Type } from './ScopeLinkInternal.vue';
+import type { Type } from './ScopeLinkInternal.vue';
 
 defineProps<{
   value: string;

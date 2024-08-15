@@ -3,7 +3,7 @@ import { HypersyncClient, type Query } from '@envio-dev/hypersync-client';
 import { defineEventHandler, getQuery } from 'h3';
 import type { Address, Hex } from 'viem';
 
-import { type Sort } from './common';
+import type { Sort } from './common';
 
 interface Log {
   blockNumber: number;

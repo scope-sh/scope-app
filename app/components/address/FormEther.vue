@@ -17,7 +17,7 @@
 </template>
 
 <script setup lang="ts">
-import { type Address } from 'viem';
+import type { Address } from 'viem';
 import { computed, ref, onMounted } from 'vue';
 
 import FormLabel from './FormLabel.vue';

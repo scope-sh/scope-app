@@ -112,7 +112,7 @@ interface Directory extends Item {
   directories: Directory[];
 }
 
-interface File extends Item {}
+type File = Item;
 
 type Node = File | Directory;
 

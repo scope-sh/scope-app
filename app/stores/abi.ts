@@ -2,8 +2,8 @@ import { defineStore } from 'pinia';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import { ref } from 'vue';
 
-import { type Abis } from '@/services/api.js';
-import { type Chain } from '@/utils/chains.js';
+import type { Abis } from '@/services/api.js';
+import type { Chain } from '@/utils/chains.js';
 
 const store = defineStore('abi', () => {
   const abis = ref<Partial<Record<Chain, Abis>>>({});

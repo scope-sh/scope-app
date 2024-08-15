@@ -47,7 +47,7 @@
 import { useDebounceFn, useFocus } from '@vueuse/core';
 import { computed, ref, watch } from 'vue';
 
-import { type File } from './FileView.vue';
+import type { File } from './FileView.vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
