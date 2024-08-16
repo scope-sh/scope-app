@@ -9,9 +9,13 @@
         address: address,
       }"
       :type
+      :is-highlighted
     >
       <slot>
-        <div class="address">
+        <div
+          ref="el"
+          class="address"
+        >
           <LabelIcon
             :uri="labelIcon"
             class="icon"
@@ -30,16 +34,23 @@
 </template>
 
 <script setup lang="ts">
+import { useElementHover } from '@vueuse/core';
 import type { Address } from 'viem';
-import { computed, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import LabelIcon from './LabelIcon.vue';
 import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { type Type } from './ScopeLinkInternal.vue';
 
 import useLabels from '@/composables/useLabels.js';
+import useLinkHover from '@/composables/useLinkHover.js';
 
 const { getLabelIcon, getLabelText, requestLabel } = useLabels();
+const { link, setLink } = useLinkHover();
+
+defineOptions({
+  inheritAttrs: false,
+});
 
 const props = withDefaults(
   defineProps<{
@@ -50,6 +61,26 @@ const props = withDefaults(
     type: 'normal',
   },
 );
+
+const el = ref();
+const isHovered = useElementHover(el);
+const isHighlighted = computed(() =>
+  link.value
+    ? link.value.type === 'address' &&
+      link.value.value === props.address &&
+      !isHovered.value
+    : false,
+);
+watch(isHovered, (value) => {
+  if (value) {
+    setLink({
+      type: 'address',
+      value: props.address,
+    });
+  } else {
+    setLink(null);
+  }
+});
 
 watch(
   () => props.address,
