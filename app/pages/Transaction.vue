@@ -569,7 +569,7 @@ const actions = computed<Action[]>(() => {
   }
   const toAddress = transaction.value.to;
   const input = transaction.value.input;
-  if (!toAddress || size(input) > 0) {
+  if (!toAddress && size(input) > 0) {
     const from = transaction.value.from;
     const nonce = BigInt(transaction.value.nonce);
     // Contract deployment transaction
