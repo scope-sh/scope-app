@@ -94,29 +94,27 @@ function getKey(arg: Argument, index: number): string {
   }
 
   & > .key {
-    min-width: 160px;
-    max-width: 160px;
+    flex: 0 0 160px;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
   @media (width >= 768px) {
     & > .key {
-      min-width: 240px;
-      max-width: 240px;
+      flex: 0 0 240px;
       white-space: nowrap;
     }
   }
 
   &:not(.terminal) {
     & > .key {
-      min-width: 100%;
-      max-width: 100%;
+      flex: 0 0 100%;
     }
   }
 
   & > .value {
-    overflow: hidden;
+    flex: 0 1 auto;
+    min-width: 1px;
   }
 }
 
