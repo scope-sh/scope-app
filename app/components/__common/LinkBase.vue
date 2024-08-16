@@ -1,12 +1,14 @@
 <template>
-  <div class="link">
-    <slot />
-    <ButtonCopy
-      v-if="type !== 'minimal'"
-      :value
-      class="button"
-      compact
-    />
+  <div>
+    <div class="link">
+      <slot />
+      <ButtonCopy
+        v-if="type !== 'minimal'"
+        :value
+        class="button"
+        compact
+      />
+    </div>
   </div>
 </template>
 
