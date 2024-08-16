@@ -2,7 +2,7 @@
   <div id="app">
     <AppHeader v-if="!isChainPage" />
     <BannerMaintenance
-      :message="'Upgrading the infra, ENS labels are degraded until Aug 16th.'"
+      :message="'Upgrading the infra, ENS labels are degraded until Aug 17th.'"
     />
     <NuxtPage />
     <AppFooter v-if="!isChainPage" />
