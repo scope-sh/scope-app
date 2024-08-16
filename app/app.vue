@@ -1,9 +1,6 @@
 <template>
   <div id="app">
     <AppHeader v-if="!isChainPage" />
-    <BannerMaintenance
-      :message="'Upgrading the infra, ENS labels are degraded until Aug 17th.'"
-    />
     <NuxtPage />
     <AppFooter v-if="!isChainPage" />
     <CommandPalette />
@@ -20,7 +17,6 @@ import '@fontsource/inconsolata/400.css';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
-import BannerMaintenance from '@/components/_app/BannerMaintenance.vue';
 import CommandPalette from '@/components/_app/CommandPalette.vue';
 import AppFooter from '@/components/_app/Footer.vue';
 import AppHeader from '@/components/_app/Header.vue';
