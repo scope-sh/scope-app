@@ -66,7 +66,7 @@ export type { Type };
 
   .background.highlighted {
     border-radius: 2px;
-    border-color: oklch(from var(--color-accent) l c h / 70%);
+    border-color: oklch(from var(--color-accent) l c h / 80%);
   }
 
   .background.trimmed {
