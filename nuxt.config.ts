@@ -71,6 +71,11 @@ export default defineNuxtConfig({
     },
   },
 
+  posthog: {
+    // Disable tracking on dev environment
+    disabled: process.env.NODE_ENV === 'development',
+  },
+
   modules: [
     '@vueuse/nuxt',
     '@pinia/nuxt',
