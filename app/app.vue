@@ -4,9 +4,9 @@
     <NuxtPage />
     <AppFooter v-if="!isChainPage" />
     <CommandPalette />
-    <Toast
-      :value="activeToast"
-      @close="hideToast"
+    <Toaster
+      :value="toasts"
+      @hide="hideToast"
     />
   </div>
 </template>
@@ -20,12 +20,12 @@ import { useRoute } from 'vue-router';
 import CommandPalette from '@/components/_app/CommandPalette.vue';
 import AppFooter from '@/components/_app/Footer.vue';
 import AppHeader from '@/components/_app/Header.vue';
-import Toast from '@/components/_app/Toast.vue';
+import Toaster from '@/components/_app/Toaster.vue';
 import useToast from '@/composables/useToast.js';
 
 const route = useRoute();
 
-const { active: activeToast, hide: hideToast } = useToast();
+const { items: toasts, hide: hideToast } = useToast();
 
 const isChainPage = computed(() => route.name === 'chain');
 </script>

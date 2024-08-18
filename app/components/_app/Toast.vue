@@ -1,37 +1,42 @@
 <template>
-  <Transition name="slide-fade">
-    <div
-      v-if="value"
-      class="toast"
-    >
-      <div class="content">
-        <ScopeIcon
-          v-if="value.type === 'success'"
-          :kind="'check-circled'"
-          class="icon"
-        />
-        <ScopeIcon
-          v-if="value.type === 'error'"
-          :kind="'cross-circled'"
-          class="icon"
-        />
-        <span class="message">{{ value.message }}</span>
-      </div>
+  <div
+    v-if="value"
+    class="toast"
+    :class="{ expanded }"
+  >
+    <div class="content">
       <ScopeIcon
-        :kind="'cross'"
-        class="icon-close"
-        @click="close"
+        v-if="value.type === 'success'"
+        :kind="'check-circled'"
+        class="icon"
       />
+      <ScopeIcon
+        v-if="value.type === 'error'"
+        :kind="'cross-circled'"
+        class="icon"
+      />
+      <span class="message">{{ value.message }}</span>
     </div>
-  </Transition>
+    <ScopeIcon
+      :kind="'cross'"
+      class="icon-close"
+      @click="close"
+    />
+  </div>
 </template>
 
 <script setup lang="ts">
-import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import type { Toast } from '@/utils/ui';
+import { watch } from 'vue';
 
-defineProps<{
+import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import useTimerFn from '@/composables/useTimerFn';
+import type { Toast } from '@/utils/ui';
+import { TOAST_DURATION } from '@/utils/ui';
+
+const props = defineProps<{
   value: Toast | null;
+  before: number;
+  expanded: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -41,42 +46,68 @@ const emit = defineEmits<{
 function close(): void {
   emit('close');
 }
+
+watch(
+  () => props.expanded,
+  (value) => {
+    if (value) {
+      pause();
+    } else {
+      resume();
+    }
+  },
+);
+
+const { pause, resume } = useTimerFn(() => {
+  close();
+}, TOAST_DURATION);
 </script>
 
 <style scoped>
-.slide-fade-enter-active {
-  transition: all 0.25s ease-in-out;
-}
-
-.slide-fade-leave-active {
-  transition: all 0.5s ease-in-out;
-}
-
-.slide-fade-enter-from,
-.slide-fade-leave-to {
-  transform: translateY(40%);
-  opacity: 0;
-}
-
 .toast {
   --icon-size: 20px;
   --icon-close-size: 14px;
   --toast-padding: var(--spacing-8);
   --item-gap: var(--spacing-6);
+  --item-width: 320px;
+  --item-height: 60px;
+  --gap: var(--spacing-4);
 
   display: flex;
-  gap: var(--item-gap);
   position: fixed;
+  z-index: 10;
   right: var(--spacing-10);
   bottom: var(--spacing-10);
   align-items: center;
   justify-content: space-between;
-  width: 320px;
+  width: var(--item-width);
+  height: var(--item-height);
+  margin: 4px;
   padding: var(--toast-padding);
+  transform: var(--y);
+  transition:
+    transform 400ms,
+    opacity 400ms,
+    height 400ms,
+    box-shadow 200ms;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);
   background: oklch(from var(--color-background-primary) l c h / 60%);
+  gap: var(--item-gap);
   backdrop-filter: blur(4px);
+
+  &:not(.expanded) {
+    --lift-amount: -8px;
+    --scale: v-bind('before') * 0.05 + 1;
+    --y: translateY(calc(var(--lift-amount) * v-bind('before')))
+      scale(calc(-1 * var(--scale)));
+  }
+
+  &.expanded {
+    --y: translateY(
+      calc(-1 * (var(--item-height) + var(--gap)) * v-bind('before'))
+    );
+  }
 }
 
 .content {

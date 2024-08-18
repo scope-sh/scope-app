@@ -1,15 +1,20 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import type { Toast, Link } from '@/utils/ui.js';
+import { type Toast, type Link, MAX_TOASTS } from '@/utils/ui.js';
 
 const store = defineStore('ui', () => {
-  const toast = ref<Toast | null>(null);
+  const toasts = ref<Toast[]>([]);
   const isPaletteOpen = ref(false);
   const linkHover = ref<Link | null>(null);
 
-  function setToast(newToast: Toast | null): void {
-    toast.value = newToast;
+  function addToast(toast: Toast): void {
+    const activeToasts = toasts.value;
+    toasts.value = [...activeToasts.slice(-MAX_TOASTS + 1), toast];
+  }
+
+  function removeToast(id: number): void {
+    toasts.value = toasts.value.filter((t) => t.id !== id);
   }
 
   function setPaletteOpen(isOpen: boolean): void {
@@ -21,10 +26,11 @@ const store = defineStore('ui', () => {
   }
 
   return {
-    toast,
+    toasts,
     isPaletteOpen,
     linkHover,
-    setToast,
+    addToast,
+    removeToast,
     setPaletteOpen,
     setLinkHover,
   };

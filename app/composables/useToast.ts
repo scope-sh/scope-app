@@ -1,46 +1,44 @@
-import { useDebounceFn } from '@vueuse/core';
 import type { Ref } from 'vue';
 import { onMounted, ref, watch } from 'vue';
 
 import useUiStore from '@/stores/ui.js';
-import type { Toast } from '@/utils/ui.js';
-import { TOAST_DURATION } from '@/utils/ui.js';
+import type { Toast, ToastData } from '@/utils/ui.js';
 
 interface UseToast {
-  active: Ref<Toast | null>;
+  items: Ref<Toast[]>;
   send: (toast: Toast) => void;
-  hide: () => void;
+  hide: (index: number) => void;
 }
 
 function useToast(): UseToast {
-  const active = ref<Toast | null>(null);
+  const items = ref<Toast[]>([]);
   const store = useUiStore();
 
   onMounted(() => {
-    active.value = store.toast;
+    items.value = store.toasts;
 
     watch(
-      () => store.toast,
-      (newChain) => {
-        active.value = newChain;
+      () => store.toasts,
+      (newToasts) => {
+        items.value = newToasts;
       },
     );
   });
 
-  const hideLater = useDebounceFn(() => {
-    store.setToast(null);
-  }, TOAST_DURATION);
-
-  function send(toast: Toast): void {
-    store.setToast(toast);
-    hideLater();
+  function send(toast: ToastData): void {
+    // Generate a random id
+    const id = Math.floor(Math.random() * 1000000);
+    store.addToast({
+      ...toast,
+      id,
+    });
   }
 
-  function hide(): void {
-    store.setToast(null);
+  function hide(id: number): void {
+    store.removeToast(id);
   }
 
-  return { active, send, hide };
+  return { items, send, hide };
 }
 
 export default useToast;

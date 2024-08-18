@@ -1,10 +1,15 @@
 import type { Address, Hex } from 'viem';
 
 const TOAST_DURATION = 5000;
+const MAX_TOASTS = 3;
 
-interface Toast {
+interface ToastData {
   type: 'success' | 'error';
   message: string;
+}
+
+interface Toast extends ToastData {
+  id: number;
 }
 
 interface BlockLink {
@@ -29,5 +34,5 @@ interface AddressLink {
 
 type Link = BlockLink | TransactionHashLink | UserOpHashLink | AddressLink;
 
-export { TOAST_DURATION };
-export type { Toast, Link };
+export { TOAST_DURATION, MAX_TOASTS };
+export type { ToastData, Toast, Link };
