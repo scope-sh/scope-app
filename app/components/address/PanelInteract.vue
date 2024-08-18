@@ -5,26 +5,34 @@
       v-model:show-as-proxy="showAsProxy"
       :implementation
     />
-    <div class="group">
-      <ScopeCombobox
-        v-model="filterValue"
-        :options="filterOptions"
-      />
-      <div class="list">
-        <div
-          v-for="fragment in activeFunctions"
-          :key="toFunctionSelector(fragment)"
-        >
-          <AbiForm
-            :fragment="fragment"
-            :is-loading="isLoading(fragment)"
-            :error="getResultError(fragment)"
-            :result="getResultValue(fragment)"
-            @submit="
-              ({ args, account, amount }) =>
-                handleSubmit(fragment, args, account, amount)
-            "
-          />
+    <div class="interact">
+      <div class="interact-header">
+        <ScopeTabs
+          v-model="activeTab"
+          :options="tabs"
+        />
+      </div>
+      <div class="group">
+        <ScopeCombobox
+          v-model="filterValue"
+          :options="filterOptions"
+        />
+        <div class="list">
+          <div
+            v-for="fragment in activeFunctions"
+            :key="toFunctionSelector(fragment)"
+          >
+            <AbiForm
+              :fragment="fragment"
+              :is-loading="isLoading(fragment)"
+              :error="getResultError(fragment)"
+              :result="getResultValue(fragment)"
+              @submit="
+                ({ args, account, amount }) =>
+                  handleSubmit(fragment, args, account, amount)
+              "
+            />
+          </div>
         </div>
       </div>
     </div>
@@ -44,6 +52,7 @@ import ScopeCombobox, {
   type Option,
 } from '@/components/__common/ScopeCombobox.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
+import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import useChain from '@/composables/useChain';
 import type { Contract } from '@/services/api';
 import {
@@ -69,30 +78,45 @@ const isFunctionLoading = ref<Record<Hex, boolean>>();
 const errors = ref<Record<Hex, QueryError | null>>();
 const results = ref<Record<Hex, unknown>>();
 
+const activeTab = ref<string>('read');
+const tabs = [
+  {
+    label: 'Read',
+    value: 'read',
+  },
+  {
+    label: 'Simulate',
+    value: 'simulate',
+  },
+];
+
 const filterValue = ref<Option<AbiFunction> | undefined>(undefined);
 const filterOptions = computed(() => {
-  return [
-    {
-      label: 'Constants',
-      options: constants.value.map((f) => getOption(f)),
-    },
-    {
-      label: 'Paramless functions',
-      options: paramlessFunctions.value.map((f) => getOption(f)),
-    },
-    {
-      label: 'Read functions',
-      options: readFunctions.value.map((f) => getOption(f)),
-    },
-    {
-      label: 'Non-payable functions',
-      options: nonpayableFunctions.value.map((f) => getOption(f)),
-    },
-    {
-      label: 'Payable functions',
-      options: payableFunctions.value.map((f) => getOption(f)),
-    },
-  ];
+  return activeTab.value === 'read'
+    ? [
+        {
+          label: 'Constants',
+          options: constants.value.map((f) => getOption(f)),
+        },
+        {
+          label: 'Paramless functions',
+          options: paramlessFunctions.value.map((f) => getOption(f)),
+        },
+        {
+          label: 'Read functions',
+          options: readFunctions.value.map((f) => getOption(f)),
+        },
+      ]
+    : [
+        {
+          label: 'Non-payable functions',
+          options: nonpayableFunctions.value.map((f) => getOption(f)),
+        },
+        {
+          label: 'Payable functions',
+          options: payableFunctions.value.map((f) => getOption(f)),
+        },
+      ];
 });
 function getOption(fragment: AbiFunction): Option<AbiFunction> {
   return {
@@ -140,12 +164,17 @@ const functions = computed(() => {
     ...payableFunctions.value,
   ];
 });
+const tabFunctions = computed(() => {
+  return activeTab.value === 'read'
+    ? [...constants.value, ...paramlessFunctions.value, ...readFunctions.value]
+    : [...nonpayableFunctions.value, ...payableFunctions.value];
+});
 const activeFunctions = computed(() => {
   const filter = filterValue.value;
   if (!filter) {
-    return functions.value;
+    return tabFunctions.value;
   }
-  return functions.value.filter((f) => filter.value === f);
+  return tabFunctions.value.filter((f) => filter.value === f);
 });
 
 watch(
@@ -275,6 +304,18 @@ async function handleSubmit(
 </script>
 
 <style scoped>
+.interact {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-6);
+}
+
+.interact-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .group {
   display: flex;
   gap: var(--spacing-6);
