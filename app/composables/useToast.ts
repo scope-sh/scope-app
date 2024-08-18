@@ -6,7 +6,7 @@ import type { Toast, ToastData } from '@/utils/ui.js';
 
 interface UseToast {
   items: Ref<Toast[]>;
-  send: (toast: Toast) => void;
+  send: (toast: ToastData) => void;
   hide: (index: number) => void;
 }
 
