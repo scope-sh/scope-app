@@ -1,5 +1,5 @@
 <template>
-  <ScopePanel title="Read">
+  <ScopePanel title="Interact">
     <NoticeProxy
       v-if="isProxy"
       v-model:show-as-proxy="showAsProxy"

@@ -275,7 +275,7 @@ const sections = computed<Section[]>(() => {
       value: SECTION_CODE,
     });
     sections.push({
-      label: 'Read',
+      label: 'Interact',
       value: SECTION_INTERACT,
     });
   }
