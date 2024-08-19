@@ -7,7 +7,7 @@ User-agent: Googlebot
 Allow: /$
 Allow: /sitemap.xml$
 Allow: /public/
-Crawl-delay: 10
+Crawl-delay: 3600
 Disallow: /
 
 User-agent: Google-Read-Aloud
@@ -19,7 +19,7 @@ User-agent: Googlebot-Mobile
 Allow: /$
 Allow: /sitemap.xml$
 Allow: /public/
-Crawl-delay: 10
+Crawl-delay: 3600
 Disallow: /
 
 User-agent: *
