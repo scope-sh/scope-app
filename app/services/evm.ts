@@ -42,7 +42,7 @@ class Service {
   }
 
   public async getCode(address: Address): Promise<Hex | null> {
-    const bytecode = await this.client.getBytecode({
+    const bytecode = await this.client.getCode({
       address: address as Address,
     });
     return bytecode || null;
