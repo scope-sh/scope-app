@@ -1,0 +1,26 @@
+User-agent: GoogleOther
+Allow: /$
+Allow: /sitemap.xml$
+Disallow: /
+
+User-agent: Googlebot
+Allow: /$
+Allow: /sitemap.xml$
+Allow: /public/
+Crawl-delay: 10
+Disallow: /
+
+User-agent: Google-Read-Aloud
+Allow: /$
+Allow: /accessibility/
+Disallow: /
+
+User-agent: Googlebot-Mobile
+Allow: /$
+Allow: /sitemap.xml$
+Allow: /public/
+Crawl-delay: 10
+Disallow: /
+
+User-agent: *
+Allow: /
