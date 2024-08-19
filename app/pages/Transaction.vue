@@ -177,7 +177,7 @@
       <template v-if="section === SECTION_LOGS">
         <ScopePanelLoading
           v-if="isLoading"
-          title="UserOps"
+          title="Logs"
         />
         <ScopePanel
           v-else-if="transactionReceipt"
