@@ -2,6 +2,7 @@
   <ScopePage
     v-model:section="section"
     :sections="sections"
+    @update:section="handleSectionUpdate"
   >
     <ScopePanelLoading
       v-if="isLoadingBalance || isLoadingCode"
@@ -248,9 +249,20 @@ const { id: chainId, name: chainName, client } = useChain();
 const { getLabels, requestLabel } = useLabels();
 const { addAbis } = useAbi();
 
+const address = computed(() => {
+  const address = route.params.address as string;
+  return address.toLowerCase() as Address;
+});
+
 const section = ref<string>(SECTION_TRANSACTIONS);
 const sections = computed<Section[]>(() => {
   const sections: Section[] = [];
+  if (ops.value.length > 0) {
+    sections.push({
+      label: 'UserOps',
+      value: SECTION_OPS,
+    });
+  }
   sections.push(
     ...[
       {
@@ -263,12 +275,6 @@ const sections = computed<Section[]>(() => {
       },
     ],
   );
-  if (ops.value.length > 0) {
-    sections.push({
-      label: 'UserOps',
-      value: SECTION_OPS,
-    });
-  }
   if (isContract.value && bytecode.value) {
     sections.push({
       label: 'Code',
@@ -282,9 +288,13 @@ const sections = computed<Section[]>(() => {
   return sections;
 });
 
-const address = computed(() => {
-  const address = route.params.address as string;
-  return address.toLowerCase() as Address;
+const sectionChanged = ref(false);
+function handleSectionUpdate(): void {
+  sectionChanged.value = true;
+}
+
+watch(address, () => {
+  section.value = SECTION_TRANSACTIONS;
 });
 
 onMounted(() => {
@@ -346,6 +356,11 @@ const logs = ref<AddressLog[]>([]);
 
 const isLoadingOps = ref(false);
 const ops = ref<UserOp[]>([]);
+watch(ops, (opsValue) => {
+  if (opsValue.length > 0 && !sectionChanged.value) {
+    section.value = SECTION_OPS;
+  }
+});
 
 const isContract = computed<boolean>(() => !!bytecode.value);
 const addressLabels = computed(() => getLabels(address.value));
