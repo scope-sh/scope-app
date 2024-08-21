@@ -1,4 +1,11 @@
-import type { Address, ByteArray, Hex, PublicClient } from 'viem';
+import type {
+  Address,
+  ByteArray,
+  ContractFunctionParameters,
+  Hex,
+  MulticallResults,
+  PublicClient,
+} from 'viem';
 import {
   createPublicClient,
   decodeFunctionResult,
@@ -54,11 +61,40 @@ class Service {
   public async resolveEnsMany(
     names: string[],
   ): Promise<Record<string, Address>> {
+    // In case there is no record for the chain, we use a fallback
+    const contracts = names
+      .map((name) => {
+        return this.#getCalls(name);
+      })
+      .flat();
+    const results = await this.ethereumClient.multicall({
+      contracts,
+    });
+    let index = 0;
+    const addresses: Record<string, Address> = {};
+    for (const name of names) {
+      const callCount = this.#getCalls(name).length;
+      const nameResults = results.slice(index, index + callCount);
+      const nameAddresses = this.#parseResults(name, nameResults);
+      for (const address of nameAddresses) {
+        if (!address) {
+          continue;
+        }
+        if (address && !addresses[address]) {
+          addresses[name] = address;
+        }
+      }
+      index += callCount;
+    }
+    return addresses;
+  }
+
+  #getCalls(name: string): ContractFunctionParameters[] {
     const ethereumChainData = getChainData(this.ensChain);
     const ensUniversalResolver =
       ethereumChainData.contracts?.ensUniversalResolver;
     if (!ensUniversalResolver) {
-      return {};
+      throw new Error('ENS Universal Resolver contract not found');
     }
     // In case there is no record for the chain, we use a fallback
     const fallbackChain = getFallbackChain(this.chain);
@@ -67,37 +103,29 @@ class Service {
     const coinTypes = queriedChains.map((chain) =>
       convertEvmChainIdToCoinType(chain),
     );
-    const contracts = names
-      .map((name) => {
-        return coinTypes.map((coinType) => ({
-          address: ensUniversalResolver.address,
-          abi: ensUniversalResolverAbi,
-          functionName: 'resolve',
-          args: [
-            toHex(packetToBytes(name)),
-            encodeFunctionData({
-              abi: ensAddressResolverAbi,
-              functionName: 'addr',
-              args: [namehash(name), BigInt(coinType)],
-            }),
-          ],
-        }));
-      })
-      .flat();
-    const results = await this.ethereumClient.multicall({
-      contracts,
-    });
-    const addresses = results.map((result, i) => {
+    return coinTypes.map((coinType) => ({
+      address: ensUniversalResolver.address,
+      abi: ensUniversalResolverAbi,
+      functionName: 'resolve',
+      args: [
+        toHex(packetToBytes(name)),
+        encodeFunctionData({
+          abi: ensAddressResolverAbi,
+          functionName: 'addr',
+          args: [namehash(name), BigInt(coinType)],
+        }),
+      ],
+    }));
+  }
+
+  #parseResults(name: string, results: MulticallResults): (Address | null)[] {
+    return results.map((result) => {
       if (result.status !== 'success') return null;
-      const value = result.result[0];
-      const name = names[Math.floor(i / coinTypes.length)];
-      if (!name) return null;
-      const coinType = coinTypes[i % coinTypes.length];
-      if (!coinType) return null;
+      const value = (result.result as [Hex, Hex])[0];
       if (value === '0x') return null;
       const address = decodeFunctionResult({
         abi: ensAddressResolverAbi,
-        args: [namehash(name), BigInt(coinType)],
+        args: [namehash(name), BigInt(0)],
         functionName: 'addr',
         data: value,
       });
@@ -105,17 +133,6 @@ class Service {
       if (trim(address) === '0x00') return null;
       return address;
     });
-    return addresses.reduce(
-      (acc, address, i) => {
-        const name = names[Math.floor(i / coinTypes.length)];
-        if (!name) return acc;
-        if (!address) return acc;
-        if (acc[name]) return acc;
-        acc[name] = address;
-        return acc;
-      },
-      {} as Record<string, Address>,
-    );
   }
 }
 
