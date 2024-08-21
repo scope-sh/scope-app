@@ -138,7 +138,7 @@ class Service {
 
   #getCalls(name: string): EnsCall[] {
     // Base names
-    if (name.endsWith('.base.eth')) {
+    if (isBaseName(name)) {
       return [
         {
           client: this.baseClient,
@@ -196,7 +196,7 @@ class Service {
       const value = (result.result as [Hex, Hex])[0];
       if (value === '0x') return null;
       // Base names
-      if (name.endsWith('.base.eth')) {
+      if (isBaseName(name)) {
         // Convert bytes32 to address
         return slice(value, 12, 32);
       }
@@ -237,6 +237,10 @@ function getFallbackChain(chain: Chain): Chain {
     case ARBITRUM_SEPOLIA:
       return SEPOLIA;
   }
+}
+
+function isBaseName(name: string): boolean {
+  return name.endsWith('.base.eth');
 }
 
 function convertEvmChainIdToCoinType(chainId: number): number {
