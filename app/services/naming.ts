@@ -13,6 +13,7 @@ import {
   http,
   labelhash,
   namehash,
+  slice,
   stringToBytes,
   toHex,
 } from 'viem';
@@ -36,14 +37,26 @@ import {
   getEndpointUrl,
 } from '@/utils/chains.js';
 
+const BASE_L2_RESOLVER_ADDRESS = '0xc6d566a56a1aff6508b41f6c90ff131615583bcd';
+
+interface EnsCall {
+  client: PublicClient;
+  params: ContractFunctionParameters;
+}
+
 class Service {
+  baseClient: PublicClient;
   ensChain: Chain;
-  ethereumClient: PublicClient;
+  ensClient: PublicClient;
   chain: Chain;
 
   constructor(alchemyApiKey: string, chain: Chain) {
+    this.baseClient = createPublicClient({
+      chain: getChainData(BASE),
+      transport: http(getEndpointUrl(BASE, alchemyApiKey)),
+    });
     this.ensChain = getFallbackChain(chain);
-    this.ethereumClient = createPublicClient({
+    this.ensClient = createPublicClient({
       chain: getChainData(this.ensChain),
       transport: http(getEndpointUrl(this.ensChain, alchemyApiKey)),
     });
@@ -62,14 +75,48 @@ class Service {
     names: string[],
   ): Promise<Record<string, Address>> {
     // In case there is no record for the chain, we use a fallback
-    const contracts = names
+    const ensCalls = names
       .map((name) => {
         return this.#getCalls(name);
       })
       .flat();
-    const results = await this.ethereumClient.multicall({
-      contracts,
-    });
+    // Group calls by client
+    const results = [];
+    const groupedCalls = ensCalls.reduce(
+      (acc, call) => {
+        const clientChain = call.client.chain;
+        if (!clientChain) {
+          throw new Error('Client chain not found');
+        }
+        const chainCalls = acc[clientChain.id];
+        if (!chainCalls) {
+          return {
+            ...acc,
+            [clientChain.id]: [call],
+          };
+        }
+        chainCalls.push(call);
+        return acc;
+      },
+      {} as Record<number, EnsCall[]>,
+    );
+    // Execute multicall for each client
+    for (const chainId in groupedCalls) {
+      const calls = groupedCalls[parseInt(chainId)];
+      if (!calls) {
+        continue;
+      }
+      const firstCall = calls[0];
+      if (!firstCall) {
+        continue;
+      }
+      const client = firstCall.client;
+      const chainResults = await client.multicall({
+        contracts: calls.map((call) => call.params),
+      });
+      results.push(...chainResults);
+    }
+    // Merge results
     let index = 0;
     const addresses: Record<string, Address> = {};
     for (const name of names) {
@@ -89,7 +136,29 @@ class Service {
     return addresses;
   }
 
-  #getCalls(name: string): ContractFunctionParameters[] {
+  #getCalls(name: string): EnsCall[] {
+    // Base names
+    if (name.endsWith('.base.eth')) {
+      return [
+        {
+          client: this.baseClient,
+          params: {
+            address: BASE_L2_RESOLVER_ADDRESS,
+            abi: ensUniversalResolverAbi,
+            functionName: 'resolve',
+            args: [
+              toHex(packetToBytes(name)),
+              encodeFunctionData({
+                abi: ensAddressResolverAbi,
+                functionName: 'addr',
+                args: [namehash(name)],
+              }),
+            ],
+          },
+        },
+      ];
+    }
+    // Ethereum names
     const ethereumChainData = getChainData(this.ensChain);
     const ensUniversalResolver =
       ethereumChainData.contracts?.ensUniversalResolver;
@@ -104,17 +173,20 @@ class Service {
       convertEvmChainIdToCoinType(chain),
     );
     return coinTypes.map((coinType) => ({
-      address: ensUniversalResolver.address,
-      abi: ensUniversalResolverAbi,
-      functionName: 'resolve',
-      args: [
-        toHex(packetToBytes(name)),
-        encodeFunctionData({
-          abi: ensAddressResolverAbi,
-          functionName: 'addr',
-          args: [namehash(name), BigInt(coinType)],
-        }),
-      ],
+      client: this.ensClient,
+      params: {
+        address: ensUniversalResolver.address,
+        abi: ensUniversalResolverAbi,
+        functionName: 'resolve',
+        args: [
+          toHex(packetToBytes(name)),
+          encodeFunctionData({
+            abi: ensAddressResolverAbi,
+            functionName: 'addr',
+            args: [namehash(name), BigInt(coinType)],
+          }),
+        ],
+      },
     }));
   }
 
@@ -123,6 +195,12 @@ class Service {
       if (result.status !== 'success') return null;
       const value = (result.result as [Hex, Hex])[0];
       if (value === '0x') return null;
+      // Base names
+      if (name.endsWith('.base.eth')) {
+        // Convert bytes32 to address
+        return slice(value, 12, 32);
+      }
+      // Ethereum names
       const address = decodeFunctionResult({
         abi: ensAddressResolverAbi,
         args: [namehash(name), BigInt(0)],
