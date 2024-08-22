@@ -2,7 +2,7 @@
   <div class="tree">
     <div class="scroll">
       <div
-        v-for="item in transactions"
+        v-for="item in calls"
         :key="item.traceAddress.join('-')"
         class="item"
         :style="{ '--level': getLevel(item) }"
@@ -63,7 +63,7 @@ import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import { formatEther } from '@/utils/formatting';
 
 defineProps<{
-  transactions: Transaction[];
+  calls: Call[];
 }>();
 
 function formatType(
@@ -78,13 +78,13 @@ function formatType(
         : 'S•CALL';
 }
 
-function getLevel(row: Transaction): number {
+function getLevel(row: Call): number {
   return row.traceAddress.length;
 }
 </script>
 
 <script lang="ts">
-interface Transaction {
+interface Call {
   success:
     | true
     | {
@@ -115,7 +115,7 @@ function getData(data: Hex): Hex {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export type { Transaction };
+export type { Call };
 </script>
 
 <style scoped>

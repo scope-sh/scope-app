@@ -225,9 +225,7 @@
               v-else
               class="internal"
             >
-              <TreeInternalTransactions
-                :transactions="internalTransactionRows"
-              />
+              <TreeInternalCalls :calls="internalCallRows" />
             </div>
           </template>
         </ScopePanel>
@@ -273,8 +271,8 @@ import {
 } from '@/components/__common/attributes';
 import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
-import type { Transaction as InternalTransactionRow } from '@/components/transaction/TreeInternalTransactions.vue';
-import TreeInternalTransactions from '@/components/transaction/TreeInternalTransactions.vue';
+import type { Call as InternalCallRow } from '@/components/transaction/TreeInternalCalls.vue';
+import TreeInternalCalls from '@/components/transaction/TreeInternalCalls.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -453,11 +451,10 @@ async function fetchTransactionTrace(hash: Hex): Promise<void> {
   }
   transactionTrace.value = await evmService.value.getTransactionTrace(hash);
 }
-const internalTransactionRows = computed<InternalTransactionRow[]>(() => {
+const internalCallRows = computed<InternalCallRow[]>(() => {
   if (!transactionTrace.value) {
     return [];
   }
-  console.log(transactionTrace.value);
   return transactionTrace.value.map((transaction) => {
     return {
       success:
