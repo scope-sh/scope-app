@@ -38,7 +38,7 @@ function parseChain(value?: string | string[]): Chain | null {
 
 function useChain(): UseChain {
   const route = useRoute();
-  const { alchemyApiKey } = useEnv();
+  const { quicknodeAppName, quicknodeAppKey } = useEnv();
 
   const id = ref<Chain>(parseChain(route.params.chain) || DEFAULT_CHAIN);
   const name = computed(() => getChainName(id.value));
@@ -62,7 +62,9 @@ function useChain(): UseChain {
   const client = computed(() =>
     createPublicClient({
       chain: getChainData(id.value),
-      transport: http(getEndpointUrl(id.value, alchemyApiKey)),
+      transport: http(
+        getEndpointUrl(id.value, quicknodeAppName, quicknodeAppKey),
+      ),
     }),
   );
 

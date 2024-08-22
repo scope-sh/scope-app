@@ -69,7 +69,7 @@ import {
 } from '@/utils/validation/pattern';
 
 const { id: chainId, name: chainName, client } = useChain();
-const { alchemyApiKey, indexerEndpoint } = useEnv();
+const { quicknodeAppName, quicknodeAppKey, indexerEndpoint } = useEnv();
 const router = useRouter();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
@@ -121,7 +121,9 @@ const indexerService = computed(() =>
     : null,
 );
 const namingService = computed(() =>
-  chainId.value ? new NamingService(alchemyApiKey, chainId.value) : null,
+  chainId.value
+    ? new NamingService(quicknodeAppName, quicknodeAppKey, chainId.value)
+    : null,
 );
 
 const search = ref('');

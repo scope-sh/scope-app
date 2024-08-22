@@ -50,15 +50,17 @@ class Service {
   ensClient: PublicClient;
   chain: Chain;
 
-  constructor(alchemyApiKey: string, chain: Chain) {
+  constructor(quicknodeAppName: string, quicknodeAppKey: string, chain: Chain) {
     this.baseClient = createPublicClient({
       chain: getChainData(BASE),
-      transport: http(getEndpointUrl(BASE, alchemyApiKey)),
+      transport: http(getEndpointUrl(BASE, quicknodeAppName, quicknodeAppKey)),
     });
     this.ensChain = getFallbackChain(chain);
     this.ensClient = createPublicClient({
       chain: getChainData(this.ensChain),
-      transport: http(getEndpointUrl(this.ensChain, alchemyApiKey)),
+      transport: http(
+        getEndpointUrl(this.ensChain, quicknodeAppName, quicknodeAppKey),
+      ),
     });
     this.chain = chain;
   }

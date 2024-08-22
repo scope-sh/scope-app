@@ -1,4 +1,4 @@
-import { alchemy } from 'evm-providers';
+import { quicknode } from 'evm-providers';
 import type { Chain as ChainData } from 'viem';
 import {
   mainnet,
@@ -121,8 +121,15 @@ function isChainName(value: string): boolean {
   return !!chain;
 }
 
-function getEndpointUrl(chainId: Chain, alchemyKey: string): string {
-  return alchemy(chainId, alchemyKey);
+// function getEndpointUrl(chainId: Chain, alchemyKey: string): string {
+//   return alchemy(chainId, alchemyKey);
+// }
+function getEndpointUrl(
+  chainId: Chain,
+  quicknodeAppName: string,
+  quicknodeAppKey: string,
+): string {
+  return quicknode(chainId, quicknodeAppName, quicknodeAppKey);
 }
 
 function parseChain(value: string): Chain | null {

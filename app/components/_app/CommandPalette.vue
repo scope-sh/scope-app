@@ -111,7 +111,7 @@ useMagicKeys({
     }
   },
 });
-const { alchemyApiKey, indexerEndpoint } = useEnv();
+const { quicknodeAppName, quicknodeAppKey, indexerEndpoint } = useEnv();
 const { commands: localCommands } = useCommands();
 const uiStore = useUiStore();
 const { send: sendToast } = useToast();
@@ -135,7 +135,9 @@ const indexerService = computed(() =>
   chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
 );
 const namingService = computed(() =>
-  chainId.value ? new NamingService(alchemyApiKey, chainId.value) : null,
+  chainId.value
+    ? new NamingService(quicknodeAppName, quicknodeAppKey, chainId.value)
+    : null,
 );
 
 function handleOpen(value: boolean): void {

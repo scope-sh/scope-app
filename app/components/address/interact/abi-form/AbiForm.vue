@@ -104,10 +104,12 @@ const emit = defineEmits<{
 }>();
 
 const { id: chainId } = useChain();
-const { alchemyApiKey } = useEnv();
+const { quicknodeAppName, quicknodeAppKey } = useEnv();
 
 const namingService = computed(() =>
-  chainId.value ? new NamingService(alchemyApiKey, chainId.value) : null,
+  chainId.value
+    ? new NamingService(quicknodeAppName, quicknodeAppKey, chainId.value)
+    : null,
 );
 
 const abiInputs = computed(() => props.fragment.inputs as AbiInput[]);
