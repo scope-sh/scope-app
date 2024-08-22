@@ -207,6 +207,31 @@
           </template>
         </ScopePanel>
       </template>
+      <template v-if="section === SECTION_INTERNAL">
+        <ScopePanelLoading
+          v-if="isLoading"
+          title="Internal"
+        />
+        <ScopePanel
+          v-else-if="transactionTrace"
+          title="Internal"
+        >
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="transactionTrace.length === 0"
+              value="No internal transactions found"
+            />
+            <div
+              v-else
+              class="internal"
+            >
+              <TreeInternalTransactions
+                :transactions="internalTransactionRows"
+              />
+            </div>
+          </template>
+        </ScopePanel>
+      </template>
     </template>
   </ScopePage>
 </template>
@@ -248,13 +273,20 @@ import {
 } from '@/components/__common/attributes';
 import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
+import type { Transaction as InternalTransactionRow } from '@/components/transaction/TreeInternalTransactions.vue';
+import TreeInternalTransactions from '@/components/transaction/TreeInternalTransactions.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
-import type { Transaction, TransactionReceipt, Block } from '@/services/evm';
+import type {
+  Transaction,
+  TransactionReceipt,
+  TransactionTrace,
+  Block,
+} from '@/services/evm';
 import type { Command } from '@/stores/commands';
 import type { UserOp } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getUserOps } from '@/utils/context/erc4337/entryPoint';
@@ -270,6 +302,7 @@ import { getRouteLocation } from '@/utils/routing';
 
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
+const SECTION_INTERNAL = 'internal';
 
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
@@ -292,6 +325,10 @@ const sections = computed<Section[]>(() => {
       value: SECTION_OPS,
     });
   }
+  list.push({
+    label: 'Internal',
+    value: SECTION_INTERNAL,
+  });
   return list;
 });
 
@@ -371,6 +408,7 @@ const isLoading = ref(false);
 const block = ref<Block | null>(null);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
+const transactionTrace = ref<TransactionTrace | null>(null);
 
 async function fetch(): Promise<void> {
   if (!evmService.value) {
@@ -380,6 +418,7 @@ async function fetch(): Promise<void> {
   await Promise.all([
     fetchTransaction(hash.value),
     fetchTransactionReceipt(hash.value),
+    fetchTransactionTrace(hash.value),
   ]);
   if (transaction.value && transaction.value.blockNumber) {
     block.value = await evmService.value.getBlock(
@@ -403,6 +442,48 @@ async function fetchTransactionReceipt(hash: Hex): Promise<void> {
   }
   transactionReceipt.value = await evmService.value.getTransactionReceipt(hash);
 }
+
+async function fetchTransactionTrace(hash: Hex): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
+  transactionTrace.value = await evmService.value.getTransactionTrace(hash);
+}
+const internalTransactionRows = computed<InternalTransactionRow[]>(() => {
+  if (!transactionTrace.value) {
+    return [];
+  }
+  console.log(transactionTrace.value);
+  return transactionTrace.value.map((transaction) => {
+    return {
+      success:
+        transaction.error === null
+          ? true
+          : transaction.error === 'OOG'
+            ? {
+                type: 'OOG',
+              }
+            : {
+                type: 'Revert',
+                reason: '',
+              },
+      type:
+        transaction.type === 'create' ? 'create' : transaction.action.callType,
+      from: transaction.action.from,
+      to: transaction.type === 'call' ? transaction.action.to : null,
+      input:
+        transaction.type === 'call'
+          ? transaction.action.input
+          : transaction.action.init,
+      value: transaction.action.value,
+      gas: {
+        used: transaction.result.gasUsed,
+        limit: transaction.action.gas,
+      },
+      traceAddress: transaction.traceAddress,
+    };
+  });
+});
 
 async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
