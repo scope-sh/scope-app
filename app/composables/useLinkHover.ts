@@ -1,4 +1,5 @@
 import { computed, type Ref } from 'vue';
+import { onBeforeRouteLeave } from 'vue-router';
 
 import useUiStore from '@/stores/ui.js';
 import type { Link } from '@/utils/ui.js';
@@ -12,6 +13,10 @@ function useLinkHover(): UseLinkHover {
   const store = useUiStore();
 
   const link = computed(() => store.linkHover);
+
+  onBeforeRouteLeave(() => {
+    setLink(null);
+  });
 
   function setLink(link: Link | null): void {
     store.setLinkHover(link);
