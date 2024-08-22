@@ -528,40 +528,44 @@ function getBeneficiary(transaction: Transaction): Address | null {
 
 function decodeCalls(callData: Hex): Call[] | null {
   const selector = slice(callData, 0, 4);
-  if (selector === '0xe9ae5c53') {
-    // Kernel V3 `execute` function
-    const decodedCallData = decodeKernelV3CallData(callData);
-    if (!decodedCallData) {
+  try {
+    if (selector === '0xe9ae5c53') {
+      // Kernel V3 `execute` function
+      const decodedCallData = decodeKernelV3CallData(callData);
+      if (!decodedCallData) {
+        return null;
+      }
+      if (decodedCallData.type === 'single') {
+        return [decodedCallData.execution];
+      }
+      if (decodedCallData.type === 'batch') {
+        return decodedCallData.executions;
+      }
       return null;
     }
-    if (decodedCallData.type === 'single') {
-      return [decodedCallData.execution];
+    if (selector === '0x541d63c8' || selector === '0x7bb37428') {
+      // Safe Core 4337 module
+      const decodedCallData = decodeSafeCoreCallData(callData);
+      if (Array.isArray(decodedCallData)) {
+        return decodedCallData.map((call) => ({
+          to: call.to,
+          callData: call.data,
+          value: call.value,
+        }));
+      }
+      return [decodedCallData];
     }
-    if (decodedCallData.type === 'batch') {
-      return decodedCallData.executions;
-    }
-    return null;
-  }
-  if (selector === '0x541d63c8' || selector === '0x7bb37428') {
-    // Safe Core 4337 module
-    const decodedCallData = decodeSafeCoreCallData(callData);
-    if (Array.isArray(decodedCallData)) {
+    if (selector === '0x34fcd5be') {
+      // Daimo "executeBatch" function
+      const decodedCallData = decodeDaimoCallData(callData);
       return decodedCallData.map((call) => ({
-        to: call.to,
+        to: call.dest,
         callData: call.data,
         value: call.value,
       }));
     }
-    return [decodedCallData];
-  }
-  if (selector === '0x34fcd5be') {
-    // Daimo "executeBatch" function
-    const decodedCallData = decodeDaimoCallData(callData);
-    return decodedCallData.map((call) => ({
-      to: call.dest,
-      callData: call.data,
-      value: call.value,
-    }));
+  } catch {
+    return null;
   }
   return null;
 }
