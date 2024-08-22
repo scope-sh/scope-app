@@ -278,6 +278,7 @@ import TreeInternalTransactions from '@/components/transaction/TreeInternalTrans
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
+import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
@@ -305,6 +306,7 @@ const SECTION_LOGS = 'logs';
 const SECTION_INTERNAL = 'internal';
 
 const { setCommands } = useCommands();
+const { featureTransactionInternalCalls } = useEnv();
 const { send: sendToast } = useToast();
 
 const route = useRoute();
@@ -325,10 +327,12 @@ const sections = computed<Section[]>(() => {
       value: SECTION_OPS,
     });
   }
-  list.push({
-    label: 'Internal',
-    value: SECTION_INTERNAL,
-  });
+  if (featureTransactionInternalCalls) {
+    list.push({
+      label: 'Internal',
+      value: SECTION_INTERNAL,
+    });
+  }
   return list;
 });
 

@@ -5,6 +5,7 @@ interface EnvironmentVariables {
   apiEndpoint: string;
   appBaseUrl: string;
   indexerEndpoint: string;
+  featureTransactionInternalCalls: boolean;
 }
 
 function useEnv(): EnvironmentVariables {
@@ -16,6 +17,8 @@ function useEnv(): EnvironmentVariables {
     apiEndpoint: env.VITE_API_ENDPOINT || '',
     appBaseUrl: env.VITE_APP_BASE_URL || '',
     indexerEndpoint: env.VITE_INDEXER_ENDPOINT || '',
+    featureTransactionInternalCalls:
+      env.VITE_FEATURE_TRANSACTION_INTERNAL_CALLS === 'true',
   };
 }
 
