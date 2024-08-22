@@ -405,7 +405,7 @@ tbody {
 }
 
 .func {
-  width: 70px;
+  width: 80px;
 }
 
 .data {
