@@ -26,11 +26,103 @@ interface BlockWithTransactions extends BaseBlock {
   transactions: Transaction[];
 }
 
+interface TransactionTraceResponseCallTrace {
+  action: {
+    from: Address;
+    callType: 'call' | 'delegatecall' | 'staticcall';
+    gas: Hex;
+    input: Hex;
+    to: Address;
+    value: Hex;
+  };
+  error?: 'out of gas' | 'Reverted';
+  result: {
+    gasUsed: Hex;
+    output: Hex;
+  };
+  subtraces: number;
+  traceAddress: number[];
+  type: 'call';
+}
+
+interface TransactionTraceResponseCreateTrace {
+  action: {
+    from: Address;
+    gas: Hex;
+    init: Hex;
+    value: Hex;
+  };
+  error?: 'out of gas' | 'Reverted';
+  result: {
+    address: Address;
+    code: Hex;
+    gasUsed: Hex;
+  };
+  subtraces: number;
+  traceAddress: number[];
+  type: 'create';
+}
+
+type TransactionTraceResponseTrace =
+  | TransactionTraceResponseCallTrace
+  | TransactionTraceResponseCreateTrace;
+
+interface TransactionTraceResponse {
+  output: Hex;
+  stateDiff: null;
+  trace: TransactionTraceResponseTrace[];
+  vmTrace: null;
+  transactionHash: Hex;
+}
+
+interface TransactionTraceCallPart {
+  action: {
+    from: Address;
+    callType: 'call' | 'delegatecall' | 'staticcall';
+    gas: bigint;
+    input: Hex;
+    to: Address;
+    value: bigint;
+  };
+  error: null | 'OOG' | 'Reverted';
+  result: {
+    gasUsed: bigint;
+    output: Hex;
+  };
+  subtraces: number;
+  traceAddress: number[];
+  type: 'call';
+}
+
+interface TransactionTraceCreatePart {
+  action: {
+    from: Address;
+    gas: bigint;
+    init: Hex;
+    value: bigint;
+  };
+  error: null | 'OOG' | 'Reverted';
+  result: {
+    gasUsed: bigint;
+    address: Address;
+    code: Hex;
+  };
+  subtraces: number;
+  traceAddress: number[];
+  type: 'create';
+}
+
+type TransactionTracePart =
+  | TransactionTraceCallPart
+  | TransactionTraceCreatePart;
+
+type TransactionTrace = TransactionTracePart[];
+
 class Service {
-  client: PublicClient;
+  client: ReturnType<typeof getClient>;
 
   constructor(client: PublicClient) {
-    this.client = client;
+    this.client = getClient(client);
   }
 
   public async getLatestBlock(): Promise<bigint> {
@@ -128,6 +220,85 @@ class Service {
     });
     return balance;
   }
+
+  public async getTransactionTrace(
+    hash: Hex,
+  ): Promise<TransactionTrace | null> {
+    try {
+      const traceResponse = await this.client.traceReplayTransaction(hash, [
+        'trace',
+      ]);
+      return traceResponse.trace.map((item) => {
+        const error =
+          item.error === undefined
+            ? null
+            : item.error === 'Reverted'
+              ? 'Reverted'
+              : 'OOG';
+        const subtraces = item.subtraces;
+        const traceAddress = item.traceAddress;
+        if (item.type === 'create') {
+          return {
+            action: {
+              from: item.action.from,
+              gas: BigInt(item.action.gas),
+              init: item.action.init,
+              value: BigInt(item.action.value),
+            },
+            error,
+            result: {
+              gasUsed: BigInt(item.result.gasUsed),
+              address: item.result.address,
+              code: item.result.code,
+            },
+            subtraces,
+            traceAddress,
+            type: item.type,
+          };
+        } else {
+          return {
+            action: {
+              from: item.action.from,
+              callType: item.action.callType,
+              gas: BigInt(item.action.gas),
+              input: item.action.input,
+              to: item.action.to,
+              value: BigInt(item.action.value),
+            },
+            error,
+            result: {
+              gasUsed: BigInt(item.result.gasUsed),
+              output: item.result.output,
+            },
+            subtraces,
+            traceAddress,
+            type: item.type,
+          };
+        }
+      });
+    } catch {
+      return null;
+    }
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+function getClient(client: PublicClient) {
+  return client.extend((client) => ({
+    async traceReplayTransaction(
+      hash: Hex,
+      type: ('trace' | 'stateDiff' | 'vmTrace')[],
+    ): Promise<TransactionTraceResponse> {
+      return await client.request({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        method: 'trace_replayTransaction',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        params: [hash, type],
+      });
+    },
+  }));
 }
 
 export default Service;
@@ -139,4 +310,5 @@ export type {
   Transaction,
   TransactionReceipt,
   TransactionStatus,
+  TransactionTrace,
 };
