@@ -338,16 +338,4 @@ tbody {
 .address {
   width: 250px;
 }
-
-.func {
-  width: 70px;
-}
-
-.data {
-  width: 260px;
-}
-
-.value {
-  width: 100px;
-}
 </style>
