@@ -121,9 +121,6 @@ function isChainName(value: string): boolean {
   return !!chain;
 }
 
-// function getEndpointUrl(chainId: Chain, alchemyKey: string): string {
-//   return alchemy(chainId, alchemyKey);
-// }
 function getEndpointUrl(
   chainId: Chain,
   quicknodeAppName: string,
