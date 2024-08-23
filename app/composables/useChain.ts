@@ -13,10 +13,17 @@ import {
 } from '@/utils/chains.js';
 import type { Chain } from '@/utils/chains.js';
 
+interface NativeCurrency {
+  name: string;
+  symbol: string;
+  decimals: number;
+}
+
 interface UseChain {
   id: Ref<Chain>;
   name: Ref<string>;
   client: Ref<PublicClient>;
+  nativeCurrency: Ref<NativeCurrency>;
 }
 
 function parseChain(value?: string | string[]): Chain | null {
@@ -68,7 +75,13 @@ function useChain(): UseChain {
     }),
   );
 
-  return { id, name, client };
+  const nativeCurrency = computed(() => {
+    const chain = getChainData(id.value);
+    return chain.nativeCurrency;
+  });
+
+  return { id, name, client, nativeCurrency };
 }
 
 export default useChain;
+export type { NativeCurrency };

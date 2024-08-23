@@ -133,6 +133,7 @@ import LinkTransaction from './LinkTransaction.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import useChain from '@/composables/useChain.js';
 import useLabels from '@/composables/useLabels.js';
 import { toRelativeTime } from '@/utils/conversion';
 import {
@@ -141,6 +142,7 @@ import {
   formatRelativeTime,
 } from '@/utils/formatting';
 
+const { nativeCurrency } = useChain();
 const { getLabelText } = useLabels();
 
 const props = defineProps<{
@@ -218,7 +220,7 @@ const columns = computed(() => {
       }),
       columnHelper.accessor('value', {
         header: 'value',
-        cell: (cell) => formatEther(cell.getValue()),
+        cell: (cell) => formatEther(cell.getValue(), nativeCurrency.value),
       }),
       columnHelper.accessor('gasPrice', {
         header: 'gas price',

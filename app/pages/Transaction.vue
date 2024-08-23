@@ -76,7 +76,7 @@
             note="The amount of natuve currency transferred from the sender to the recipient"
           />
           <AttributeItemValue>
-            {{ formatEther(transaction.value) }}
+            {{ formatEther(transaction.value, nativeCurrency) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
@@ -112,7 +112,7 @@
             note="The total transaction fee paid by the sender, calculated as gas used multiplied by gas price"
           />
           <AttributeItemValue>
-            {{ formatEther(fee) }}
+            {{ formatEther(fee, nativeCurrency) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
@@ -309,7 +309,7 @@ const { send: sendToast } = useToast();
 
 const route = useRoute();
 const router = useRouter();
-const { id: chainId, name: chainName, client } = useChain();
+const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
 const { addAbis } = useAbi();
 
 const section = ref<Section['value']>(SECTION_LOGS);

@@ -3,12 +3,14 @@ import type { Address } from 'viem';
 import type { RelativeTime } from './conversion.js';
 import { fromWei } from './conversion.js';
 
+import type { NativeCurrency } from '@/composables/useChain.js';
+
 function formatAddress(value: Address, size: number): string {
   return `${value.slice(0, 2 + size / 2)}...${value.slice(-size / 2)}`;
 }
 
-function formatEther(value: bigint): string {
-  return `${formatNumber(fromWei(value, 18))} ETH`;
+function formatEther(value: bigint, nativeCurrency: NativeCurrency): string {
+  return `${formatNumber(fromWei(value, nativeCurrency.decimals))} ${nativeCurrency.symbol}`;
 }
 
 function formatGasPrice(value: bigint): string {

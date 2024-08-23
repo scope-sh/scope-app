@@ -125,7 +125,7 @@
                 note="The amount of native currency transferred from the sender to the recipient"
               />
               <AttributeItemValue>
-                {{ formatEther(call.value) }}
+                {{ formatEther(call.value, nativeCurrency) }}
               </AttributeItemValue>
             </AttributeItem>
             <AttributeItem>
@@ -180,7 +180,7 @@
             note="The total operation fee paid by the sender or paymaster, calculated as gas used multiplied by gas price"
           />
           <AttributeItemValue>
-            {{ formatEther(userOpUnpacked.actualGasCost) }}
+            {{ formatEther(userOpUnpacked.actualGasCost, nativeCurrency) }}
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
@@ -335,7 +335,7 @@ const { send: sendToast } = useToast();
 const { indexerEndpoint } = useEnv();
 const route = useRoute();
 const router = useRouter();
-const { id: chainId, name: chainName, client } = useChain();
+const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
 const { addAbis } = useAbi();
 const { getLabel } = useLabels();
 
