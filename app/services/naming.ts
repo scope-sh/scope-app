@@ -1,6 +1,5 @@
 import type {
   Address,
-  ByteArray,
   ContractFunctionParameters,
   Hex,
   MulticallResults,
@@ -11,12 +10,11 @@ import {
   decodeFunctionResult,
   encodeFunctionData,
   http,
-  labelhash,
   namehash,
   slice,
-  stringToBytes,
   toHex,
 } from 'viem';
+import { packetToBytes } from 'viem/ens';
 import { trim } from 'viem/utils';
 
 import ensAddressResolverAbi from '@/abi/ensAddressResolver';
@@ -249,34 +247,6 @@ function convertEvmChainIdToCoinType(chainId: number): number {
   if (chainId === ETHEREUM) return 60;
   if (chainId === SEPOLIA) return 60;
   return (0x80000000 | chainId) >>> 0;
-}
-
-function encodeLabelhash(hash: Hex): `[${string}]` {
-  return `[${hash.slice(2)}]`;
-}
-
-function packetToBytes(packet: string): ByteArray {
-  // strip leading and trailing `.`
-  const value = packet.replace(/^\.|\.$/gm, '');
-  if (value.length === 0) return new Uint8Array(1);
-
-  const bytes = new Uint8Array(stringToBytes(value).byteLength + 2);
-
-  let offset = 0;
-  const list = value.split('.');
-  for (const item of list) {
-    let encoded = stringToBytes(item);
-    // if the length is > 255, make the encoded label value a labelhash
-    // this is compatible with the universal resolver
-    if (encoded.byteLength > 255)
-      encoded = stringToBytes(encodeLabelhash(labelhash(item)));
-    bytes[offset] = encoded.length;
-    bytes.set(encoded, offset + 1);
-    offset += encoded.length + 1;
-  }
-
-  if (bytes.byteLength !== offset + 1) return bytes.slice(0, offset + 1);
-  return bytes;
 }
 
 export default Service;
