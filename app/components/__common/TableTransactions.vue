@@ -65,41 +65,41 @@
             </template>
             <LinkBlock
               v-if="cell.column.id === 'blockNumber'"
-              :number="cell.getValue() as bigint"
+              :number="toBlockNumber(cell.getValue())"
               type="minimal"
             />
             <LinkTransaction
               v-else-if="cell.column.id === 'hash'"
-              :hash="cell.getValue() as Hex"
+              :hash="toHash(cell.getValue())"
               type="minimal"
             >
-              {{ cell.getValue() as Hex }}
+              {{ cell.getValue() }}
             </LinkTransaction>
             <template v-else-if="cell.column.id === 'from'">
               <LinkAddress
                 v-if="cell.getValue() !== address"
-                :address="cell.getValue() as Address"
+                :address="toAddress(cell.getValue())"
                 type="minimal"
               />
               <div
                 v-else
                 class="address-value"
               >
-                {{ getAddress(cell.getValue() as Address) }}
+                {{ getAddress(toAddress(cell.getValue())) }}
               </div>
             </template>
             <template v-else-if="cell.column.id === 'to'">
               <template v-if="cell.getValue()">
                 <LinkAddress
                   v-if="cell.getValue() !== address"
-                  :address="cell.getValue() as Address"
+                  :address="toAddress(cell.getValue())"
                   type="minimal"
                 />
                 <div
                   v-else
                   class="address-value"
                 >
-                  {{ getAddress(cell.getValue() as Address) }}
+                  {{ getAddress(toAddress(cell.getValue())) }}
                 </div>
               </template>
               <span v-else>—</span>
@@ -268,6 +268,18 @@ function formatData(value: Hex): string {
     return '—';
   }
   return value;
+}
+
+function toBlockNumber(value: unknown): bigint {
+  return value as bigint;
+}
+
+function toHash(value: unknown): Hex {
+  return value as Hex;
+}
+
+function toAddress(value: unknown): Address {
+  return value as Address;
 }
 </script>
 

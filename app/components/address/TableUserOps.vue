@@ -63,31 +63,31 @@
             </template>
             <LinkBlock
               v-else-if="cell.column.id === 'blockNumber'"
-              :number="cell.getValue() as bigint"
+              :number="toBlockNumber(cell.getValue())"
               type="minimal"
             />
             <LinkTransaction
               v-else-if="cell.column.id === 'transactionHash'"
-              :hash="cell.getValue() as Hex"
+              :hash="toHash(cell.getValue())"
               type="minimal"
             >
-              {{ cell.getValue() as Hex }}
+              {{ toHash(cell.getValue()) }}
             </LinkTransaction>
             <LinkUserOp
               v-else-if="cell.column.id === 'hash'"
-              :hash="cell.getValue() as Hex"
+              :hash="toHash(cell.getValue())"
               type="minimal"
             >
-              {{ cell.getValue() as Hex }}
+              {{ toHash(cell.getValue()) }}
             </LinkUserOp>
             <LinkAddress
               v-else-if="cell.column.id === 'bundler'"
-              :address="cell.getValue() as Address"
+              :address="toAddress(cell.getValue())"
               type="minimal"
             />
             <LinkAddress
               v-else-if="isPaymaster(cell)"
-              :address="cell.getValue() as Address"
+              :address="toAddress(cell.getValue())"
               type="minimal"
             />
             <FlexRender
@@ -217,6 +217,18 @@ watch(
 
 function isPaymaster(cell: Cell<UserOp, unknown>): boolean {
   return cell.column.id === 'paymaster' && cell.getValue() !== zeroAddress;
+}
+
+function toBlockNumber(value: unknown): bigint {
+  return value as bigint;
+}
+
+function toHash(value: unknown): Hex {
+  return value as Hex;
+}
+
+function toAddress(value: unknown): Address {
+  return value as Address;
 }
 </script>
 
