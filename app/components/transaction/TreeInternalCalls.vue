@@ -48,7 +48,9 @@
           </div>
         </div>
         <div class="sticky right">
-          <div class="cell value">{{ formatEther(item.value) }}</div>
+          <div class="cell value">
+            {{ formatEther(item.value, nativeCurrency) }}
+          </div>
         </div>
       </div>
     </div>
@@ -60,7 +62,10 @@ import { type Address, type Hex, size, slice } from 'viem';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import useChain from '@/composables/useChain';
 import { formatEther } from '@/utils/formatting';
+
+const { nativeCurrency } = useChain();
 
 defineProps<{
   calls: Call[];
