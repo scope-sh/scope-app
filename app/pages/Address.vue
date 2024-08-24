@@ -79,11 +79,18 @@
           title="UserOps"
         >
           <template #header>
-            <ScopePaginator
-              v-if="opRows.length"
-              v-model="opPage"
-              :total="maxOpPage"
-            />
+            <div class="panel-header">
+              <ScopePaginator
+                v-if="opRows.length"
+                v-model="opPage"
+                :total="maxOpPage"
+              />
+              <ScopeIcon
+                class="icon-reload"
+                kind="reload"
+                @click="reloadOps"
+              />
+            </div>
           </template>
           <template #default>
             <ScopeLabelEmptyState
@@ -109,11 +116,18 @@
           title="Transactions"
         >
           <template #header>
-            <ScopePaginator
-              v-if="transactionRows.length"
-              v-model="transactionPage"
-              :total="maxTransactionPage"
-            />
+            <div class="panel-header">
+              <ScopePaginator
+                v-if="transactionRows.length"
+                v-model="transactionPage"
+                :total="maxTransactionPage"
+              />
+              <ScopeIcon
+                class="icon-reload"
+                kind="reload"
+                @click="reloadTransactions"
+              />
+            </div>
           </template>
           <ScopeLabelEmptyState
             v-if="!transactionRows.length"
@@ -139,11 +153,18 @@
           title="Logs"
         >
           <template #header>
-            <ScopePaginator
-              v-if="logRows.length"
-              v-model="logPage"
-              :total="maxLogPage"
-            />
+            <div class="panel-header">
+              <ScopePaginator
+                v-if="logRows.length"
+                v-model="logPage"
+                :total="maxLogPage"
+              />
+              <ScopeIcon
+                class="icon-reload"
+                kind="reload"
+                @click="reloadLogs"
+              />
+            </div>
           </template>
           <template #default>
             <ScopeLabelEmptyState
@@ -537,6 +558,15 @@ const transactionRows = computed<TransactionRow[]>(() => {
     };
   });
 });
+async function reloadTransactions(): Promise<void> {
+  transactionPage.value = 1;
+  transactionPagination.value = {
+    cursor: null,
+    height: null,
+  };
+  transactions.value = [];
+  await fetchTransactions();
+}
 
 const LOGS_PER_PAGE = 20;
 const logPage = ref(1);
@@ -599,6 +629,15 @@ const logRows = computed<Log[]>(() => {
     })
     .slice((logPage.value - 1) * LOGS_PER_PAGE, logPage.value * LOGS_PER_PAGE);
 });
+async function reloadLogs(): Promise<void> {
+  logPage.value = 1;
+  logPagination.value = {
+    cursor: null,
+    height: null,
+  };
+  logs.value = [];
+  await fetchLogs();
+}
 
 function getMaxPage(
   sort: Sort | null,
@@ -649,6 +688,11 @@ async function fetchUserOps(): Promise<void> {
     ...new Map(ops.value.concat(newOps).map((op) => [op.hash, op])).values(),
   ];
   isLoadingOps.value = false;
+}
+async function reloadOps(): Promise<void> {
+  opPage.value = 1;
+  ops.value = [];
+  await fetchUserOps();
 }
 const opRows = computed<UserOpRow[]>(() => {
   return ops.value.map((op) => {
@@ -769,6 +813,23 @@ watch(
     margin: 0;
     padding-left: 0;
     list-style-type: none;
+  }
+}
+
+.panel-header {
+  display: flex;
+  gap: var(--spacing-6);
+  align-items: center;
+}
+
+.icon-reload {
+  width: 14px;
+  height: 14px;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-primary);
   }
 }
 
