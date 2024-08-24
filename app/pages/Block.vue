@@ -31,6 +31,15 @@
       title="Block"
       :subtitle="number.toString()"
     >
+      <template #header>
+        <ScopePaginator
+          v-if="block"
+          :zero-based="true"
+          :show-page="false"
+          :model-value="block.number"
+          @update:model-value="handleBlockNumberUpdate"
+        />
+      </template>
       <BlockStatus
         v-if="block"
         :status="'executed'"
@@ -306,6 +315,10 @@ const maxPage = computed(() => {
   }
   return Math.ceil(block.value.transactions.length / TRANSACTIONS_PER_PAGE);
 });
+
+async function handleBlockNumberUpdate(number: number): Promise<void> {
+  router.push(getRouteLocation({ name: 'block', number: BigInt(number) }));
+}
 
 async function handleOpenLatestBlockClick(): Promise<void> {
   if (!evmService.value) {
