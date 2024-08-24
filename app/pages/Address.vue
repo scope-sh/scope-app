@@ -86,9 +86,9 @@
                 :total="maxOpPage"
               />
               <ScopeIcon
-                class="icon-reload"
+                class="icon-refresh"
                 kind="reload"
-                @click="reloadOps"
+                @click="refreshOps"
               />
             </div>
           </template>
@@ -123,9 +123,9 @@
                 :total="maxTransactionPage"
               />
               <ScopeIcon
-                class="icon-reload"
+                class="icon-refresh"
                 kind="reload"
-                @click="reloadTransactions"
+                @click="refreshTransactions"
               />
             </div>
           </template>
@@ -160,9 +160,9 @@
                 :total="maxLogPage"
               />
               <ScopeIcon
-                class="icon-reload"
+                class="icon-refresh"
                 kind="reload"
-                @click="reloadLogs"
+                @click="refreshLogs"
               />
             </div>
           </template>
@@ -558,7 +558,7 @@ const transactionRows = computed<TransactionRow[]>(() => {
     };
   });
 });
-async function reloadTransactions(): Promise<void> {
+async function refreshTransactions(): Promise<void> {
   transactionPage.value = 1;
   transactionPagination.value = {
     cursor: null,
@@ -629,7 +629,7 @@ const logRows = computed<Log[]>(() => {
     })
     .slice((logPage.value - 1) * LOGS_PER_PAGE, logPage.value * LOGS_PER_PAGE);
 });
-async function reloadLogs(): Promise<void> {
+async function refreshLogs(): Promise<void> {
   logPage.value = 1;
   logPagination.value = {
     cursor: null,
@@ -689,7 +689,7 @@ async function fetchUserOps(): Promise<void> {
   ];
   isLoadingOps.value = false;
 }
-async function reloadOps(): Promise<void> {
+async function refreshOps(): Promise<void> {
   opPage.value = 1;
   ops.value = [];
   await fetchUserOps();
@@ -822,7 +822,7 @@ watch(
   align-items: center;
 }
 
-.icon-reload {
+.icon-refresh {
   width: 14px;
   height: 14px;
   color: var(--color-text-secondary);
