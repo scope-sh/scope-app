@@ -114,6 +114,31 @@ class Service {
       const chainResults = await client.multicall({
         contracts: calls.map((call) => call.params),
       });
+      // Retry failed calls one by one
+      for (let i = 0; i < calls.length; i++) {
+        const call = calls[i];
+        if (!call) {
+          continue;
+        }
+        const chainResult = chainResults[i];
+        if (!chainResult) {
+          continue;
+        }
+        if (chainResult.status === 'failure') {
+          try {
+            const retryResult = await client.readContract(call.params);
+            chainResults[i] = {
+              status: 'success',
+              result: retryResult,
+            };
+          } catch (e) {
+            chainResults[i] = {
+              status: 'failure',
+              error: e as Error,
+            };
+          }
+        }
+      }
       results.push(...chainResults);
     }
     // Merge results
