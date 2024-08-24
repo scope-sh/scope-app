@@ -29,6 +29,15 @@
       title="Transaction"
       :subtitle="hash"
     >
+      <template #header>
+        <ScopePaginator
+          v-if="block && transaction && transaction.transactionIndex !== null"
+          :total="block.transactions"
+          :zero-based="true"
+          :model-value="transaction.transactionIndex"
+          @update:model-value="handleTransactionIndexUpdate"
+        />
+      </template>
       <TransactionStatus
         v-if="transactionReceipt"
         :status="transactionReceipt.status"
@@ -257,6 +266,7 @@ import ScopeEmptyState from '@/components/__common/ScopeEmptyState.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
+import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
@@ -336,57 +346,6 @@ const sections = computed<Section[]>(() => {
 
 const hash = computed(() => route.params.hash as Address);
 
-const commands = computed<Command[]>(() => [
-  {
-    icon: 'copy',
-    label: 'Copy transaction hash',
-    act: (): void => {
-      if (!hash.value) {
-        return;
-      }
-      navigator.clipboard.writeText(hash.value);
-      sendToast({
-        type: 'success',
-        message: 'Transaction hash copied to clipboard',
-      });
-    },
-  },
-  {
-    icon: 'arrow-left',
-    label: 'Previous transaction',
-    act: (): void => {
-      if (transaction.value && transaction.value.transactionIndex) {
-        openBlockTransaction(
-          transaction.value.transactionIndex - 1,
-          'No previous transaction',
-        );
-      }
-    },
-  },
-  {
-    icon: 'arrow-right',
-    label: 'Next transaction',
-    act: (): void => {
-      if (transaction.value && transaction.value.transactionIndex) {
-        openBlockTransaction(
-          transaction.value.transactionIndex + 1,
-          'No next transaction',
-        );
-      }
-    },
-  },
-]);
-
-watch(
-  commands,
-  () => {
-    setCommands(commands.value);
-  },
-  {
-    immediate: true,
-  },
-);
-
 onMounted(() => {
   fetch();
 });
@@ -411,6 +370,81 @@ const block = ref<Block | null>(null);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
 const transactionTrace = ref<TransactionTrace | null>(null);
+
+const hasPrevTransaction = computed(() => {
+  if (!transaction.value || !transaction.value.transactionIndex) {
+    return false;
+  }
+  return transaction.value.transactionIndex > 0;
+});
+const hasNextTransaction = computed(() => {
+  if (
+    !transaction.value ||
+    transaction.value.transactionIndex === null ||
+    !block.value
+  ) {
+    return false;
+  }
+  return transaction.value.transactionIndex < block.value.transactions - 1;
+});
+
+const commands = computed<Command[]>(() => {
+  const list: Command[] = [
+    {
+      icon: 'copy',
+      label: 'Copy transaction hash',
+      act: (): void => {
+        if (!hash.value) {
+          return;
+        }
+        navigator.clipboard.writeText(hash.value);
+        sendToast({
+          type: 'success',
+          message: 'Transaction hash copied to clipboard',
+        });
+      },
+    },
+  ];
+  if (hasPrevTransaction.value) {
+    list.push({
+      icon: 'arrow-left',
+      label: 'Previous transaction',
+      act: (): void => {
+        if (transaction.value && transaction.value.transactionIndex !== null) {
+          openBlockTransaction(
+            transaction.value.transactionIndex - 1,
+            'No previous transaction',
+          );
+        }
+      },
+    });
+  }
+  if (hasNextTransaction.value) {
+    list.push({
+      icon: 'arrow-right',
+      label: 'Next transaction',
+      act: (): void => {
+        if (transaction.value && transaction.value.transactionIndex !== null) {
+          openBlockTransaction(
+            transaction.value.transactionIndex + 1,
+            'No next transaction',
+          );
+        }
+      },
+    });
+  }
+  return list;
+});
+
+watch(
+  commands,
+  () => {
+    setCommands(commands.value);
+  },
+  {
+    immediate: true,
+  },
+);
 
 async function fetch(): Promise<void> {
   if (!evmService.value) {
@@ -674,6 +708,10 @@ const actions = computed<Action[]>(() => {
   }
   return [];
 });
+
+async function handleTransactionIndexUpdate(index: number): Promise<void> {
+  openBlockTransaction(index, 'No transaction found');
+}
 
 async function openBlockTransaction(
   index: number,
