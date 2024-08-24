@@ -1,6 +1,6 @@
 <template>
   <Pagination.Root
-    :page="page"
+    :page="zeroBased ? page + 1 : page"
     :total="total"
     :items-per-page="1"
     :sibling-count="1"
@@ -15,6 +15,7 @@
         />
       </Pagination.Prev>
       <Pagination.ListItem
+        v-if="showPage"
         class="button"
         :value="page"
       >
@@ -35,16 +36,25 @@ import { Pagination } from 'radix-vue/namespaced';
 
 import ScopeIcon from './ScopeIcon.vue';
 
-defineProps<{
-  total?: number;
-}>();
+const props = withDefaults(
+  defineProps<{
+    total?: number;
+    zeroBased?: boolean;
+    showPage?: boolean;
+  }>(),
+  {
+    total: undefined,
+    zeroBased: false,
+    showPage: true,
+  },
+);
 
 const page = defineModel<number>({
   required: true,
 });
 
 function handlePageUpdate(newValue: number): void {
-  page.value = newValue;
+  page.value = props.zeroBased ? newValue - 1 : newValue;
 }
 </script>
 
