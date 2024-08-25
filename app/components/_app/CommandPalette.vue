@@ -485,11 +485,14 @@ async function getGoToItems(
     const foundUserOp = await indexerService.value.getTxHashByUserOpHash(
       hash as Hex,
     );
-    if (foundUserOp) {
-      return getOpenUserOpCommand(hash);
-    } else {
+    const foundTx = await evmService.value.getTransaction(hash as Hex);
+    if (foundTx) {
       return getOpenTransactionCommand(hash);
     }
+    if (foundUserOp) {
+      return getOpenUserOpCommand(hash);
+    }
+    return null;
   }
 
   async function getOpenLabelCommands(query: string): Promise<Command[]> {
