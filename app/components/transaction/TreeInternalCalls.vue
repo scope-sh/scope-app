@@ -174,6 +174,12 @@ export type { Call };
       padding: 6px 10px 10px;
     }
   }
+
+  &:only-child {
+    .cell {
+      padding: 10px;
+    }
+  }
 }
 
 .tree:hover {
