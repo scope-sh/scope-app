@@ -128,7 +128,7 @@ export type { Call };
   --border-radius: var(--border-radius-s);
 
   width: 100%;
-  padding-bottom: var(--spacing-2);
+  padding-bottom: var(--spacing-4);
   overflow: auto hidden;
   border-spacing: 0;
   border: 1px solid var(--color-border-tertiary);
