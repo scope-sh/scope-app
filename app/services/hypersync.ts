@@ -51,6 +51,48 @@ interface Transaction {
   status: number;
 }
 
+interface Erc20Transfer {
+  type: 'erc20';
+  blockNumber: number;
+  blockTimestamp: number;
+  transactionHash: Hex;
+  asset: Address;
+  from: Address;
+  to: Address;
+  amount: string;
+}
+
+interface Erc721Transfer {
+  type: 'erc721';
+  blockNumber: number;
+  blockTimestamp: number;
+  transactionHash: Hex;
+  asset: Address;
+  from: Address;
+  to: Address;
+  id: string;
+  amount: string;
+}
+
+interface Erc1155Transfer {
+  type: 'erc1155';
+  blockNumber: number;
+  blockTimestamp: number;
+  transactionHash: Hex;
+  asset: Address;
+  from: Address;
+  to: Address;
+  ids: string[];
+  amounts: string[];
+}
+
+type Transfer = Erc20Transfer | Erc721Transfer | Erc1155Transfer;
+
+interface AddressTransfers {
+  transfers: Transfer[];
+  pagination: Pagination;
+}
+
 interface Log {
   blockNumber: number;
   blockTimestamp: number;
@@ -120,7 +162,25 @@ class Service {
     });
     return response.json<AddressLogs>();
   }
+
+  async getAddressTransfers(
+    address: Address,
+    startCursor: number | null,
+    limit: number,
+    sort: Sort,
+  ): Promise<AddressTransfers> {
+    const response = await this.client.get('transfers', {
+      searchParams: {
+        chain: this.chain,
+        address,
+        cursor: startCursor ? startCursor : 0,
+        limit,
+        sort,
+      },
+    });
+    return response.json<AddressTransfers>();
+  }
 }
 
 export default Service;
-export type { Transaction, Log, Pagination, Sort };
+export type { Transaction, Log, Transfer, Pagination, Sort };
