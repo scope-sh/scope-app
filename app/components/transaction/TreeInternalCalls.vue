@@ -111,11 +111,11 @@ interface Call {
 }
 
 function getFunction(data: Hex): Hex {
-  return data.length > 10 ? slice(data, 0, 4) : '0x';
+  return size(data) > 0 ? slice(data, 0, 4) : '0x';
 }
 
 function getData(data: Hex): Hex {
-  return data.length > 10 ? slice(data, 4) : '0x';
+  return size(data) > 4 ? slice(data, 4) : '0x';
 }
 
 // eslint-disable-next-line import/prefer-default-export
