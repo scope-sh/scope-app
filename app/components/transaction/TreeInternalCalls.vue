@@ -1,5 +1,9 @@
 <template>
-  <div class="tree">
+  <div
+    ref="el"
+    class="tree"
+    :class="{ scrollable }"
+  >
     <div class="scroll">
       <div
         v-for="item in calls"
@@ -58,6 +62,7 @@
 
 <script setup lang="ts">
 import { type Address, type Hex, size, slice } from 'viem';
+import { ref, computed } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
@@ -69,6 +74,14 @@ const { nativeCurrency } = useChain();
 defineProps<{
   calls: Call[];
 }>();
+
+const el = ref<HTMLElement | null>(null);
+const scrollable = computed(() => {
+  if (!el.value) {
+    return false;
+  }
+  return el.value.scrollWidth > el.value.clientWidth;
+});
 
 function formatType(
   value: 'call' | 'delegatecall' | 'staticcall' | 'create',
@@ -127,11 +140,14 @@ export type { Call };
   --border-radius: var(--border-radius-s);
 
   width: 100%;
-  padding-bottom: var(--spacing-4);
   overflow: auto hidden;
   border-spacing: 0;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius);
+
+  &.scrollable {
+    padding-bottom: var(--spacing-4);
+  }
 }
 
 .scroll {
