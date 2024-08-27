@@ -10,8 +10,7 @@
         <div class="sticky left">
           <div class="cell tiny">
             <ScopeIcon
-              v-if="item.success !== undefined"
-              :kind="item.success ? 'check' : 'cross'"
+              :kind="item.success === true ? 'check' : 'cross'"
               class="icon"
             />
           </div>
