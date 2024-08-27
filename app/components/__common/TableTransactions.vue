@@ -427,7 +427,7 @@ tbody {
 }
 
 .value {
-  width: 100px;
+  width: 110px;
 }
 
 .address-value {
