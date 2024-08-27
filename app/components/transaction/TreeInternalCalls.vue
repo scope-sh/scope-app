@@ -228,7 +228,7 @@ export type { Call };
 }
 
 .value {
-  width: 100px;
+  width: 110px;
   text-align: end;
 }
 </style>
