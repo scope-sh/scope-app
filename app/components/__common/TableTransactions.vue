@@ -375,6 +375,12 @@ tr {
     }
   }
 
+  &:only-child {
+    td {
+      padding: 10px;
+    }
+  }
+
   th {
     &:first-child {
       border-radius: calc(var(--border-radius) - 1px) 0 0 0;
@@ -382,6 +388,10 @@ tr {
 
     &:last-child {
       border-radius: 0 calc(var(--border-radius) - 1px) 0 0;
+    }
+
+    &:only-child {
+      border-radius: calc(var(--border-radius) - 1px) 0;
     }
   }
 }
