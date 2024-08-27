@@ -13,6 +13,5 @@ interface ImportMeta {
     VITE_APP_BASE_URL?: string;
     VITE_API_ENDPOINT?: string;
     VITE_INDEXER_ENDPOINT?: string;
-    VITE_FEATURE_TRANSACTION_INTERNAL_CALLS?: string;
   };
 }
