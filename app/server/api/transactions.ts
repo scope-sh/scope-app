@@ -1,4 +1,9 @@
-import { HypersyncClient, type Query } from '@envio-dev/hypersync-client';
+import {
+  BlockField,
+  HypersyncClient,
+  TransactionField,
+  type Query,
+} from '@envio-dev/hypersync-client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineEventHandler, getQuery } from 'h3';
 import type { Address, Hex } from 'viem';
@@ -52,17 +57,17 @@ export default defineEventHandler(async (event) => {
     ],
     maxNumTransactions: limit,
     fieldSelection: {
-      block: ['number', 'timestamp'],
+      block: [BlockField.Number, BlockField.Timestamp],
       transaction: [
-        'block_number',
-        'transaction_index',
-        'hash',
-        'from',
-        'to',
-        'input',
-        'value',
-        'gas_price',
-        'status',
+        TransactionField.BlockNumber,
+        TransactionField.TransactionIndex,
+        TransactionField.Hash,
+        TransactionField.From,
+        TransactionField.To,
+        TransactionField.Input,
+        TransactionField.Value,
+        TransactionField.GasPrice,
+        TransactionField.Status,
       ],
     },
   };
@@ -84,17 +89,17 @@ export default defineEventHandler(async (event) => {
       const transactionBlock = pageBlocks.find(
         (block) => block.number === tx.blockNumber,
       );
-      const timestamp = transactionBlock?.timestamp || '0x';
+      const timestamp = transactionBlock?.timestamp || 0;
       return {
         blockNumber: tx.blockNumber as number,
-        blockTimestamp: 1000 * parseInt(timestamp),
+        blockTimestamp: 1000 * timestamp,
         from: tx.from as Address,
-        gasPrice: tx.gasPrice || '0x',
+        gasPrice: tx.gasPrice?.toString() as string,
         hash: tx.hash as Hex,
         input: tx.input as Hex,
         to: (tx.to as Address | undefined) || null,
         transactionIndex: tx.transactionIndex as number,
-        value: tx.value as string,
+        value: tx.value?.toString() as string,
         status: tx.status as number,
       };
     });

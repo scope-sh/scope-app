@@ -1,4 +1,9 @@
-import { HypersyncClient, type Query } from '@envio-dev/hypersync-client';
+import {
+  BlockField,
+  HypersyncClient,
+  LogField,
+  type Query,
+} from '@envio-dev/hypersync-client';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineEventHandler, getQuery } from 'h3';
 import type { Address, Hex } from 'viem';
@@ -46,17 +51,17 @@ export default defineEventHandler(async (event) => {
     ],
     maxNumLogs: limit,
     fieldSelection: {
-      block: ['number', 'timestamp'],
+      block: [BlockField.Number, BlockField.Timestamp],
       log: [
-        'log_index',
-        'transaction_hash',
-        'block_number',
-        'address',
-        'data',
-        'topic0',
-        'topic1',
-        'topic2',
-        'topic3',
+        LogField.LogIndex,
+        LogField.TransactionHash,
+        LogField.BlockNumber,
+        LogField.Address,
+        LogField.Data,
+        LogField.Topic0,
+        LogField.Topic1,
+        LogField.Topic2,
+        LogField.Topic3,
       ],
     },
   };
@@ -78,10 +83,10 @@ export default defineEventHandler(async (event) => {
       const logBlock = pageBlocks.find(
         (block) => block.number === log.blockNumber,
       );
-      const timestamp = logBlock?.timestamp || '0x';
+      const timestamp = logBlock?.timestamp || 0;
       return {
         blockNumber: log.blockNumber as number,
-        blockTimestamp: 1000 * parseInt(timestamp),
+        blockTimestamp: 1000 * timestamp,
         logIndex: log.logIndex as number,
         transactionHash: log.transactionHash as Hex,
         address: log.address as Address,
