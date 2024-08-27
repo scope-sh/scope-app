@@ -205,6 +205,42 @@
           :address
         />
       </template>
+      <template v-else-if="section === SECTION_TRANSFERS">
+        <ScopePanelLoading
+          v-if="isLoadingTransfers"
+          title="Transfers"
+        />
+        <ScopePanel
+          v-else
+          title="Transfers"
+        >
+          <template #header>
+            <div class="panel-header">
+              <ScopePaginator
+                v-if="transferRows.length"
+                v-model="transferPage"
+                :total="maxTransferPage"
+              />
+              <ScopeIcon
+                class="icon-refresh"
+                kind="reload"
+                @click="refreshTransfers"
+              />
+            </div>
+          </template>
+          <ScopeLabelEmptyState
+            v-if="!transferRows.length"
+            value="No transfers found"
+          />
+          <TableTransfers
+            v-else
+            :address="address"
+            :transfers="transferRows"
+            :per-page="TRANSFERS_PER_PAGE"
+            :page="transferPage - 1"
+          />
+        </ScopePanel>
+      </template>
     </template>
   </ScopePage>
 </template>
@@ -235,6 +271,8 @@ import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
 import PanelCode from '@/components/address/PanelCode.vue';
 import PanelInteract from '@/components/address/PanelInteract.vue';
+import TableTransfers from '@/components/address/TableTransfers.vue';
+import type { Transfer as TransferRow } from '@/components/address/TableTransfers.vue';
 import type { UserOp as UserOpRow } from '@/components/address/TableUserOps.vue';
 import TableUserOps from '@/components/address/TableUserOps.vue';
 import useAbi from '@/composables/useAbi';
@@ -248,6 +286,7 @@ import EvmService from '@/services/evm';
 import type {
   Log as AddressLog,
   Transaction as AddressTransaction,
+  Transfer as AddressTransfer,
   Pagination,
   Sort,
 } from '@/services/hypersync';
@@ -261,6 +300,7 @@ const SECTION_TRANSACTIONS = 'transactions';
 const SECTION_LOGS = 'logs';
 const SECTION_CODE = 'code';
 const SECTION_INTERACT = 'interact';
+const SECTION_TRANSFERS = 'transfers';
 
 const { appBaseUrl, indexerEndpoint } = useEnv();
 const { setCommands } = useCommands();
@@ -306,6 +346,10 @@ const sections = computed<Section[]>(() => {
       value: SECTION_INTERACT,
     });
   }
+  sections.push({
+    label: 'Transfers',
+    value: SECTION_TRANSFERS,
+  });
   return sections;
 });
 
@@ -383,6 +427,9 @@ watch(ops, (opsValue) => {
   }
 });
 
+const isLoadingTransfers = ref(false);
+const transfers = ref<AddressTransfer[]>([]);
+
 const isContract = computed<boolean>(() => !!bytecode.value);
 const addressLabels = computed(() => getLabels(address.value));
 const primaryLabel = computed(() => addressLabels.value[0] || null);
@@ -416,6 +463,7 @@ async function fetch(): Promise<void> {
     fetchTransactions(),
     fetchLogs(),
     fetchUserOps(),
+    fetchTransfers(),
   ]);
 }
 
@@ -709,6 +757,105 @@ const opRows = computed<UserOpRow[]>(() => {
     };
   });
 });
+
+const TRANSFERS_PER_PAGE = 20;
+const transferPage = ref(1);
+const transferPagination = ref<Pagination>({
+  cursor: null,
+  height: null,
+});
+const maxTransferPage = computed(() =>
+  getMaxPage(
+    sort.value,
+    transferPagination.value,
+    transfers.value.length,
+    TRANSFERS_PER_PAGE,
+  ),
+);
+watch(transferPage, (page) => {
+  if (transferRows.value.length >= page * TRANSFERS_PER_PAGE) {
+    return;
+  }
+  fetchTransfers();
+});
+async function fetchTransfers(): Promise<void> {
+  if (!address.value || !hypersyncService.value || !sort.value) {
+    return;
+  }
+  if (
+    sort.value === 'desc' &&
+    transferPagination.value.cursor &&
+    transferPagination.value.cursor < 0
+  ) {
+    return;
+  }
+  isLoadingTransfers.value = true;
+  const addressTransfers = await hypersyncService.value.getAddressTransfers(
+    address.value,
+    transferPagination.value.cursor,
+    TRANSFERS_PER_PAGE + 1,
+    sort.value,
+  );
+  const newTransfers = addressTransfers.transfers;
+  // Append newly fetched transfers to the end of the list
+  // Make sure there are no duplicates
+  transfers.value = [
+    ...new Map(
+      transfers.value
+        .concat(newTransfers)
+        .map((transfer) => [transfer.transactionHash, transfer]),
+    ).values(),
+  ];
+  transferPagination.value = addressTransfers.pagination;
+  isLoadingTransfers.value = false;
+}
+const transferRows = computed<TransferRow[]>(() => {
+  return transfers.value.map((transfer) => {
+    return transfer.type === 'erc20'
+      ? {
+          blockNumber: transfer.blockNumber,
+          blockTimestamp: transfer.blockTimestamp,
+          transactionHash: transfer.transactionHash,
+          asset: transfer.asset,
+          from: transfer.from,
+          type: transfer.type,
+          to: transfer.to,
+          amount: transfer.amount,
+        }
+      : transfer.type === 'erc721'
+        ? {
+            blockNumber: transfer.blockNumber,
+            blockTimestamp: transfer.blockTimestamp,
+            transactionHash: transfer.transactionHash,
+            asset: transfer.asset,
+            from: transfer.from,
+            to: transfer.to,
+            type: transfer.type,
+            amount: transfer.amount,
+            id: transfer.id,
+          }
+        : {
+            blockNumber: transfer.blockNumber,
+            blockTimestamp: transfer.blockTimestamp,
+            transactionHash: transfer.transactionHash,
+            asset: transfer.asset,
+            from: transfer.from,
+            to: transfer.to,
+            type: transfer.type,
+            amount: transfer.amounts.join(','),
+            id: transfer.ids.join(','),
+          };
+  });
+});
+async function refreshTransfers(): Promise<void> {
+  transferPage.value = 1;
+  transferPagination.value = {
+    cursor: null,
+    height: null,
+  };
+  transfers.value = [];
+  await fetchTransfers();
+}
 
 const commands = computed<Command[]>(() => {
   const commands: Command[] = [
