@@ -14,6 +14,12 @@
       :title="overviewPanelTitle"
       :subtitle="address"
     >
+      <template
+        v-if="deployment"
+        #header
+      >
+        <CardDeployment :deployment />
+      </template>
       <FormEther
         v-if="address"
         v-model:balance="etherBalance"
@@ -269,6 +275,7 @@ import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.v
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
 import type { Transaction as TransactionRow } from '@/components/__common/TableTransactions.vue';
 import TableTransactions from '@/components/__common/TableTransactions.vue';
+import CardDeployment from '@/components/address/CardDeployment.vue';
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
 import PanelCode from '@/components/address/PanelCode.vue';
