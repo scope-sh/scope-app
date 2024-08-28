@@ -298,9 +298,9 @@ import type { Command } from '@/stores/commands';
 const SECTION_OPS = 'ops';
 const SECTION_TRANSACTIONS = 'transactions';
 const SECTION_LOGS = 'logs';
+const SECTION_TRANSFERS = 'transfers';
 const SECTION_CODE = 'code';
 const SECTION_INTERACT = 'interact';
-const SECTION_TRANSFERS = 'transfers';
 
 const { appBaseUrl, indexerEndpoint } = useEnv();
 const { setCommands } = useCommands();
@@ -336,6 +336,10 @@ const sections = computed<Section[]>(() => {
       },
     ],
   );
+  sections.push({
+    label: 'Transfers',
+    value: SECTION_TRANSFERS,
+  });
   if (isContract.value && bytecode.value) {
     sections.push({
       label: 'Code',
@@ -346,10 +350,6 @@ const sections = computed<Section[]>(() => {
       value: SECTION_INTERACT,
     });
   }
-  sections.push({
-    label: 'Transfers',
-    value: SECTION_TRANSFERS,
-  });
   return sections;
 });
 
