@@ -283,7 +283,11 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
-import ApiService, { type Contract, type LabelType } from '@/services/api';
+import ApiService, {
+  type Contract,
+  type LabelType,
+  type Deployment,
+} from '@/services/api';
 import EvmService from '@/services/evm';
 import type {
   Log as AddressLog,
@@ -420,6 +424,7 @@ const isLoadingCode = ref(false);
 const isLoadingContract = ref(false);
 const bytecode = ref<Hex | null>(null);
 const contract = ref<Contract | null>(null);
+const deployment = ref<Deployment | null>(null);
 
 const isLoadingTransactions = ref(false);
 const transactions = ref<AddressTransaction[]>([]);
@@ -501,7 +506,12 @@ async function fethcContract(): Promise<void> {
     return;
   }
   isLoadingContract.value = true;
-  contract.value = await apiService.value.getContractSource(address.value);
+  const [contractResponse, deploymentResponse] = await Promise.all([
+    apiService.value.getContractSource(address.value),
+    apiService.value.getContractDeployment(address.value),
+  ]);
+  contract.value = contractResponse;
+  deployment.value = deploymentResponse;
   isLoadingContract.value = false;
 }
 watch(contract, (contract) => {
