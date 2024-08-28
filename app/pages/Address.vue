@@ -232,13 +232,15 @@
             v-if="!transferRows.length"
             value="No transfers found"
           />
-          <TableTransfers
-            v-else
-            :address="address"
-            :transfers="transferRows"
-            :per-page="TRANSFERS_PER_PAGE"
-            :page="transferPage - 1"
-          />
+          <template v-else>
+            <div class="label-unsupported">ETH transfers not supported yet</div>
+            <TableTransfers
+              :address="address"
+              :transfers="transferRows"
+              :per-page="TRANSFERS_PER_PAGE"
+              :page="transferPage - 1"
+            />
+          </template>
         </ScopePanel>
       </template>
     </template>
@@ -983,5 +985,11 @@ watch(
   display: flex;
   gap: var(--spacing-5);
   flex-direction: column;
+}
+
+.label-unsupported {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-m);
+  font-style: italic;
 }
 </style>
