@@ -74,6 +74,8 @@ function copyToClipboard(text: string): void {
 
 .header {
   display: flex;
+  gap: var(--spacing-4);
+  flex-wrap: wrap;
   justify-content: space-between;
 }
 
