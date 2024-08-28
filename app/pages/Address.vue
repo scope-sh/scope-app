@@ -798,14 +798,7 @@ async function fetchTransfers(): Promise<void> {
   );
   const newTransfers = addressTransfers.transfers;
   // Append newly fetched transfers to the end of the list
-  // Make sure there are no duplicates
-  transfers.value = [
-    ...new Map(
-      transfers.value
-        .concat(newTransfers)
-        .map((transfer) => [transfer.transactionHash, transfer]),
-    ).values(),
-  ];
+  transfers.value = transfers.value.concat(newTransfers);
   transferPagination.value = addressTransfers.pagination;
   isLoadingTransfers.value = false;
 }
