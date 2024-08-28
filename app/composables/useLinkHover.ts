@@ -2,27 +2,27 @@ import { computed, type Ref } from 'vue';
 import { onBeforeRouteLeave } from 'vue-router';
 
 import useUiStore from '@/stores/ui.js';
-import type { Link } from '@/utils/ui.js';
+import type { Route } from '@/utils/routing.js';
 
 interface UseLinkHover {
-  link: Ref<Link | null>;
-  setLink: (link: Link | null) => void;
+  route: Ref<Route | null>;
+  setRoute: (route: Route | null) => void;
 }
 
 function useLinkHover(): UseLinkHover {
   const store = useUiStore();
 
-  const link = computed(() => store.linkHover);
+  const route = computed(() => store.hoveredRoute);
 
   onBeforeRouteLeave(() => {
-    setLink(null);
+    setRoute(null);
   });
 
-  function setLink(link: Link | null): void {
-    store.setLinkHover(link);
+  function setRoute(route: Route | null): void {
+    store.setHoveredRoute(route);
   }
 
-  return { link, setLink };
+  return { route, setRoute };
 }
 
 export default useLinkHover;

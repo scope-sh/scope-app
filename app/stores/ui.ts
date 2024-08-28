@@ -1,12 +1,13 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import { type Toast, type Link, MAX_TOASTS } from '@/utils/ui.js';
+import type { Route } from '@/utils/routing.js';
+import { type Toast, MAX_TOASTS } from '@/utils/ui.js';
 
 const store = defineStore('ui', () => {
   const toasts = ref<Toast[]>([]);
   const isPaletteOpen = ref(false);
-  const linkHover = ref<Link | null>(null);
+  const hoveredRoute = ref<Route | null>(null);
 
   function addToast(toast: Toast): void {
     const activeToasts = toasts.value;
@@ -21,18 +22,18 @@ const store = defineStore('ui', () => {
     isPaletteOpen.value = isOpen;
   }
 
-  function setLinkHover(link: Link | null): void {
-    linkHover.value = link;
+  function setHoveredRoute(route: Route | null): void {
+    hoveredRoute.value = route;
   }
 
   return {
     toasts,
     isPaletteOpen,
-    linkHover,
+    hoveredRoute,
     addToast,
     removeToast,
     setPaletteOpen,
-    setLinkHover,
+    setHoveredRoute,
   };
 });
 

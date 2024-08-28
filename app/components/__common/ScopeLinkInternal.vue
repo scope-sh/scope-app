@@ -1,5 +1,8 @@
 <template>
-  <div class="root">
+  <div
+    ref="el"
+    class="root"
+  >
     <router-link
       :to="to"
       class="link"
@@ -15,15 +18,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { useElementHover } from '@vueuse/core';
+import { computed, ref, watch } from 'vue';
 
+import useLinkHover from '@/composables/useLinkHover.js';
 import type { Route } from '@/utils/routing';
 import { getRouteLocation } from '@/utils/routing';
+
+const { route: hoveredRoute, setRoute: setHoveredRoute } = useLinkHover();
 
 const props = withDefaults(
   defineProps<{
     route: Route;
-    isHighlighted: boolean;
     type?: Type;
   }>(),
   {
@@ -31,7 +37,48 @@ const props = withDefaults(
   },
 );
 
+const el = ref();
+const isHovered = useElementHover(el);
+watch(isHovered, (value) => {
+  if (value) {
+    setHoveredRoute(props.route);
+  } else {
+    setHoveredRoute(null);
+  }
+});
+
 const to = computed(() => getRouteLocation(props.route));
+
+const isHighlighted = computed(() => {
+  if (isHovered.value) {
+    return false;
+  }
+  if (hoveredRoute.value) {
+    switch (hoveredRoute.value.name) {
+      case 'block':
+        return (
+          props.route.name === 'block' &&
+          props.route.number === hoveredRoute.value.number
+        );
+      case 'transaction':
+        return (
+          props.route.name === 'transaction' &&
+          props.route.hash === hoveredRoute.value.hash
+        );
+      case 'address':
+        return (
+          props.route.name === 'address' &&
+          props.route.address === hoveredRoute.value.address
+        );
+      case 'userop':
+        return (
+          props.route.name === 'userop' &&
+          props.route.hash === hoveredRoute.value.hash
+        );
+    }
+  }
+  return false;
+});
 </script>
 
 <script lang="ts">
