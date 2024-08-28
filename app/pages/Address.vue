@@ -375,11 +375,17 @@ watch(address, () => {
   logPage.value = 1;
   ops.value = [];
   opPage.value = 1;
+  transfers.value = [];
+  transferPage.value = 1;
   transactionPagination.value = {
     cursor: null,
     height: null,
   };
   logPagination.value = {
+    cursor: null,
+    height: null,
+  };
+  transferPagination.value = {
     cursor: null,
     height: null,
   };
