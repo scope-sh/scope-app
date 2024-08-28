@@ -132,6 +132,11 @@ interface ContractSelectors {
   selectors: Hex[];
 }
 
+interface Deployment {
+  deployer: Address;
+  transactionHash: Hex;
+}
+
 type Abis = Record<
   Address,
   {
@@ -217,6 +222,18 @@ class Service {
     });
     return response.json<Abis>();
   }
+
+  public async getContractDeployment(
+    address: Address,
+  ): Promise<Deployment | null> {
+    const response = await this.client.get('contract/deployment', {
+      searchParams: {
+        chain: this.chainId,
+        address,
+      },
+    });
+    return response.json<Deployment | null>();
+  }
 }
 
 export default Service;
@@ -230,4 +247,5 @@ export type {
   SourceCode,
   ContractSelectors,
   Abis,
+  Deployment,
 };
