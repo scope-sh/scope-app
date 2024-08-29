@@ -2,7 +2,6 @@ import type {
   Address,
   ContractFunctionParameters,
   Hex,
-  MulticallResults,
   PublicClient,
 } from 'viem';
 import {
@@ -42,6 +41,16 @@ interface EnsCall {
   params: ContractFunctionParameters;
 }
 
+type CallResult =
+  | {
+      status: 'success';
+      result: unknown;
+    }
+  | {
+      status: 'failure';
+      error: Error;
+    };
+
 class Service {
   baseClient: PublicClient;
   ensChain: Chain;
@@ -51,13 +60,18 @@ class Service {
   constructor(quicknodeAppName: string, quicknodeAppKey: string, chain: Chain) {
     this.baseClient = createPublicClient({
       chain: getChainData(BASE),
-      transport: http(getEndpointUrl(BASE, quicknodeAppName, quicknodeAppKey)),
+      transport: http(getEndpointUrl(BASE, quicknodeAppName, quicknodeAppKey), {
+        batch: true,
+      }),
     });
     this.ensChain = getFallbackChain(chain);
     this.ensClient = createPublicClient({
       chain: getChainData(this.ensChain),
       transport: http(
         getEndpointUrl(this.ensChain, quicknodeAppName, quicknodeAppKey),
+        {
+          batch: true,
+        },
       ),
     });
     this.chain = chain;
@@ -81,7 +95,7 @@ class Service {
       })
       .flat();
     // Group calls by client
-    const results = [];
+    const results: CallResult[] = [];
     const groupedCalls = ensCalls.reduce(
       (acc, call) => {
         const clientChain = call.client.chain;
@@ -106,39 +120,9 @@ class Service {
       if (!calls) {
         continue;
       }
-      const firstCall = calls[0];
-      if (!firstCall) {
-        continue;
-      }
-      const client = firstCall.client;
-      const chainResults = await client.multicall({
-        contracts: calls.map((call) => call.params),
-      });
-      // Retry failed calls one by one
-      for (let i = 0; i < calls.length; i++) {
-        const call = calls[i];
-        if (!call) {
-          continue;
-        }
-        const chainResult = chainResults[i];
-        if (!chainResult) {
-          continue;
-        }
-        if (chainResult.status === 'failure') {
-          try {
-            const retryResult = await client.readContract(call.params);
-            chainResults[i] = {
-              status: 'success',
-              result: retryResult,
-            };
-          } catch (e) {
-            chainResults[i] = {
-              status: 'failure',
-              error: e as Error,
-            };
-          }
-        }
-      }
+      const chainResults = await Promise.all(
+        calls.map((call) => this.#queryCall(call)),
+      );
       results.push(...chainResults);
     }
     // Merge results
@@ -159,6 +143,21 @@ class Service {
       index += callCount;
     }
     return addresses;
+  }
+
+  async #queryCall(call: EnsCall): Promise<CallResult> {
+    try {
+      const result = await call.client.readContract(call.params);
+      return {
+        status: 'success',
+        result,
+      };
+    } catch (e) {
+      return {
+        status: 'failure',
+        error: e as Error,
+      };
+    }
   }
 
   #getCalls(name: string): EnsCall[] {
@@ -215,7 +214,7 @@ class Service {
     }));
   }
 
-  #parseResults(name: string, results: MulticallResults): (Address | null)[] {
+  #parseResults(name: string, results: CallResult[]): (Address | null)[] {
     return results.map((result) => {
       if (result.status !== 'success') return null;
       const value = (result.result as [Hex, Hex])[0];
