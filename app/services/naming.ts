@@ -37,16 +37,19 @@ import {
 const BASE_L2_RESOLVER_ADDRESS = '0xc6d566a56a1aff6508b41f6c90ff131615583bcd';
 
 interface EnsCall {
+  name: string;
   client: PublicClient;
   params: ContractFunctionParameters;
 }
 
 type CallResult =
   | {
+      name: string;
       status: 'success';
       result: unknown;
     }
   | {
+      name: string;
       status: 'failure';
       error: Error;
     };
@@ -126,11 +129,9 @@ class Service {
       results.push(...chainResults);
     }
     // Merge results
-    let index = 0;
     const addresses: Record<string, Address> = {};
     for (const name of names) {
-      const callCount = this.#getCalls(name).length;
-      const nameResults = results.slice(index, index + callCount);
+      const nameResults = results.filter((result) => result.name === name);
       const nameAddresses = this.#parseResults(name, nameResults);
       for (const address of nameAddresses) {
         if (!address) {
@@ -140,8 +141,8 @@ class Service {
           addresses[name] = address;
         }
       }
-      index += callCount;
     }
+    console.log('ENS resolved addresses:', addresses);
     return addresses;
   }
 
@@ -149,11 +150,13 @@ class Service {
     try {
       const result = await call.client.readContract(call.params);
       return {
+        name: call.name,
         status: 'success',
         result,
       };
     } catch (e) {
       return {
+        name: call.name,
         status: 'failure',
         error: e as Error,
       };
@@ -165,6 +168,7 @@ class Service {
     if (isBaseName(name)) {
       return [
         {
+          name,
           client: this.baseClient,
           params: {
             address: BASE_L2_RESOLVER_ADDRESS,
@@ -197,6 +201,7 @@ class Service {
       convertEvmChainIdToCoinType(chain),
     );
     return coinTypes.map((coinType) => ({
+      name,
       client: this.ensClient,
       params: {
         address: ensUniversalResolver.address,
