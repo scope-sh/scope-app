@@ -42,7 +42,7 @@
 <script setup lang="ts">
 import type { AbiFunction, Address } from 'abitype';
 import { type Hex, toFunctionSelector } from 'viem';
-import { multicall, simulateContract } from 'viem/actions';
+import { readContract, simulateContract } from 'viem/actions';
 import { computed, ref, watch } from 'vue';
 
 import NoticeProxy from './code/NoticeProxy.vue';
@@ -220,9 +220,6 @@ function getResultValue(fragment: AbiFunction): unknown {
 }
 
 async function fetchParamless(): Promise<void> {
-  if (!results.value) {
-    results.value = {};
-  }
   if (!isFunctionLoading.value) {
     isFunctionLoading.value = {};
   }
@@ -232,35 +229,36 @@ async function fetchParamless(): Promise<void> {
   const queryableFunctions = [...constants.value, ...paramlessFunctions.value];
   for (const fragment of queryableFunctions) {
     isFunctionLoading.value[toFunctionSelector(fragment)] = true;
+    errors.value[toFunctionSelector(fragment)] = null;
   }
-  const callResults = await multicall(client.value, {
-    contracts: queryableFunctions.map((f) => ({
+  for (const fragment of queryableFunctions) {
+    fetchParamlessFragment(fragment);
+  }
+}
+
+async function fetchParamlessFragment(fragment: AbiFunction): Promise<void> {
+  if (!results.value) {
+    results.value = {};
+  }
+  if (!isFunctionLoading.value) {
+    isFunctionLoading.value = {};
+  }
+  if (!errors.value) {
+    errors.value = {};
+  }
+  try {
+    const result = await readContract(client.value, {
       address: props.address,
-      abi: [f],
-      functionName: f.name,
+      abi: abi.value || [],
+      functionName: fragment.name,
       args: [],
-    })),
-  });
-  for (const [i, fragment] of queryableFunctions.entries()) {
+    });
+    results.value[toFunctionSelector(fragment)] = result;
     isFunctionLoading.value[toFunctionSelector(fragment)] = false;
-    const callResult = callResults[i];
-    if (!callResult) {
-      errors.value[toFunctionSelector(fragment)] = {
-        type: 'unknown',
-      };
-      continue;
-    }
-    const isError = callResult.status === 'failure';
-    if (isError) {
-      errors.value[toFunctionSelector(fragment)] = {
-        type: 'unknown',
-      };
-      continue;
-    }
-    const result = callResult.status === 'success' ? callResult.result : null;
-    if (result !== null) {
-      results.value[toFunctionSelector(fragment)] = result;
-    }
+  } catch (e) {
+    const error = getQueryError(e);
+    errors.value[toFunctionSelector(fragment)] = error;
+    isFunctionLoading.value[toFunctionSelector(fragment)] = false;
   }
 }
 
