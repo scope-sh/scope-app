@@ -19,7 +19,7 @@
           <LinkAddress
             v-if="type === 'transaction'"
             :address="log.address"
-            type="minimal"
+            type="copyable"
           />
           <LinkTransaction
             v-else-if="type === 'address' && log.transactionHash"
@@ -158,6 +158,7 @@ export type { Log, LogView };
   display: flex;
   gap: var(--spacing-2);
   flex-wrap: wrap;
+  align-items: center;
   font-size: var(--font-size-s);
 }
 
