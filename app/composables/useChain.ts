@@ -71,6 +71,9 @@ function useChain(): UseChain {
       chain: getChainData(id.value),
       transport: http(
         getEndpointUrl(id.value, quicknodeAppName, quicknodeAppKey),
+        {
+          batch: true,
+        },
       ),
     }),
   );
