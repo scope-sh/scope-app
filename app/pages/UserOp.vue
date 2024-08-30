@@ -312,6 +312,7 @@ import EvmService from '@/services/evm';
 import HypersyncService from '@/services/hypersync';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
+import { raceNonNull } from '@/utils';
 import type { UserOp } from '@/utils/context/erc4337/entryPoint';
 import {
   getUserOpEvent,
@@ -510,7 +511,7 @@ async function fetch(): Promise<void> {
   await fetchAbis();
 }
 
-async function getTxHashByUserOp(hash: Address): Promise<Hex | null> {
+async function getTxHashByUserOp(hash: Hex): Promise<Hex | null> {
   if (!hypersyncService.value || !indexerService.value) {
     return null;
   }
@@ -523,25 +524,6 @@ async function getTxHashByUserOp(hash: Address): Promise<Hex | null> {
     return null;
   }
   return txHash;
-}
-
-function raceNonNull<T>(promises: Promise<T | null>[]): Promise<T | null> {
-  return new Promise((resolve) => {
-    let remainingPromises = promises.length;
-
-    promises.forEach((promise) => {
-      promise.then((result) => {
-        if (result !== null) {
-          resolve(result);
-        } else {
-          remainingPromises--;
-          if (remainingPromises === 0) {
-            resolve(null);
-          }
-        }
-      });
-    });
-  });
 }
 
 async function fetchTransaction(txHash: Address): Promise<void> {
