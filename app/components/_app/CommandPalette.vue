@@ -77,10 +77,12 @@ import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
+import HypersyncService from '@/services/hypersync';
 import IndexerService from '@/services/indexer';
 import NamingService from '@/services/naming';
 import type { Command, NestedCommand } from '@/stores/commands';
 import useUiStore from '@/stores/ui';
+import { raceNonNull } from '@/utils';
 import type { Chain } from '@/utils/chains';
 import {
   CHAINS,
@@ -111,7 +113,8 @@ useMagicKeys({
     }
   },
 });
-const { quicknodeAppName, quicknodeAppKey, indexerEndpoint } = useEnv();
+const { appBaseUrl, quicknodeAppName, quicknodeAppKey, indexerEndpoint } =
+  useEnv();
 const { commands: localCommands } = useCommands();
 const uiStore = useUiStore();
 const { send: sendToast } = useToast();
@@ -130,6 +133,9 @@ const apiService = computed(() =>
 );
 const evmService = computed(() =>
   client.value ? new EvmService(client.value) : null,
+);
+const hypersyncService = computed(() =>
+  chainId.value ? new HypersyncService(chainId.value, appBaseUrl) : null,
 );
 const indexerService = computed(() =>
   chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
@@ -479,16 +485,29 @@ async function getGoToItems(
   async function getOpenTransactionOrUserOpCommand(
     hash: string,
   ): Promise<Command | null> {
-    if (!evmService.value || !indexerService.value) {
+    async function getTxHashByUserOp(hash: Hex): Promise<Hex | null> {
+      if (!hypersyncService.value || !indexerService.value) {
+        return null;
+      }
+      // Race to get the tx hash from hypersync or indexer
+      // But ignore the promise if it resolves as null
+      const hypersyncRequest = hypersyncService.value.getUserOpTxHash(hash);
+      const indexerRequest = indexerService.value.getTxHashByUserOpHash(hash);
+      const txHash = await raceNonNull([hypersyncRequest, indexerRequest]);
+      if (!txHash) {
+        return null;
+      }
+      return txHash;
+    }
+
+    if (!evmService.value) {
       return null;
     }
-    const foundUserOp = await indexerService.value.getTxHashByUserOpHash(
-      hash as Hex,
-    );
     const foundTx = await evmService.value.getTransaction(hash as Hex);
     if (foundTx) {
       return getOpenTransactionCommand(hash);
     }
+    const foundUserOp = await getTxHashByUserOp(hash as Hex);
     if (foundUserOp) {
       return getOpenUserOpCommand(hash);
     }
