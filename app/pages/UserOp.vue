@@ -309,6 +309,7 @@ import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
+import HypersyncService from '@/services/hypersync';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
 import type { UserOp } from '@/utils/context/erc4337/entryPoint';
@@ -332,7 +333,7 @@ const SECTION_LOGS = 'logs';
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
-const { indexerEndpoint } = useEnv();
+const { appBaseUrl, indexerEndpoint } = useEnv();
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
@@ -397,6 +398,9 @@ const apiService = computed(() =>
 );
 const evmService = computed(() =>
   client.value ? new EvmService(client.value) : null,
+);
+const hypersyncService = computed(() =>
+  chainId.value ? new HypersyncService(chainId.value, appBaseUrl) : null,
 );
 const indexerService = computed(() =>
   chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
@@ -492,11 +496,8 @@ const logs = computed<Log[]>(() => {
 const isTransactionLoading = ref(false);
 const isTransactionReceiptLoading = ref(false);
 async function fetch(): Promise<void> {
-  if (!evmService.value || !indexerService.value) {
-    return;
-  }
   isLoading.value = true;
-  const txHash = await indexerService.value.getTxHashByUserOpHash(hash.value);
+  const txHash = await getTxHashByUserOp(hash.value);
   if (!txHash) {
     isLoading.value = false;
     return;
@@ -507,6 +508,40 @@ async function fetch(): Promise<void> {
   ]);
   isLoading.value = false;
   await fetchAbis();
+}
+
+async function getTxHashByUserOp(hash: Address): Promise<Hex | null> {
+  if (!hypersyncService.value || !indexerService.value) {
+    return null;
+  }
+  // Race to get the tx hash from hypersync or indexer
+  // But ignore the promise if it resolves as null
+  const hypersyncRequest = hypersyncService.value.getUserOpTxHash(hash);
+  const indexerRequest = indexerService.value.getTxHashByUserOpHash(hash);
+  const txHash = await raceNonNull([hypersyncRequest, indexerRequest]);
+  if (!txHash) {
+    return null;
+  }
+  return txHash;
+}
+
+function raceNonNull<T>(promises: Promise<T | null>[]): Promise<T | null> {
+  return new Promise((resolve) => {
+    let remainingPromises = promises.length;
+
+    promises.forEach((promise) => {
+      promise.then((result) => {
+        if (result !== null) {
+          resolve(result);
+        } else {
+          remainingPromises--;
+          if (remainingPromises === 0) {
+            resolve(null);
+          }
+        }
+      });
+    });
+  });
 }
 
 async function fetchTransaction(txHash: Address): Promise<void> {
