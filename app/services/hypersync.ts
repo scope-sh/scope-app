@@ -180,6 +180,16 @@ class Service {
     });
     return response.json<AddressTransfers>();
   }
+
+  async getUserOpTxHash(hash: Hex): Promise<Hex> {
+    const response = await this.client.get('userop', {
+      searchParams: {
+        chain: this.chain,
+        hash,
+      },
+    });
+    return response.text() as Promise<Hex>;
+  }
 }
 
 export default Service;
