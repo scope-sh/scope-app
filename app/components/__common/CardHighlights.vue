@@ -2,12 +2,12 @@
   <ScopeCard>
     <div class="list">
       <div
-        v-for="(action, actionIndex) in actions"
-        :key="actionIndex"
+        v-for="(item, itemIndex) in items"
+        :key="itemIndex"
         class="item"
       >
         <div
-          v-for="(part, partIndex) in action"
+          v-for="(part, partIndex) in item"
           :key="partIndex"
         >
           <template v-if="part.type === 'text'">
@@ -29,27 +29,27 @@ import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
 
 defineProps<{
-  actions: Action[];
+  items: Item[];
 }>();
 </script>
 
 <script lang="ts">
-interface ActionPartText {
+interface ItemPartText {
   type: 'text';
   value: string;
 }
 
-interface ActionPartAddress {
+interface ItemPartAddress {
   type: 'address';
   address: Address;
 }
 
-type ActionPart = ActionPartText | ActionPartAddress;
+type ItemPart = ItemPartText | ItemPartAddress;
 
-type Action = ActionPart[];
+type Item = ItemPart[];
 
 // eslint-disable-next-line import/prefer-default-export
-export type { Action };
+export type { Item };
 </script>
 
 <style scoped>

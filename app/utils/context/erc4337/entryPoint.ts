@@ -588,4 +588,4 @@ export {
   decodeCalls,
   unpackUserOp,
 };
-export type { Call, TxType, UserOp, UserOp_0_6, UserOp_0_7 };
+export type { Call, TxType, UserOp, UserOpUnpacked, UserOp_0_6, UserOp_0_7 };

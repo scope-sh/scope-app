@@ -184,9 +184,9 @@
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
-      <CardActions
-        v-if="actions.length > 0"
-        :actions
+      <CardHighlights
+        v-if="userOpUnpacked"
+        :user-op="userOpUnpacked"
       />
     </ScopePanel>
     <template #section>
@@ -277,8 +277,6 @@ import { size } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import type { Action } from '@/components/__common/CardActions.vue';
-import CardActions from '@/components/__common/CardActions.vue';
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -300,12 +298,12 @@ import {
   AttributeItemValue,
   AttributeList,
 } from '@/components/__common/attributes';
+import CardHighlights from '@/components/user-op/CardHighlights.vue';
 import UserOpStatus from '@/components/user-op/UserOpStatus.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
-import useLabels from '@/composables/useLabels';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
@@ -324,7 +322,6 @@ import {
   unpackUserOp,
   getEntryPoint,
 } from '@/utils/context/erc4337/entryPoint';
-import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 
@@ -339,7 +336,6 @@ const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
 const { addAbis } = useAbi();
-const { getLabel } = useLabels();
 
 const section = ref<Section['value']>(SECTION_LOGS);
 const sections = computed<Section[]>(() => [
@@ -608,42 +604,6 @@ const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
     icon: 'hex-string',
   },
 ]);
-
-const actions = computed<Action[]>(() => {
-  const opData = userOpUnpacked.value;
-  if (!opData) {
-    return [];
-  }
-  const sender = opData.sender;
-  const label = getLabel(sender);
-  if (!label) {
-    return [];
-  }
-  const labelType = label.type;
-  if (!labelType) {
-    return [];
-  }
-  if (labelType.id === 'kernel-v3-account') {
-    const nonce = opData.nonce;
-    const decodedNonce = kernelV3DecodeNonce(nonce);
-    if (!decodedNonce) {
-      return [];
-    }
-    return [
-      [
-        {
-          type: 'text',
-          value: 'Validated by',
-        },
-        {
-          type: 'address',
-          address: decodedNonce.identifier,
-        },
-      ],
-    ] as Action[];
-  }
-  return [];
-});
 
 function handleOpenAsTransactionClick(): void {
   router.push(getRouteLocation({ name: 'transaction', hash: hash.value }));

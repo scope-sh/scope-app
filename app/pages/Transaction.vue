@@ -153,9 +153,10 @@
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
-      <CardActions
-        v-if="actions.length > 0"
-        :actions
+      <CardHighlights
+        v-if="transaction && transactionReceipt"
+        :transaction
+        :logs="transactionReceipt?.logs"
       />
     </ScopePanel>
     <template #section>
@@ -245,18 +246,10 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import {
-  getContractAddress,
-  size,
-  type Address,
-  type Hex,
-  type TransactionType,
-} from 'viem';
+import type { Address, Hex, TransactionType } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import type { Action } from '@/components/__common/CardActions.vue';
-import CardActions from '@/components/__common/CardActions.vue';
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -279,6 +272,7 @@ import {
   AttributeItemValue,
   AttributeList,
 } from '@/components/__common/attributes';
+import CardHighlights from '@/components/transaction/CardHighlights.vue';
 import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
 import type { Call as InternalCallRow } from '@/components/transaction/TreeInternalCalls.vue';
@@ -673,36 +667,6 @@ watch(transaction, async () => {
   }
   entryPoint.value = getEntryPoint(transaction.value);
   userOps.value = await getUserOps(client.value, transaction.value);
-});
-
-const actions = computed<Action[]>(() => {
-  if (!transaction.value) {
-    return [];
-  }
-  const toAddress = transaction.value.to;
-  const input = transaction.value.input;
-  if (!toAddress && size(input) > 0) {
-    const from = transaction.value.from;
-    const nonce = BigInt(transaction.value.nonce);
-    // Contract deployment transaction
-    const contractAddress = getContractAddress({
-      from,
-      nonce,
-    });
-    return [
-      [
-        {
-          type: 'text',
-          value: 'Contract deployed at',
-        },
-        {
-          type: 'address',
-          address: contractAddress.toLowerCase() as Address,
-        },
-      ],
-    ];
-  }
-  return [];
 });
 
 async function handleTransactionIndexUpdate(index: number): Promise<void> {
