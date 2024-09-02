@@ -1,5 +1,8 @@
 <template>
-  <BaseCard :items />
+  <BaseCard
+    v-if="items.length > 0"
+    :items
+  />
 </template>
 
 <script setup lang="ts">
@@ -34,16 +37,19 @@ const items = computed<Item[]>(() => {
       return [];
     }
     return [
-      [
-        {
-          type: 'text',
-          value: 'Validated by',
-        },
-        {
-          type: 'address',
-          address: decodedNonce.identifier,
-        },
-      ],
+      {
+        icon: label.iconUrl,
+        parts: [
+          {
+            type: 'text',
+            value: 'Validate with',
+          },
+          {
+            type: 'address',
+            address: decodedNonce.identifier,
+          },
+        ],
+      },
     ] as Item[];
   }
   return [];
