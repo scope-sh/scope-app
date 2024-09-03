@@ -139,7 +139,7 @@ function handleSearchSubmit(): void {
     router.push(getRouteLocation({ name: 'address', address: search.value }));
   } else if (isBlockNumber(search.value)) {
     const number = toBigInt(search.value);
-    if (!number) {
+    if (number === null) {
       return;
     }
     router.push(getRouteLocation({ name: 'block', number }));

@@ -427,7 +427,7 @@ async function getGoToItems(
       label: number,
       act: (): void => {
         const blockNumber = toBigInt(number);
-        if (!blockNumber) {
+        if (blockNumber === null) {
           return;
         }
         router.push(getRouteLocation({ name: 'block', number: blockNumber }));
