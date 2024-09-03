@@ -142,7 +142,6 @@ class Service {
         }
       }
     }
-    console.log('ENS resolved addresses:', addresses);
     return addresses;
   }
 
