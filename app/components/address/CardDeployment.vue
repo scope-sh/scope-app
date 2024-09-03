@@ -1,28 +1,44 @@
 <template>
   <div class="card">
-    <div class="item">
-      Deployed by
-      <LinkAddress :address="deployment.deployer" />
+    <div
+      v-if="isGenesis"
+      class="item"
+    >
+      Deployed at <LinkBlock :number="0n">genesis</LinkBlock>
     </div>
-    <div class="item">
-      in tx
-      <LinkTransaction :hash="deployment.transactionHash">
-        {{ deployment.transactionHash.slice(0, 8) }}…{{
-          deployment.transactionHash.slice(-8)
-        }}
-      </LinkTransaction>
-    </div>
+    <template v-else>
+      <div class="item">
+        Deployed by
+        <LinkAddress :address="deployment.deployer" />
+      </div>
+      <div class="item">
+        in tx
+        <LinkTransaction :hash="deployment.transactionHash">
+          {{ deployment.transactionHash.slice(0, 8) }}…{{
+            deployment.transactionHash.slice(-8)
+          }}
+        </LinkTransaction>
+      </div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
+import { computed } from 'vue';
+
+import LinkBlock from '../__common/LinkBlock.vue';
+
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkTransaction from '@/components/__common/LinkTransaction.vue';
 import type { Deployment } from '@/services/api';
 
-defineProps<{
+const props = defineProps<{
   deployment: Deployment;
 }>();
+
+const isGenesis = computed(
+  () => (props.deployment.deployer as string) === 'GENESIS',
+);
 </script>
 
 <style scoped>
