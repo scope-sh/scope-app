@@ -99,6 +99,7 @@ function copyToClipboard(text: string): void {
   color: var(--color-text-primary);
   font-size: var(--font-size-l);
   font-weight: var(--font-weight-light);
+  text-align: left;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
