@@ -11,6 +11,7 @@ import { computed } from 'vue';
 import type { Item } from '@/components/__common/CardHighlights.vue';
 import BaseCard from '@/components/__common/CardHighlights.vue';
 import useLabels from '@/composables/useLabels';
+import { decodeSignature as biconomyV2DecodeSignature } from '@/utils/context/erc4337/biconomyV2';
 import type { UserOpUnpacked } from '@/utils/context/erc4337/entryPoint';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 
@@ -47,6 +48,25 @@ const items = computed<Item[]>(() => {
           {
             type: 'address',
             address: decodedNonce.identifier,
+          },
+        ],
+      },
+    ] as Item[];
+  }
+  if (labelType.id === 'biconomy-v2-account') {
+    const signature = props.userOp.signature;
+    const decodedSignature = biconomyV2DecodeSignature(signature);
+    return [
+      {
+        icon: label.iconUrl,
+        parts: [
+          {
+            type: 'text',
+            value: 'Validate with',
+          },
+          {
+            type: 'address',
+            address: decodedSignature.validator,
           },
         ],
       },

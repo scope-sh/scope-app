@@ -1,4 +1,9 @@
-import { type Address, type Hex, decodeFunctionData } from 'viem';
+import {
+  type Address,
+  type Hex,
+  decodeAbiParameters,
+  decodeFunctionData,
+} from 'viem';
 
 import biconomyV2AccountAbi from '@/abi/biconomyV2Account';
 
@@ -6,6 +11,11 @@ interface Call {
   dest: Address;
   value: bigint;
   data: Hex;
+}
+
+interface DecodedSignature {
+  signature: Hex;
+  validator: Address;
 }
 
 function decodeCallData(callData: Hex): Call[] {
@@ -38,5 +48,18 @@ function decodeCallData(callData: Hex): Call[] {
   return [];
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export { decodeCallData };
+function decodeSignature(signature: Hex): DecodedSignature {
+  const data = decodeAbiParameters(
+    [
+      { type: 'bytes', name: 'signature' },
+      { type: 'address', name: 'validator' },
+    ],
+    signature,
+  );
+  return {
+    signature: data[0],
+    validator: data[1].toLowerCase() as Address,
+  };
+}
+
+export { decodeCallData, decodeSignature };
