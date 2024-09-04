@@ -13,6 +13,7 @@ import BaseCard from '@/components/__common/CardHighlights.vue';
 import useLabels from '@/composables/useLabels';
 import { decodeSignature as biconomyV2DecodeSignature } from '@/utils/context/erc4337/biconomyV2';
 import type { UserOpUnpacked } from '@/utils/context/erc4337/entryPoint';
+import { decodeSignature as kernelV2DecodeSignature } from '@/utils/context/erc4337/kernelV2';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 
 const { getLabel } = useLabels();
@@ -30,6 +31,60 @@ const items = computed<Item[]>(() => {
   const labelType = label.type;
   if (!labelType) {
     return [];
+  }
+  if (labelType.id === 'kernel-v2-account') {
+    const signature = props.userOp.signature;
+    const decodedSignature = kernelV2DecodeSignature(signature);
+    if (!decodedSignature) {
+      return [];
+    }
+    if (decodedSignature.mode === 'sudo') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: 'Validate with default validator',
+            },
+          ],
+        },
+      ] as Item[];
+    }
+    if (decodedSignature.mode === 'enable') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: 'Enable',
+            },
+            {
+              type: 'address',
+              address: decodedSignature.validator,
+            },
+            {
+              type: 'text',
+              value: 'as validator',
+            },
+          ],
+        },
+      ] as Item[];
+    }
+    if (decodedSignature.mode === 'use') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: 'Use custom validator',
+            },
+          ],
+        },
+      ] as Item[];
+    }
   }
   if (labelType.id === 'kernel-v3-account') {
     const nonce = props.userOp.nonce;

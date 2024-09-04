@@ -1,4 +1,4 @@
-import { type Address, type Hex, decodeFunctionData } from 'viem';
+import { type Address, type Hex, decodeFunctionData, slice } from 'viem';
 
 import kernelV2AccountAbi from '@/abi/kernelV2Account.js';
 
@@ -7,6 +7,18 @@ interface Call {
   value: bigint;
   data: Hex;
 }
+
+type DecodedSignature =
+  | {
+      mode: 'sudo';
+    }
+  | {
+      mode: 'use';
+    }
+  | {
+      mode: 'enable';
+      validator: Address;
+    };
 
 function decodeCallData(callData: Hex): Call[] {
   const data = decodeFunctionData({
@@ -32,5 +44,19 @@ function decodeCallData(callData: Hex): Call[] {
   return [];
 }
 
-// eslint-disable-next-line import/prefer-default-export
-export { decodeCallData };
+function decodeSignature(signature: Hex): DecodedSignature | null {
+  const mode = slice(signature, 0, 4);
+  if (mode === '0x00000000') {
+    return { mode: 'sudo' };
+  }
+  if (mode === '0x00000001') {
+    return { mode: 'use' };
+  }
+  if (mode === '0x00000002') {
+    const validator = slice(signature, 16, 36) as Address;
+    return { mode: 'enable', validator };
+  }
+  return null;
+}
+
+export { decodeCallData, decodeSignature };
