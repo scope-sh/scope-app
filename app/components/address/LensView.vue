@@ -4,6 +4,10 @@
     v-if="hasLabelTypeId('daimo-v1-account')"
     :address="address"
   />
+  <KernelV2AccountLens
+    v-else-if="hasLabelTypeId('kernel-v2-account')"
+    :address="address"
+  />
   <KernelV3AccountLens
     v-else-if="hasLabelTypeId('kernel-v3-account')"
     :address="address"
@@ -61,6 +65,7 @@ import BiconomyV2Account from './lenses/BiconomyV2Account.vue';
 import DaimoAccount from './lenses/DaimoAccount.vue';
 import Erc20Lens from './lenses/Erc20Lens.vue';
 import Erc7579ModuleLens from './lenses/Erc7579ModuleLens.vue';
+import KernelV2AccountLens from './lenses/KernelV2AccountLens.vue';
 import KernelV3AccountLens from './lenses/KernelV3AccountLens.vue';
 import MorphoVault from './lenses/MorphoVault.vue';
 import SafeV1_4_1Lens from './lenses/SafeV1_4_1Lens.vue';
