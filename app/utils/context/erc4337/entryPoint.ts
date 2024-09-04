@@ -11,6 +11,7 @@ import {
 } from 'viem';
 import { readContract } from 'viem/actions';
 
+import { decodeCallData as decodeBiconomyV2CallData } from './biconomyV2.js';
 import { decodeCallData as decodeDaimoCallData } from './daimo.js';
 import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
 
@@ -558,6 +559,21 @@ function decodeCalls(callData: Hex): Call[] | null {
     if (selector === '0x34fcd5be') {
       // Daimo "executeBatch" function
       const decodedCallData = decodeDaimoCallData(callData);
+      return decodedCallData.map((call) => ({
+        to: call.dest,
+        callData: call.data,
+        value: call.value,
+      }));
+    }
+    if (
+      selector === '0x0000189a' ||
+      selector === '0x00004680' ||
+      selector === '0x47e1da2a' ||
+      selector === '0xb61d27f6'
+    ) {
+      // Biconomy V2
+      const decodedCallData = decodeBiconomyV2CallData(callData);
+      console.log(decodedCallData);
       return decodedCallData.map((call) => ({
         to: call.dest,
         callData: call.data,
