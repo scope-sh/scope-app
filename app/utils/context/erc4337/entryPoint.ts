@@ -13,6 +13,7 @@ import { readContract } from 'viem/actions';
 
 import { decodeCallData as decodeBiconomyV2CallData } from './biconomyV2.js';
 import { decodeCallData as decodeDaimoCallData } from './daimo.js';
+import { decodeCallData as decodeKernelV2CallData } from './kernelV2.js';
 import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
 
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0.js';
@@ -573,7 +574,15 @@ function decodeCalls(callData: Hex): Call[] | null {
     ) {
       // Biconomy V2
       const decodedCallData = decodeBiconomyV2CallData(callData);
-      console.log(decodedCallData);
+      return decodedCallData.map((call) => ({
+        to: call.dest,
+        callData: call.data,
+        value: call.value,
+      }));
+    }
+    if (selector === '0x51945447') {
+      // Kernel V2
+      const decodedCallData = decodeKernelV2CallData(callData);
       return decodedCallData.map((call) => ({
         to: call.dest,
         callData: call.data,
