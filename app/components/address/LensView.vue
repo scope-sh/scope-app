@@ -8,6 +8,10 @@
     v-else-if="hasLabelTypeId('kernel-v3-account')"
     :address="address"
   />
+  <BiconomyV2Account
+    v-else-if="hasLabelTypeId('biconomy-v2-account')"
+    :address="address"
+  />
   <SafeV1_4_1Lens
     v-if="hasLabelTypeId('safe-v1.4.1-account')"
     :address="address"
@@ -53,6 +57,7 @@ import type { Address } from 'viem';
 
 import AaveV3Token from './lenses/AaveV3Token.vue';
 import AerodromeV1Pool from './lenses/AerodromeV1Pool.vue';
+import BiconomyV2Account from './lenses/BiconomyV2Account.vue';
 import DaimoAccount from './lenses/DaimoAccount.vue';
 import Erc20Lens from './lenses/Erc20Lens.vue';
 import Erc7579ModuleLens from './lenses/Erc7579ModuleLens.vue';
