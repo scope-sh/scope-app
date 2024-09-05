@@ -57,8 +57,6 @@ const props = defineProps<{
 const isLoading = ref(true);
 const isKeyLoading = ref(false);
 
-const keyIndex = ref<string>('');
-
 const activeKeys = ref<number | null>(null);
 const activeSlots = ref<string | null>(null);
 const key = ref<string | null>(null);
@@ -98,12 +96,13 @@ async function fetch(): Promise<void> {
   isLoading.value = false;
 }
 
-async function fetchKey(): Promise<void> {
+async function fetchKey(args: unknown[]): Promise<void> {
+  const keyIndex = args[0] as bigint;
   isKeyLoading.value = true;
   key.value = null;
-  if (!client.value || !keyIndex.value) return;
+  if (!client.value || keyIndex === undefined) return;
 
-  const index = parseInt(keyIndex.value);
+  const index = parseInt(keyIndex.toString());
   const result = await client.value.multicall({
     contracts: [
       {
