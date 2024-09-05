@@ -22,7 +22,7 @@ function decodeCallData(callData: Hex): Call[] {
     }
     return dests.map((dest, i) => ({
       dest: dest,
-      value: 0n,
+      value: BigInt(0),
       data: a[i] as Hex,
     }));
   }
