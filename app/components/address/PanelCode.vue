@@ -24,7 +24,8 @@
           kind="minimal"
           @click="toggleSearch"
         >
-          Search
+          <template v-if="isSearching"> Hide Search </template>
+          <template v-else> Search </template>
         </ScopeButton>
       </div>
       <CardSource
