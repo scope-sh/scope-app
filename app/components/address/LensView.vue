@@ -29,7 +29,10 @@
     :address="address"
   />
   <SafeV1_4_1Lens
-    v-if="hasLabelTypeId('safe-v1.4.1-account')"
+    v-if="
+      hasLabelTypeId('safe-v1.4.1-account') ||
+      hasLabelTypeId('safe7579-v1.0.0-account')
+    "
     :address="address"
   />
   <UniswapV2PoolLens
