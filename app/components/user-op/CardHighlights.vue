@@ -12,6 +12,7 @@ import type { Item } from '@/components/__common/CardHighlights.vue';
 import BaseCard from '@/components/__common/CardHighlights.vue';
 import useLabels from '@/composables/useLabels';
 import { decodeSignature as biconomyV2DecodeSignature } from '@/utils/context/erc4337/biconomyV2';
+import { decodeSignature as coinbaseSmartWalletV1DecodeSignature } from '@/utils/context/erc4337/coinbaseSmartWalletV1';
 import type { UserOpUnpacked } from '@/utils/context/erc4337/entryPoint';
 import { decodeSignature as kernelV2DecodeSignature } from '@/utils/context/erc4337/kernelV2';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
@@ -122,6 +123,24 @@ const items = computed<Item[]>(() => {
           {
             type: 'address',
             address: decodedSignature.validator,
+          },
+        ],
+      },
+    ] as Item[];
+  }
+  if (labelType.id === 'coinbase-smart-wallet-v1-account') {
+    const signature = props.userOp.signature;
+    const decodedSignature = coinbaseSmartWalletV1DecodeSignature(signature);
+    if (!decodedSignature) {
+      return [];
+    }
+    return [
+      {
+        icon: label.iconUrl,
+        parts: [
+          {
+            type: 'text',
+            value: `Validate with owner #${decodedSignature.ownerIndex}`,
           },
         ],
       },
