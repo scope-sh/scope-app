@@ -88,7 +88,7 @@ async function fetch(): Promise<void> {
         address: props.address as Address,
         abi: ABI_SAFE_1_4_1_ACCOUNT,
         functionName: 'getModulesPaginated',
-        args: ['0x0000000000000000000000000000000000000001', 10n],
+        args: ['0x0000000000000000000000000000000000000001', 1000n],
       },
       {
         address: props.address as Address,
