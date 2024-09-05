@@ -4,6 +4,10 @@
     v-if="hasLabelTypeId('daimo-v1-account')"
     :address="address"
   />
+  <CoinbaseSmartWalletV1Account
+    v-else-if="hasLabelTypeId('coinbase-smart-wallet-v1-account')"
+    :address="address"
+  />
   <KernelV2AccountLens
     v-else-if="hasLabelTypeId('kernel-v2-account')"
     :address="address"
@@ -62,6 +66,7 @@ import type { Address } from 'viem';
 import AaveV3Token from './lenses/AaveV3Token.vue';
 import AerodromeV1Pool from './lenses/AerodromeV1Pool.vue';
 import BiconomyV2Account from './lenses/BiconomyV2Account.vue';
+import CoinbaseSmartWalletV1Account from './lenses/CoinbaseSmartWalletV1Account.vue';
 import DaimoAccount from './lenses/DaimoAccount.vue';
 import Erc20Lens from './lenses/Erc20Lens.vue';
 import Erc7579ModuleLens from './lenses/Erc7579ModuleLens.vue';
