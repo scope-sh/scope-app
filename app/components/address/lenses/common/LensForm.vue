@@ -86,6 +86,7 @@ async function handleSubmit(): Promise<void> {
 .root {
   display: flex;
   gap: var(--spacing-4);
+  flex-wrap: wrap;
 }
 
 form {
