@@ -295,7 +295,7 @@ async function getUserOps(
       return [];
     }
     return args[0] as UserOp_0_6[];
-  } else {
+  } else if (txType === TX_TYPE_SAFE_PAYMASTER) {
     const { functionName, args } = decodeFunctionData({
       abi: safePaymasterAbi,
       data: transaction.input,
@@ -305,6 +305,7 @@ async function getUserOps(
     }
     return args[0] as UserOp_0_7[];
   }
+  return [];
 }
 
 function getUserOpHash(
