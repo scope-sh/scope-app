@@ -38,6 +38,14 @@
                 type="minimal"
               />
             </template>
+            <template v-else-if="part.type === 'userop'">
+              <LinkUserOp
+                :hash="part.hash"
+                type="minimal"
+              >
+                {{ part.hash }}
+              </LinkUserOp>
+            </template>
           </div>
         </div>
       </div>
@@ -46,7 +54,9 @@
 </template>
 
 <script setup lang="ts">
-import type { Address } from 'viem';
+import type { Address, Hash } from 'viem';
+
+import LinkUserOp from './LinkUserOp.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
@@ -68,7 +78,12 @@ interface ItemPartAddress {
   label?: string;
 }
 
-type ItemPart = ItemPartText | ItemPartAddress;
+interface ItemPartUserOp {
+  type: 'userop';
+  hash: Hash;
+}
+
+type ItemPart = ItemPartText | ItemPartAddress | ItemPartUserOp;
 
 interface Item {
   icon?: string;

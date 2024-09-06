@@ -20,6 +20,7 @@ import {
 import { computed } from 'vue';
 
 import aerodromeV1PoolAbi from '@/abi/aerodromeV1Pool';
+import entryPoint070Abi from '@/abi/entryPointV0_7_0';
 import erc20Abi from '@/abi/erc20';
 import uniswapV2PoolAbi from '@/abi/uniswapV2Pool';
 import uniswapV3PoolAbi from '@/abi/uniswapV3Pool';
@@ -104,6 +105,14 @@ function getLogItem(log: Log): Item | undefined {
   const aeroV1SwapTransfer = getAbiItem({
     abi: aerodromeV1PoolAbi,
     name: 'Swap',
+  });
+  const entryPointUserOperation = getAbiItem({
+    abi: entryPoint070Abi,
+    name: 'UserOperationEvent',
+  });
+  const entryPointAccountDeployment = getAbiItem({
+    abi: entryPoint070Abi,
+    name: 'AccountDeployed',
   });
   if (topic === toEventSelector(erc20Transfer)) {
     const decodedLog = decodeEventLog({
@@ -449,6 +458,78 @@ function getLogItem(log: Log): Item | undefined {
           type: 'address',
           address: log.address.toLowerCase() as Address,
           label: name,
+        },
+      ],
+    };
+  } else if (topic === toEventSelector(entryPointUserOperation)) {
+    const decodedLog = decodeEventLog({
+      abi: entryPoint070Abi,
+      topics: log.topics,
+      data: log.data,
+    });
+    if (!decodedLog) {
+      return;
+    }
+    if (decodedLog.eventName !== 'UserOperationEvent') {
+      return;
+    }
+    const sender = decodedLog.args.sender.toLowerCase() as Address;
+    const addressLabel = getLabel(sender);
+    const hash = decodedLog.args.userOpHash;
+    return {
+      icon: addressLabel?.iconUrl,
+      parts: [
+        {
+          type: 'text',
+          value: 'User operation',
+        },
+        {
+          type: 'userop',
+          hash,
+        },
+        {
+          type: 'text',
+          value: 'from',
+        },
+        {
+          type: 'address',
+          address: sender,
+        },
+      ],
+    };
+  } else if (topic === toEventSelector(entryPointAccountDeployment)) {
+    const decodedLog = decodeEventLog({
+      abi: entryPoint070Abi,
+      topics: log.topics,
+      data: log.data,
+    });
+    if (!decodedLog) {
+      return;
+    }
+    if (decodedLog.eventName !== 'AccountDeployed') {
+      return;
+    }
+    const sender = decodedLog.args.sender;
+    const factory = decodedLog.args.factory;
+    const addressLabel = getLabel(sender);
+    return {
+      icon: addressLabel?.iconUrl,
+      parts: [
+        {
+          type: 'text',
+          value: 'Deploy account',
+        },
+        {
+          type: 'address',
+          address: factory.toLowerCase() as Address,
+        },
+        {
+          type: 'text',
+          value: 'using',
+        },
+        {
+          type: 'address',
+          address: factory.toLowerCase() as Address,
         },
       ],
     };
