@@ -300,8 +300,14 @@ const transactions = computed<Transaction[]>(() => {
       from: transaction.from,
       to: transaction.to,
       function:
-        transaction.input.length >= 10 ? slice(transaction.input, 0, 4) : '0x',
-      data: transaction.input.length > 10 ? slice(transaction.input, 4) : '0x',
+        transaction.to && transaction.input.length >= 10
+          ? slice(transaction.input, 0, 4)
+          : '0x',
+      data: transaction.to
+        ? transaction.input.length > 10
+          ? slice(transaction.input, 4)
+          : '0x'
+        : transaction.input,
       value: transaction.value,
       gasPrice: transaction.gasPrice,
     } as Transaction;
