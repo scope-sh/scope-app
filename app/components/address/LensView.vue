@@ -35,6 +35,10 @@
     "
     :address="address"
   />
+  <FunV1Account
+    v-if="hasLabelTypeId('fun-v1-account')"
+    :address="address"
+  />
   <UniswapV2PoolLens
     v-else-if="hasLabelTypeId('uniswap-v2-pool')"
     :address="address"
@@ -83,6 +87,7 @@ import CoinbaseSmartWalletV1Account from './lenses/CoinbaseSmartWalletV1Account.
 import DaimoAccount from './lenses/DaimoAccount.vue';
 import Erc20Lens from './lenses/Erc20Lens.vue';
 import Erc7579ModuleLens from './lenses/Erc7579ModuleLens.vue';
+import FunV1Account from './lenses/FunV1Account.vue';
 import KernelV2AccountLens from './lenses/KernelV2AccountLens.vue';
 import KernelV3AccountLens from './lenses/KernelV3AccountLens.vue';
 import MorphoVault from './lenses/MorphoVault.vue';
