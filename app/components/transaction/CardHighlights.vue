@@ -464,42 +464,6 @@ function getLogItem(log: Log): Item | undefined {
         },
       ],
     };
-  } else if (topic === toEventSelector(entryPointUserOperation)) {
-    const decodedLog = decodeEventLog({
-      abi: entryPoint070Abi,
-      topics: log.topics,
-      data: log.data,
-    });
-    if (!decodedLog) {
-      return;
-    }
-    if (decodedLog.eventName !== 'UserOperationEvent') {
-      return;
-    }
-    const sender = decodedLog.args.sender.toLowerCase() as Address;
-    const addressLabel = getLabel(sender);
-    const hash = decodedLog.args.userOpHash;
-    return {
-      icon: addressLabel?.iconUrl,
-      parts: [
-        {
-          type: 'text',
-          value: 'User operation',
-        },
-        {
-          type: 'userop',
-          hash,
-        },
-        {
-          type: 'text',
-          value: 'from',
-        },
-        {
-          type: 'address',
-          address: sender,
-        },
-      ],
-    };
   } else if (topic === toEventSelector(entryPointAccountDeployment)) {
     const decodedLog = decodeEventLog({
       abi: entryPoint070Abi,
