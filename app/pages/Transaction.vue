@@ -135,12 +135,17 @@
         </AttributeItem>
         <AttributeItem v-if="transaction.input !== '0x'">
           <AttributeItemLabel
-            value="Input"
-            note="The additional data sent along with the transaction, often used to invoke functions on contracts."
+            :value="isContractDeployment ? 'Init code' : 'Input'"
+            :note="
+              isContractDeployment
+                ? 'The code used to deploy a new contract'
+                : 'The additional data sent along with the transaction, often used to invoke functions on contracts.'
+            "
           />
           <AttributeItemValue>
             <div class="input">
               <ScopeToggle
+                v-if="!isContractDeployment"
                 v-model="selectedCallDataView"
                 :options="callDataViewOptions"
               />
@@ -596,6 +601,13 @@ const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
     icon: 'hex-string',
   },
 ]);
+
+const isContractDeployment = computed(() => {
+  if (!transaction.value) {
+    return false;
+  }
+  return !transaction.value.to;
+});
 
 const blockRelativeTime = computed(() => {
   if (!block.value) {
