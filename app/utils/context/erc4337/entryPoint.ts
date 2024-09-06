@@ -14,6 +14,7 @@ import { readContract } from 'viem/actions';
 import { decodeCallData as decodeAlchemyLightV2CallData } from './alchemyLightV2.js';
 import { decodeCallData as decodeBiconomyV2CallData } from './biconomyV2.js';
 import { decodeCallData as decodeDaimoCallData } from './daimo.js';
+import { decodeCallData as decodeFunV1CallData } from './funV1.js';
 import { decodeCallData as decodeKernelV2CallData } from './kernelV2.js';
 import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
 
@@ -615,6 +616,15 @@ function decodeCalls(callData: Hex): Call[] | null {
     if (selector === '0x18dfb3c7') {
       // Alchemy Light V2
       const decodedCallData = decodeAlchemyLightV2CallData(callData);
+      return decodedCallData.map((call) => ({
+        to: call.dest,
+        callData: call.data,
+        value: call.value,
+      }));
+    }
+    if (selector === '0x80c5c7d0' || selector === '0xe007fd8d') {
+      // Fun V1
+      const decodedCallData = decodeFunV1CallData(callData);
       return decodedCallData.map((call) => ({
         to: call.dest,
         callData: call.data,
