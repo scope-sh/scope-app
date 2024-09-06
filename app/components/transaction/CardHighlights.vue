@@ -115,6 +115,9 @@ function getLogItem(log: Log): Item | undefined {
     name: 'AccountDeployed',
   });
   if (topic === toEventSelector(erc20Transfer)) {
+    if (size(log.data) !== 32) {
+      return;
+    }
     const decodedLog = decodeEventLog({
       abi: erc20Abi,
       topics: log.topics,
