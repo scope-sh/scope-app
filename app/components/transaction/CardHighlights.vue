@@ -106,10 +106,6 @@ function getLogItem(log: Log): Item | undefined {
     abi: aerodromeV1PoolAbi,
     name: 'Swap',
   });
-  const entryPointUserOperation = getAbiItem({
-    abi: entryPoint070Abi,
-    name: 'UserOperationEvent',
-  });
   const entryPointAccountDeployment = getAbiItem({
     abi: entryPoint070Abi,
     name: 'AccountDeployed',
@@ -476,9 +472,9 @@ function getLogItem(log: Log): Item | undefined {
     if (decodedLog.eventName !== 'AccountDeployed') {
       return;
     }
-    const sender = decodedLog.args.sender;
-    const factory = decodedLog.args.factory;
-    const addressLabel = getLabel(sender);
+    const sender = decodedLog.args.sender.toLowerCase() as Address;
+    const factory = decodedLog.args.factory.toLowerCase() as Address;
+    const addressLabel = getLabel(factory);
     return {
       icon: addressLabel?.iconUrl,
       parts: [
@@ -488,7 +484,7 @@ function getLogItem(log: Log): Item | undefined {
         },
         {
           type: 'address',
-          address: factory.toLowerCase() as Address,
+          address: sender,
         },
         {
           type: 'text',
@@ -496,7 +492,7 @@ function getLogItem(log: Log): Item | undefined {
         },
         {
           type: 'address',
-          address: factory.toLowerCase() as Address,
+          address: factory,
         },
       ],
     };
