@@ -117,7 +117,7 @@
                 :options="callDataViewOptions"
               />
               <ViewCallData
-                :address="userOp.sender"
+                :address="userOp.sender.toLowerCase() as Address"
                 :call-data="userOp.callData"
                 :view="selectedCallDataView"
               />
@@ -243,7 +243,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import type { Address, Hex, Log, Transaction, TransactionReceipt } from 'viem';
-import { size } from 'viem';
+import { size, slice } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -400,6 +400,24 @@ watch(transaction, async () => {
         entryPoint.value &&
         getUserOpHash(chain, entryPoint.value, op) === hash.value,
     ) || null;
+});
+watch(userOp, async () => {
+  if (!apiService.value) {
+    return;
+  }
+  if (!userOp.value) {
+    return;
+  }
+  const sender = userOp.value.sender.toLowerCase();
+  const callData = userOp.value.callData;
+
+  const abis = await apiService.value.getContractAbi({
+    [sender]: {
+      functions: [slice(callData, 0, 4)],
+      events: [],
+    },
+  });
+  addAbis(abis);
 });
 const userOpUnpacked = computed(() => {
   if (!chainId.value) {
@@ -563,6 +581,10 @@ const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
   {
     value: 'calls',
     icon: 'hamburger',
+  },
+  {
+    value: 'decoded',
+    icon: 'text',
   },
   {
     value: 'hex',
