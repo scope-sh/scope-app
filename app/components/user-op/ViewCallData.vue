@@ -1,10 +1,9 @@
 <template>
-  <div
+  <ViewCalls
     v-if="view === 'calls' && calls"
     class="calls"
-  >
-    <ArgumentTree :args="calls" />
-  </div>
+    :calls
+  />
   <div
     v-else-if="view === 'decoded' && decoded"
     class="decoded"
@@ -36,6 +35,8 @@ import {
 } from 'viem';
 import { computed } from 'vue';
 
+import ViewCalls from './ViewCalls.vue';
+
 import ButtonCopy from '@/components/__common/ButtonCopy.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
 import {
@@ -45,6 +46,7 @@ import {
 } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
 import { decodeCalls } from '@/utils/context/erc4337/entryPoint';
+import type { Call } from '@/utils/context/erc4337/entryPoint';
 
 const props = defineProps<{
   address: Address | null;
@@ -70,35 +72,7 @@ const abi = computed<AbiFunction | null>(() => {
     : null;
 });
 
-const calls = computed<Argument[] | null>(() => {
-  const calls = decodeCalls(props.callData);
-  if (!calls) {
-    return null;
-  }
-  return getArguments(
-    [
-      {
-        type: 'tuple[]',
-        components: [
-          {
-            type: 'address',
-            name: 'to',
-          },
-          {
-            type: 'uint256',
-            name: 'value',
-          },
-          {
-            type: 'bytes',
-            name: 'callData',
-          },
-        ],
-        name: 'calls',
-      },
-    ],
-    [calls],
-  );
-});
+const calls = computed<Call[] | null>(() => decodeCalls(props.callData));
 
 const decoded = computed<DecodedCallData | null>(() => {
   if (!abi.value) return null;
