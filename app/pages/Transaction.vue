@@ -269,8 +269,6 @@ import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
-import type { CallDataView } from '@/components/__common/ViewCallData.vue';
-import ViewCallData from '@/components/__common/ViewCallData.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -282,6 +280,8 @@ import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
 import type { Call as InternalCallRow } from '@/components/transaction/TreeInternalCalls.vue';
 import TreeInternalCalls from '@/components/transaction/TreeInternalCalls.vue';
+import ViewCallData from '@/components/transaction/ViewCallData.vue';
+import type { CallDataView } from '@/components/transaction/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';

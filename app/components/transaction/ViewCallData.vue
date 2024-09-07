@@ -30,10 +30,13 @@ import {
 } from 'viem';
 import { computed } from 'vue';
 
-import ButtonCopy from './ButtonCopy.vue';
-import ScopeTextView from './ScopeTextView.vue';
-import { ArgumentTree, type Argument, getArguments } from './arguments';
-
+import ButtonCopy from '@/components/__common/ButtonCopy.vue';
+import ScopeTextView from '@/components/__common/ScopeTextView.vue';
+import {
+  ArgumentTree,
+  type Argument,
+  getArguments,
+} from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
 
 const props = defineProps<{
