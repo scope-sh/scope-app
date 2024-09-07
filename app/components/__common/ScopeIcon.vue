@@ -17,6 +17,7 @@
   <IconCrossCircled v-else-if="kind === 'cross-circled'" />
   <IconDoubleArrowLeft v-else-if="kind === 'double-arrow-left'" />
   <IconDoubleArrowRight v-else-if="kind === 'double-arrow-right'" />
+  <IconHamburger v-else-if="kind === 'hamburger'" />
   <IconHexString v-else-if="kind === 'hex-string'" />
   <IconInput v-else-if="kind === 'input'" />
   <IconJson v-else-if="kind === 'json'" />
@@ -48,6 +49,7 @@ import IconCross from './icon/general/Cross.vue';
 import IconCrossCircled from './icon/general/CrossCircled.vue';
 import IconDoubleArrowLeft from './icon/general/DoubleArrowLeft.vue';
 import IconDoubleArrowRight from './icon/general/DoubleArrowRight.vue';
+import IconHamburger from './icon/general/Hamburger.vue';
 import IconHexString from './icon/general/HexString.vue';
 import IconInput from './icon/general/Input.vue';
 import IconJson from './icon/general/Json.vue';

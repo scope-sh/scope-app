@@ -17,6 +17,7 @@ type Kind =
   | 'cross-circled'
   | 'double-arrow-left'
   | 'double-arrow-right'
+  | 'hamburger'
   | 'hex-string'
   | 'input'
   | 'json'
