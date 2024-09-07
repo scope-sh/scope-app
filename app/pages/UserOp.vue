@@ -103,55 +103,25 @@
             />
           </AttributeItemValue>
         </AttributeItem>
-      </AttributeList>
-      <AttributeList>
-        <template v-if="calls">
-          <template
-            v-for="(call, index) in calls"
-            :key="index"
-          >
-            <AttributeItem>
-              <AttributeItemLabel
-                :value="`To ${index + 1}`"
-                note="The address of the account that is the recipient of the call"
-              />
-              <AttributeItemValue>
-                <LinkAddress :address="call.to" />
-              </AttributeItemValue>
-            </AttributeItem>
-            <AttributeItem v-if="call.value">
-              <AttributeItemLabel
-                :value="`Value ${index + 1}`"
-                note="The amount of native currency transferred from the sender to the recipient"
-              />
-              <AttributeItemValue>
-                {{ formatEther(call.value, nativeCurrency) }}
-              </AttributeItemValue>
-            </AttributeItem>
-            <AttributeItem>
-              <AttributeItemLabel
-                :value="`Data ${index + 1}`"
-                note="The additional data sent along with the call, often used to invoke functions on contracts"
-              />
-              <AttributeItemValue>
-                <ScopeTextView
-                  :value="call.callData"
-                  size="tiny"
-                />
-              </AttributeItemValue>
-            </AttributeItem>
-          </template>
-        </template>
-        <AttributeItem v-else>
+        <AttributeItem v-if="userOp">
           <AttributeItemLabel
             value="Call Data"
-            note="The data that is passed to the sender contract, defining the call's destination, value, and parameters"
+            note="
+              The data that is passed to the sender contract, defining the call's destination, value, and parameters
+            "
           />
           <AttributeItemValue>
-            <ScopeTextView
-              :value="userOpUnpacked.callData"
-              size="tiny"
-            />
+            <div class="input">
+              <ScopeToggle
+                v-model="selectedCallDataView"
+                :options="callDataViewOptions"
+              />
+              <ViewCallData
+                :address="userOp.sender"
+                :call-data="userOp.callData"
+                :view="selectedCallDataView"
+              />
+            </div>
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>
@@ -300,6 +270,8 @@ import {
 } from '@/components/__common/attributes';
 import CardHighlights from '@/components/user-op/CardHighlights.vue';
 import UserOpStatus from '@/components/user-op/UserOpStatus.vue';
+import type { CallDataView } from '@/components/user-op/ViewCallData.vue';
+import ViewCallData from '@/components/user-op/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -316,7 +288,6 @@ import {
   getUserOpEvent,
   getUserOpHash,
   getUserOps,
-  decodeCalls,
   getBeneficiary,
   getUserOpLogs,
   unpackUserOp,
@@ -468,12 +439,6 @@ const gasPrice = computed(() => {
     userOpUnpacked.value.actualGasCost / userOpUnpacked.value.actualGasUsed
   );
 });
-const calls = computed(() => {
-  if (!userOpUnpacked.value) {
-    return null;
-  }
-  return decodeCalls(userOpUnpacked.value.callData);
-});
 const beneficiary = computed<Address | null>(() => {
   if (!transaction.value) {
     return null;
@@ -593,6 +558,17 @@ async function fetchAbis(): Promise<void> {
   addAbis(abis);
 }
 
+const selectedCallDataView = ref<CallDataView>('calls');
+const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
+  {
+    value: 'calls',
+    icon: 'hamburger',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
 const selectedLogView = ref<LogView>('decoded');
 const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
   {
@@ -611,6 +587,13 @@ function handleOpenAsTransactionClick(): void {
 </script>
 
 <style scoped>
+.input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-2);
+}
+
 .logs {
   display: flex;
   gap: var(--spacing-5);
