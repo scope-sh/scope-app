@@ -45,6 +45,8 @@ import {
   getArguments,
 } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
+import useLabels from '@/composables/useLabels';
+import type { LabelTypeId } from '@/services/api';
 import { decode as decodeCalls } from '@/utils/context/erc4337/callData';
 import type { Call } from '@/utils/context/erc4337/callData';
 
@@ -55,12 +57,26 @@ const props = defineProps<{
 }>();
 
 const { getFunctionAbi } = useAbi();
+const { getLabel } = useLabels();
 
 interface DecodedCallData {
   name: string;
   args: Argument[];
 }
 
+const labelType = computed<LabelTypeId | null>(() => {
+  if (!props.address) {
+    return null;
+  }
+  const label = getLabel(props.address);
+  if (!label) {
+    return null;
+  }
+  if (!label.type) {
+    return null;
+  }
+  return label.type.id;
+});
 const signature = computed<Hex>(() => props.callData.substring(0, 10) as Hex);
 
 const abi = computed<AbiFunction | null>(() => {
@@ -72,7 +88,9 @@ const abi = computed<AbiFunction | null>(() => {
     : null;
 });
 
-const calls = computed<Call[] | null>(() => decodeCalls(props.callData));
+const calls = computed<Call[] | null>(() =>
+  decodeCalls(labelType.value, props.callData),
+);
 
 const decoded = computed<DecodedCallData | null>(() => {
   if (!abi.value) return null;
