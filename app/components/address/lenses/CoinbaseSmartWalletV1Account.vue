@@ -82,7 +82,6 @@ async function fetch(): Promise<void> {
 
   const nextOwnerIndex =
     result[0].status === 'success' ? result[0].result : null;
-  console.log(nextOwnerIndex);
 
   if (nextOwnerIndex === null) {
     isLoading.value = false;
@@ -103,7 +102,6 @@ async function fetch(): Promise<void> {
   owners.value = ownersValue
     .filter((owner): owner is Address => owner !== zeroHash)
     .map((owner) => {
-      console.log(owner, slice(owner, 44));
       // If the first 44 bytes are 0, it's an address
       if (pad(slice(owner, 44)) === owner) {
         return {
