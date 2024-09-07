@@ -2,8 +2,10 @@ import { type Address, type Hex, decodeFunctionData, size, slice } from 'viem';
 
 import safeCore4337ModuleAbi from '@/abi/safeCore4337Module';
 
-const SAFE_1_4_1_MULTI_SEND_ADDRESS =
+const SAFE_1_4_1_MULTI_SEND_1_ADDRESS =
   '0x9641d764fc13c8b624c04430c7356c1c7c8102e2';
+const SAFE_1_4_1_MULTI_SEND_2_ADDRESS =
+  '0x38869bf66a61cf6bdb996a6ae40d5853fd43b526';
 const SAFE_1_3_0_MULTI_SEND_ADDRESS =
   '0x40a2accbd92bca938b02010e17a5b8929b49130d';
 
@@ -40,13 +42,17 @@ function decodeCallData(callData: Hex): Call | MultisendCall[] {
           const dataLengthEnd = valueEnd + 32;
           const dataLength = BigInt(slice(bytes, valueEnd, dataLengthEnd));
           const dataEnd = dataLengthEnd + Number(dataLength);
-          const data = slice(bytes, dataLengthEnd, dataEnd);
-          calls.push({
+          const data =
+            dataLength === BigInt(0)
+              ? '0x'
+              : slice(bytes, dataLengthEnd, dataEnd);
+          const call = {
             operation: Number(operation),
-            to: to as Address,
+            to,
             value,
             data,
-          });
+          };
+          calls.push(call);
           byteIndex = dataEnd;
         }
         return calls;
@@ -58,7 +64,8 @@ function decodeCallData(callData: Hex): Call | MultisendCall[] {
 
     if (
       to === SAFE_1_3_0_MULTI_SEND_ADDRESS ||
-      to === SAFE_1_4_1_MULTI_SEND_ADDRESS
+      to === SAFE_1_4_1_MULTI_SEND_1_ADDRESS ||
+      to === SAFE_1_4_1_MULTI_SEND_2_ADDRESS
     ) {
       const { functionName, args: multiSendArgs } = decodeFunctionData({
         abi: [
