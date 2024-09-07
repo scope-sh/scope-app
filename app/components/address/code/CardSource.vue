@@ -31,7 +31,7 @@
       />
       <FileView
         v-else
-        v-model:selectedFileIndex="selectedFileIndex"
+        v-model:selected-file-index="selectedFileIndex"
         :files="files"
       />
       <div
