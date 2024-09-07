@@ -5,13 +5,9 @@ import {
   decodeFunctionData,
 } from 'viem';
 
-import biconomyV2AccountAbi from '@/abi/biconomyV2Account';
+import type { Call } from './callData';
 
-interface Call {
-  dest: Address;
-  value: bigint;
-  data: Hex;
-}
+import biconomyV2AccountAbi from '@/abi/biconomyV2Account';
 
 interface DecodedSignature {
   signature: Hex;
@@ -26,7 +22,7 @@ function decodeCallData(callData: Hex): Call[] {
   if (data.functionName === 'execute' || data.functionName === 'execute_ncC') {
     return [
       {
-        dest: data.args[0].toLowerCase() as Address,
+        to: data.args[0].toLowerCase() as Address,
         value: data.args[1],
         data: data.args[2],
       },
@@ -40,7 +36,7 @@ function decodeCallData(callData: Hex): Call[] {
     const values = data.args[1];
     const datas = data.args[2];
     return dests.map((dest, index) => ({
-      dest: dest.toLowerCase() as Address,
+      to: dest.toLowerCase() as Address,
       value: values[index] as bigint,
       data: datas[index] as Hex,
     }));

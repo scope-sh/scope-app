@@ -1,5 +1,7 @@
 import { type Address, type Hex, decodeFunctionData, size, slice } from 'viem';
 
+import type { Call } from './callData';
+
 import safeCore4337ModuleAbi from '@/abi/safeCore4337Module';
 
 const SAFE_1_4_1_MULTI_SEND_1_ADDRESS =
@@ -9,32 +11,14 @@ const SAFE_1_4_1_MULTI_SEND_2_ADDRESS =
 const SAFE_1_3_0_MULTI_SEND_ADDRESS =
   '0x40a2accbd92bca938b02010e17a5b8929b49130d';
 
-interface MultisendCall {
-  operation: number;
-  to: Address;
-  value: bigint;
-  data: Hex;
-}
-
-interface Call {
-  to: Address;
-  value: bigint;
-  callData: Hex;
-}
-
-function decodeCallData(callData: Hex): Call | MultisendCall[] {
-  function decode(
-    to: Address,
-    value: bigint,
-    callData: Hex,
-  ): Call | MultisendCall[] {
-    function decodeMultisend(bytes: Hex): MultisendCall[] {
+function decodeCallData(callData: Hex): Call[] {
+  function decode(to: Address, value: bigint, callData: Hex): Call[] {
+    function decodeMultisend(bytes: Hex): Call[] {
       try {
-        const calls: MultisendCall[] = [];
+        const calls: Call[] = [];
         let byteIndex = 0;
         while (byteIndex < size(bytes)) {
           const operationEnd = byteIndex + 1;
-          const operation = slice(bytes, byteIndex, operationEnd);
           const toEnd = operationEnd + 20;
           const to = slice(bytes, operationEnd, toEnd);
           const valueEnd = toEnd + 32;
@@ -47,7 +31,6 @@ function decodeCallData(callData: Hex): Call | MultisendCall[] {
               ? '0x'
               : slice(bytes, dataLengthEnd, dataEnd);
           const call = {
-            operation: Number(operation),
             to,
             value,
             data,
@@ -85,11 +68,13 @@ function decodeCallData(callData: Hex): Call | MultisendCall[] {
         return decodeMultisend(multiSendArgs[0]);
       }
     }
-    return {
-      to,
-      value,
-      callData,
-    };
+    return [
+      {
+        to,
+        value,
+        data: callData,
+      },
+    ];
   }
 
   const { functionName, args } = decodeFunctionData({

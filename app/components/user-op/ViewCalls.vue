@@ -22,12 +22,12 @@
           <div>{{ formatEther(call.value, nativeCurrency) }}</div>
         </div>
         <div
-          v-if="size(call.callData) > 0"
+          v-if="size(call.data) > 0"
           class="item"
         >
           <div class="key">data</div>
           <div>
-            {{ call.callData }}
+            {{ call.data }}
           </div>
         </div>
       </div>
@@ -40,7 +40,7 @@ import { size } from 'viem';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import useChain from '@/composables/useChain';
-import type { Call } from '@/utils/context/erc4337/entryPoint';
+import type { Call } from '@/utils/context/erc4337/callData';
 import { formatEther } from '@/utils/formatting';
 
 const { nativeCurrency } = useChain();

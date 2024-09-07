@@ -32,27 +32,27 @@ interface NonceDecoded {
 
 interface Execution {
   to: Address;
-  callData: Hex;
+  data: Hex;
   value: bigint;
 }
 
-interface CalldataBatch {
+interface CallDataBatch {
   type: 'batch';
   executions: Execution[];
 }
 
-interface CalldataSingle {
+interface CallDataSingle {
   type: 'single';
   execution: Execution;
 }
 
-interface CalldataDelegate {
+interface CallDataDelegate {
   type: 'delegate';
   delegate: Address;
   calldata: Hex;
 }
 
-type CalldataDecoded = CalldataBatch | CalldataSingle | CalldataDelegate;
+type CallDataDecoded = CallDataBatch | CallDataSingle | CallDataDelegate;
 
 function bitwiseAndHexStrings(hex1: Hex, hex2: Hex): Hex {
   const num1 = BigInt(`0x${hex1}`);
@@ -145,7 +145,7 @@ function decodeExecMode(execMode: Hex): ExecMode {
   };
 }
 
-function decodeCallData(callData: Hex): CalldataDecoded | null {
+function decodeCallData(callData: Hex): CallDataDecoded | null {
   const { functionName, args } = decodeFunctionData({
     abi: kernelV3AccountAbi,
     data: callData,
@@ -166,7 +166,7 @@ function decodeCallData(callData: Hex): CalldataDecoded | null {
         executions: executions[0].map((execution) => ({
           to: execution.target.toLowerCase() as Address,
           value: execution.value,
-          callData: execution.callData,
+          data: execution.callData,
         })),
       };
     }
@@ -179,7 +179,7 @@ function decodeCallData(callData: Hex): CalldataDecoded | null {
         execution: {
           to: target,
           value: BigInt(value),
-          callData: data,
+          data: data,
         },
       };
     }

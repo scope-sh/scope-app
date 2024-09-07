@@ -1,13 +1,9 @@
 import type { Address, Hex } from 'viem';
 import { decodeFunctionData } from 'viem';
 
-import funV1Abi from '@/abi/funV1Account';
+import type { Call } from './callData';
 
-interface Call {
-  dest: Address;
-  value: bigint;
-  data: Hex;
-}
+import funV1Abi from '@/abi/funV1Account';
 
 function decodeCallData(callData: Hex): Call[] {
   const data = decodeFunctionData({
@@ -17,7 +13,7 @@ function decodeCallData(callData: Hex): Call[] {
   if (data.functionName === 'execFromEntryPoint') {
     return [
       {
-        dest: data.args[0].toLowerCase() as Address,
+        to: data.args[0].toLowerCase() as Address,
         value: BigInt(data.args[1]),
         data: data.args[2],
       },
@@ -26,7 +22,7 @@ function decodeCallData(callData: Hex): Call[] {
   if (data.functionName === 'execFromEntryPointWithFee') {
     return [
       {
-        dest: data.args[0].toLowerCase() as Address,
+        to: data.args[0].toLowerCase() as Address,
         value: BigInt(data.args[1]),
         data: data.args[2],
       },

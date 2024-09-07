@@ -11,13 +11,6 @@ import {
 } from 'viem';
 import { readContract } from 'viem/actions';
 
-import { decodeCallData as decodeAlchemyLightV2CallData } from './alchemyLightV2.js';
-import { decodeCallData as decodeBiconomyV2CallData } from './biconomyV2.js';
-import { decodeCallData as decodeDaimoCallData } from './daimo.js';
-import { decodeCallData as decodeFunV1CallData } from './funV1.js';
-import { decodeCallData as decodeKernelV2CallData } from './kernelV2.js';
-import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
-
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0.js';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0.js';
 import klasterPaymasterAbi from '@/abi/klasterPaymaster.js';
@@ -25,7 +18,6 @@ import pimlicoBundleBulkerAbi from '@/abi/pimlicoBundleBulker.js';
 import safePaymasterAbi from '@/abi/safePaymaster.js';
 import type { Log, Transaction } from '@/services/evm.js';
 import type { Chain } from '@/utils/chains.js';
-import { decodeCallData as decodeKernelV3CallData } from '@/utils/context/erc7579/kernelV3.js';
 
 interface UserOpEvent {
   logIndex: number | null;
@@ -100,12 +92,6 @@ interface UserOpUnpacked {
 interface AccountDeployment {
   address: Address;
   factory: Address;
-}
-
-interface Call {
-  to: Address;
-  callData: Hex;
-  value: bigint;
 }
 
 const TX_TYPE_ENTRY_POINT_0_6 = 'Entry Point 0.6';
@@ -553,91 +539,6 @@ function getBeneficiary(transaction: Transaction): Address | null {
   return null;
 }
 
-function decodeCalls(callData: Hex): Call[] | null {
-  const selector = slice(callData, 0, 4);
-  try {
-    if (selector === '0xe9ae5c53') {
-      // Kernel V3 `execute` function
-      const decodedCallData = decodeKernelV3CallData(callData);
-      if (!decodedCallData) {
-        return null;
-      }
-      if (decodedCallData.type === 'single') {
-        return [decodedCallData.execution];
-      }
-      if (decodedCallData.type === 'batch') {
-        return decodedCallData.executions;
-      }
-      return null;
-    }
-    if (selector === '0x541d63c8' || selector === '0x7bb37428') {
-      // Safe Core 4337 module
-      const decodedCallData = decodeSafeCoreCallData(callData);
-      if (Array.isArray(decodedCallData)) {
-        return decodedCallData.map((call) => ({
-          to: call.to,
-          callData: call.data,
-          value: call.value,
-        }));
-      }
-      return [decodedCallData];
-    }
-    if (selector === '0x34fcd5be') {
-      // Daimo "executeBatch" function
-      const decodedCallData = decodeDaimoCallData(callData);
-      return decodedCallData.map((call) => ({
-        to: call.dest,
-        callData: call.data,
-        value: call.value,
-      }));
-    }
-    if (
-      selector === '0x0000189a' ||
-      selector === '0x00004680' ||
-      selector === '0x47e1da2a' ||
-      selector === '0xb61d27f6'
-    ) {
-      // Biconomy V2
-      const decodedCallData = decodeBiconomyV2CallData(callData);
-      return decodedCallData.map((call) => ({
-        to: call.dest,
-        callData: call.data,
-        value: call.value,
-      }));
-    }
-    if (selector === '0x51945447') {
-      // Kernel V2
-      const decodedCallData = decodeKernelV2CallData(callData);
-      return decodedCallData.map((call) => ({
-        to: call.dest,
-        callData: call.data,
-        value: call.value,
-      }));
-    }
-    if (selector === '0x18dfb3c7') {
-      // Alchemy Light V2
-      const decodedCallData = decodeAlchemyLightV2CallData(callData);
-      return decodedCallData.map((call) => ({
-        to: call.dest,
-        callData: call.data,
-        value: call.value,
-      }));
-    }
-    if (selector === '0x80c5c7d0' || selector === '0xe007fd8d') {
-      // Fun V1
-      const decodedCallData = decodeFunV1CallData(callData);
-      return decodedCallData.map((call) => ({
-        to: call.dest,
-        callData: call.data,
-        value: call.value,
-      }));
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
 export {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
@@ -653,7 +554,6 @@ export {
   getAccountDeployments,
   getBeneficiary,
   getUserOpLogs,
-  decodeCalls,
   unpackUserOp,
 };
-export type { Call, TxType, UserOp, UserOpUnpacked, UserOp_0_6, UserOp_0_7 };
+export type { TxType, UserOp, UserOpUnpacked, UserOp_0_6, UserOp_0_7 };

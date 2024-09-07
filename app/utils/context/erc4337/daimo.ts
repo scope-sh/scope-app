@@ -1,12 +1,8 @@
 import { type Address, type Hex, decodeFunctionData } from 'viem';
 
-import daimoAccountAbi from '@/abi/daimoAccount';
+import type { Call } from './callData';
 
-interface Call {
-  dest: Address;
-  value: bigint;
-  data: Hex;
-}
+import daimoAccountAbi from '@/abi/daimoAccount';
 
 function decodeCallData(callData: Hex): Call[] {
   const data = decodeFunctionData({
@@ -17,7 +13,7 @@ function decodeCallData(callData: Hex): Call[] {
     return [];
   }
   return data.args[0].map((call) => ({
-    dest: call.dest.toLowerCase() as Address,
+    to: call.dest.toLowerCase() as Address,
     value: BigInt(call.value),
     data: call.data,
   }));

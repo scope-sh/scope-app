@@ -45,8 +45,8 @@ import {
   getArguments,
 } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
-import { decodeCalls } from '@/utils/context/erc4337/entryPoint';
-import type { Call } from '@/utils/context/erc4337/entryPoint';
+import { decode as decodeCalls } from '@/utils/context/erc4337/callData';
+import type { Call } from '@/utils/context/erc4337/callData';
 
 const props = defineProps<{
   address: Address | null;

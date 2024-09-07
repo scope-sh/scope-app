@@ -1,12 +1,8 @@
-import { decodeFunctionData, type Address, type Hex } from 'viem';
+import { decodeFunctionData, type Hex } from 'viem';
+
+import type { Call } from './callData';
 
 import abi from '@/abi/alchemyLightV2Account';
-
-interface Call {
-  dest: Address;
-  value: bigint;
-  data: Hex;
-}
 
 function decodeCallData(callData: Hex): Call[] {
   const data = decodeFunctionData({
@@ -15,15 +11,15 @@ function decodeCallData(callData: Hex): Call[] {
   });
   if (data.functionName === 'executeBatch') {
     const dests = data.args[0];
-    const a = data.args[1];
-    const b = data.args[2];
-    if (b) {
+    const arg1 = data.args[1];
+    const arg2 = data.args[2];
+    if (arg2) {
       return [];
     }
     return dests.map((dest, i) => ({
-      dest: dest,
+      to: dest,
       value: BigInt(0),
-      data: a[i] as Hex,
+      data: arg1[i] as Hex,
     }));
   }
   return [];

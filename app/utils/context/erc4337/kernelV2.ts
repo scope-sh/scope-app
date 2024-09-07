@@ -1,12 +1,8 @@
 import { type Address, type Hex, decodeFunctionData, slice } from 'viem';
 
-import kernelV2AccountAbi from '@/abi/kernelV2Account.js';
+import type { Call } from './callData';
 
-interface Call {
-  dest: Address;
-  value: bigint;
-  data: Hex;
-}
+import kernelV2AccountAbi from '@/abi/kernelV2Account.js';
 
 type DecodedSignature =
   | {
@@ -28,7 +24,7 @@ function decodeCallData(callData: Hex): Call[] {
   if (data.functionName === 'execute') {
     return [
       {
-        dest: data.args[0].toLowerCase() as Address,
+        to: data.args[0].toLowerCase() as Address,
         value: data.args[1],
         data: data.args[2],
       },
@@ -36,7 +32,7 @@ function decodeCallData(callData: Hex): Call[] {
   }
   if (data.functionName === 'executeBatch') {
     return data.args[0].map((call) => ({
-      dest: call.to.toLowerCase() as Address,
+      to: call.to.toLowerCase() as Address,
       value: call.value,
       data: call.data,
     }));
