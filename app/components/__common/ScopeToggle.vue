@@ -36,7 +36,10 @@ defineProps<{
 
 const modelValue = defineModel<string>();
 
-function handleModelValueUpdate(value: string | string[]): void {
+function handleModelValueUpdate(value: string | string[] | undefined): void {
+  if (value === undefined) {
+    return;
+  }
   if (Array.isArray(value)) {
     return;
   }
