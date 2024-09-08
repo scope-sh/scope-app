@@ -18,6 +18,12 @@ interface Call {
 }
 
 function decode(labelTypeId: LabelTypeId | null, callData: Hex): Call[] | null {
+  if (labelTypeId !== null) {
+    const calls = decodeLabelledCallData(labelTypeId, callData);
+    if (calls !== null) {
+      return calls;
+    }
+  }
   try {
     const decodedCallData = decodeFunctionData({
       abi: [
@@ -137,9 +143,6 @@ function decode(labelTypeId: LabelTypeId | null, callData: Hex): Call[] | null {
     }
   } catch {
     return null;
-  }
-  if (labelTypeId !== null) {
-    return decodeLabelledCallData(labelTypeId, callData);
   }
   return null;
 }
