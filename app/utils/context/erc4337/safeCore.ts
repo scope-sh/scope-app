@@ -11,8 +11,8 @@ const SAFE_1_4_1_MULTI_SEND_2_ADDRESS =
 const SAFE_1_3_0_MULTI_SEND_ADDRESS =
   '0x40a2accbd92bca938b02010e17a5b8929b49130d';
 
-function decodeCallData(callData: Hex): Call[] {
-  function decode(to: Address, value: bigint, callData: Hex): Call[] {
+function decodeCallData(callData: Hex): Call[] | null {
+  function decode(to: Address, value: bigint, callData: Hex): Call[] | null {
     function decodeMultisend(bytes: Hex): Call[] {
       try {
         const calls: Call[] = [];
@@ -87,7 +87,7 @@ function decodeCallData(callData: Hex): Call[] {
   if (functionName === 'executeUserOpWithErrorString') {
     return decode(args[0].toLowerCase() as Address, BigInt(args[1]), args[2]);
   }
-  return [];
+  return null;
 }
 
 // eslint-disable-next-line import/prefer-default-export

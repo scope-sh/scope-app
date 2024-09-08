@@ -14,7 +14,7 @@ interface DecodedSignature {
   validator: Address;
 }
 
-function decodeCallData(callData: Hex): Call[] {
+function decodeCallData(callData: Hex): Call[] | null {
   const data = decodeFunctionData({
     abi: biconomyV2AccountAbi,
     data: callData,
@@ -41,7 +41,7 @@ function decodeCallData(callData: Hex): Call[] {
       data: datas[index] as Hex,
     }));
   }
-  return [];
+  return null;
 }
 
 function decodeSignature(signature: Hex): DecodedSignature {

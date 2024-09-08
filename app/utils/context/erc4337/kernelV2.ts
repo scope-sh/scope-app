@@ -16,7 +16,7 @@ type DecodedSignature =
       validator: Address;
     };
 
-function decodeCallData(callData: Hex): Call[] {
+function decodeCallData(callData: Hex): Call[] | null {
   const data = decodeFunctionData({
     abi: kernelV2AccountAbi,
     data: callData,
@@ -37,7 +37,7 @@ function decodeCallData(callData: Hex): Call[] {
       data: call.data,
     }));
   }
-  return [];
+  return null;
 }
 
 function decodeSignature(signature: Hex): DecodedSignature | null {

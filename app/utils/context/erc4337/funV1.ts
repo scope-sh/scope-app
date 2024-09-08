@@ -5,7 +5,7 @@ import type { Call } from './callData';
 
 import funV1Abi from '@/abi/funV1Account';
 
-function decodeCallData(callData: Hex): Call[] {
+function decodeCallData(callData: Hex): Call[] | null {
   const data = decodeFunctionData({
     abi: funV1Abi,
     data: callData,
@@ -28,7 +28,7 @@ function decodeCallData(callData: Hex): Call[] {
       },
     ];
   }
-  return [];
+  return null;
 }
 
 // eslint-disable-next-line import/prefer-default-export

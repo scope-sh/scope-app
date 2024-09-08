@@ -4,13 +4,13 @@ import type { Call } from './callData';
 
 import daimoAccountAbi from '@/abi/daimoAccount';
 
-function decodeCallData(callData: Hex): Call[] {
+function decodeCallData(callData: Hex): Call[] | null {
   const data = decodeFunctionData({
     abi: daimoAccountAbi,
     data: callData,
   });
   if (data.functionName !== 'executeBatch') {
-    return [];
+    return null;
   }
   return data.args[0].map((call) => ({
     to: call.dest.toLowerCase() as Address,
