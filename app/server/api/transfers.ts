@@ -4,6 +4,7 @@ import {
   LogField,
   type Query,
 } from '@envio-dev/hypersync-client';
+import { alchemy } from 'evm-providers';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { defineEventHandler, getQuery } from 'h3';
 import {
@@ -25,10 +26,9 @@ import type { Sort } from './common';
 
 import erc1155Abi from '@/abi/erc1155';
 import erc20Abi from '@/abi/erc20';
-import { getChainData, getEndpointUrl, parseChain } from '@/utils/chains.js';
+import { getChainData, parseChain } from '@/utils/chains.js';
 
-const quicknodeAppName = process.env.VITE_QUICKNODE_APP_NAME || '';
-const quicknodeAppKey = process.env.VITE_QUICKNODE_APP_KEY || '';
+const alchemyApiKey = process.env.ALCHEMY_KEY || '';
 
 interface TransferData {
   type: 'transfer';
@@ -277,7 +277,7 @@ export default defineEventHandler(async (event) => {
   }
   const evmClient = createPublicClient({
     chain: getChainData(chainId),
-    transport: http(getEndpointUrl(chainId, quicknodeAppName, quicknodeAppKey)),
+    transport: http(alchemy(chainId, alchemyApiKey)),
   });
   const decimalResults = await multicall(evmClient, {
     contracts: assets.map((asset) => ({
