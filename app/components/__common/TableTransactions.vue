@@ -11,8 +11,8 @@
             :key="header.id"
             :colSpan="header.colSpan"
             :class="{
-              tiny:
-                header.column.id === 'success' ||
+              status: header.column.id === 'success',
+              small:
                 header.column.id === 'blockPosition' ||
                 header.column.id === 'transactionIndex',
               block: header.column.id === 'blockNumber',
@@ -42,8 +42,8 @@
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
             :class="{
-              tiny:
-                cell.column.id === 'success' ||
+              status: cell.column.id === 'success',
+              small:
                 cell.column.id === 'blockPosition' ||
                 cell.column.id === 'transactionIndex',
               block: cell.column.id === 'blockNumber',
@@ -58,8 +58,8 @@
           >
             <template v-if="cell.column.id === 'success'">
               <ScopeIcon
-                v-if="cell.getValue() !== undefined"
-                :kind="cell.getValue() ? 'check' : 'cross'"
+                v-if="cell.getValue() === false"
+                kind="cross"
                 class="icon"
               />
             </template>
@@ -337,6 +337,7 @@ thead {
   background: var(--color-background-secondary);
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
+  font-size: var(--font-size-s);
 }
 
 th,
@@ -375,6 +376,10 @@ tr {
     }
   }
 
+  td.status {
+    padding-right: 0;
+  }
+
   &:only-child {
     td {
       padding: 10px;
@@ -407,7 +412,11 @@ tbody {
   height: 12px;
 }
 
-.tiny {
+.status {
+  width: 24px;
+}
+
+.small {
   width: 60px;
 }
 
