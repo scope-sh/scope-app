@@ -295,6 +295,7 @@ import type {
   Block,
 } from '@/services/evm';
 import type { Command } from '@/stores/commands';
+import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type { UserOp } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getUserOps } from '@/utils/context/erc4337/entryPoint';
 import { toRelativeTime } from '@/utils/conversion';
@@ -306,6 +307,7 @@ import {
   formatTime,
 } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
+import { convertDebugTraceToTransactionTrace } from '~/utils/evm';
 
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
@@ -478,7 +480,12 @@ async function fetchTransactionTrace(hash: Hex): Promise<void> {
   if (!evmService.value) {
     return;
   }
-  transactionTrace.value = await evmService.value.getTransactionTrace(hash);
+  if (chainId.value === ARBITRUM || chainId.value === ARBITRUM_SEPOLIA) {
+    const debugTrace = await evmService.value.getDebugTransactionTrace(hash);
+    transactionTrace.value = convertDebugTraceToTransactionTrace(debugTrace);
+  } else {
+    transactionTrace.value = await evmService.value.getTransactionTrace(hash);
+  }
 }
 const internalCallRows = computed<InternalCallRow[]>(() => {
   if (!transactionTrace.value) {
