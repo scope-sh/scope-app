@@ -11,8 +11,8 @@
             :key="header.id"
             :colSpan="header.colSpan"
             :class="{
-              tiny:
-                header.column.id === 'success' ||
+              status: header.column.id === 'success',
+              small:
                 header.column.id === 'entryPoint' ||
                 header.column.id === 'nonce',
               block: header.column.id === 'blockNumber',
@@ -42,10 +42,9 @@
             v-for="cell in row.getVisibleCells()"
             :key="cell.id"
             :class="{
-              tiny:
-                cell.column.id === 'success' ||
-                cell.column.id === 'entryPoint' ||
-                cell.column.id === 'nonce',
+              status: cell.column.id === 'success',
+              small:
+                cell.column.id === 'entryPoint' || cell.column.id === 'nonce',
               block: cell.column.id === 'blockNumber',
               timestamp: cell.column.id === 'blockTimestamp',
               hash:
@@ -57,7 +56,8 @@
           >
             <template v-if="cell.column.id === 'success'">
               <ScopeIcon
-                :kind="cell.getValue() ? 'check' : 'cross'"
+                v-if="cell.getValue() === false"
+                kind="cross"
                 class="icon"
               />
             </template>
@@ -309,6 +309,10 @@ tr {
     }
   }
 
+  td.status {
+    padding-right: 0;
+  }
+
   &:only-child {
     td {
       padding: 10px;
@@ -341,7 +345,11 @@ tbody {
   height: 12px;
 }
 
-.tiny {
+.status {
+  width: 24px;
+}
+
+.small {
   width: 60px;
 }
 
