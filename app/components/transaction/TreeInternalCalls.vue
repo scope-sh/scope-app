@@ -12,9 +12,10 @@
         :style="{ '--level': getLevel(item) }"
       >
         <div class="sticky left">
-          <div class="cell tiny">
+          <div class="cell status">
             <ScopeIcon
-              :kind="item.success === true ? 'check' : 'cross'"
+              v-if="item.success !== true"
+              kind="cross"
               class="icon"
             />
           </div>
@@ -191,6 +192,10 @@ export type { Call };
     }
   }
 
+  .cell.status {
+    padding-right: 0;
+  }
+
   &:only-child {
     .cell {
       padding: 10px;
@@ -234,8 +239,8 @@ export type { Call };
   height: 12px;
 }
 
-.tiny {
-  width: 40px;
+.status {
+  width: 24px;
 }
 
 .call {
