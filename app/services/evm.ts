@@ -118,6 +118,63 @@ type TransactionTracePart =
 
 type TransactionTrace = TransactionTracePart[];
 
+interface DebugTransactionTraceResponseCall {
+  from: Address;
+  gas: Hex;
+  gasUsed: Hex;
+  input: Hex;
+  output?: Hex;
+  to: Address;
+  value?: Hex;
+  type: 'CALL' | 'STATICCALL' | 'DELEGATECALL' | 'CREATE' | 'CREATE2';
+  calls?: DebugTransactionTraceResponseCall[];
+  error?: 'execution reverted' | 'out of gas';
+}
+
+interface DebugTransactionTraceResponse
+  extends DebugTransactionTraceResponseCall {
+  afterEVMTransfers: {
+    from: null;
+    purpose: 'gasRefund' | 'feeCollection';
+    to: Address;
+    value: Hex;
+  }[];
+  beforeEVMTransfers: {
+    from: Address;
+    purpose: 'feePayment';
+    to: null;
+    value: Hex;
+  }[];
+}
+
+interface DebugTransactionTraceCall {
+  from: Address;
+  gas: bigint;
+  gasUsed: bigint;
+  input: Hex;
+  output: Hex;
+  to: Address;
+  type: 'CALL' | 'STATICCALL' | 'DELEGATECALL' | 'CREATE' | 'CREATE2';
+  value: bigint;
+  calls: DebugTransactionTraceCall[];
+  error: null | 'Reverted' | 'OOG';
+}
+
+interface DebugTransactionTrace extends DebugTransactionTraceCall {
+  afterEVMTransfers: {
+    from: null;
+    purpose: 'gasRefund' | 'feeCollection';
+    to: Address;
+    value: bigint;
+  }[];
+  beforeEVMTransfers: {
+    from: Address;
+    purpose: 'feePayment';
+    to: null;
+    value: bigint;
+  }[];
+}
+
 class Service {
   client: ReturnType<typeof getClient>;
 
@@ -280,6 +337,68 @@ class Service {
       return null;
     }
   }
+
+  public async getDebugTransactionTrace(
+    hash: Hex,
+  ): Promise<DebugTransactionTrace | null> {
+    function parseCall(
+      call: DebugTransactionTraceResponseCall,
+    ): DebugTransactionTraceCall {
+      return {
+        calls: (call.calls || []).map(parseCall),
+        from: call.from,
+        gas: BigInt(call.gas),
+        gasUsed: BigInt(call.gasUsed),
+        input: call.input,
+        output: call.output || '0x',
+        to: call.to,
+        type: call.type,
+        value: BigInt(call.value || '0'),
+        error:
+          call.error === 'execution reverted'
+            ? 'Reverted'
+            : call.error === 'out of gas'
+              ? 'OOG'
+              : null,
+      };
+    }
+
+    try {
+      const traceResponse = await this.client.debugTraceTransaction(
+        hash,
+        'callTracer',
+      );
+      return {
+        afterEVMTransfers: traceResponse.afterEVMTransfers.map((transfer) => ({
+          from: transfer.from,
+          purpose: transfer.purpose,
+          to: transfer.to,
+          value: BigInt(transfer.value),
+        })),
+        beforeEVMTransfers: traceResponse.beforeEVMTransfers.map(
+          (transfer) => ({
+            from: transfer.from,
+            purpose: transfer.purpose,
+            to: transfer.to,
+            value: BigInt(transfer.value),
+          }),
+        ),
+        ...parseCall({
+          from: traceResponse.from,
+          gas: traceResponse.gas,
+          gasUsed: traceResponse.gasUsed,
+          input: traceResponse.input,
+          output: traceResponse.output,
+          to: traceResponse.to,
+          type: traceResponse.type,
+          value: traceResponse.value,
+          calls: traceResponse.calls,
+        }),
+      };
+    } catch {
+      return null;
+    }
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -298,6 +417,24 @@ function getClient(client: PublicClient) {
         params: [hash, type],
       });
     },
+    async debugTraceTransaction(
+      hash: Hex,
+      tracer: 'callTracer' | 'prestateTracer',
+    ): Promise<DebugTransactionTraceResponse> {
+      return await client.request({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        method: 'debug_traceTransaction',
+        params: [
+          hash,
+          {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            tracer: tracer,
+          },
+        ],
+      });
+    },
   }));
 }
 
@@ -311,4 +448,9 @@ export type {
   TransactionReceipt,
   TransactionStatus,
   TransactionTrace,
+  TransactionTracePart,
+  TransactionTraceCallPart,
+  TransactionTraceCreatePart,
+  DebugTransactionTrace,
+  DebugTransactionTraceCall,
 };
