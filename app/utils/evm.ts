@@ -19,6 +19,12 @@ import type {
   TransactionTraceCreatePart,
 } from '@/services/evm';
 
+interface UserOpTrace {
+  creation: TransactionTracePart[];
+  validation: TransactionTracePart[];
+  execution: TransactionTracePart[];
+}
+
 function convertTransactionTraceToRows(
   trace: TransactionTrace | null,
 ): InternalCallRow[] {
@@ -136,11 +142,7 @@ function getUserOpTrace(
   transactionTrace: TransactionTracePart[],
   hash: Hex,
   sender: Address,
-): {
-  creation: TransactionTracePart[];
-  validation: TransactionTracePart[];
-  execution: TransactionTracePart[];
-} | null {
+): UserOpTrace | null {
   function getInternalCalls(
     trace: TransactionTrace,
     tracePart: TransactionTracePart | undefined,
@@ -278,3 +280,4 @@ export {
   convertDebugTraceToTransactionTrace,
   getUserOpTrace,
 };
+export type { UserOpTrace };

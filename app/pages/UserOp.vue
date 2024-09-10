@@ -250,28 +250,10 @@
               v-if="transactionTrace.length === 0"
               value="No internal transactions found"
             />
-            <div
+            <InternalCalls
               v-else
-              class="internal"
-            >
-              <div class="calls">
-                <div
-                  v-if="creationInternalCallRows.length > 0"
-                  class="calls-section"
-                >
-                  <div class="label-calls">Creation</div>
-                  <TreeInternalCalls :calls="creationInternalCallRows" />
-                </div>
-                <div class="calls-section">
-                  <div class="label-calls">Validation</div>
-                  <TreeInternalCalls :calls="validationInternalCallRows" />
-                </div>
-                <div class="calls-section">
-                  <div class="label-calls">Execution</div>
-                  <TreeInternalCalls :calls="executionInternalCallRows" />
-                </div>
-              </div>
-            </div>
+              :trace="userOpTrace"
+            />
           </template>
         </ScopePanel>
       </template>
@@ -301,8 +283,6 @@ import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
-import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
-import type { Call as InternalCallRow } from '@/components/__common/TreeInternalCalls.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -310,6 +290,7 @@ import {
   AttributeList,
 } from '@/components/__common/attributes';
 import CardHighlights from '@/components/user-op/CardHighlights.vue';
+import InternalCalls from '@/components/user-op/InternalCalls.vue';
 import UserOpStatus from '@/components/user-op/UserOpStatus.vue';
 import type { CallDataView } from '@/components/user-op/ViewCallData.vue';
 import ViewCallData from '@/components/user-op/ViewCallData.vue';
@@ -336,9 +317,9 @@ import {
   unpackUserOp,
   getEntryPoint,
 } from '@/utils/context/erc4337/entryPoint';
+import type { UserOpTrace } from '@/utils/evm';
 import {
   convertDebugTraceToTransactionTrace,
-  convertTransactionTraceToRows,
   getUserOpTrace,
 } from '@/utils/evm';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
@@ -590,7 +571,7 @@ async function fetchTransactionTrace(txHash: Hex): Promise<void> {
     transactionTrace.value = await evmService.value.getTransactionTrace(txHash);
   }
 }
-const userOpTrace = computed(() => {
+const userOpTrace = computed<UserOpTrace | null>(() => {
   if (!transactionTrace.value) {
     return null;
   }
@@ -603,21 +584,6 @@ const userOpTrace = computed(() => {
     userOp.value.sender,
   );
 });
-const creationInternalCallRows = computed<InternalCallRow[]>(() =>
-  userOpTrace.value
-    ? convertTransactionTraceToRows(userOpTrace.value.creation)
-    : [],
-);
-const validationInternalCallRows = computed<InternalCallRow[]>(() =>
-  userOpTrace.value
-    ? convertTransactionTraceToRows(userOpTrace.value.validation)
-    : [],
-);
-const executionInternalCallRows = computed<InternalCallRow[]>(() =>
-  userOpTrace.value
-    ? convertTransactionTraceToRows(userOpTrace.value.execution)
-    : [],
-);
 
 async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
@@ -715,22 +681,5 @@ function handleOpenAsTransactionClick(): void {
   display: flex;
   gap: var(--spacing-5);
   flex-direction: column;
-}
-
-.calls {
-  display: flex;
-  gap: var(--spacing-5);
-  flex-direction: column;
-}
-
-.calls-section {
-  display: flex;
-  gap: var(--spacing-3);
-  flex-direction: column;
-}
-
-.label-calls {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-s);
 }
 </style>
