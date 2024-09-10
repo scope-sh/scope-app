@@ -236,6 +236,45 @@
           </AttributeList>
         </ScopePanel>
       </template>
+      <template v-if="section === SECTION_INTERNAL">
+        <ScopePanelLoading
+          v-if="isLoading"
+          title="Internal"
+        />
+        <ScopePanel
+          v-else-if="transactionTrace"
+          title="Internal"
+        >
+          <template #default>
+            <ScopeLabelEmptyState
+              v-if="transactionTrace.length === 0"
+              value="No internal transactions found"
+            />
+            <div
+              v-else
+              class="internal"
+            >
+              <div class="calls">
+                <div
+                  v-if="creationInternalCallRows.length > 0"
+                  class="calls-section"
+                >
+                  <div class="label-calls">Creation</div>
+                  <TreeInternalCalls :calls="creationInternalCallRows" />
+                </div>
+                <div class="calls-section">
+                  <div class="label-calls">Validation</div>
+                  <TreeInternalCalls :calls="validationInternalCallRows" />
+                </div>
+                <div class="calls-section">
+                  <div class="label-calls">Execution</div>
+                  <TreeInternalCalls :calls="executionInternalCallRows" />
+                </div>
+              </div>
+            </div>
+          </template>
+        </ScopePanel>
+      </template>
     </template>
   </ScopePage>
 </template>
@@ -262,6 +301,8 @@ import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
+import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
+import type { Call as InternalCallRow } from '@/components/__common/TreeInternalCalls.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -278,11 +319,13 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
+import type { TransactionTrace } from '@/services/evm';
 import EvmService from '@/services/evm';
 import HypersyncService from '@/services/hypersync';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
 import { raceNonNull } from '@/utils';
+import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type { UserOp } from '@/utils/context/erc4337/entryPoint';
 import {
   getUserOpEvent,
@@ -293,11 +336,17 @@ import {
   unpackUserOp,
   getEntryPoint,
 } from '@/utils/context/erc4337/entryPoint';
+import {
+  convertDebugTraceToTransactionTrace,
+  convertTransactionTraceToRows,
+  getUserOpTrace,
+} from '@/utils/evm';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 
 const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
+const SECTION_INTERNAL = 'internal';
 
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
@@ -317,6 +366,10 @@ const sections = computed<Section[]>(() => [
   {
     label: 'Transaction',
     value: SECTION_TRANSACTION,
+  },
+  {
+    label: 'Internal',
+    value: SECTION_INTERNAL,
   },
 ]);
 
@@ -377,6 +430,7 @@ const indexerService = computed(() =>
 const isLoading = ref(false);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
+const transactionTrace = ref<TransactionTrace | null>(null);
 
 const entryPoint = ref<Address | null>(null);
 const userOp = ref<UserOp | null>(null);
@@ -485,6 +539,7 @@ async function fetch(): Promise<void> {
   await Promise.all([
     fetchTransaction(txHash),
     fetchTransactionReceipt(txHash),
+    fetchTransactionTrace(txHash),
   ]);
   isLoading.value = false;
   await fetchAbis();
@@ -523,6 +578,46 @@ async function fetchTransactionReceipt(txHash: Address): Promise<void> {
     await evmService.value.getTransactionReceipt(txHash);
   isTransactionReceiptLoading.value = false;
 }
+
+async function fetchTransactionTrace(txHash: Hex): Promise<void> {
+  if (!evmService.value) {
+    return;
+  }
+  if (chainId.value === ARBITRUM || chainId.value === ARBITRUM_SEPOLIA) {
+    const debugTrace = await evmService.value.getDebugTransactionTrace(txHash);
+    transactionTrace.value = convertDebugTraceToTransactionTrace(debugTrace);
+  } else {
+    transactionTrace.value = await evmService.value.getTransactionTrace(txHash);
+  }
+}
+const userOpTrace = computed(() => {
+  if (!transactionTrace.value) {
+    return null;
+  }
+  if (!userOp.value) {
+    return null;
+  }
+  return getUserOpTrace(
+    transactionTrace.value,
+    hash.value,
+    userOp.value.sender,
+  );
+});
+const creationInternalCallRows = computed<InternalCallRow[]>(() =>
+  userOpTrace.value
+    ? convertTransactionTraceToRows(userOpTrace.value.creation)
+    : [],
+);
+const validationInternalCallRows = computed<InternalCallRow[]>(() =>
+  userOpTrace.value
+    ? convertTransactionTraceToRows(userOpTrace.value.validation)
+    : [],
+);
+const executionInternalCallRows = computed<InternalCallRow[]>(() =>
+  userOpTrace.value
+    ? convertTransactionTraceToRows(userOpTrace.value.execution)
+    : [],
+);
 
 async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
@@ -620,5 +715,22 @@ function handleOpenAsTransactionClick(): void {
   display: flex;
   gap: var(--spacing-5);
   flex-direction: column;
+}
+
+.calls {
+  display: flex;
+  gap: var(--spacing-5);
+  flex-direction: column;
+}
+
+.calls-section {
+  display: flex;
+  gap: var(--spacing-3);
+  flex-direction: column;
+}
+
+.label-calls {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-s);
 }
 </style>
