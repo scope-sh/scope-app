@@ -398,7 +398,10 @@ function unpackUserOp(
             paymasterPostOpGasLimit: BigInt(
               slice(userOp.paymasterAndData, 36, 52),
             ),
-            paymasterData: slice(userOp.paymasterAndData, 52),
+            paymasterData:
+              size(userOp.paymasterAndData) > 52
+                ? slice(userOp.paymasterAndData, 52)
+                : '0x',
           }
         : {
             paymaster: slice(userOp.paymasterAndData, 0, 20),
