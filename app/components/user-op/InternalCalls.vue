@@ -23,7 +23,10 @@ import { computed } from 'vue';
 
 import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
 import type { Call as InternalCallRow } from '@/components/__common/TreeInternalCalls.vue';
-import { convertTransactionTraceToRows, type UserOpTrace } from '@/utils/evm';
+import {
+  convertTransactionTraceToRows,
+  type UserOpTrace,
+} from '@/utils/context/traces';
 
 const props = defineProps<{
   trace: UserOpTrace | null;

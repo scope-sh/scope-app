@@ -317,11 +317,11 @@ import {
   unpackUserOp,
   getEntryPoint,
 } from '@/utils/context/erc4337/entryPoint';
-import type { UserOpTrace } from '@/utils/evm';
+import type { UserOpTrace } from '@/utils/context/traces';
 import {
   convertDebugTraceToTransactionTrace,
   getUserOpTrace,
-} from '@/utils/evm';
+} from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
 

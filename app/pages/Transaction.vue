@@ -298,6 +298,10 @@ import type { Command } from '@/stores/commands';
 import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type { UserOp } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getUserOps } from '@/utils/context/erc4337/entryPoint';
+import {
+  convertDebugTraceToTransactionTrace,
+  convertTransactionTraceToRows,
+} from '@/utils/context/traces';
 import { toRelativeTime } from '@/utils/conversion';
 import {
   formatEther,
@@ -307,10 +311,6 @@ import {
   formatTime,
 } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
-import {
-  convertDebugTraceToTransactionTrace,
-  convertTransactionTraceToRows,
-} from '~/utils/evm';
 
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';

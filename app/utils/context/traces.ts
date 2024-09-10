@@ -4,7 +4,7 @@ import { decodeFunctionData, pad, slice } from 'viem';
 import {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
-} from './context/erc4337/entryPoint';
+} from './erc4337/entryPoint';
 
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0';
