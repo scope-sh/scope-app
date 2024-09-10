@@ -269,6 +269,8 @@ import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
+import type { Call as InternalCallRow } from '@/components/__common/TreeInternalCalls.vue';
+import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -278,8 +280,6 @@ import {
 import CardHighlights from '@/components/transaction/CardHighlights.vue';
 import CardUserOp from '@/components/transaction/CardUserOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
-import type { Call as InternalCallRow } from '@/components/transaction/TreeInternalCalls.vue';
-import TreeInternalCalls from '@/components/transaction/TreeInternalCalls.vue';
 import ViewCallData from '@/components/transaction/ViewCallData.vue';
 import type { CallDataView } from '@/components/transaction/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
@@ -307,7 +307,10 @@ import {
   formatTime,
 } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
-import { convertDebugTraceToTransactionTrace } from '~/utils/evm';
+import {
+  convertDebugTraceToTransactionTrace,
+  convertTransactionTraceToRows,
+} from '~/utils/evm';
 
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
@@ -487,40 +490,9 @@ async function fetchTransactionTrace(hash: Hex): Promise<void> {
     transactionTrace.value = await evmService.value.getTransactionTrace(hash);
   }
 }
-const internalCallRows = computed<InternalCallRow[]>(() => {
-  if (!transactionTrace.value) {
-    return [];
-  }
-  return transactionTrace.value.map((transaction) => {
-    return {
-      success:
-        transaction.error === null
-          ? true
-          : transaction.error === 'OOG'
-            ? {
-                type: 'OOG',
-              }
-            : {
-                type: 'Revert',
-                reason: '',
-              },
-      type:
-        transaction.type === 'create' ? 'create' : transaction.action.callType,
-      from: transaction.action.from,
-      to: transaction.type === 'call' ? transaction.action.to : null,
-      input:
-        transaction.type === 'call'
-          ? transaction.action.input
-          : transaction.action.init,
-      value: transaction.action.value,
-      gas: {
-        used: transaction.result.gasUsed,
-        limit: transaction.action.gas,
-      },
-      traceAddress: transaction.traceAddress,
-    };
-  });
-});
+const internalCallRows = computed<InternalCallRow[]>(() =>
+  convertTransactionTraceToRows(transactionTrace.value),
+);
 
 async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
