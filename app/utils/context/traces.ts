@@ -147,14 +147,20 @@ function getUserOpTrace(
     trace: TransactionTrace,
     tracePart: TransactionTracePart | undefined,
   ): TransactionTracePart[] {
+    function startsWith(a: number[], b: number[]): boolean {
+      if (b.length > a.length) return false;
+      return b.every((num, index) => num === a[index]);
+    }
+
     if (!tracePart) {
       return [];
     }
-    return trace.filter(
-      (part) =>
+    return trace.filter((part) => {
+      return (
         part.traceAddress.length >= tracePart.traceAddress.length &&
-        part.traceAddress.join().startsWith(tracePart.traceAddress.join()),
-    );
+        startsWith(part.traceAddress, tracePart.traceAddress)
+      );
+    });
   }
 
   // Get creation traces
