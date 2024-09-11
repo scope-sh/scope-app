@@ -25,7 +25,19 @@
         <slot name="header" />
       </div>
     </div>
-    <div class="content">
+    <div
+      v-if="loading"
+      class="content loading"
+    >
+      <slot />
+      <div class="loading-view">
+        <IconLoading />
+      </div>
+    </div>
+    <div
+      v-else
+      class="content"
+    >
       <slot />
     </div>
   </div>
@@ -35,11 +47,13 @@
 import { useTimeout } from '@vueuse/core';
 import { onMounted } from 'vue';
 
+import IconLoading from './IconLoading.vue';
 import ScopeTooltip from './ScopeTooltip.vue';
 
 defineProps<{
   title: string;
   subtitle?: string;
+  loading?: boolean;
 }>();
 
 onMounted(() => {
@@ -109,5 +123,19 @@ function copyToClipboard(text: string): void {
   display: flex;
   gap: var(--spacing-9);
   flex-direction: column;
+}
+
+.loading {
+  position: relative;
+}
+
+.loading-view {
+  display: flex;
+  position: absolute;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--color-background-primary);
 }
 </style>
