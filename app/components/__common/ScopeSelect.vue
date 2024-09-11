@@ -13,7 +13,9 @@
           class="value"
           :placeholder="placeholder"
         >
-          <slot name="trigger" />
+          <slot name="trigger">
+            {{ modelValue }}
+          </slot>
         </Select.Value>
         <ScopeIcon
           class="icon"
@@ -43,7 +45,9 @@
                 <slot
                   name="item"
                   :item
-                />
+                >
+                  {{ item.label }}
+                </slot>
               </Select.Item>
             </Select.Group>
           </Select.Viewport>
