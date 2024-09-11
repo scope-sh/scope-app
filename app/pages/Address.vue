@@ -76,13 +76,9 @@
     </ScopePanel>
     <template #section>
       <template v-if="section === SECTION_OPS">
-        <ScopePanelLoading
-          v-if="isLoadingOps"
-          title="UserOps"
-        />
         <ScopePanel
-          v-else-if="ops.length > 0"
           title="UserOps"
+          :loading="isLoadingOps"
         >
           <template #header>
             <div class="panel-header">
@@ -113,13 +109,9 @@
         </ScopePanel>
       </template>
       <template v-else-if="section === SECTION_TRANSACTIONS">
-        <ScopePanelLoading
-          v-if="isLoadingTransactions"
-          title="Transactions"
-        />
         <ScopePanel
-          v-else
           title="Transactions"
+          :loading="isLoadingTransactions"
         >
           <template #header>
             <div class="panel-header">
@@ -212,13 +204,9 @@
         />
       </template>
       <template v-else-if="section === SECTION_TRANSFERS">
-        <ScopePanelLoading
-          v-if="isLoadingTransfers"
-          title="Transfers"
-        />
         <ScopePanel
-          v-else
           title="Transfers"
+          :loading="isLoadingTransfers"
         >
           <template #header>
             <div class="panel-header">
@@ -256,7 +244,13 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
-import { slice, toEventSelector, toFunctionSelector } from 'viem';
+import {
+  slice,
+  toEventSelector,
+  toFunctionSelector,
+  zeroAddress,
+  zeroHash,
+} from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -614,28 +608,44 @@ async function fetchTransactions(): Promise<void> {
   isLoadingTransactions.value = false;
 }
 const transactionRows = computed<TransactionRow[]>(() => {
-  return transactions.value.map((transaction) => {
-    return {
-      success: transaction.status > 0,
-      blockNumber: transaction.blockNumber,
-      blockTimestamp: transaction.blockTimestamp,
-      transactionIndex: transaction.transactionIndex,
-      hash: transaction.hash,
-      from: transaction.from,
-      to: transaction.to || null,
-      function:
-        transaction.to && transaction.input.length >= 10
-          ? slice(transaction.input, 0, 4)
-          : '0x',
-      data: transaction.to
-        ? transaction.input.length > 10
-          ? slice(transaction.input, 4)
-          : '0x'
-        : transaction.input,
-      value: transaction.value,
-      gasPrice: transaction.gasPrice,
-    };
-  });
+  return isLoadingTransactions.value
+    ? new Array<TransactionRow>(
+        transactionPage.value * TRANSACTIONS_PER_PAGE,
+      ).fill({
+        success: false,
+        blockNumber: 0,
+        blockTimestamp: 0,
+        transactionIndex: 0,
+        hash: zeroHash,
+        from: zeroAddress,
+        to: zeroAddress,
+        function: '0x',
+        data: '0x',
+        value: 0n,
+        gasPrice: 0n,
+      })
+    : transactions.value.map((transaction) => {
+        return {
+          success: transaction.status > 0,
+          blockNumber: transaction.blockNumber,
+          blockTimestamp: transaction.blockTimestamp,
+          transactionIndex: transaction.transactionIndex,
+          hash: transaction.hash,
+          from: transaction.from,
+          to: transaction.to || null,
+          function:
+            transaction.to && transaction.input.length >= 10
+              ? slice(transaction.input, 0, 4)
+              : '0x',
+          data: transaction.to
+            ? transaction.input.length > 10
+              ? slice(transaction.input, 4)
+              : '0x'
+            : transaction.input,
+          value: transaction.value,
+          gasPrice: transaction.gasPrice,
+        };
+      });
 });
 async function refreshTransactions(): Promise<void> {
   transactionPage.value = 1;
@@ -774,19 +784,31 @@ async function refreshOps(): Promise<void> {
   await fetchUserOps();
 }
 const opRows = computed<UserOpRow[]>(() => {
-  return ops.value.map((op) => {
-    return {
-      success: op.success,
-      entryPoint: op.entryPoint,
-      nonce: op.nonce,
-      blockNumber: op.blockNumber,
-      blockTimestamp: 1000 * op.blockTimestamp,
-      transactionHash: op.transactionHash,
-      hash: op.hash,
-      bundler: op.bundler,
-      paymaster: op.paymaster,
-    };
-  });
+  return isLoadingOps.value
+    ? new Array<UserOpRow>(opPage.value * OPS_PER_PAGE).fill({
+        success: false,
+        entryPoint: zeroAddress,
+        nonce: 0n,
+        blockNumber: 0,
+        blockTimestamp: 0,
+        transactionHash: zeroHash,
+        hash: zeroHash,
+        bundler: zeroAddress,
+        paymaster: zeroAddress,
+      })
+    : ops.value.map((op) => {
+        return {
+          success: op.success,
+          entryPoint: op.entryPoint,
+          nonce: op.nonce,
+          blockNumber: op.blockNumber,
+          blockTimestamp: 1000 * op.blockTimestamp,
+          transactionHash: op.transactionHash,
+          hash: op.hash,
+          bundler: op.bundler,
+          paymaster: op.paymaster,
+        };
+      });
 });
 
 const TRANSFERS_PER_PAGE = 20;
@@ -834,42 +856,53 @@ async function fetchTransfers(): Promise<void> {
   isLoadingTransfers.value = false;
 }
 const transferRows = computed<TransferRow[]>(() => {
-  return transfers.value.map((transfer) => {
-    return transfer.type === 'erc20'
-      ? {
-          blockNumber: transfer.blockNumber,
-          blockTimestamp: transfer.blockTimestamp,
-          transactionHash: transfer.transactionHash,
-          asset: transfer.asset,
-          from: transfer.from,
-          type: transfer.type,
-          to: transfer.to,
-          amount: transfer.amount,
-        }
-      : transfer.type === 'erc721'
-        ? {
-            blockNumber: transfer.blockNumber,
-            blockTimestamp: transfer.blockTimestamp,
-            transactionHash: transfer.transactionHash,
-            asset: transfer.asset,
-            from: transfer.from,
-            to: transfer.to,
-            type: transfer.type,
-            amount: transfer.amount,
-            id: transfer.id,
-          }
-        : {
-            blockNumber: transfer.blockNumber,
-            blockTimestamp: transfer.blockTimestamp,
-            transactionHash: transfer.transactionHash,
-            asset: transfer.asset,
-            from: transfer.from,
-            to: transfer.to,
-            type: transfer.type,
-            amount: transfer.amounts.join(','),
-            id: transfer.ids.join(','),
-          };
-  });
+  return isLoadingTransfers.value
+    ? new Array<TransferRow>(transferPage.value * TRANSFERS_PER_PAGE).fill({
+        blockNumber: 0,
+        blockTimestamp: 0,
+        transactionHash: zeroHash,
+        asset: zeroAddress,
+        from: zeroAddress,
+        to: zeroAddress,
+        type: 'erc20',
+        amount: '0',
+      })
+    : transfers.value.map((transfer) => {
+        return transfer.type === 'erc20'
+          ? {
+              blockNumber: transfer.blockNumber,
+              blockTimestamp: transfer.blockTimestamp,
+              transactionHash: transfer.transactionHash,
+              asset: transfer.asset,
+              from: transfer.from,
+              type: transfer.type,
+              to: transfer.to,
+              amount: transfer.amount,
+            }
+          : transfer.type === 'erc721'
+            ? {
+                blockNumber: transfer.blockNumber,
+                blockTimestamp: transfer.blockTimestamp,
+                transactionHash: transfer.transactionHash,
+                asset: transfer.asset,
+                from: transfer.from,
+                to: transfer.to,
+                type: transfer.type,
+                amount: transfer.amount,
+                id: transfer.id,
+              }
+            : {
+                blockNumber: transfer.blockNumber,
+                blockTimestamp: transfer.blockTimestamp,
+                transactionHash: transfer.transactionHash,
+                asset: transfer.asset,
+                from: transfer.from,
+                to: transfer.to,
+                type: transfer.type,
+                amount: transfer.amounts.join(','),
+                id: transfer.ids.join(','),
+              };
+      });
 });
 async function refreshTransfers(): Promise<void> {
   transferPage.value = 1;
