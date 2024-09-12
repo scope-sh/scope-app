@@ -128,22 +128,22 @@
       </template>
       <template v-else-if="section === SECTION_TRANSACTIONS">
         <PanelTransactions
+          v-model:page="transactionPage"
+          v-model:per-page="transactionsPerPage"
           :address
           :is-loading="isLoadingTransactions"
           :items="transactions"
           :max-page="maxTransactionPage"
-          :page="transactionPage"
-          :per-page="transactionsPerPage"
           @refresh="refreshTransactions"
         />
       </template>
       <template v-else-if="section === SECTION_LOGS">
         <PanelLogs
+          v-model:page="logPage"
+          v-model:per-page="logsPerPage"
           :is-loading="isLoadingLogs"
           :items="logs"
           :max-page="maxLogPage"
-          :page="logPage"
-          :per-page="logsPerPage"
           @refresh="refreshLogs"
         />
       </template>
