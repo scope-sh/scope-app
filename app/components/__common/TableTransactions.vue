@@ -220,11 +220,12 @@ const columns = computed(() => {
       }),
       columnHelper.accessor('value', {
         header: 'value',
-        cell: (cell) => formatEther(cell.getValue(), nativeCurrency.value),
+        cell: (cell) =>
+          formatEther(cell.getValue(), nativeCurrency.value, false),
       }),
       columnHelper.accessor('gasPrice', {
         header: 'gas price',
-        cell: (cell) => formatGasPrice(cell.getValue()),
+        cell: (cell) => formatGasPrice(cell.getValue(), false),
       }),
     ],
   );

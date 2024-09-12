@@ -19,7 +19,7 @@
           class="item"
         >
           <div class="key">value</div>
-          <div>{{ formatEther(call.value, nativeCurrency) }}</div>
+          <div>{{ formatEther(call.value, nativeCurrency, true) }}</div>
         </div>
         <div
           v-if="size(call.data) > 0"

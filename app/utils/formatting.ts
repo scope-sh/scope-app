@@ -9,24 +9,32 @@ function formatAddress(value: Address, size: number): string {
   return `${value.slice(0, 2 + size / 2)}...${value.slice(-size / 2)}`;
 }
 
-function formatEther(value: bigint, nativeCurrency: NativeCurrency): string {
-  return `${formatNumber(fromWei(value, nativeCurrency.decimals))} ${nativeCurrency.symbol}`;
+function formatEther(
+  value: bigint,
+  nativeCurrency: NativeCurrency,
+  exact: boolean,
+): string {
+  return exact
+    ? `${fromWei(value, nativeCurrency.decimals)} ${nativeCurrency.symbol}`
+    : `${formatNumber(fromWei(value, nativeCurrency.decimals))} ${nativeCurrency.symbol}`;
 }
 
-function formatGasPrice(value: bigint): string {
-  return `${formatNumber(fromWei(value, 9))} Gwei`;
+function formatGasPrice(value: bigint, exact: boolean): string {
+  return exact
+    ? `${fromWei(value, 9)} Gwei`
+    : `${formatNumber(fromWei(value, 9))} Gwei`;
 }
 
 function formatNumber(value: number): string {
-  if (value > 0 && value < 0.01) {
-    return '<0.01';
+  if (value === 0) {
+    return '0';
   }
   const valueFormat = new Intl.NumberFormat('en-US', {
     notation: 'compact',
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
-  return valueFormat.format(value);
+  return `~${valueFormat.format(value)}`;
 }
 
 function formatRelativeTime({ value, unit }: RelativeTime): string {

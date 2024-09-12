@@ -53,7 +53,7 @@
         </div>
         <div class="sticky right">
           <div class="cell value">
-            {{ formatEther(item.value, nativeCurrency) }}
+            {{ formatEther(item.value, nativeCurrency, false) }}
           </div>
         </div>
       </div>

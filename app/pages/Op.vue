@@ -141,7 +141,7 @@
             note="The amount of native currency the sender is willing to pay per unit of gas"
           />
           <AttributeItemValue>
-            {{ formatGasPrice(gasPrice) }}
+            {{ formatGasPrice(gasPrice, true) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
@@ -150,7 +150,7 @@
             note="The total operation fee paid by the sender or paymaster, calculated as gas used multiplied by gas price"
           />
           <AttributeItemValue>
-            {{ formatEther(opUnpacked.actualGasCost, nativeCurrency) }}
+            {{ formatEther(opUnpacked.actualGasCost, nativeCurrency, true) }}
           </AttributeItemValue>
         </AttributeItem>
       </AttributeList>

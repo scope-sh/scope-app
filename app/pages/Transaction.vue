@@ -85,7 +85,7 @@
             note="The amount of natuve currency transferred from the sender to the recipient"
           />
           <AttributeItemValue>
-            {{ formatEther(transaction.value, nativeCurrency) }}
+            {{ formatEther(transaction.value, nativeCurrency, true) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
@@ -112,7 +112,7 @@
             note="The amount of ether the sender is willing to pay per unit of gas"
           />
           <AttributeItemValue>
-            {{ formatGasPrice(transaction.gasPrice) }}
+            {{ formatGasPrice(transaction.gasPrice, true) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="fee">
@@ -121,7 +121,7 @@
             note="The total transaction fee paid by the sender, calculated as gas used multiplied by gas price"
           />
           <AttributeItemValue>
-            {{ formatEther(fee, nativeCurrency) }}
+            {{ formatEther(fee, nativeCurrency, true) }}
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem>
