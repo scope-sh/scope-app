@@ -1,5 +1,5 @@
 <template>
-  <ScopeTooltip>
+  <ScopeTooltip delay="medium">
     <template #trigger>
       <slot name="trigger" />
     </template>

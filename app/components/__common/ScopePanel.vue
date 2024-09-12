@@ -5,6 +5,7 @@
         <h2 class="title">{{ title }}</h2>
         <ScopeTooltip
           v-if="subtitle"
+          delay="large"
           disable-closing-trigger
         >
           <template #trigger>

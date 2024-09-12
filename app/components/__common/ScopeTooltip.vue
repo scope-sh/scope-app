@@ -1,5 +1,5 @@
 <template>
-  <Tooltip.Provider>
+  <Tooltip.Provider :delay-duration>
     <Tooltip.Root>
       <Tooltip.Trigger as-child>
         <button class="trigger">
@@ -22,6 +22,25 @@
 
 <script setup lang="ts">
 import { Tooltip } from 'radix-vue/namespaced';
+import { computed } from 'vue';
+
+type Delay = 'small' | 'medium' | 'large';
+
+const props = defineProps<{
+  delay: Delay;
+}>();
+
+const delayDuration = computed<number>(() => {
+  switch (props.delay) {
+    case 'small':
+      return 300;
+    case 'medium':
+      return 600;
+    case 'large':
+      return 1200;
+  }
+  return 0;
+});
 </script>
 
 <style scoped>

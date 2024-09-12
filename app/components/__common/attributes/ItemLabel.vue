@@ -1,6 +1,9 @@
 <template>
   <div class="label">
-    <ScopeTooltip v-if="note">
+    <ScopeTooltip
+      v-if="note"
+      delay="small"
+    >
       <template #trigger>
         <div class="value">
           {{ value }}
