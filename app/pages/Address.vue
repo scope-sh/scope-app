@@ -122,55 +122,15 @@
         />
       </template>
       <template v-else-if="section === SECTION_TRANSFERS">
-        <ScopePanel
-          title="Transfers"
-          :loading="isLoadingTransfers"
-        >
-          <template #header>
-            <div class="panel-header">
-              <ScopePaginator
-                v-if="transferRows.length"
-                v-model="transferPage"
-                :total="maxTransferPage"
-                :disabled="isLoadingTransfers"
-              />
-              <ScopeIcon
-                class="icon-refresh"
-                kind="reload"
-                @click="refreshTransfers"
-              />
-            </div>
-          </template>
-          <ScopeLabelEmptyState
-            v-if="!transferRows.length"
-            value="No transfers found"
-          />
-          <template v-else>
-            <div class="label-unsupported">ETH transfers not supported yet</div>
-            <TableTransfers
-              :address="address"
-              :transfers="transferRows"
-              :per-page="transfersPerPage"
-              :page="transferPage - 1"
-            />
-            <div class="panel-footer">
-              <SelectPerPage v-model="transfersPerPage" />
-              <div class="footer-side">
-                <ScopePaginator
-                  v-if="transferRows.length"
-                  v-model="transferPage"
-                  :total="maxTransferPage"
-                  :disabled="isLoadingTransfers"
-                />
-                <ScopeIcon
-                  class="icon-refresh"
-                  kind="reload"
-                  @click="refreshTransfers"
-                />
-              </div>
-            </div>
-          </template>
-        </ScopePanel>
+        <PanelTransfers
+          v-model:page="transferPage"
+          v-model:per-page="transfersPerPage"
+          :address
+          :is-loading="isLoadingTransfers"
+          :items="transfers"
+          :max-page="maxTransferPage"
+          @refresh="refreshTransfers"
+        />
       </template>
     </template>
   </ScopePage>
@@ -179,25 +139,17 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
-import {
-  toEventSelector,
-  toFunctionSelector,
-  zeroAddress,
-  zeroHash,
-} from 'viem';
+import { toEventSelector, toFunctionSelector } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
 import LabelIcon from '@/components/__common/LabelIcon.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
-import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopePopover from '@/components/__common/ScopePopover.vue';
-import SelectPerPage from '@/components/__common/SelectPerPage.vue';
 import CardDeployment from '@/components/address/CardDeployment.vue';
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
@@ -205,9 +157,8 @@ import PanelCode from '@/components/address/PanelCode.vue';
 import PanelInteract from '@/components/address/PanelInteract.vue';
 import PanelLogs from '@/components/address/PanelLogs.vue';
 import PanelTransactions from '@/components/address/PanelTransactions.vue';
+import PanelTransfers from '@/components/address/PanelTransfers.vue';
 import PanelUserOps from '@/components/address/PanelUserOps.vue';
-import TableTransfers from '@/components/address/TableTransfers.vue';
-import type { Transfer as TransferRow } from '@/components/address/TableTransfers.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -684,7 +635,7 @@ watch(transfersPerPage, () => {
   fetchTransfers();
 });
 watch(transferPage, (page) => {
-  if (transferRows.value.length >= page * transfersPerPage.value) {
+  if (transfers.value.length >= page * transfersPerPage.value) {
     return;
   }
   fetchTransfers();
@@ -713,55 +664,6 @@ async function fetchTransfers(): Promise<void> {
   transferPagination.value = addressTransfers.pagination;
   isLoadingTransfers.value = false;
 }
-const transferRows = computed<TransferRow[]>(() => {
-  return isLoadingTransfers.value
-    ? new Array<TransferRow>(transferPage.value * transfersPerPage.value).fill({
-        blockNumber: 0,
-        blockTimestamp: 0,
-        transactionHash: zeroHash,
-        asset: zeroAddress,
-        from: zeroAddress,
-        to: zeroAddress,
-        type: 'erc20',
-        amount: '0',
-      })
-    : transfers.value.map((transfer) => {
-        return transfer.type === 'erc20'
-          ? {
-              blockNumber: transfer.blockNumber,
-              blockTimestamp: transfer.blockTimestamp,
-              transactionHash: transfer.transactionHash,
-              asset: transfer.asset,
-              from: transfer.from,
-              type: transfer.type,
-              to: transfer.to,
-              amount: transfer.amount,
-            }
-          : transfer.type === 'erc721'
-            ? {
-                blockNumber: transfer.blockNumber,
-                blockTimestamp: transfer.blockTimestamp,
-                transactionHash: transfer.transactionHash,
-                asset: transfer.asset,
-                from: transfer.from,
-                to: transfer.to,
-                type: transfer.type,
-                amount: transfer.amount,
-                id: transfer.id,
-              }
-            : {
-                blockNumber: transfer.blockNumber,
-                blockTimestamp: transfer.blockTimestamp,
-                transactionHash: transfer.transactionHash,
-                asset: transfer.asset,
-                from: transfer.from,
-                to: transfer.to,
-                type: transfer.type,
-                amount: transfer.amounts.join(','),
-                id: transfer.ids.join(','),
-              };
-      });
-});
 async function refreshTransfers(): Promise<void> {
   transferPage.value = 1;
   transferPagination.value = {
@@ -876,39 +778,5 @@ watch(
     padding-left: 0;
     list-style-type: none;
   }
-}
-
-.panel-header {
-  display: flex;
-  gap: var(--spacing-6);
-  align-items: center;
-}
-
-.panel-footer {
-  display: flex;
-  justify-content: space-between;
-}
-
-.footer-side {
-  display: flex;
-  gap: var(--spacing-6);
-  align-items: center;
-}
-
-.icon-refresh {
-  width: 14px;
-  height: 14px;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-
-  &:hover {
-    color: var(--color-text-primary);
-  }
-}
-
-.label-unsupported {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-m);
-  font-style: italic;
 }
 </style>
