@@ -30,8 +30,8 @@ interface AddressRoute {
   address: Address;
 }
 
-interface UserOpRoute {
-  name: 'userop';
+interface OpRoute {
+  name: 'op';
   chain?: Chain;
   hash: string;
 }
@@ -42,7 +42,7 @@ type Route =
   | BlockRoute
   | TransactionRoute
   | AddressRoute
-  | UserOpRoute;
+  | OpRoute;
 
 function getRouteLocation(route: Route): RouteLocationRaw {
   switch (route.name) {
@@ -81,9 +81,9 @@ function getRouteLocation(route: Route): RouteLocationRaw {
           address: route.address,
         },
       };
-    case 'userop':
+    case 'op':
       return {
-        name: 'userop',
+        name: 'op',
         params: {
           chain: route.chain,
           hash: route.hash,

@@ -23,10 +23,10 @@
 
 <script setup lang="ts">
 import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
-import type { UserOpTrace } from '@/utils/context/traces';
+import type { OpTrace } from '@/utils/context/traces';
 
 defineProps<{
-  trace: UserOpTrace | null;
+  trace: OpTrace | null;
 }>();
 </script>
 

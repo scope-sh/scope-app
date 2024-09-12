@@ -76,7 +76,7 @@
     </ScopePanel>
     <template #section>
       <template v-if="section === SECTION_OPS">
-        <PanelUserOps
+        <PanelOps
           v-model:page="opPage"
           v-model:per-page="opsPerPage"
           :is-loading="isLoadingOps"
@@ -156,9 +156,9 @@ import LensView from '@/components/address/LensView.vue';
 import PanelCode from '@/components/address/PanelCode.vue';
 import PanelInteract from '@/components/address/PanelInteract.vue';
 import PanelLogs from '@/components/address/PanelLogs.vue';
+import PanelOps from '@/components/address/PanelOps.vue';
 import PanelTransactions from '@/components/address/PanelTransactions.vue';
 import PanelTransfers from '@/components/address/PanelTransfers.vue';
-import PanelUserOps from '@/components/address/PanelUserOps.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -179,7 +179,7 @@ import type {
   Sort,
 } from '@/services/hypersync';
 import HypersyncService from '@/services/hypersync';
-import type { UserOp } from '@/services/indexer';
+import type { Op } from '@/services/indexer';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
 
@@ -315,7 +315,7 @@ const isLoadingLogs = ref(false);
 const logs = ref<AddressLog[]>([]);
 
 const isLoadingOps = ref(false);
-const ops = ref<UserOp[]>([]);
+const ops = ref<Op[]>([]);
 watch(ops, (opsValue) => {
   if (opsValue.length > 0 && !sectionChanged.value) {
     section.value = SECTION_OPS;
@@ -357,7 +357,7 @@ async function fetch(): Promise<void> {
     fethcContract(),
     fetchTransactions(),
     fetchLogs(),
-    fetchUserOps(),
+    fetchOps(),
     fetchTransfers(),
   ]);
 }
@@ -585,20 +585,20 @@ const maxOpPage = computed(() => {
 });
 watch(opsPerPage, () => {
   opPage.value = 1;
-  fetchUserOps();
+  fetchOps();
 });
 watch(opPage, (page) => {
   if (ops.value.length >= page * opsPerPage.value) {
     return;
   }
-  fetchUserOps();
+  fetchOps();
 });
-async function fetchUserOps(): Promise<void> {
+async function fetchOps(): Promise<void> {
   if (!address.value || !indexerService.value) {
     return;
   }
   isLoadingOps.value = true;
-  const newOps = await indexerService.value.getUserOpsByAddress(
+  const newOps = await indexerService.value.getOpsByAddress(
     address.value,
     (opPage.value - 1) * opsPerPage.value,
     opsPerPage.value + 1,
@@ -613,7 +613,7 @@ async function fetchUserOps(): Promise<void> {
 async function refreshOps(): Promise<void> {
   opPage.value = 1;
   ops.value = [];
-  await fetchUserOps();
+  await fetchOps();
 }
 
 const transfersPerPage = ref(20);

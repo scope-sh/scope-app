@@ -18,7 +18,7 @@ import type {
   TransactionTraceCreatePart,
 } from '@/services/evm';
 
-interface UserOpTrace {
+interface OpTrace {
   creation: TransactionTracePart[];
   validation: TransactionTracePart[];
   execution: TransactionTracePart[];
@@ -100,11 +100,11 @@ function convertDebugTraceToTransactionTrace(
   return processCall(debugTrace);
 }
 
-function getUserOpTrace(
+function getOpTrace(
   transactionTrace: TransactionTracePart[],
   hash: Hex,
   sender: Address,
-): UserOpTrace | null {
+): OpTrace | null {
   function getInternalCalls(
     trace: TransactionTrace,
     tracePart: TransactionTracePart | undefined,
@@ -145,7 +145,7 @@ function getUserOpTrace(
   // Get validation traces
 
   // Find the "validateUserOp" calls from the entrypoint
-  const validateUserOpCalls = transactionTrace.filter(
+  const validateOpCalls = transactionTrace.filter(
     (part): part is TransactionTraceCallPart =>
       part.type === 'call' &&
       ((part.action.from === ENTRY_POINT_0_6_ADDRESS &&
@@ -153,7 +153,7 @@ function getUserOpTrace(
         (part.action.from === ENTRY_POINT_0_7_ADDRESS &&
           slice(part.action.input, 0, 4) === '0x19822f7c')),
   );
-  const validateUserOpCall = validateUserOpCalls.find((call) => {
+  const validateOpCall = validateOpCalls.find((call) => {
     const decoded = decodeFunctionData({
       abi: iAccountAbi,
       data: call.action.input,
@@ -163,16 +163,16 @@ function getUserOpTrace(
     }
     return decoded.args[1] === hash;
   });
-  if (!validateUserOpCall) {
+  if (!validateOpCall) {
     return null;
   }
-  const validateUserOpCallInnerCalls = getInternalCalls(
+  const validateOpCallInnerCalls = getInternalCalls(
     transactionTrace,
-    validateUserOpCall,
+    validateOpCall,
   );
 
   // Find the "validatePaymasterUserOp" calls from the entrypoint
-  const validatePaymasterUserOpCalls = transactionTrace.filter(
+  const validatePaymasterOpCalls = transactionTrace.filter(
     (part): part is TransactionTraceCallPart =>
       part.type === 'call' &&
       ((part.action.from === ENTRY_POINT_0_6_ADDRESS &&
@@ -180,21 +180,19 @@ function getUserOpTrace(
         (part.action.from === ENTRY_POINT_0_7_ADDRESS &&
           slice(part.action.input, 0, 4) === '0x52b7512c')),
   );
-  const validatePaymasterUserOpCall = validatePaymasterUserOpCalls.find(
-    (call) => {
-      const decoded = decodeFunctionData({
-        abi: iAccountAbi,
-        data: call.action.input,
-      });
-      if (decoded.functionName !== 'validatePaymasterUserOp') {
-        return false;
-      }
-      return decoded.args[1] === hash;
-    },
-  );
-  const validatePaymasterUserOpCallInnerCalls = getInternalCalls(
+  const validatePaymasterOpCall = validatePaymasterOpCalls.find((call) => {
+    const decoded = decodeFunctionData({
+      abi: iAccountAbi,
+      data: call.action.input,
+    });
+    if (decoded.functionName !== 'validatePaymasterUserOp') {
+      return false;
+    }
+    return decoded.args[1] === hash;
+  });
+  const validatePaymasterOpCallInnerCalls = getInternalCalls(
     transactionTrace,
-    validatePaymasterUserOpCall,
+    validatePaymasterOpCall,
   );
 
   // Get execution traces
@@ -236,12 +234,12 @@ function getUserOpTrace(
   return {
     creation: createSenderCallInnerCalls,
     validation: [
-      ...validateUserOpCallInnerCalls,
-      ...validatePaymasterUserOpCallInnerCalls,
+      ...validateOpCallInnerCalls,
+      ...validatePaymasterOpCallInnerCalls,
     ],
     execution: innerHandleOpCallInnerCalls,
   };
 }
 
-export { convertDebugTraceToTransactionTrace, getUserOpTrace };
-export type { UserOpTrace };
+export { convertDebugTraceToTransactionTrace, getOpTrace };
+export type { OpTrace };

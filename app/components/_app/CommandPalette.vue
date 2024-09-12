@@ -99,7 +99,7 @@ import {
   isBlockTag,
   isEnsAddress,
   isTransactionHash,
-  isUserOpHash,
+  isOpHash,
 } from '@/utils/validation/pattern';
 
 const router = useRouter();
@@ -238,9 +238,8 @@ const globalCommands = computed<Command[]>(() => {
       icon: 'arrow-right',
       label: 'Go to UserOp',
       placeholder: 'Enter hash',
-      isAsync: areGoToItemsAsync('userop'),
-      getItems: async (query): Promise<Command[]> =>
-        getGoToItems('userop', query),
+      isAsync: areGoToItemsAsync('op'),
+      getItems: async (query): Promise<Command[]> => getGoToItems('op', query),
     },
     {
       icon: 'arrow-right',
@@ -327,7 +326,7 @@ const globalCommands = computed<Command[]>(() => {
 });
 
 function areGoToItemsAsync(
-  type: 'address' | 'block' | 'transaction' | 'userop' | 'all',
+  type: 'address' | 'block' | 'transaction' | 'op' | 'all',
 ): (query: string) => boolean {
   return (query: string): boolean => {
     if (type === 'address') {
@@ -351,7 +350,7 @@ function areGoToItemsAsync(
     if (type === 'transaction') {
       return false;
     }
-    if (type === 'userop') {
+    if (type === 'op') {
       return false;
     }
     if (type === 'all') {
@@ -380,7 +379,7 @@ function areGoToItemsAsync(
 }
 
 async function getGoToItems(
-  type: 'address' | 'block' | 'transaction' | 'userop' | 'all',
+  type: 'address' | 'block' | 'transaction' | 'op' | 'all',
   query: string,
 ): Promise<Command[]> {
   function getOpenChainCommand(chain: Chain): Command {
@@ -472,27 +471,27 @@ async function getGoToItems(
     };
   }
 
-  function getOpenUserOpCommand(hash: string): Command {
+  function getOpenOpCommand(hash: string): Command {
     return {
       icon: 'arrow-right',
       label: hash,
       act: (): void => {
-        router.push(getRouteLocation({ name: 'userop', hash }));
+        router.push(getRouteLocation({ name: 'op', hash }));
       },
     };
   }
 
-  async function getOpenTransactionOrUserOpCommand(
+  async function getOpenTransactionOrOpCommand(
     hash: string,
   ): Promise<Command | null> {
-    async function getTxHashByUserOp(hash: Hex): Promise<Hex | null> {
+    async function getTxHashByOp(hash: Hex): Promise<Hex | null> {
       if (!hypersyncService.value || !indexerService.value) {
         return null;
       }
       // Race to get the tx hash from hypersync or indexer
       // But ignore the promise if it resolves as null
-      const hypersyncRequest = hypersyncService.value.getUserOpTxHash(hash);
-      const indexerRequest = indexerService.value.getTxHashByUserOpHash(hash);
+      const hypersyncRequest = hypersyncService.value.getOpTxHash(hash);
+      const indexerRequest = indexerService.value.getTxHashByOpHash(hash);
       const txHash = await raceNonNull([hypersyncRequest, indexerRequest]);
       if (!txHash) {
         return null;
@@ -507,9 +506,9 @@ async function getGoToItems(
     if (foundTx) {
       return getOpenTransactionCommand(hash);
     }
-    const foundUserOp = await getTxHashByUserOp(hash as Hex);
-    if (foundUserOp) {
-      return getOpenUserOpCommand(hash);
+    const foundOp = await getTxHashByOp(hash as Hex);
+    if (foundOp) {
+      return getOpenOpCommand(hash);
     }
     return null;
   }
@@ -561,8 +560,8 @@ async function getGoToItems(
     case 'transaction': {
       return isTransactionHash(query) ? [getOpenTransactionCommand(query)] : [];
     }
-    case 'userop': {
-      return isUserOpHash(query) ? [getOpenUserOpCommand(query)] : [];
+    case 'op': {
+      return isOpHash(query) ? [getOpenOpCommand(query)] : [];
     }
     case 'all': {
       if (isChainName(query)) {
@@ -585,7 +584,7 @@ async function getGoToItems(
         return command ? [command] : [];
       }
       if (isTransactionHash(query)) {
-        const command = await getOpenTransactionOrUserOpCommand(query);
+        const command = await getOpenTransactionOrOpCommand(query);
         return command ? [command] : [];
       }
       return getOpenLabelCommands(query);

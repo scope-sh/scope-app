@@ -17,7 +17,7 @@
         <template #actions>
           <ScopeButton
             kind="primary"
-            @click="handleOpenAsUserOpClick"
+            @click="handleOpenAsOpClick"
           >
             Open as UserOp
           </ScopeButton>
@@ -171,15 +171,15 @@
           title="UserOps"
         />
         <ScopePanel
-          v-else-if="userOps && userOps.length > 0"
+          v-else-if="ops && ops.length > 0"
           title="UserOps"
         >
           <template
             v-if="transaction && transactionReceipt"
             #default
           >
-            <CardUserOp
-              v-for="(op, index) in userOps"
+            <CardOp
+              v-for="(op, index) in ops"
               :key="index"
               :entry-point="entryPoint"
               :op="op"
@@ -277,7 +277,7 @@ import {
   AttributeList,
 } from '@/components/__common/attributes';
 import CardHighlights from '@/components/transaction/CardHighlights.vue';
-import CardUserOp from '@/components/transaction/CardUserOp.vue';
+import CardOp from '@/components/transaction/CardOp.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
 import ViewCallData from '@/components/transaction/ViewCallData.vue';
 import type { CallDataView } from '@/components/transaction/ViewCallData.vue';
@@ -295,8 +295,8 @@ import type {
 } from '@/services/evm';
 import type { Command } from '@/stores/commands';
 import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
-import type { UserOp } from '@/utils/context/erc4337/entryPoint';
-import { getEntryPoint, getUserOps } from '@/utils/context/erc4337/entryPoint';
+import type { Op } from '@/utils/context/erc4337/entryPoint';
+import { getEntryPoint, getOps } from '@/utils/context/erc4337/entryPoint';
 import { convertDebugTraceToTransactionTrace } from '@/utils/context/traces';
 import { toRelativeTime } from '@/utils/conversion';
 import {
@@ -327,7 +327,7 @@ const sections = computed<Section[]>(() => {
     label: 'Logs',
     value: SECTION_LOGS,
   });
-  if (userOps.value && userOps.value.length > 0) {
+  if (ops.value && ops.value.length > 0) {
     list.push({
       label: 'UserOps',
       value: SECTION_OPS,
@@ -644,13 +644,13 @@ const typeLabel = computed(() => {
 });
 
 const entryPoint = ref<Address | null>(null);
-const userOps = ref<UserOp[] | null>(null);
+const ops = ref<Op[] | null>(null);
 watch(transaction, async () => {
   if (!transaction.value) {
     return;
   }
   entryPoint.value = getEntryPoint(transaction.value);
-  userOps.value = await getUserOps(client.value, transaction.value);
+  ops.value = await getOps(client.value, transaction.value);
 });
 
 async function handleTransactionIndexUpdate(index: number): Promise<void> {
@@ -681,8 +681,8 @@ async function openBlockTransaction(
   });
 }
 
-function handleOpenAsUserOpClick(): void {
-  router.push(getRouteLocation({ name: 'userop', hash: hash.value }));
+function handleOpenAsOpClick(): void {
+  router.push(getRouteLocation({ name: 'op', hash: hash.value }));
 }
 </script>
 

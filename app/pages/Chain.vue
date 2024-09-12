@@ -144,7 +144,7 @@ function handleSearchSubmit(): void {
     }
     router.push(getRouteLocation({ name: 'block', number }));
   } else if (isTransactionHash(search.value)) {
-    openTransactionOrUserOp(search.value);
+    openTransactionOrOp(search.value);
   }
 }
 
@@ -172,18 +172,16 @@ async function openLatestBlock(): Promise<void> {
   router.push(getRouteLocation({ name: 'block', number }));
 }
 
-const isTransactionOrUserOpResolving = ref(false);
-async function openTransactionOrUserOp(hash: Hex): Promise<void> {
+const isTransactionOrOpResolving = ref(false);
+async function openTransactionOrOp(hash: Hex): Promise<void> {
   if (!indexerService.value) {
     return;
   }
-  isTransactionOrUserOpResolving.value = true;
-  const foundUserOp = await indexerService.value.getTxHashByUserOpHash(
-    hash as Hex,
-  );
-  isTransactionOrUserOpResolving.value = false;
-  if (foundUserOp) {
-    router.push(getRouteLocation({ name: 'userop', hash: search.value }));
+  isTransactionOrOpResolving.value = true;
+  const foundOp = await indexerService.value.getTxHashByOpHash(hash as Hex);
+  isTransactionOrOpResolving.value = false;
+  if (foundOp) {
+    router.push(getRouteLocation({ name: 'op', hash: search.value }));
   } else {
     router.push(getRouteLocation({ name: 'transaction', hash: search.value }));
   }

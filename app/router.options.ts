@@ -3,8 +3,8 @@ import type { RouterConfig } from '@nuxt/schema';
 import Address from '@/pages/Address.vue';
 import Block from '@/pages/Block.vue';
 import Chain from '@/pages/Chain.vue';
+import Op from '@/pages/Op.vue';
 import Transaction from '@/pages/Transaction.vue';
-import UserOp from '@/pages/UserOp.vue';
 
 export default <RouterConfig>{
   routes: (_routes) => [
@@ -35,8 +35,8 @@ export default <RouterConfig>{
     },
     {
       path: '/:chain/op/:hash',
-      name: 'userop',
-      component: UserOp,
+      name: 'op',
+      component: Op,
     },
   ],
 };

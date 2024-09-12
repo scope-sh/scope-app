@@ -11,19 +11,19 @@ import { computed } from 'vue';
 
 import BaseCard from '@/components/__common/CardHighlights.vue';
 import useLabels from '@/composables/useLabels';
-import type { UserOpUnpacked } from '@/utils/context/erc4337/entryPoint';
-import { getUserOp, getLogs, type Item } from '@/utils/context/highlights';
+import type { OpUnpacked } from '@/utils/context/erc4337/entryPoint';
+import { getOp, getLogs, type Item } from '@/utils/context/highlights';
 
 const { getLabel } = useLabels();
 
 const props = defineProps<{
-  userOp: UserOpUnpacked;
+  op: OpUnpacked;
   logs: Log[];
 }>();
 
 const items = computed<Item[]>(() => {
-  const userOpItems = getUserOp(props.userOp, getLabel);
+  const opItems = getOp(props.op, getLabel);
   const logItems = getLogs(props.logs, getLabel);
-  return [...userOpItems, ...logItems];
+  return [...opItems, ...logItems];
 });
 </script>

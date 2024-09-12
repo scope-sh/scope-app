@@ -19,7 +19,7 @@ import safePaymasterAbi from '@/abi/safePaymaster.js';
 import type { Log, Transaction } from '@/services/evm.js';
 import type { Chain } from '@/utils/chains.js';
 
-interface UserOpEvent {
+interface OpEvent {
   logIndex: number | null;
   userOpHash: Hex;
   sender: Address;
@@ -38,7 +38,7 @@ type TxType =
   | typeof TX_TYPE_SAFE_PAYMASTER
   | typeof TX_TYPE_UNKNOWN;
 
-interface UserOp_0_6 {
+interface Op_0_6 {
   sender: Address;
   nonce: bigint;
   initCode: Hex;
@@ -52,7 +52,7 @@ interface UserOp_0_6 {
   signature: Hex;
 }
 
-interface UserOp_0_7 {
+interface Op_0_7 {
   sender: Address;
   nonce: bigint;
   initCode: Hex;
@@ -64,9 +64,9 @@ interface UserOp_0_7 {
   signature: Hex;
 }
 
-type UserOp = UserOp_0_6 | UserOp_0_7;
+type Op = Op_0_6 | Op_0_7;
 
-interface UserOpUnpacked {
+interface OpUnpacked {
   hash: Hex;
   success: boolean;
   sender: Address;
@@ -177,8 +177,8 @@ function getBeforeExecutionLog(logs: Log[]): Log | null {
   return null;
 }
 
-function getUserOpEvents(logs: Log[]): UserOpEvent[] {
-  const events: UserOpEvent[] = [];
+function getOpEvents(logs: Log[]): OpEvent[] {
+  const events: OpEvent[] = [];
   for (const log of logs) {
     if (log.address === ENTRY_POINT_0_6_ADDRESS) {
       const event = decodeEventLog({
@@ -223,23 +223,23 @@ function getUserOpEvents(logs: Log[]): UserOpEvent[] {
   return events;
 }
 
-function getUserOpEvent(
+function getOpEvent(
   chain: Chain,
   entrypoint: Address,
   logs: Log[],
-  op: UserOp,
-): UserOpEvent | null {
-  const userOpEvents = getUserOpEvents(logs);
-  const userOpEvent = userOpEvents.find(
-    (event) => event.userOpHash === getUserOpHash(chain, entrypoint, op),
+  op: Op,
+): OpEvent | null {
+  const opEvents = getOpEvents(logs);
+  const userOpEvent = opEvents.find(
+    (event) => event.userOpHash === getOpHash(chain, entrypoint, op),
   );
   return userOpEvent || null;
 }
 
-async function getUserOps(
+async function getOps(
   client: PublicClient,
   transaction: Transaction,
-): Promise<UserOp[]> {
+): Promise<Op[]> {
   const txType = getTxType(transaction);
   if (txType === TX_TYPE_ENTRY_POINT_0_6) {
     const { functionName, args } = decodeFunctionData({
@@ -249,7 +249,7 @@ async function getUserOps(
     if (functionName !== 'handleOps') {
       return [];
     }
-    return args[0] as UserOp_0_6[];
+    return args[0] as Op_0_6[];
   }
   if (txType === TX_TYPE_ENTRY_POINT_0_7) {
     const { functionName, args } = decodeFunctionData({
@@ -259,7 +259,7 @@ async function getUserOps(
     if (functionName !== 'handleOps') {
       return [];
     }
-    return args[0] as UserOp_0_7[];
+    return args[0] as Op_0_7[];
   }
   if (txType === TX_TYPE_PIMLICO_BULKER) {
     const bundle = await readContract(client, {
@@ -280,7 +280,7 @@ async function getUserOps(
     if (functionName !== 'handleOps') {
       return [];
     }
-    return args[0] as UserOp_0_6[];
+    return args[0] as Op_0_6[];
   } else if (txType === TX_TYPE_SAFE_PAYMASTER) {
     const { functionName, args } = decodeFunctionData({
       abi: safePaymasterAbi,
@@ -289,18 +289,14 @@ async function getUserOps(
     if (functionName !== 'handleOps') {
       return [];
     }
-    return args[0] as UserOp_0_7[];
+    return args[0] as Op_0_7[];
   }
   return [];
 }
 
-function getUserOpHash(
-  chain: Chain,
-  entryPoint: Address,
-  userOp: UserOp,
-): Hex | null {
+function getOpHash(chain: Chain, entryPoint: Address, op: Op): Hex | null {
   if (entryPoint === ENTRY_POINT_0_6_ADDRESS) {
-    const userOperation = userOp as UserOp_0_6;
+    const userOperation = op as Op_0_6;
     const hashedInitCode = keccak256(userOperation.initCode);
     const hashedCallData = keccak256(userOperation.callData);
     const hashedPaymasterAndData = keccak256(userOperation.paymasterAndData);
@@ -337,7 +333,7 @@ function getUserOpHash(
     ) as `0x${string}`;
     return keccak256(encoded);
   } else if (entryPoint === ENTRY_POINT_0_7_ADDRESS) {
-    const userOperation = userOp as UserOp_0_7;
+    const userOperation = op as Op_0_7;
     const hashedInitCode = keccak256(userOperation.initCode);
     const hashedCallData = keccak256(userOperation.callData);
     const hashedPaymasterAndData = keccak256(userOperation.paymasterAndData);
@@ -372,39 +368,33 @@ function getUserOpHash(
   return null;
 }
 
-function unpackUserOp(
-  hash: Hex,
-  userOp: UserOp,
-  event: UserOpEvent,
-): UserOpUnpacked {
+function unpackOp(hash: Hex, op: Op, event: OpEvent): OpUnpacked {
   const initCodeUnpacked =
-    size(userOp.initCode) > 0
+    size(op.initCode) > 0
       ? {
-          factory: slice(userOp.initCode, 0, 20),
-          initData: slice(userOp.initCode, 20),
+          factory: slice(op.initCode, 0, 20),
+          initData: slice(op.initCode, 20),
         }
       : {
           factory: null,
           initData: null,
         };
   const paymasterDataUnpacked =
-    size(userOp.paymasterAndData) > 0
-      ? size(userOp.paymasterAndData) > 20
+    size(op.paymasterAndData) > 0
+      ? size(op.paymasterAndData) > 20
         ? {
-            paymaster: slice(userOp.paymasterAndData, 0, 20),
+            paymaster: slice(op.paymasterAndData, 0, 20),
             paymasterVerificationGasLimit: BigInt(
-              slice(userOp.paymasterAndData, 20, 36),
+              slice(op.paymasterAndData, 20, 36),
             ),
-            paymasterPostOpGasLimit: BigInt(
-              slice(userOp.paymasterAndData, 36, 52),
-            ),
+            paymasterPostOpGasLimit: BigInt(slice(op.paymasterAndData, 36, 52)),
             paymasterData:
-              size(userOp.paymasterAndData) > 52
-                ? slice(userOp.paymasterAndData, 52)
+              size(op.paymasterAndData) > 52
+                ? slice(op.paymasterAndData, 52)
                 : '0x',
           }
         : {
-            paymaster: slice(userOp.paymasterAndData, 0, 20),
+            paymaster: slice(op.paymasterAndData, 0, 20),
             paymasterVerificationGasLimit: null,
             paymasterPostOpGasLimit: null,
             paymasterData: null,
@@ -416,37 +406,35 @@ function unpackUserOp(
           paymasterData: null,
         };
   const verificationGasLimit =
-    'verificationGasLimit' in userOp
-      ? userOp.verificationGasLimit
-      : BigInt(slice(userOp.accountGasLimits, 0, 16));
+    'verificationGasLimit' in op
+      ? op.verificationGasLimit
+      : BigInt(slice(op.accountGasLimits, 0, 16));
   const callGasLimit =
-    'callGasLimit' in userOp
-      ? userOp.callGasLimit
-      : BigInt(slice(userOp.accountGasLimits, 16));
+    'callGasLimit' in op
+      ? op.callGasLimit
+      : BigInt(slice(op.accountGasLimits, 16));
   const maxFeePerGas =
-    'maxFeePerGas' in userOp
-      ? userOp.maxFeePerGas
-      : BigInt(slice(userOp.gasFees, 0, 16));
+    'maxFeePerGas' in op ? op.maxFeePerGas : BigInt(slice(op.gasFees, 0, 16));
   const maxPriorityFeePerGas =
-    'maxPriorityFeePerGas' in userOp
-      ? userOp.maxPriorityFeePerGas
-      : BigInt(slice(userOp.gasFees, 16));
+    'maxPriorityFeePerGas' in op
+      ? op.maxPriorityFeePerGas
+      : BigInt(slice(op.gasFees, 16));
   return {
     hash,
     success: event.success,
     sender: event.sender.toLowerCase() as Address,
     nonce: event.nonce,
-    initCode: userOp.initCode,
+    initCode: op.initCode,
     factory: initCodeUnpacked.factory,
     initData: initCodeUnpacked.initData,
-    callData: userOp.callData,
+    callData: op.callData,
     paymaster: paymasterDataUnpacked.paymaster,
     paymasterVerificationGasLimit:
       paymasterDataUnpacked.paymasterVerificationGasLimit,
     paymasterPostOpGasLimit: paymasterDataUnpacked.paymasterPostOpGasLimit,
     paymasterData: paymasterDataUnpacked.paymasterData,
-    signature: userOp.signature,
-    preVerificationGas: userOp.preVerificationGas,
+    signature: op.signature,
+    preVerificationGas: op.preVerificationGas,
     verificationGasLimit: verificationGasLimit,
     callGasLimit: callGasLimit,
     actualGasUsed: event.actualGasUsed,
@@ -456,13 +444,13 @@ function unpackUserOp(
   };
 }
 
-function getUserOpLogs(logs: Log[], hash: Hex): Log[] {
+function getOpLogs(logs: Log[], hash: Hex): Log[] {
   const beforeExecutionLog = getBeforeExecutionLog(logs);
   if (!beforeExecutionLog) {
     return [];
   }
-  const userOpEvents = getUserOpEvents(logs);
-  const matchingEvent = userOpEvents.find((event) => hash === event.userOpHash);
+  const opEvents = getOpEvents(logs);
+  const matchingEvent = opEvents.find((event) => hash === event.userOpHash);
   if (!matchingEvent) {
     return [];
   }
@@ -470,9 +458,9 @@ function getUserOpLogs(logs: Log[], hash: Hex): Log[] {
   if (!maxLogIndex) {
     return [];
   }
-  const prevUserOpEvent = userOpEvents[userOpEvents.indexOf(matchingEvent) - 1];
-  const minLogIndex = prevUserOpEvent
-    ? prevUserOpEvent.logIndex
+  const prevOpEvent = opEvents[opEvents.indexOf(matchingEvent) - 1];
+  const minLogIndex = prevOpEvent
+    ? prevOpEvent.logIndex
     : beforeExecutionLog.logIndex;
   if (minLogIndex === null) {
     return [];
@@ -550,13 +538,13 @@ export {
   TX_TYPE_UNKNOWN,
   getTxType,
   getEntryPoint,
-  getUserOpEvent,
-  getUserOpEvents,
-  getUserOps,
-  getUserOpHash,
+  getOpEvent,
+  getOpEvents,
+  getOps,
+  getOpHash,
   getAccountDeployments,
   getBeneficiary,
-  getUserOpLogs,
-  unpackUserOp,
+  getOpLogs,
+  unpackOp,
 };
-export type { TxType, UserOp, UserOpUnpacked, UserOp_0_6, UserOp_0_7 };
+export type { TxType, Op, OpUnpacked, Op_0_6, Op_0_7 };

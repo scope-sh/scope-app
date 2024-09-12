@@ -181,7 +181,7 @@ class Service {
     return response.json<AddressTransfers>();
   }
 
-  async getUserOpTxHash(hash: Hex): Promise<Hex> {
+  async getOpTxHash(hash: Hex): Promise<Hex> {
     const response = await this.client.get('userop', {
       searchParams: {
         chain: this.chain,

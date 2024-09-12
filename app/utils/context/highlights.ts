@@ -19,7 +19,7 @@ import uniswapV3PoolAbi from '@/abi/uniswapV3Pool';
 import type { Label } from '@/services/api';
 import { decodeSignature as biconomyV2DecodeSignature } from '@/utils/context/erc4337/biconomyV2';
 import { decodeSignature as coinbaseSmartWalletV1DecodeSignature } from '@/utils/context/erc4337/coinbaseSmartWalletV1';
-import type { UserOpUnpacked } from '@/utils/context/erc4337/entryPoint';
+import type { OpUnpacked } from '@/utils/context/erc4337/entryPoint';
 import { decodeSignature as kernelV2DecodeSignature } from '@/utils/context/erc4337/kernelV2';
 import { decodeNonce as kernelV3DecodeNonce } from '@/utils/context/erc7579/kernelV3';
 
@@ -34,12 +34,12 @@ interface ItemPartAddress {
   label?: string;
 }
 
-interface ItemPartUserOp {
-  type: 'userop';
+interface ItemPartOp {
+  type: 'op';
   hash: Hash;
 }
 
-type ItemPart = ItemPartText | ItemPartAddress | ItemPartUserOp;
+type ItemPart = ItemPartText | ItemPartAddress | ItemPartOp;
 
 interface Item {
   icon?: string;
@@ -79,11 +79,11 @@ function getContractDeployment(transaction: Transaction): Item[] {
   return [];
 }
 
-function getUserOp(
-  userOp: UserOpUnpacked,
+function getOp(
+  op: OpUnpacked,
   getLabel: (address: Address) => Label | null,
 ): Item[] {
-  const sender = userOp.sender;
+  const sender = op.sender;
   const label = getLabel(sender);
   if (!label) {
     return [];
@@ -93,7 +93,7 @@ function getUserOp(
     return [];
   }
   if (labelType.id === 'kernel-v2-account') {
-    const signature = userOp.signature;
+    const signature = op.signature;
     const decodedSignature = kernelV2DecodeSignature(signature);
     if (!decodedSignature) {
       return [];
@@ -147,7 +147,7 @@ function getUserOp(
     }
   }
   if (labelType.id === 'kernel-v3-account') {
-    const nonce = userOp.nonce;
+    const nonce = op.nonce;
     const decodedNonce = kernelV3DecodeNonce(nonce);
     if (!decodedNonce) {
       return [];
@@ -169,7 +169,7 @@ function getUserOp(
     ] as Item[];
   }
   if (labelType.id === 'biconomy-v2-account') {
-    const signature = userOp.signature;
+    const signature = op.signature;
     const decodedSignature = biconomyV2DecodeSignature(signature);
     return [
       {
@@ -188,7 +188,7 @@ function getUserOp(
     ] as Item[];
   }
   if (labelType.id === 'coinbase-smart-wallet-v1-account') {
-    const signature = userOp.signature;
+    const signature = op.signature;
     const decodedSignature = coinbaseSmartWalletV1DecodeSignature(signature);
     if (!decodedSignature) {
       return [];
@@ -639,5 +639,5 @@ function getLog(
   }
 }
 
-export { getContractDeployment, getUserOp, getLogs };
+export { getContractDeployment, getOp, getLogs };
 export type { Item };

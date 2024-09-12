@@ -22,8 +22,8 @@ interface TransactionHashLink {
   value: Hex;
 }
 
-interface UserOpHashLink {
-  type: 'userop';
+interface OpHashLink {
+  type: 'op';
   value: Hex;
 }
 
@@ -32,7 +32,7 @@ interface AddressLink {
   value: Address;
 }
 
-type Link = BlockLink | TransactionHashLink | UserOpHashLink | AddressLink;
+type Link = BlockLink | TransactionHashLink | OpHashLink | AddressLink;
 
 export { TOAST_DURATION, MAX_TOASTS };
 export type { ToastData, Toast, Link };

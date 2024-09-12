@@ -38,13 +38,13 @@
                 type="minimal"
               />
             </template>
-            <template v-else-if="part.type === 'userop'">
-              <LinkUserOp
+            <template v-else-if="part.type === 'op'">
+              <LinkOp
                 :hash="part.hash"
                 type="minimal"
               >
                 {{ part.hash }}
-              </LinkUserOp>
+              </LinkOp>
             </template>
           </div>
         </div>
@@ -54,7 +54,7 @@
 </template>
 
 <script setup lang="ts">
-import LinkUserOp from './LinkUserOp.vue';
+import LinkOp from './LinkOp.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';

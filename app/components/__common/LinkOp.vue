@@ -5,7 +5,7 @@
   >
     <ScopeLinkInternal
       :route="{
-        name: 'userop',
+        name: 'op',
         hash,
       }"
       :type

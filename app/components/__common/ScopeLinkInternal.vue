@@ -70,9 +70,9 @@ const isHighlighted = computed(() => {
           props.route.name === 'address' &&
           props.route.address === hoveredRoute.value.address
         );
-      case 'userop':
+      case 'op':
         return (
-          props.route.name === 'userop' &&
+          props.route.name === 'op' &&
           props.route.hash === hoveredRoute.value.hash
         );
     }

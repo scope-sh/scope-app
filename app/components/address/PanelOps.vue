@@ -24,7 +24,7 @@
         value="No ops found"
       />
       <template v-else>
-        <TableUserOps
+        <TableOps
           :ops="rows"
           :per-page="perPage"
           :page="page - 1"
@@ -59,13 +59,13 @@ import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import SelectPerPage from '@/components/__common/SelectPerPage.vue';
-import TableUserOps from '@/components/address/TableUserOps.vue';
-import type { UserOp as UserOpRow } from '@/components/address/TableUserOps.vue';
-import type { UserOp } from '@/services/indexer';
+import TableOps from '@/components/address/TableOps.vue';
+import type { Op as OpRow } from '@/components/address/TableOps.vue';
+import type { Op } from '@/services/indexer';
 
 const props = defineProps<{
   isLoading: boolean;
-  items: UserOp[];
+  items: Op[];
   maxPage: number;
 }>();
 
@@ -80,9 +80,9 @@ const emit = defineEmits<{
   refresh: [];
 }>();
 
-const rows = computed<UserOpRow[]>(() => {
+const rows = computed<OpRow[]>(() => {
   return props.isLoading
-    ? new Array<UserOpRow>(page.value * perPage.value).fill({
+    ? new Array<OpRow>(page.value * perPage.value).fill({
         success: false,
         entryPoint: zeroAddress,
         nonce: 0n,

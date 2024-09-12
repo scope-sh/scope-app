@@ -1,36 +1,36 @@
 <template>
-  <ScopeCard v-if="userOpUnpacked">
+  <ScopeCard v-if="opUnpacked">
     <AttributeList>
       <AttributeItem>
         <AttributeItemLabel value="Hash" />
         <AttributeItemValue>
-          <LinkUserOp :hash="userOpUnpacked.hash" />
+          <LinkOp :hash="opUnpacked.hash" />
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
         <AttributeItemLabel value="Success" />
         <AttributeItemValue>
-          {{ userOpUnpacked.success }}
+          {{ opUnpacked.success }}
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
         <AttributeItemLabel value="Sender" />
         <AttributeItemValue>
-          <LinkAddress :address="userOpUnpacked.sender" />
+          <LinkAddress :address="opUnpacked.sender" />
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
         <AttributeItemLabel value="Nonce" />
         <AttributeItemValue>
-          {{ userOpUnpacked.nonce }}
+          {{ opUnpacked.nonce }}
         </AttributeItemValue>
       </AttributeItem>
 
-      <AttributeItem v-if="size(userOpUnpacked.initCode) > 0">
+      <AttributeItem v-if="size(opUnpacked.initCode) > 0">
         <AttributeItemLabel value="Init Code" />
         <AttributeItemValue>
           <ScopeTextView
-            :value="userOpUnpacked.initCode"
+            :value="opUnpacked.initCode"
             :size="'tiny'"
           />
         </AttributeItemValue>
@@ -39,7 +39,7 @@
         <AttributeItemLabel value="Call Data" />
         <AttributeItemValue>
           <ScopeTextView
-            :value="userOpUnpacked.callData"
+            :value="opUnpacked.callData"
             :size="'tiny'"
           />
         </AttributeItemValue>
@@ -53,7 +53,7 @@ import type { Address, Hex } from 'viem';
 import { size } from 'viem';
 import { computed } from 'vue';
 
-import LinkUserOp from '../__common/LinkUserOp.vue';
+import LinkOp from '../__common/LinkOp.vue';
 import ScopeCard from '../__common/ScopeCard.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -67,15 +67,15 @@ import {
 import useChain from '@/composables/useChain';
 import type { Transaction, TransactionReceipt } from '@/services/evm';
 import {
-  type UserOp,
-  getUserOpHash,
-  getUserOpEvent,
-  unpackUserOp,
+  type Op,
+  getOpHash,
+  getOpEvent,
+  unpackOp,
 } from '@/utils/context/erc4337/entryPoint';
 
 const props = defineProps<{
   entryPoint: Address | null;
-  op: UserOp;
+  op: Op;
   transaction: Transaction;
   transactionReceipt: TransactionReceipt;
 }>();
@@ -89,10 +89,10 @@ const hash = computed<Hex | null>(() => {
   if (!chainId.value) {
     return null;
   }
-  return getUserOpHash(chainId.value, props.entryPoint, props.op);
+  return getOpHash(chainId.value, props.entryPoint, props.op);
 });
 
-const userOpUnpacked = computed(() => {
+const opUnpacked = computed(() => {
   if (!hash.value) {
     return null;
   }
@@ -102,7 +102,7 @@ const userOpUnpacked = computed(() => {
   if (!props.entryPoint) {
     return null;
   }
-  const event = getUserOpEvent(
+  const event = getOpEvent(
     chainId.value,
     props.entryPoint,
     props.transactionReceipt.logs,
@@ -111,7 +111,7 @@ const userOpUnpacked = computed(() => {
   if (!event) {
     return null;
   }
-  return unpackUserOp(hash.value, props.op, event);
+  return unpackOp(hash.value, props.op, event);
 });
 </script>
 

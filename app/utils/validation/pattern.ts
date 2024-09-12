@@ -25,7 +25,7 @@ function isTransactionHash(value: string): value is Hex {
   return !!value.match(hashRegex);
 }
 
-function isUserOpHash(value: string): value is Hex {
+function isOpHash(value: string): value is Hex {
   const hashRegex = /^0x[0-9a-f]{64}$/;
   return !!value.match(hashRegex);
 }
@@ -36,5 +36,5 @@ export {
   isBlockTag,
   isEnsAddress,
   isTransactionHash,
-  isUserOpHash,
+  isOpHash,
 };

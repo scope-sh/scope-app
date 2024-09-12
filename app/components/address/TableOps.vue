@@ -73,13 +73,13 @@
             >
               {{ toHash(cell.getValue()) }}
             </LinkTransaction>
-            <LinkUserOp
+            <LinkOp
               v-else-if="cell.column.id === 'hash'"
               :hash="toHash(cell.getValue())"
               type="minimal"
             >
               {{ toHash(cell.getValue()) }}
-            </LinkUserOp>
+            </LinkOp>
             <LinkAddress
               v-else-if="cell.column.id === 'bundler'"
               :address="toAddress(cell.getValue())"
@@ -116,8 +116,8 @@ import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
+import LinkOp from '@/components/__common/LinkOp.vue';
 import LinkTransaction from '@/components/__common/LinkTransaction.vue';
-import LinkUserOp from '@/components/__common/LinkUserOp.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import {
   ENTRY_POINT_0_6_ADDRESS,
@@ -127,12 +127,12 @@ import { toRelativeTime } from '@/utils/conversion';
 import { formatRelativeTime } from '@/utils/formatting';
 
 const props = defineProps<{
-  ops: UserOp[];
+  ops: Op[];
   page: number;
   perPage: number;
 }>();
 
-const columnHelper = createColumnHelper<UserOp>();
+const columnHelper = createColumnHelper<Op>();
 
 const columns = computed(() => [
   columnHelper.accessor('success', {
@@ -215,7 +215,7 @@ watch(
   },
 );
 
-function isPaymaster(cell: Cell<UserOp, unknown>): boolean {
+function isPaymaster(cell: Cell<Op, unknown>): boolean {
   return cell.column.id === 'paymaster' && cell.getValue() !== zeroAddress;
 }
 
@@ -233,7 +233,7 @@ function toAddress(value: unknown): Address {
 </script>
 
 <script lang="ts">
-interface UserOp {
+interface Op {
   success: boolean;
   entryPoint: Address;
   nonce: bigint;
@@ -246,7 +246,7 @@ interface UserOp {
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export type { UserOp };
+export type { Op };
 </script>
 
 <style scoped>

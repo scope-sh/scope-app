@@ -3,7 +3,7 @@ import type { Address, Hex } from 'viem';
 
 import type { Chain } from '@/utils/chains.js';
 
-interface HashUserOpResponse {
+interface HashOpResponse {
   data: {
     UserOp: {
       transactionHash: Hex;
@@ -11,7 +11,7 @@ interface HashUserOpResponse {
   };
 }
 
-interface UserOpsResponse {
+interface OpsResponse {
   data: {
     UserOp: {
       success: boolean;
@@ -27,7 +27,7 @@ interface UserOpsResponse {
   };
 }
 
-interface UserOp {
+interface Op {
   success: boolean;
   entryPoint: Address;
   blockNumber: number;
@@ -50,7 +50,7 @@ class Service {
     });
   }
 
-  public async getTxHashByUserOpHash(hash: Hex): Promise<Hex | null> {
+  public async getTxHashByOpHash(hash: Hex): Promise<Hex | null> {
     const query = `{
       UserOp(where: {
         id: {
@@ -66,7 +66,7 @@ class Service {
       json: { query },
     });
 
-    const json = (await response.json()) as HashUserOpResponse;
+    const json = (await response.json()) as HashOpResponse;
     if (json.data.UserOp.length === 0) {
       return null;
     } else {
@@ -78,11 +78,11 @@ class Service {
     }
   }
 
-  public async getUserOpsByAddress(
+  public async getOpsByAddress(
     address: Address,
     offset: number,
     limit: number,
-  ): Promise<UserOp[]> {
+  ): Promise<Op[]> {
     const query = `{
       UserOp(
         limit: ${limit},
@@ -115,7 +115,7 @@ class Service {
       json: { query },
     });
 
-    const json = (await response.json()) as UserOpsResponse;
+    const json = (await response.json()) as OpsResponse;
     if (json.data.UserOp.length === 0) {
       return [];
     } else {
@@ -135,4 +135,4 @@ class Service {
 }
 
 export default Service;
-export type { UserOp };
+export type { Op };
