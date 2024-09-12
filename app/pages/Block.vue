@@ -121,7 +121,13 @@
                 :per-page="perPage"
                 type="block"
               />
-              <SelectPerPage v-model="perPage" />
+              <div class="panel-footer">
+                <SelectPerPage v-model="perPage" />
+                <ScopePaginator
+                  v-model="page"
+                  :total="maxPage"
+                />
+              </div>
             </template>
           </template>
         </ScopePanel>
@@ -341,3 +347,10 @@ async function handleOpenLatestBlockClick(): Promise<void> {
   router.push(getRouteLocation({ name: 'block', number: block }));
 }
 </script>
+
+<style scoped>
+.panel-footer {
+  display: flex;
+  justify-content: space-between;
+}
+</style>
