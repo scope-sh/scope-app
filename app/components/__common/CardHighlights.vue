@@ -54,44 +54,15 @@
 </template>
 
 <script setup lang="ts">
-import type { Address, Hash } from 'viem';
-
 import LinkUserOp from './LinkUserOp.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
+import type { Item } from '@/utils/context/highlights';
 
 defineProps<{
   items: Item[];
 }>();
-</script>
-
-<script lang="ts">
-interface ItemPartText {
-  type: 'text';
-  value: string;
-}
-
-interface ItemPartAddress {
-  type: 'address';
-  address: Address;
-  label?: string;
-}
-
-interface ItemPartUserOp {
-  type: 'userop';
-  hash: Hash;
-}
-
-type ItemPart = ItemPartText | ItemPartAddress | ItemPartUserOp;
-
-interface Item {
-  icon?: string;
-  parts: ItemPart[];
-}
-
-// eslint-disable-next-line import/prefer-default-export
-export type { Item };
 </script>
 
 <style scoped>
