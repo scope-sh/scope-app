@@ -138,67 +138,14 @@
         />
       </template>
       <template v-else-if="section === SECTION_LOGS">
-        <ScopePanelLoading
-          v-if="isLoadingLogs"
-          title="Logs"
+        <PanelLogs
+          :is-loading="isLoadingLogs"
+          :items="logs"
+          :max-page="maxLogPage"
+          :page="logPage"
+          :per-page="logsPerPage"
+          @refresh="refreshLogs"
         />
-        <ScopePanel
-          v-else
-          title="Logs"
-        >
-          <template #header>
-            <div class="panel-header">
-              <ScopePaginator
-                v-if="logRows.length"
-                v-model="logPage"
-                :total="maxLogPage"
-                :disabled="isLoadingLogs"
-              />
-              <ScopeIcon
-                class="icon-refresh"
-                kind="reload"
-                @click="refreshLogs"
-              />
-            </div>
-          </template>
-          <template #default>
-            <ScopeLabelEmptyState
-              v-if="!logRows.length"
-              value="No logs found"
-            />
-            <template v-else>
-              <div class="logs">
-                <ScopeToggle
-                  v-model="selectedLogView"
-                  :options="logViewOptions"
-                />
-                <CardLog
-                  v-for="(log, index) in logRows"
-                  :key="index"
-                  :log="log"
-                  :view="selectedLogView"
-                  type="address"
-                />
-              </div>
-              <div class="panel-footer">
-                <SelectPerPage v-model="logsPerPage" />
-                <div class="footer-side">
-                  <ScopePaginator
-                    v-if="logRows.length"
-                    v-model="logPage"
-                    :total="maxLogPage"
-                    :disabled="isLoadingLogs"
-                  />
-                  <ScopeIcon
-                    class="icon-refresh"
-                    kind="reload"
-                    @click="refreshLogs"
-                  />
-                </div>
-              </div>
-            </template>
-          </template>
-        </ScopePanel>
       </template>
       <template v-else-if="section === SECTION_CODE">
         <PanelCode
@@ -282,8 +229,6 @@ import {
 import { computed, onMounted, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
-import type { Log, LogView } from '@/components/__common/CardLog.vue';
-import CardLog from '@/components/__common/CardLog.vue';
 import LabelIcon from '@/components/__common/LabelIcon.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
@@ -293,14 +238,13 @@ import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopePopover from '@/components/__common/ScopePopover.vue';
-import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
-import ScopeToggle from '@/components/__common/ScopeToggle.vue';
 import SelectPerPage from '@/components/__common/SelectPerPage.vue';
 import CardDeployment from '@/components/address/CardDeployment.vue';
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
 import PanelCode from '@/components/address/PanelCode.vue';
 import PanelInteract from '@/components/address/PanelInteract.vue';
+import PanelLogs from '@/components/address/PanelLogs.vue';
 import PanelTransactions from '@/components/address/PanelTransactions.vue';
 import TableTransfers from '@/components/address/TableTransfers.vue';
 import type { Transfer as TransferRow } from '@/components/address/TableTransfers.vue';
@@ -564,17 +508,6 @@ watch(contract, (contract) => {
     },
   });
 });
-const selectedLogView = ref<LogView>('decoded');
-const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
-  {
-    value: 'decoded',
-    icon: 'text',
-  },
-  {
-    value: 'hex',
-    icon: 'hex-string',
-  },
-]);
 
 const sort = computed<Sort | null>(() => {
   if (!hypersyncService.value) {
@@ -704,24 +637,6 @@ async function fetchLogs(): Promise<void> {
   logPagination.value = addressLogs.pagination;
   isLoadingLogs.value = false;
 }
-const logRows = computed<Log[]>(() => {
-  return logs.value
-    .map((log) => {
-      return {
-        blockNumber: log.blockNumber,
-        blockTimestamp: log.blockTimestamp,
-        transactionHash: log.transactionHash,
-        logIndex: log.logIndex,
-        address: log.address,
-        topics: log.topics,
-        data: log.data,
-      };
-    })
-    .slice(
-      (logPage.value - 1) * logsPerPage.value,
-      logPage.value * logsPerPage.value,
-    );
-});
 async function refreshLogs(): Promise<void> {
   logPage.value = 1;
   logPagination.value = {
@@ -1058,12 +973,6 @@ watch(
   &:hover {
     color: var(--color-text-primary);
   }
-}
-
-.logs {
-  display: flex;
-  gap: var(--spacing-5);
-  flex-direction: column;
 }
 
 .label-unsupported {
