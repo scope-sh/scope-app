@@ -16,7 +16,17 @@
             :uri="labelIcon"
             class="icon"
           />
-          <div v-if="labelText">{{ labelText }}</div>
+          <ScopeTooltip
+            v-if="labelText"
+            disable-closing-trigger
+          >
+            <template #trigger>
+              {{ labelText }}
+            </template>
+            <template #default>
+              {{ address }}
+            </template>
+          </ScopeTooltip>
           <div
             v-else
             class="label-address"
@@ -36,6 +46,7 @@ import { computed, watch } from 'vue';
 import LabelIcon from './LabelIcon.vue';
 import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { type Type } from './ScopeLinkInternal.vue';
+import ScopeTooltip from './ScopeTooltip.vue';
 
 import useLabels from '@/composables/useLabels.js';
 

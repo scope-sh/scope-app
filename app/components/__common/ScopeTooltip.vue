@@ -30,6 +30,7 @@ import { Tooltip } from 'radix-vue/namespaced';
   border: none;
   outline: none;
   background: transparent;
+  color: inherit;
   cursor: pointer;
 }
 
