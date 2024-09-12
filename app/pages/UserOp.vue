@@ -157,6 +157,7 @@
       <CardHighlights
         v-if="userOpUnpacked"
         :user-op="userOpUnpacked"
+        :logs="logs"
       />
     </ScopePanel>
     <template #section>
