@@ -30,7 +30,9 @@
 import { computed } from 'vue';
 
 import IconChain from '@/components/__common/IconChain.vue';
-import ScopeSelect, { type Item } from '@/components/__common/ScopeSelect.vue';
+import ScopeSelect, {
+  type Option as SelectOption,
+} from '@/components/__common/ScopeSelect.vue';
 import {
   type Chain,
   CHAINS,
@@ -51,7 +53,7 @@ function handleModelUpdate(value: string): void {
   model.value = chain;
 }
 
-const options = computed<Item[]>(() =>
+const options = computed<SelectOption[]>(() =>
   CHAINS.map((chain) => {
     return {
       value: chain.toString(),

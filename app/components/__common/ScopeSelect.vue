@@ -67,11 +67,11 @@ import { Select } from 'radix-vue/namespaced';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
 defineProps<{
-  options: Item[];
+  options: Option[];
   placeholder: string;
 }>();
 
-const model = defineModel<Item['value']>({
+const model = defineModel<Option['value']>({
   required: true,
 });
 
@@ -81,13 +81,13 @@ function handleModelValueUpdate(newValue: string): void {
 </script>
 
 <script lang="ts">
-interface Item {
+interface Option {
   value: string;
   label: string;
 }
 
 // eslint-disable-next-line import/prefer-default-export
-export type { Item };
+export type { Option };
 </script>
 
 <style scoped>

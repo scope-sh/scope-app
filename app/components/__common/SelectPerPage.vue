@@ -16,7 +16,7 @@
 import { computed } from 'vue';
 
 import ScopeSelect from '@/components/__common/ScopeSelect.vue';
-import type { Item as SelectOption } from '@/components/__common/ScopeSelect.vue';
+import type { Option as SelectOption } from '@/components/__common/ScopeSelect.vue';
 
 const value = defineModel<number>({
   required: true,
