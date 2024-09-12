@@ -127,55 +127,15 @@
         </ScopePanel>
       </template>
       <template v-else-if="section === SECTION_TRANSACTIONS">
-        <ScopePanel
-          title="Transactions"
-          :loading="isLoadingTransactions"
-        >
-          <template #header>
-            <div class="panel-header">
-              <ScopePaginator
-                v-if="transactionRows.length"
-                v-model="transactionPage"
-                :total="maxTransactionPage"
-                :disabled="isLoadingTransactions"
-              />
-              <ScopeIcon
-                class="icon-refresh"
-                kind="reload"
-                @click="refreshTransactions"
-              />
-            </div>
-          </template>
-          <ScopeLabelEmptyState
-            v-if="!transactionRows.length"
-            value="No transactions found"
-          />
-          <template v-else>
-            <TableTransactions
-              :address="address"
-              :transactions="transactionRows"
-              :per-page="transactionsPerPage"
-              :page="transactionPage - 1"
-              type="address"
-            />
-            <div class="panel-footer">
-              <SelectPerPage v-model="transactionsPerPage" />
-              <div class="footer-side">
-                <ScopePaginator
-                  v-if="transactionRows.length"
-                  v-model="transactionPage"
-                  :total="maxTransactionPage"
-                  :disabled="isLoadingTransactions"
-                />
-                <ScopeIcon
-                  class="icon-refresh"
-                  kind="reload"
-                  @click="refreshTransactions"
-                />
-              </div>
-            </div>
-          </template>
-        </ScopePanel>
+        <PanelTransactions
+          :address
+          :is-loading="isLoadingTransactions"
+          :items="transactions"
+          :max-page="maxTransactionPage"
+          :page="transactionPage"
+          :per-page="transactionsPerPage"
+          @refresh="refreshTransactions"
+        />
       </template>
       <template v-else-if="section === SECTION_LOGS">
         <ScopePanelLoading
@@ -314,7 +274,6 @@
 import { useHead } from '@unhead/vue';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import {
-  slice,
   toEventSelector,
   toFunctionSelector,
   zeroAddress,
@@ -337,13 +296,12 @@ import ScopePopover from '@/components/__common/ScopePopover.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
 import SelectPerPage from '@/components/__common/SelectPerPage.vue';
-import type { Transaction as TransactionRow } from '@/components/__common/TableTransactions.vue';
-import TableTransactions from '@/components/__common/TableTransactions.vue';
 import CardDeployment from '@/components/address/CardDeployment.vue';
 import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
 import PanelCode from '@/components/address/PanelCode.vue';
 import PanelInteract from '@/components/address/PanelInteract.vue';
+import PanelTransactions from '@/components/address/PanelTransactions.vue';
 import TableTransfers from '@/components/address/TableTransfers.vue';
 import type { Transfer as TransferRow } from '@/components/address/TableTransfers.vue';
 import type { UserOp as UserOpRow } from '@/components/address/TableUserOps.vue';
@@ -644,7 +602,7 @@ watch(transactionsPerPage, () => {
   fetchTransactions();
 });
 watch(transactionPage, (page) => {
-  if (transactionRows.value.length >= page * transactionsPerPage.value) {
+  if (transactions.value.length >= page * transactionsPerPage.value) {
     return;
   }
   fetchTransactions();
@@ -681,46 +639,6 @@ async function fetchTransactions(): Promise<void> {
   transactionPagination.value = addressTransactions.pagination;
   isLoadingTransactions.value = false;
 }
-const transactionRows = computed<TransactionRow[]>(() => {
-  return isLoadingTransactions.value
-    ? new Array<TransactionRow>(
-        transactionPage.value * transactionsPerPage.value,
-      ).fill({
-        success: false,
-        blockNumber: 0,
-        blockTimestamp: 0,
-        transactionIndex: 0,
-        hash: zeroHash,
-        from: zeroAddress,
-        to: zeroAddress,
-        function: '0x',
-        data: '0x',
-        value: 0n,
-        gasPrice: 0n,
-      })
-    : transactions.value.map((transaction) => {
-        return {
-          success: transaction.status > 0,
-          blockNumber: transaction.blockNumber,
-          blockTimestamp: transaction.blockTimestamp,
-          transactionIndex: transaction.transactionIndex,
-          hash: transaction.hash,
-          from: transaction.from,
-          to: transaction.to || null,
-          function:
-            transaction.to && transaction.input.length >= 10
-              ? slice(transaction.input, 0, 4)
-              : '0x',
-          data: transaction.to
-            ? transaction.input.length > 10
-              ? slice(transaction.input, 4)
-              : '0x'
-            : transaction.input,
-          value: transaction.value,
-          gasPrice: transaction.gasPrice,
-        };
-      });
-});
 async function refreshTransactions(): Promise<void> {
   transactionPage.value = 1;
   transactionPagination.value = {
