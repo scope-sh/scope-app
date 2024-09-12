@@ -99,6 +99,8 @@ export type { Item };
   display: flex;
   gap: var(--spacing-4);
   flex-direction: column;
+  max-height: 150px;
+  overflow: auto;
 }
 
 .item {
