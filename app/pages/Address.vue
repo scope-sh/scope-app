@@ -86,6 +86,7 @@
                 v-if="opRows.length"
                 v-model="opPage"
                 :total="maxOpPage"
+                :disabled="isLoadingOps"
               />
               <ScopeIcon
                 class="icon-refresh"
@@ -105,7 +106,22 @@
                 :per-page="opsPerPage"
                 :page="opPage - 1"
               />
-              <SelectPerPage v-model="opsPerPage" />
+              <div class="panel-footer">
+                <SelectPerPage v-model="opsPerPage" />
+                <div class="footer-side">
+                  <ScopePaginator
+                    v-if="opRows.length"
+                    v-model="opPage"
+                    :total="maxOpPage"
+                    :disabled="isLoadingOps"
+                  />
+                  <ScopeIcon
+                    class="icon-refresh"
+                    kind="reload"
+                    @click="refreshOps"
+                  />
+                </div>
+              </div>
             </template>
           </template>
         </ScopePanel>
@@ -121,6 +137,7 @@
                 v-if="transactionRows.length"
                 v-model="transactionPage"
                 :total="maxTransactionPage"
+                :disabled="isLoadingTransactions"
               />
               <ScopeIcon
                 class="icon-refresh"
@@ -141,7 +158,22 @@
               :page="transactionPage - 1"
               type="address"
             />
-            <SelectPerPage v-model="transactionsPerPage" />
+            <div class="panel-footer">
+              <SelectPerPage v-model="transactionsPerPage" />
+              <div class="footer-side">
+                <ScopePaginator
+                  v-if="transactionRows.length"
+                  v-model="transactionPage"
+                  :total="maxTransactionPage"
+                  :disabled="isLoadingTransactions"
+                />
+                <ScopeIcon
+                  class="icon-refresh"
+                  kind="reload"
+                  @click="refreshTransactions"
+                />
+              </div>
+            </div>
           </template>
         </ScopePanel>
       </template>
@@ -160,6 +192,7 @@
                 v-if="logRows.length"
                 v-model="logPage"
                 :total="maxLogPage"
+                :disabled="isLoadingLogs"
               />
               <ScopeIcon
                 class="icon-refresh"
@@ -187,7 +220,22 @@
                   type="address"
                 />
               </div>
-              <SelectPerPage v-model="logsPerPage" />
+              <div class="panel-footer">
+                <SelectPerPage v-model="logsPerPage" />
+                <div class="footer-side">
+                  <ScopePaginator
+                    v-if="logRows.length"
+                    v-model="logPage"
+                    :total="maxLogPage"
+                    :disabled="isLoadingLogs"
+                  />
+                  <ScopeIcon
+                    class="icon-refresh"
+                    kind="reload"
+                    @click="refreshLogs"
+                  />
+                </div>
+              </div>
             </template>
           </template>
         </ScopePanel>
@@ -218,6 +266,7 @@
                 v-if="transferRows.length"
                 v-model="transferPage"
                 :total="maxTransferPage"
+                :disabled="isLoadingTransfers"
               />
               <ScopeIcon
                 class="icon-refresh"
@@ -238,7 +287,22 @@
               :per-page="transfersPerPage"
               :page="transferPage - 1"
             />
-            <SelectPerPage v-model="transfersPerPage" />
+            <div class="panel-footer">
+              <SelectPerPage v-model="transfersPerPage" />
+              <div class="footer-side">
+                <ScopePaginator
+                  v-if="transferRows.length"
+                  v-model="transferPage"
+                  :total="maxTransferPage"
+                  :disabled="isLoadingTransfers"
+                />
+                <ScopeIcon
+                  class="icon-refresh"
+                  kind="reload"
+                  @click="refreshTransfers"
+                />
+              </div>
+            </div>
           </template>
         </ScopePanel>
       </template>
@@ -1051,6 +1115,17 @@ watch(
 }
 
 .panel-header {
+  display: flex;
+  gap: var(--spacing-6);
+  align-items: center;
+}
+
+.panel-footer {
+  display: flex;
+  justify-content: space-between;
+}
+
+.footer-side {
   display: flex;
   gap: var(--spacing-6);
   align-items: center;
