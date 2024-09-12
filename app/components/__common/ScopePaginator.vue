@@ -2,6 +2,7 @@
   <Pagination.Root
     :page="zeroBased ? page + 1 : page"
     :total="total"
+    :disabled
     :items-per-page="1"
     :sibling-count="1"
     show-edges
@@ -41,11 +42,13 @@ const props = withDefaults(
     total?: number;
     zeroBased?: boolean;
     showPage?: boolean;
+    disabled?: boolean;
   }>(),
   {
     total: undefined,
     zeroBased: false,
     showPage: true,
+    disabled: false,
   },
 );
 
