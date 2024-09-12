@@ -76,55 +76,14 @@
     </ScopePanel>
     <template #section>
       <template v-if="section === SECTION_OPS">
-        <ScopePanel
-          title="UserOps"
-          :loading="isLoadingOps"
-        >
-          <template #header>
-            <div class="panel-header">
-              <ScopePaginator
-                v-if="opRows.length"
-                v-model="opPage"
-                :total="maxOpPage"
-                :disabled="isLoadingOps"
-              />
-              <ScopeIcon
-                class="icon-refresh"
-                kind="reload"
-                @click="refreshOps"
-              />
-            </div>
-          </template>
-          <template #default>
-            <ScopeLabelEmptyState
-              v-if="!opRows.length"
-              value="No ops found"
-            />
-            <template v-else>
-              <TableUserOps
-                :ops="opRows"
-                :per-page="opsPerPage"
-                :page="opPage - 1"
-              />
-              <div class="panel-footer">
-                <SelectPerPage v-model="opsPerPage" />
-                <div class="footer-side">
-                  <ScopePaginator
-                    v-if="opRows.length"
-                    v-model="opPage"
-                    :total="maxOpPage"
-                    :disabled="isLoadingOps"
-                  />
-                  <ScopeIcon
-                    class="icon-refresh"
-                    kind="reload"
-                    @click="refreshOps"
-                  />
-                </div>
-              </div>
-            </template>
-          </template>
-        </ScopePanel>
+        <PanelUserOps
+          v-model:page="opPage"
+          v-model:per-page="opsPerPage"
+          :is-loading="isLoadingOps"
+          :items="ops"
+          :max-page="maxOpPage"
+          @refresh="refreshOps"
+        />
       </template>
       <template v-else-if="section === SECTION_TRANSACTIONS">
         <PanelTransactions
@@ -246,10 +205,9 @@ import PanelCode from '@/components/address/PanelCode.vue';
 import PanelInteract from '@/components/address/PanelInteract.vue';
 import PanelLogs from '@/components/address/PanelLogs.vue';
 import PanelTransactions from '@/components/address/PanelTransactions.vue';
+import PanelUserOps from '@/components/address/PanelUserOps.vue';
 import TableTransfers from '@/components/address/TableTransfers.vue';
 import type { Transfer as TransferRow } from '@/components/address/TableTransfers.vue';
-import type { UserOp as UserOpRow } from '@/components/address/TableUserOps.vue';
-import TableUserOps from '@/components/address/TableUserOps.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
@@ -706,33 +664,6 @@ async function refreshOps(): Promise<void> {
   ops.value = [];
   await fetchUserOps();
 }
-const opRows = computed<UserOpRow[]>(() => {
-  return isLoadingOps.value
-    ? new Array<UserOpRow>(opPage.value * opsPerPage.value).fill({
-        success: false,
-        entryPoint: zeroAddress,
-        nonce: 0n,
-        blockNumber: 0,
-        blockTimestamp: 0,
-        transactionHash: zeroHash,
-        hash: zeroHash,
-        bundler: zeroAddress,
-        paymaster: zeroAddress,
-      })
-    : ops.value.map((op) => {
-        return {
-          success: op.success,
-          entryPoint: op.entryPoint,
-          nonce: op.nonce,
-          blockNumber: op.blockNumber,
-          blockTimestamp: 1000 * op.blockTimestamp,
-          transactionHash: op.transactionHash,
-          hash: op.hash,
-          bundler: op.bundler,
-          paymaster: op.paymaster,
-        };
-      });
-});
 
 const transfersPerPage = ref(20);
 const transferPage = ref(1);
