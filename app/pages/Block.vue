@@ -113,13 +113,16 @@
               v-if="!block?.transactions.length"
               value="No transactions found"
             />
-            <TableTransactions
-              v-else
-              :transactions
-              :page="page - 1"
-              :per-page="TRANSACTIONS_PER_PAGE"
-              type="block"
-            />
+
+            <template v-else>
+              <TableTransactions
+                :transactions
+                :page="page - 1"
+                :per-page="perPage"
+                type="block"
+              />
+              <SelectPerPage v-model="perPage" />
+            </template>
           </template>
         </ScopePanel>
       </template>
@@ -142,6 +145,7 @@ import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePaginator from '@/components/__common/ScopePaginator.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
+import SelectPerPage from '@/components/__common/SelectPerPage.vue';
 import TableTransactions, {
   type Transaction,
 } from '@/components/__common/TableTransactions.vue';
@@ -167,7 +171,6 @@ import {
 import { getRouteLocation } from '@/utils/routing';
 
 const SECTION_TRANSACTIONS = 'transactions';
-const TRANSACTIONS_PER_PAGE = 20;
 
 const section = ref<string>(SECTION_TRANSACTIONS);
 const sections = computed<Section[]>(() => {
@@ -314,12 +317,16 @@ const transactions = computed<Transaction[]>(() => {
   });
 });
 
+const perPage = ref(20);
 const page = ref(1);
 const maxPage = computed(() => {
   if (!block.value) {
     return 1;
   }
-  return Math.ceil(block.value.transactions.length / TRANSACTIONS_PER_PAGE);
+  return Math.ceil(block.value.transactions.length / perPage.value);
+});
+watch(perPage, () => {
+  page.value = 1;
 });
 
 async function handleBlockNumberUpdate(number: number): Promise<void> {
