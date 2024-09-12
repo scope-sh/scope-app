@@ -9,7 +9,6 @@ import {
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0';
 import iAccountAbi from '@/abi/iAccount';
-import type { Call as InternalCallRow } from '@/components/__common/TreeInternalCalls.vue';
 import type {
   DebugTransactionTrace,
   DebugTransactionTraceCall,
@@ -23,43 +22,6 @@ interface UserOpTrace {
   creation: TransactionTracePart[];
   validation: TransactionTracePart[];
   execution: TransactionTracePart[];
-}
-
-function convertTransactionTraceToRows(
-  trace: TransactionTrace | null,
-): InternalCallRow[] {
-  if (!trace) {
-    return [];
-  }
-  return trace.map((transaction) => {
-    return {
-      success:
-        transaction.error === null
-          ? true
-          : transaction.error === 'OOG'
-            ? {
-                type: 'OOG',
-              }
-            : {
-                type: 'Revert',
-                reason: '',
-              },
-      type:
-        transaction.type === 'create' ? 'create' : transaction.action.callType,
-      from: transaction.action.from,
-      to: transaction.type === 'call' ? transaction.action.to : null,
-      input:
-        transaction.type === 'call'
-          ? transaction.action.input
-          : transaction.action.init,
-      value: transaction.action.value,
-      gas: {
-        used: transaction.result.gasUsed,
-        limit: transaction.action.gas,
-      },
-      traceAddress: transaction.traceAddress,
-    };
-  });
 }
 
 function convertDebugTraceToTransactionTrace(
@@ -281,9 +243,5 @@ function getUserOpTrace(
   };
 }
 
-export {
-  convertTransactionTraceToRows,
-  convertDebugTraceToTransactionTrace,
-  getUserOpTrace,
-};
+export { convertDebugTraceToTransactionTrace, getUserOpTrace };
 export type { UserOpTrace };

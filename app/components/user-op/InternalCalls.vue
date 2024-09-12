@@ -1,46 +1,33 @@
 <template>
-  <div class="root">
+  <div
+    v-if="trace"
+    class="root"
+  >
     <div
-      v-if="creationInternalCallRows.length > 0"
+      v-if="trace.creation.length > 0"
       class="section"
     >
       <div class="label">Creation</div>
-      <TreeInternalCalls :calls="creationInternalCallRows" />
+      <TreeInternalCalls :trace="trace.creation" />
     </div>
     <div class="section">
       <div class="label">Validation</div>
-      <TreeInternalCalls :calls="validationInternalCallRows" />
+      <TreeInternalCalls :trace="trace.validation" />
     </div>
     <div class="section">
       <div class="label">Execution</div>
-      <TreeInternalCalls :calls="executionInternalCallRows" />
+      <TreeInternalCalls :trace="trace.execution" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-
 import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
-import type { Call as InternalCallRow } from '@/components/__common/TreeInternalCalls.vue';
-import {
-  convertTransactionTraceToRows,
-  type UserOpTrace,
-} from '@/utils/context/traces';
+import type { UserOpTrace } from '@/utils/context/traces';
 
-const props = defineProps<{
+defineProps<{
   trace: UserOpTrace | null;
 }>();
-
-const creationInternalCallRows = computed<InternalCallRow[]>(() =>
-  props.trace ? convertTransactionTraceToRows(props.trace.creation) : [],
-);
-const validationInternalCallRows = computed<InternalCallRow[]>(() =>
-  props.trace ? convertTransactionTraceToRows(props.trace.validation) : [],
-);
-const executionInternalCallRows = computed<InternalCallRow[]>(() =>
-  props.trace ? convertTransactionTraceToRows(props.trace.execution) : [],
-);
 </script>
 
 <style scoped>

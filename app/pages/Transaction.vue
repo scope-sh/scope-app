@@ -240,7 +240,7 @@
               v-else
               class="internal"
             >
-              <TreeInternalCalls :calls="internalCallRows" />
+              <TreeInternalCalls :trace="transactionTrace" />
             </div>
           </template>
         </ScopePanel>
@@ -269,7 +269,6 @@ import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
-import type { Call as InternalCallRow } from '@/components/__common/TreeInternalCalls.vue';
 import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
 import {
   AttributeItem,
@@ -298,10 +297,7 @@ import type { Command } from '@/stores/commands';
 import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type { UserOp } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getUserOps } from '@/utils/context/erc4337/entryPoint';
-import {
-  convertDebugTraceToTransactionTrace,
-  convertTransactionTraceToRows,
-} from '@/utils/context/traces';
+import { convertDebugTraceToTransactionTrace } from '@/utils/context/traces';
 import { toRelativeTime } from '@/utils/conversion';
 import {
   formatEther,
@@ -490,9 +486,6 @@ async function fetchTransactionTrace(hash: Hex): Promise<void> {
     transactionTrace.value = await evmService.value.getTransactionTrace(hash);
   }
 }
-const internalCallRows = computed<InternalCallRow[]>(() =>
-  convertTransactionTraceToRows(transactionTrace.value),
-);
 
 async function fetchAbis(): Promise<void> {
   if (!apiService.value) {

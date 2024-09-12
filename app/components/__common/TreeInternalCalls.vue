@@ -68,40 +68,11 @@ import { ref, computed } from 'vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useChain from '@/composables/useChain';
+import type { TransactionTrace } from '@/services/evm';
 import { formatEther } from '@/utils/formatting';
 
 const { nativeCurrency } = useChain();
 
-defineProps<{
-  calls: Call[];
-}>();
-
-const el = ref<HTMLElement | null>(null);
-const scrollable = computed(() => {
-  if (!el.value) {
-    return false;
-  }
-  return el.value.scrollWidth > el.value.clientWidth;
-});
-
-function formatType(
-  value: 'call' | 'delegatecall' | 'staticcall' | 'create',
-): string {
-  return value === 'create'
-    ? 'CREATE'
-    : value === 'call'
-      ? 'CALL'
-      : value === 'delegatecall'
-        ? 'D•CALL'
-        : 'S•CALL';
-}
-
-function getLevel(row: Call): number {
-  return row.traceAddress.length;
-}
-</script>
-
-<script lang="ts">
 interface Call {
   success:
     | true
@@ -124,6 +95,69 @@ interface Call {
   traceAddress: number[];
 }
 
+const props = defineProps<{
+  trace: TransactionTrace | null;
+}>();
+
+const el = ref<HTMLElement | null>(null);
+const scrollable = computed(() => {
+  if (!el.value) {
+    return false;
+  }
+  return el.value.scrollWidth > el.value.clientWidth;
+});
+
+const calls = computed<Call[]>(() => {
+  if (!props.trace) {
+    return [];
+  }
+  return props.trace.map((transaction) => {
+    return {
+      success:
+        transaction.error === null
+          ? true
+          : transaction.error === 'OOG'
+            ? {
+                type: 'OOG',
+              }
+            : {
+                type: 'Revert',
+                reason: '',
+              },
+      type:
+        transaction.type === 'create' ? 'create' : transaction.action.callType,
+      from: transaction.action.from,
+      to: transaction.type === 'call' ? transaction.action.to : null,
+      input:
+        transaction.type === 'call'
+          ? transaction.action.input
+          : transaction.action.init,
+      value: transaction.action.value,
+      gas: {
+        used: transaction.result.gasUsed,
+        limit: transaction.action.gas,
+      },
+      traceAddress: transaction.traceAddress,
+    };
+  });
+});
+
+function formatType(
+  value: 'call' | 'delegatecall' | 'staticcall' | 'create',
+): string {
+  return value === 'create'
+    ? 'CREATE'
+    : value === 'call'
+      ? 'CALL'
+      : value === 'delegatecall'
+        ? 'D•CALL'
+        : 'S•CALL';
+}
+
+function getLevel(row: Call): number {
+  return row.traceAddress.length;
+}
+
 function getFunction(data: Hex): Hex {
   return size(data) > 0 ? slice(data, 0, 4) : '0x';
 }
@@ -131,9 +165,6 @@ function getFunction(data: Hex): Hex {
 function getData(data: Hex): Hex {
   return size(data) > 4 ? slice(data, 4) : '0x';
 }
-
-// eslint-disable-next-line import/prefer-default-export
-export type { Call };
 </script>
 
 <style scoped>
