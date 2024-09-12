@@ -99,12 +99,14 @@
               v-if="!opRows.length"
               value="No ops found"
             />
-            <TableUserOps
-              v-else
-              :ops="opRows"
-              :per-page="OPS_PER_PAGE"
-              :page="opPage - 1"
-            />
+            <template v-else>
+              <TableUserOps
+                :ops="opRows"
+                :per-page="opsPerPage"
+                :page="opPage - 1"
+              />
+              <SelectPerPage v-model="opsPerPage" />
+            </template>
           </template>
         </ScopePanel>
       </template>
@@ -131,14 +133,16 @@
             v-if="!transactionRows.length"
             value="No transactions found"
           />
-          <TableTransactions
-            v-else
-            :address="address"
-            :transactions="transactionRows"
-            :per-page="TRANSACTIONS_PER_PAGE"
-            :page="transactionPage - 1"
-            type="address"
-          />
+          <template v-else>
+            <TableTransactions
+              :address="address"
+              :transactions="transactionRows"
+              :per-page="transactionsPerPage"
+              :page="transactionPage - 1"
+              type="address"
+            />
+            <SelectPerPage v-model="transactionsPerPage" />
+          </template>
         </ScopePanel>
       </template>
       <template v-else-if="section === SECTION_LOGS">
@@ -169,22 +173,22 @@
               v-if="!logRows.length"
               value="No logs found"
             />
-            <div
-              v-else
-              class="logs"
-            >
-              <ScopeToggle
-                v-model="selectedLogView"
-                :options="logViewOptions"
-              />
-              <CardLog
-                v-for="(log, index) in logRows"
-                :key="index"
-                :log="log"
-                :view="selectedLogView"
-                type="address"
-              />
-            </div>
+            <template v-else>
+              <div class="logs">
+                <ScopeToggle
+                  v-model="selectedLogView"
+                  :options="logViewOptions"
+                />
+                <CardLog
+                  v-for="(log, index) in logRows"
+                  :key="index"
+                  :log="log"
+                  :view="selectedLogView"
+                  type="address"
+                />
+              </div>
+              <SelectPerPage v-model="logsPerPage" />
+            </template>
           </template>
         </ScopePanel>
       </template>
@@ -231,9 +235,10 @@
             <TableTransfers
               :address="address"
               :transfers="transferRows"
-              :per-page="TRANSFERS_PER_PAGE"
+              :per-page="transfersPerPage"
               :page="transferPage - 1"
             />
+            <SelectPerPage v-model="transfersPerPage" />
           </template>
         </ScopePanel>
       </template>
@@ -267,6 +272,7 @@ import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopePopover from '@/components/__common/ScopePopover.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
+import SelectPerPage from '@/components/__common/SelectPerPage.vue';
 import type { Transaction as TransactionRow } from '@/components/__common/TableTransactions.vue';
 import TableTransactions from '@/components/__common/TableTransactions.vue';
 import CardDeployment from '@/components/address/CardDeployment.vue';
@@ -555,7 +561,7 @@ const sort = computed<Sort | null>(() => {
   return hypersyncService.value.getSort();
 });
 
-const TRANSACTIONS_PER_PAGE = 20;
+const transactionsPerPage = ref(20);
 const transactionPage = ref(1);
 const transactionPagination = ref<Pagination>({
   cursor: null,
@@ -566,11 +572,15 @@ const maxTransactionPage = computed(() =>
     sort.value,
     transactionPagination.value,
     transactions.value.length,
-    TRANSACTIONS_PER_PAGE,
+    transactionsPerPage.value,
   ),
 );
+watch(transactionsPerPage, () => {
+  transactionPage.value = 1;
+  fetchTransactions();
+});
 watch(transactionPage, (page) => {
-  if (transactionRows.value.length >= page * TRANSACTIONS_PER_PAGE) {
+  if (transactionRows.value.length >= page * transactionsPerPage.value) {
     return;
   }
   fetchTransactions();
@@ -591,7 +601,7 @@ async function fetchTransactions(): Promise<void> {
     await hypersyncService.value.getAddressTransactions(
       address.value,
       transactionPagination.value.cursor,
-      TRANSACTIONS_PER_PAGE + 1,
+      transactionsPerPage.value + 1,
       sort.value,
     );
   const newTransactions = addressTransactions.transactions;
@@ -610,7 +620,7 @@ async function fetchTransactions(): Promise<void> {
 const transactionRows = computed<TransactionRow[]>(() => {
   return isLoadingTransactions.value
     ? new Array<TransactionRow>(
-        transactionPage.value * TRANSACTIONS_PER_PAGE,
+        transactionPage.value * transactionsPerPage.value,
       ).fill({
         success: false,
         blockNumber: 0,
@@ -657,17 +667,26 @@ async function refreshTransactions(): Promise<void> {
   await fetchTransactions();
 }
 
-const LOGS_PER_PAGE = 20;
+const logsPerPage = ref(20);
 const logPage = ref(1);
 const logPagination = ref<Pagination>({
   cursor: null,
   height: null,
 });
 const maxLogPage = computed(() =>
-  getMaxPage(sort.value, logPagination.value, logs.value.length, LOGS_PER_PAGE),
+  getMaxPage(
+    sort.value,
+    logPagination.value,
+    logs.value.length,
+    logsPerPage.value,
+  ),
 );
+watch(logsPerPage, () => {
+  logPage.value = 1;
+  fetchLogs();
+});
 watch(logPage, (page) => {
-  if (logs.value.length >= page * LOGS_PER_PAGE) {
+  if (logs.value.length >= page * logsPerPage.value) {
     return;
   }
   fetchLogs();
@@ -687,7 +706,7 @@ async function fetchLogs(): Promise<void> {
   const addressLogs = await hypersyncService.value.getAddressLogs(
     address.value,
     logPagination.value.cursor,
-    LOGS_PER_PAGE + 1,
+    logsPerPage.value + 1,
     sort.value,
   );
   const newLogs = addressLogs.logs;
@@ -716,7 +735,10 @@ const logRows = computed<Log[]>(() => {
         data: log.data,
       };
     })
-    .slice((logPage.value - 1) * LOGS_PER_PAGE, logPage.value * LOGS_PER_PAGE);
+    .slice(
+      (logPage.value - 1) * logsPerPage.value,
+      logPage.value * logsPerPage.value,
+    );
 });
 async function refreshLogs(): Promise<void> {
   logPage.value = 1;
@@ -750,13 +772,17 @@ function getMaxPage(
       : maxPage;
 }
 
-const OPS_PER_PAGE = 20;
+const opsPerPage = ref(20);
 const opPage = ref(1);
 const maxOpPage = computed(() => {
-  return Math.ceil(ops.value.length / OPS_PER_PAGE);
+  return Math.ceil(ops.value.length / opsPerPage.value);
+});
+watch(opsPerPage, () => {
+  opPage.value = 1;
+  fetchUserOps();
 });
 watch(opPage, (page) => {
-  if (ops.value.length >= page * OPS_PER_PAGE) {
+  if (ops.value.length >= page * opsPerPage.value) {
     return;
   }
   fetchUserOps();
@@ -768,8 +794,8 @@ async function fetchUserOps(): Promise<void> {
   isLoadingOps.value = true;
   const newOps = await indexerService.value.getUserOpsByAddress(
     address.value,
-    (opPage.value - 1) * OPS_PER_PAGE,
-    OPS_PER_PAGE + 1,
+    (opPage.value - 1) * opsPerPage.value,
+    opsPerPage.value + 1,
   );
   // Append newly fetched ops to the end of the list
   // Make sure there are no duplicates
@@ -785,7 +811,7 @@ async function refreshOps(): Promise<void> {
 }
 const opRows = computed<UserOpRow[]>(() => {
   return isLoadingOps.value
-    ? new Array<UserOpRow>(opPage.value * OPS_PER_PAGE).fill({
+    ? new Array<UserOpRow>(opPage.value * opsPerPage.value).fill({
         success: false,
         entryPoint: zeroAddress,
         nonce: 0n,
@@ -811,7 +837,7 @@ const opRows = computed<UserOpRow[]>(() => {
       });
 });
 
-const TRANSFERS_PER_PAGE = 20;
+const transfersPerPage = ref(20);
 const transferPage = ref(1);
 const transferPagination = ref<Pagination>({
   cursor: null,
@@ -822,11 +848,15 @@ const maxTransferPage = computed(() =>
     sort.value,
     transferPagination.value,
     transfers.value.length,
-    TRANSFERS_PER_PAGE,
+    transfersPerPage.value,
   ),
 );
+watch(transfersPerPage, () => {
+  transferPage.value = 1;
+  fetchTransfers();
+});
 watch(transferPage, (page) => {
-  if (transferRows.value.length >= page * TRANSFERS_PER_PAGE) {
+  if (transferRows.value.length >= page * transfersPerPage.value) {
     return;
   }
   fetchTransfers();
@@ -846,7 +876,7 @@ async function fetchTransfers(): Promise<void> {
   const addressTransfers = await hypersyncService.value.getAddressTransfers(
     address.value,
     transferPagination.value.cursor,
-    TRANSFERS_PER_PAGE + 1,
+    transfersPerPage.value + 1,
     sort.value,
   );
   const newTransfers = addressTransfers.transfers;
@@ -857,7 +887,7 @@ async function fetchTransfers(): Promise<void> {
 }
 const transferRows = computed<TransferRow[]>(() => {
   return isLoadingTransfers.value
-    ? new Array<TransferRow>(transferPage.value * TRANSFERS_PER_PAGE).fill({
+    ? new Array<TransferRow>(transferPage.value * transfersPerPage.value).fill({
         blockNumber: 0,
         blockTimestamp: 0,
         transactionHash: zeroHash,
