@@ -258,6 +258,7 @@ function getLog(
       abi: erc20Abi,
       topics: log.topics,
       data: log.data,
+      strict: false,
     });
     if (!decodedLog) {
       return;
@@ -281,7 +282,13 @@ function getLog(
     if (decimals === undefined) {
       return;
     }
-    const amount = formatUnits(decodedLog.args.value, decimals);
+    const from = decodedLog.args.from?.toLowerCase() as Address | undefined;
+    const to = decodedLog.args.to?.toLowerCase() as Address | undefined;
+    const value = decodedLog.args.value;
+    if (!from || !to || !value) {
+      return;
+    }
+    const amount = formatUnits(value, decimals);
     return {
       icon: addressLabel.iconUrl,
       parts: [
@@ -300,7 +307,7 @@ function getLog(
         },
         {
           type: 'address',
-          address: decodedLog.args.from.toLowerCase() as Address,
+          address: from,
         },
         {
           type: 'text',
@@ -308,7 +315,7 @@ function getLog(
         },
         {
           type: 'address',
-          address: decodedLog.args.to.toLowerCase() as Address,
+          address: to,
         },
       ],
     };
@@ -317,6 +324,7 @@ function getLog(
       abi: uniswapV2PoolAbi,
       topics: log.topics,
       data: log.data,
+      strict: false,
     });
     if (!decodedLog) {
       return;
@@ -361,7 +369,15 @@ function getLog(
     if (token0Decimals === undefined || token1Decimals === undefined) {
       return;
     }
-    const is0To1 = decodedLog.args.amount0In > 0n;
+    const amount0In = decodedLog.args.amount0In;
+    const amount1In = decodedLog.args.amount1In;
+    const amount0Out = decodedLog.args.amount0Out;
+    const amount1Out = decodedLog.args.amount1Out;
+    if (!amount0In || !amount1In || !amount0Out || !amount1Out) {
+      return;
+    }
+
+    const is0To1 = amount0In > 0n;
     const tokenIn = is0To1 ? token0 : token1;
     const tokenOut = is0To1 ? token1 : token0;
     const tokenInSymbol = is0To1 ? token0Symbol : token1Symbol;
@@ -369,11 +385,11 @@ function getLog(
     const tokenInDecimals = is0To1 ? token0Decimals : token1Decimals;
     const tokenOutDecimals = is0To1 ? token1Decimals : token0Decimals;
     const tokenInAmount = formatUnits(
-      is0To1 ? decodedLog.args.amount0In : decodedLog.args.amount1In,
+      is0To1 ? amount0In : amount1In,
       tokenInDecimals,
     );
     const tokenOutAmount = formatUnits(
-      is0To1 ? decodedLog.args.amount1Out : decodedLog.args.amount0Out,
+      is0To1 ? amount1Out : amount0Out,
       tokenOutDecimals,
     );
     return {
@@ -413,6 +429,7 @@ function getLog(
       abi: uniswapV3PoolAbi,
       topics: log.topics,
       data: log.data,
+      strict: false,
     });
     if (!decodedLog) {
       return;
@@ -457,7 +474,13 @@ function getLog(
     if (token0Decimals === undefined || token1Decimals === undefined) {
       return;
     }
-    const is0To1 = decodedLog.args.amount0 > 0n;
+    const amount0 = decodedLog.args.amount0;
+    const amount1 = decodedLog.args.amount1;
+    if (!amount0 || !amount1) {
+      return;
+    }
+
+    const is0To1 = amount0 > 0n;
     const tokenIn = is0To1 ? token0 : token1;
     const tokenOut = is0To1 ? token1 : token0;
     const tokenInSymbol = is0To1 ? token0Symbol : token1Symbol;
@@ -465,11 +488,11 @@ function getLog(
     const tokenInDecimals = is0To1 ? token0Decimals : token1Decimals;
     const tokenOutDecimals = is0To1 ? token1Decimals : token0Decimals;
     const tokenInAmount = formatUnits(
-      is0To1 ? decodedLog.args.amount0 : decodedLog.args.amount1,
+      is0To1 ? amount0 : amount1,
       tokenInDecimals,
     );
     const tokenOutAmount = formatUnits(
-      is0To1 ? -decodedLog.args.amount1 : -decodedLog.args.amount0,
+      is0To1 ? -amount1 : -amount0,
       tokenOutDecimals,
     );
     return {
@@ -509,6 +532,7 @@ function getLog(
       abi: aerodromeV1PoolAbi,
       topics: log.topics,
       data: log.data,
+      strict: false,
     });
     if (!decodedLog) {
       return;
@@ -553,7 +577,15 @@ function getLog(
     if (token0Decimals === undefined || token1Decimals === undefined) {
       return;
     }
-    const is0To1 = decodedLog.args.amount0In > 0n;
+    const amount0In = decodedLog.args.amount0In;
+    const amount1In = decodedLog.args.amount1In;
+    const amount0Out = decodedLog.args.amount0Out;
+    const amount1Out = decodedLog.args.amount1Out;
+    if (!amount0In || !amount1In || !amount0Out || !amount1Out) {
+      return;
+    }
+
+    const is0To1 = amount0In > 0n;
     const tokenIn = is0To1 ? token0 : token1;
     const tokenOut = is0To1 ? token1 : token0;
     const tokenInSymbol = is0To1 ? token0Symbol : token1Symbol;
@@ -561,11 +593,11 @@ function getLog(
     const tokenInDecimals = is0To1 ? token0Decimals : token1Decimals;
     const tokenOutDecimals = is0To1 ? token1Decimals : token0Decimals;
     const tokenInAmount = formatUnits(
-      is0To1 ? decodedLog.args.amount0In : decodedLog.args.amount1In,
+      is0To1 ? amount0In : amount1In,
       tokenInDecimals,
     );
     const tokenOutAmount = formatUnits(
-      is0To1 ? decodedLog.args.amount1Out : decodedLog.args.amount0Out,
+      is0To1 ? amount1Out : amount0Out,
       tokenOutDecimals,
     );
     return {
@@ -605,6 +637,7 @@ function getLog(
       abi: entryPoint070Abi,
       topics: log.topics,
       data: log.data,
+      strict: false,
     });
     if (!decodedLog) {
       return;
@@ -612,8 +645,14 @@ function getLog(
     if (decodedLog.eventName !== 'AccountDeployed') {
       return;
     }
-    const sender = decodedLog.args.sender.toLowerCase() as Address;
-    const factory = decodedLog.args.factory.toLowerCase() as Address;
+    const sender = decodedLog.args.sender?.toLowerCase() as Address | undefined;
+    const factory = decodedLog.args.factory?.toLowerCase() as
+      | Address
+      | undefined;
+    if (!sender || !factory) {
+      return;
+    }
+
     const addressLabel = getLabel(factory);
     return {
       icon: addressLabel?.iconUrl,

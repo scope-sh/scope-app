@@ -126,6 +126,7 @@ const decoded = computed<DecodedLog | null>(() => {
     abi: [abi.value],
     data: props.log.data,
     topics: props.log.topics as [Hex, ...Hex[]],
+    strict: false,
   });
 
   const args = getArguments(

@@ -212,41 +212,63 @@ export default defineEventHandler(async (event) => {
           topics: log.topics.filter(
             (topic) => topic !== null && topic !== undefined,
           ) as [Hex, ...Hex[]],
+          strict: false,
         });
         if (decodedLog.eventName === 'Transfer') {
+          const from = decodedLog.args.from?.toLowerCase() as
+            | Address
+            | undefined;
+          const to = decodedLog.args.to?.toLowerCase() as Address | undefined;
+          if (!from || !to) {
+            return null;
+          }
           return {
             type: 'transfer',
             blockNumber: log.blockNumber as number,
             blockTimestamp: 1000 * timestamp,
             transactionHash: log.transactionHash as Hex,
             asset: log.address as Address,
-            from: decodedLog.args.from.toLowerCase() as Address,
-            to: decodedLog.args.to.toLowerCase() as Address,
+            from,
+            to,
             value: decodedLog.args.value,
           } as Data;
         }
         if (decodedLog.eventName === 'TransferSingle') {
+          const from = decodedLog.args.from?.toLowerCase() as
+            | Address
+            | undefined;
+          const to = decodedLog.args.to?.toLowerCase() as Address | undefined;
+          if (!from || !to) {
+            return null;
+          }
           return {
             type: 'transfer-single',
             blockNumber: log.blockNumber as number,
             blockTimestamp: 1000 * timestamp,
             transactionHash: log.transactionHash as Hex,
             asset: log.address as Address,
-            from: decodedLog.args.from.toLowerCase() as Address,
-            to: decodedLog.args.to.toLowerCase() as Address,
+            from,
+            to,
             id: decodedLog.args.id,
             value: decodedLog.args.value,
           } as Data;
         }
         if (decodedLog.eventName === 'TransferBatch') {
+          const from = decodedLog.args.from?.toLowerCase() as
+            | Address
+            | undefined;
+          const to = decodedLog.args.to?.toLowerCase() as Address | undefined;
+          if (!from || !to) {
+            return null;
+          }
           return {
             type: 'transfer-batch',
             blockNumber: log.blockNumber as number,
             blockTimestamp: 1000 * timestamp,
             transactionHash: log.transactionHash as Hex,
             asset: log.address as Address,
-            from: decodedLog.args.from.toLowerCase() as Address,
-            to: decodedLog.args.to.toLowerCase() as Address,
+            from,
+            to,
             values: decodedLog.args.values,
             ids: decodedLog.args.ids,
           } as Data;
