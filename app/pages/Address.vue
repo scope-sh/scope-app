@@ -388,12 +388,13 @@ async function fethcContract(): Promise<void> {
     return;
   }
   isLoadingContract.value = true;
-  const [contractResponse, deploymentResponse] = await Promise.all([
-    apiService.value.getContractSource(address.value),
-    apiService.value.getContractDeployment(address.value),
-  ]);
-  contract.value = contractResponse;
-  deployment.value = deploymentResponse;
+  const response = await apiService.value.getContract(address.value);
+  if (!response) {
+    isLoadingContract.value = false;
+    return;
+  }
+  contract.value = response.source;
+  deployment.value = response.deployment;
   isLoadingContract.value = false;
 }
 watch(contract, (contract) => {

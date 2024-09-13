@@ -195,6 +195,22 @@ class Service {
     return response.json<LabelWithAddress[]>();
   }
 
+  public async getContract(address: Address): Promise<{
+    source: Contract | null;
+    deployment: Deployment | null;
+  } | null> {
+    const response = await this.client.get('contract/all', {
+      searchParams: {
+        chain: this.chainId,
+        address,
+      },
+    });
+    return response.json<{
+      source: Contract | null;
+      deployment: Deployment | null;
+    } | null>();
+  }
+
   public async getContractSource(address: Address): Promise<Contract> {
     const response = await this.client.get('contract/source', {
       searchParams: {
