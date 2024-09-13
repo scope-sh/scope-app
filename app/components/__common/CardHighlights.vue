@@ -67,10 +67,18 @@ defineProps<{
 
 <style scoped>
 .list {
+  --item-size: 20px;
+  --max-items: 5;
+  --gap: var(--spacing-4);
+
   display: flex;
-  gap: var(--spacing-4);
+  gap: var(--gap);
   flex-direction: column;
-  max-height: 150px;
+
+  /* Show MAX_ITEMS and a half to indicate there are more items in the list */
+  max-height: calc(
+    var(--item-size) * (var(--max-items) + 0.5) + var(--gap) * var(--max-items)
+  );
   overflow: auto;
 }
 
@@ -82,8 +90,8 @@ defineProps<{
 
 .icon-placeholder,
 .icon {
-  width: 20px;
-  height: 20px;
+  width: var(--item-size);
+  height: var(--item-size);
   border-radius: 50%;
 }
 
