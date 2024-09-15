@@ -11,6 +11,7 @@ import {
   formatUnits,
 } from 'viem';
 
+import aaveV3TokenAbi from '@/abi/aaveV3Token';
 import aerodromeV1PoolAbi from '@/abi/aerodromeV1Pool';
 import entryPoint070Abi from '@/abi/entryPointV0_7_0';
 import erc20Abi from '@/abi/erc20';
@@ -249,6 +250,14 @@ function getLog(
   const entryPointAccountDeployment = getAbiItem({
     abi: entryPoint070Abi,
     name: 'AccountDeployed',
+  });
+  const aaveV3TokenMint = getAbiItem({
+    abi: aaveV3TokenAbi,
+    name: 'Mint',
+  });
+  const aaveV3TokenBurn = getAbiItem({
+    abi: aaveV3TokenAbi,
+    name: 'Burn',
   });
   if (topic === toEventSelector(erc20Transfer)) {
     if (size(log.data) !== 32) {
@@ -672,6 +681,145 @@ function getLog(
         {
           type: 'address',
           address: factory,
+        },
+      ],
+    };
+  } else if (topic === toEventSelector(aaveV3TokenMint)) {
+    console.log('aaveV3TokenMint', log);
+    const decodedLog = decodeEventLog({
+      abi: aaveV3TokenAbi,
+      topics: log.topics,
+      data: log.data,
+      strict: false,
+    });
+    console.log('aaveV3TokenMint 2', decodedLog);
+    if (!decodedLog) {
+      return;
+    }
+    if (decodedLog.eventName !== 'Mint') {
+      return;
+    }
+    const addressLabel = getLabel(log.address);
+    console.log('aaveV3TokenMint 3', addressLabel);
+    if (!addressLabel) {
+      return;
+    }
+    const addressLabelType = addressLabel.type;
+    if (!addressLabelType) {
+      return;
+    }
+    if (
+      addressLabelType.id !== 'aave-v3-atoken' &&
+      addressLabelType.id !== 'aave-v3-vtoken'
+    ) {
+      return;
+    }
+    const underlying = addressLabel?.metadata?.underlying as
+      | Address
+      | undefined;
+    if (underlying === undefined) {
+      return;
+    }
+    const account = decodedLog.args.onBehalfOf?.toLowerCase() as
+      | Address
+      | undefined;
+    if (!account) {
+      return;
+    }
+    return {
+      icon: addressLabel.iconUrl,
+      parts: [
+        {
+          type: 'text',
+          value: 'Deposit',
+        },
+        {
+          type: 'address',
+          address: underlying.toLowerCase() as Address,
+        },
+        {
+          type: 'text',
+          value: 'to',
+        },
+        {
+          type: 'address',
+          address: log.address.toLowerCase() as Address,
+        },
+        {
+          type: 'text',
+          value: 'for',
+        },
+        {
+          type: 'address',
+          address: account,
+        },
+      ],
+    };
+  } else if (topic === toEventSelector(aaveV3TokenBurn)) {
+    const decodedLog = decodeEventLog({
+      abi: aaveV3TokenAbi,
+      topics: log.topics,
+      data: log.data,
+      strict: false,
+    });
+    if (!decodedLog) {
+      return;
+    }
+    if (decodedLog.eventName !== 'Burn') {
+      return;
+    }
+    const addressLabel = getLabel(log.address);
+    if (!addressLabel) {
+      return;
+    }
+    const addressLabelType = addressLabel.type;
+    if (!addressLabelType) {
+      return;
+    }
+    if (
+      addressLabelType.id !== 'aave-v3-atoken' &&
+      addressLabelType.id !== 'aave-v3-vtoken'
+    ) {
+      return;
+    }
+    const underlying = addressLabel?.metadata?.underlying as
+      | Address
+      | undefined;
+    if (underlying === undefined) {
+      return;
+    }
+    const account = decodedLog.args.target?.toLowerCase() as
+      | Address
+      | undefined;
+    if (!account) {
+      return;
+    }
+    return {
+      icon: addressLabel.iconUrl,
+      parts: [
+        {
+          type: 'text',
+          value: 'Withdraw',
+        },
+        {
+          type: 'address',
+          address: underlying.toLowerCase() as Address,
+        },
+        {
+          type: 'text',
+          value: 'to',
+        },
+        {
+          type: 'address',
+          address: log.address.toLowerCase() as Address,
+        },
+        {
+          type: 'text',
+          value: 'for',
+        },
+        {
+          type: 'address',
+          address: account,
         },
       ],
     };
