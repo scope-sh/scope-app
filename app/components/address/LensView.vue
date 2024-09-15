@@ -73,6 +73,14 @@
     "
     :address="address"
   />
+  <ZoraToken721Lens
+    v-else-if="hasLabelTypeId('zora-721-token')"
+    :address="address"
+  />
+  <ZoraToken1155Lens
+    v-else-if="hasLabelTypeId('zora-1155-token')"
+    :address="address"
+  />
   <Erc20Lens
     v-else-if="hasLabelTypeId('erc20')"
     :address="address"
@@ -99,6 +107,8 @@ import MorphoVault from './lenses/MorphoVault.vue';
 import SafeV1_4_1Lens from './lenses/SafeV1_4_1Lens.vue';
 import UniswapV2PoolLens from './lenses/UniswapV2PoolLens.vue';
 import UniswapV3PoolLens from './lenses/UniswapV3PoolLens.vue';
+import ZoraToken1155Lens from './lenses/ZoraToken1155.vue';
+import ZoraToken721Lens from './lenses/ZoraToken721.vue';
 
 import type { LabelTypeId } from '@/services/api.js';
 
