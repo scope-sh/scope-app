@@ -43,7 +43,9 @@ type LabelTypeId =
   | 'safe-v1.4.1-account'
   | 'thirdweb-v1-managed-account'
   | 'uniswap-v2-pool'
-  | 'uniswap-v3-pool';
+  | 'uniswap-v3-pool'
+  | 'zora-721-token'
+  | 'zora-1155-token';
 
 interface LabelType {
   id: LabelTypeId;
