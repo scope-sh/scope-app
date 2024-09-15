@@ -17,6 +17,8 @@ import entryPoint070Abi from '@/abi/entryPointV0_7_0';
 import erc20Abi from '@/abi/erc20';
 import uniswapV2PoolAbi from '@/abi/uniswapV2Pool';
 import uniswapV3PoolAbi from '@/abi/uniswapV3Pool';
+import zora1155TokenAbi from '@/abi/zora1155Token';
+import zora721TokenAbi from '@/abi/zora721Token';
 import type { Label } from '@/services/api';
 import { decodeSignature as biconomyV2DecodeSignature } from '@/utils/context/erc4337/biconomyV2';
 import { decodeSignature as coinbaseSmartWalletV1DecodeSignature } from '@/utils/context/erc4337/coinbaseSmartWalletV1';
@@ -258,6 +260,14 @@ function getLog(
   const aaveV3TokenBurn = getAbiItem({
     abi: aaveV3TokenAbi,
     name: 'Burn',
+  });
+  const zora721TokenSale = getAbiItem({
+    abi: zora721TokenAbi,
+    name: 'Sale',
+  });
+  const zora1155TokenPurchase = getAbiItem({
+    abi: zora1155TokenAbi,
+    name: 'Purchased',
   });
   if (topic === toEventSelector(erc20Transfer)) {
     if (size(log.data) !== 32) {
@@ -816,6 +826,128 @@ function getLog(
         {
           type: 'text',
           value: 'for',
+        },
+        {
+          type: 'address',
+          address: account,
+        },
+      ],
+    };
+  } else if (topic === toEventSelector(zora721TokenSale)) {
+    const decodedLog = decodeEventLog({
+      abi: zora721TokenAbi,
+      topics: log.topics,
+      data: log.data,
+      strict: false,
+    });
+    if (!decodedLog) {
+      return;
+    }
+    if (decodedLog.eventName !== 'Sale') {
+      return;
+    }
+    const address = log.address.toLowerCase() as Address;
+    const addressLabel = getLabel(address);
+    if (!addressLabel) {
+      return;
+    }
+    const addressLabelType = addressLabel.type;
+    if (!addressLabelType) {
+      return;
+    }
+    if (addressLabelType.id !== 'zora-721-token') {
+      return;
+    }
+    const amount = decodedLog.args.quantity;
+    if (!amount) {
+      return;
+    }
+    const account = decodedLog.args.to?.toLowerCase() as Address | undefined;
+    if (!account) {
+      return;
+    }
+    const token = addressLabel.namespace
+      ? `${addressLabel.namespace.value}: ${addressLabel.value}`
+      : addressLabel.value;
+    return {
+      icon: addressLabel.iconUrl,
+      parts: [
+        {
+          type: 'text',
+          value: 'Mint',
+        },
+        {
+          type: 'address',
+          address,
+          label: `${amount} ${token}`,
+        },
+        {
+          type: 'text',
+          value: 'by',
+        },
+        {
+          type: 'address',
+          address: account,
+        },
+      ],
+    };
+  } else if (topic === toEventSelector(zora1155TokenPurchase)) {
+    const decodedLog = decodeEventLog({
+      abi: zora1155TokenAbi,
+      topics: log.topics,
+      data: log.data,
+      strict: false,
+    });
+    if (!decodedLog) {
+      return;
+    }
+    if (decodedLog.eventName !== 'Purchased') {
+      return;
+    }
+    const address = log.address.toLowerCase() as Address;
+    const addressLabel = getLabel(address);
+    if (!addressLabel) {
+      return;
+    }
+    const addressLabelType = addressLabel.type;
+    if (!addressLabelType) {
+      return;
+    }
+    if (addressLabelType.id !== 'zora-1155-token') {
+      return;
+    }
+    const amount = decodedLog.args.quantity;
+    if (!amount) {
+      return;
+    }
+    const tokenId = decodedLog.args.tokenId;
+    if (!tokenId) {
+      return;
+    }
+    const account = decodedLog.args.sender?.toLowerCase() as
+      | Address
+      | undefined;
+    if (!account) {
+      return;
+    }
+    const token = addressLabel.namespace
+      ? `${addressLabel.namespace.value}: ${addressLabel.value}`
+      : addressLabel.value;
+    return {
+      icon: addressLabel.iconUrl,
+      parts: [
+        {
+          type: 'text',
+          value: 'Mint',
+        },
+        {
+          type: 'address',
+          address,
+          label: `${amount} ${token} #${tokenId}`,
+        },
+        {
+          type: 'text',
+          value: 'by',
         },
         {
           type: 'address',
