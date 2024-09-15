@@ -16,7 +16,7 @@ import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0.js';
 import klasterPaymasterAbi from '@/abi/klasterPaymaster.js';
 import pimlicoBundleBulkerAbi from '@/abi/pimlicoBundleBulker.js';
 import safePaymasterAbi from '@/abi/safePaymaster.js';
-import type { Log, Transaction } from '@/services/evm.js';
+import type { Log, Transaction, TransactionTrace } from '@/services/evm.js';
 import type { Chain } from '@/utils/chains.js';
 
 interface OpEvent {
@@ -130,7 +130,10 @@ function getTxType(transaction: Transaction): TxType {
   return TX_TYPE_UNKNOWN;
 }
 
-function getEntryPoint(transaction: Transaction): Address | null {
+function getEntryPoint(
+  transaction: Transaction,
+  trace: TransactionTrace | null,
+): Address | null {
   const txType = getTxType(transaction);
   if (txType === TX_TYPE_ENTRY_POINT_0_6) {
     return ENTRY_POINT_0_6_ADDRESS;
@@ -146,6 +149,25 @@ function getEntryPoint(transaction: Transaction): Address | null {
   }
   if (txType === TX_TYPE_SAFE_PAYMASTER) {
     return ENTRY_POINT_0_7_ADDRESS;
+  } else {
+    // Trace-based approach
+    if (!trace) {
+      return null;
+    }
+    return getEntryPointFromTrace(trace);
+  }
+}
+
+function getEntryPointFromTrace(trace: TransactionTrace): Address | null {
+  for (const tracePart of trace) {
+    if (tracePart.type === 'call') {
+      if (tracePart.action.to === ENTRY_POINT_0_6_ADDRESS) {
+        return ENTRY_POINT_0_6_ADDRESS;
+      }
+      if (tracePart.action.to === ENTRY_POINT_0_7_ADDRESS) {
+        return ENTRY_POINT_0_7_ADDRESS;
+      }
+    }
   }
   return null;
 }
@@ -239,6 +261,7 @@ function getOpEvent(
 async function getOps(
   client: PublicClient,
   transaction: Transaction,
+  trace: TransactionTrace | null,
 ): Promise<Op[]> {
   const txType = getTxType(transaction);
   if (txType === TX_TYPE_ENTRY_POINT_0_6) {
@@ -290,8 +313,49 @@ async function getOps(
       return [];
     }
     return args[0] as Op_0_7[];
+  } else {
+    // Trace-based approach
+    if (!trace) {
+      return [];
+    }
+    return getTraceOps(trace);
   }
-  return [];
+}
+
+function getTraceOps(trace: TransactionTrace): Op[] {
+  const ops: Op[] = [];
+  for (const tracePart of trace) {
+    if (tracePart.type === 'call') {
+      if (tracePart.action.to === ENTRY_POINT_0_6_ADDRESS) {
+        try {
+          const { functionName, args } = decodeFunctionData({
+            abi: entryPointV0_6_0Abi,
+            data: tracePart.action.input,
+          });
+          if (functionName !== 'handleOps') {
+            continue;
+          }
+          ops.push(...args[0]);
+        } catch {
+          // Ignore
+        }
+      } else if (tracePart.action.to === ENTRY_POINT_0_7_ADDRESS) {
+        try {
+          const { functionName, args } = decodeFunctionData({
+            abi: entryPointV0_7_0Abi,
+            data: tracePart.action.input,
+          });
+          if (functionName !== 'handleOps') {
+            continue;
+          }
+          ops.push(...args[0]);
+        } catch {
+          // Ignore
+        }
+      }
+    }
+  }
+  return ops;
 }
 
 function getOpHash(chain: Chain, entryPoint: Address, op: Op): Hex | null {

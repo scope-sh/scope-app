@@ -428,8 +428,12 @@ watch(transaction, async () => {
   if (!chain) {
     return;
   }
-  entryPoint.value = getEntryPoint(transaction.value);
-  const ops = await getOps(client.value, transaction.value);
+  entryPoint.value = getEntryPoint(transaction.value, transactionTrace.value);
+  const ops = await getOps(
+    client.value,
+    transaction.value,
+    transactionTrace.value,
+  );
   op.value =
     ops.find(
       (op) =>

@@ -649,8 +649,12 @@ watch(transaction, async () => {
   if (!transaction.value) {
     return;
   }
-  entryPoint.value = getEntryPoint(transaction.value);
-  ops.value = await getOps(client.value, transaction.value);
+  entryPoint.value = getEntryPoint(transaction.value, transactionTrace.value);
+  ops.value = await getOps(
+    client.value,
+    transaction.value,
+    transactionTrace.value,
+  );
 });
 
 async function handleTransactionIndexUpdate(index: number): Promise<void> {
