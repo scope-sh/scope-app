@@ -41,6 +41,7 @@
       <TransactionStatus
         v-if="transactionReceipt"
         :status="transactionReceipt.status"
+        :trace="revertTrace"
       />
       <AttributeList v-if="transaction && transactionReceipt">
         <AttributeItem v-if="transaction.blockNumber">
@@ -298,7 +299,10 @@ import type { Command } from '@/stores/commands';
 import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type { Op } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getOps } from '@/utils/context/erc4337/entryPoint';
-import { convertDebugTraceToTransactionTrace } from '@/utils/context/traces';
+import {
+  convertDebugTraceToTransactionTrace,
+  getRevert as getRevertTrace,
+} from '@/utils/context/traces';
 import { toRelativeTime } from '@/utils/conversion';
 import {
   formatEther,
@@ -487,6 +491,13 @@ async function fetchTransactionTrace(hash: Hex): Promise<void> {
     transactionTrace.value = await evmService.value.getTransactionTrace(hash);
   }
 }
+
+const revertTrace = computed(() => {
+  if (!transactionTrace.value) {
+    return null;
+  }
+  return getRevertTrace(transactionTrace.value);
+});
 
 async function fetchAbis(): Promise<void> {
   if (!apiService.value) {

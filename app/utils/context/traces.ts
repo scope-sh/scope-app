@@ -24,6 +24,11 @@ interface OpTrace {
   execution: TransactionTracePart[];
 }
 
+function startsWith(a: number[], b: number[]): boolean {
+  if (b.length > a.length) return false;
+  return b.every((num, index) => num === a[index]);
+}
+
 function convertDebugTraceToTransactionTrace(
   debugTrace: DebugTransactionTrace | null,
 ): TransactionTrace | null {
@@ -100,6 +105,51 @@ function convertDebugTraceToTransactionTrace(
   return processCall(debugTrace);
 }
 
+// Finds the trace part that bubbles up the error
+// There should be a clear path from the top level to the error
+// Returns the lowest level error in the path or null if no error is found
+function getRevert(
+  transactionTrace: TransactionTracePart[],
+): TransactionTracePart | null {
+  function getDirectChildren(
+    trace: TransactionTracePart[],
+    parent: TransactionTracePart,
+  ): TransactionTracePart[] {
+    return trace.filter((part) => {
+      return (
+        part.traceAddress.length === parent.traceAddress.length + 1 &&
+        startsWith(part.traceAddress, parent.traceAddress)
+      );
+    });
+  }
+
+  function getDirectChildRevert(
+    parent: TransactionTracePart,
+  ): TransactionTracePart | null {
+    if (parent.error === null) {
+      return null;
+    }
+    const children = getDirectChildren(transactionTrace, parent);
+    for (const child of children) {
+      const result = getDirectChildRevert(child);
+      if (result) {
+        return result;
+      }
+      if (child.error) {
+        return child;
+      }
+    }
+    return null;
+  }
+
+  const root = transactionTrace.find((part) => part.traceAddress.length === 0);
+  if (!root) {
+    return null;
+  }
+  // Use recursion to find the error
+  return getDirectChildRevert(root);
+}
+
 function getOpTrace(
   transactionTrace: TransactionTracePart[],
   hash: Hex,
@@ -109,11 +159,6 @@ function getOpTrace(
     trace: TransactionTrace,
     tracePart: TransactionTracePart | undefined,
   ): TransactionTracePart[] {
-    function startsWith(a: number[], b: number[]): boolean {
-      if (b.length > a.length) return false;
-      return b.every((num, index) => num === a[index]);
-    }
-
     if (!tracePart) {
       return [];
     }
@@ -241,5 +286,5 @@ function getOpTrace(
   };
 }
 
-export { convertDebugTraceToTransactionTrace, getOpTrace };
+export { convertDebugTraceToTransactionTrace, getOpTrace, getRevert };
 export type { OpTrace };

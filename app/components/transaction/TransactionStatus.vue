@@ -17,31 +17,44 @@
         :kind="'cross-circled'"
         class="icon"
       />
-      {{ label }}
+      <template v-if="trace === null">
+        {{
+          status === null
+            ? 'Executed'
+            : status === 'success'
+              ? 'Success'
+              : 'Reverted'
+        }}
+      </template>
+      <template v-else>
+        <template v-if="trace.error === null || trace.error === 'Reverted'">
+          <div
+            v-if="trace.type === 'call'"
+            class="address"
+          >
+            Reverted in
+            <LinkAddress
+              :address="trace.action.to"
+              type="copyable"
+            />
+          </div>
+          <template v-else> Reverted </template>
+        </template>
+        <div v-else-if="trace.error === 'OOG'">Out of gas</div>
+      </template>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
-
+import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import type { TransactionStatus } from '@/services/evm';
+import type { TransactionStatus, TransactionTracePart } from '@/services/evm';
 
-const props = defineProps<{
+defineProps<{
   status: TransactionStatus | null;
+  trace: TransactionTracePart | null;
 }>();
-
-const label = computed(() => {
-  if (!props.status) {
-    return 'Executed';
-  }
-  const map: Record<TransactionStatus, string> = {
-    success: 'Success',
-    reverted: 'Reverted',
-  };
-  return map[props.status];
-});
 </script>
 
 <style scoped>
@@ -72,5 +85,10 @@ const label = computed(() => {
 .icon {
   width: 16px;
   height: 16px;
+}
+
+.address {
+  display: flex;
+  gap: var(--spacing-3);
 }
 </style>
