@@ -227,14 +227,15 @@
           v-if="isLoading"
           title="Internal"
         />
-        <ScopePanel
-          v-else-if="transactionTrace"
-          title="Internal"
-        >
+        <ScopePanel title="Internal">
           <template #default>
             <ScopeLabelEmptyState
-              v-if="transactionTrace.length === 0"
-              value="No internal transactions found"
+              v-if="transactionTrace === null"
+              value="Internal calls not available"
+            />
+            <ScopeLabelEmptyState
+              v-else-if="transactionTrace.length === 0"
+              value="No internal calls found"
             />
             <div
               v-else
