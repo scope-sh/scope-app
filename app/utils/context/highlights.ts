@@ -695,14 +695,12 @@ function getLog(
       ],
     };
   } else if (topic === toEventSelector(aaveV3TokenMint)) {
-    console.log('aaveV3TokenMint', log);
     const decodedLog = decodeEventLog({
       abi: aaveV3TokenAbi,
       topics: log.topics,
       data: log.data,
       strict: false,
     });
-    console.log('aaveV3TokenMint 2', decodedLog);
     if (!decodedLog) {
       return;
     }
@@ -710,7 +708,6 @@ function getLog(
       return;
     }
     const addressLabel = getLabel(log.address);
-    console.log('aaveV3TokenMint 3', addressLabel);
     if (!addressLabel) {
       return;
     }
