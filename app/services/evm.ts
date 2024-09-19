@@ -36,7 +36,7 @@ interface TransactionTraceResponseCallTrace {
     value: Hex;
   };
   error?: 'out of gas' | 'Reverted';
-  result: {
+  result: null | {
     gasUsed: Hex;
     output: Hex;
   };
@@ -53,7 +53,7 @@ interface TransactionTraceResponseCreateTrace {
     value: Hex;
   };
   error?: 'out of gas' | 'Reverted';
-  result: {
+  result: null | {
     address: Address;
     code: Hex;
     gasUsed: Hex;
@@ -87,7 +87,7 @@ interface TransactionTraceCallPart {
   error: null | 'OOG' | 'Reverted';
   result: {
     gasUsed: bigint;
-    output: Hex;
+    output: Hex | null;
   };
   subtraces: number;
   traceAddress: number[];
@@ -104,8 +104,8 @@ interface TransactionTraceCreatePart {
   error: null | 'OOG' | 'Reverted';
   result: {
     gasUsed: bigint;
-    address: Address;
-    code: Hex;
+    address: Address | null;
+    code: Hex | null;
   };
   subtraces: number;
   traceAddress: number[];
@@ -303,11 +303,18 @@ class Service {
               value: BigInt(item.action.value),
             },
             error,
-            result: {
-              gasUsed: BigInt(item.result.gasUsed),
-              address: item.result.address,
-              code: item.result.code,
-            },
+            result:
+              item.result !== null
+                ? {
+                    gasUsed: BigInt(item.result.gasUsed),
+                    address: item.result.address,
+                    code: item.result.code,
+                  }
+                : {
+                    gasUsed: BigInt(item.action.gas),
+                    address: null,
+                    code: null,
+                  },
             subtraces,
             traceAddress,
             type: item.type,
@@ -323,10 +330,16 @@ class Service {
               value: BigInt(item.action.value),
             },
             error,
-            result: {
-              gasUsed: BigInt(item.result.gasUsed),
-              output: item.result.output,
-            },
+            result:
+              item.result !== null
+                ? {
+                    gasUsed: BigInt(item.result.gasUsed),
+                    output: item.result.output,
+                  }
+                : {
+                    gasUsed: BigInt(item.action.gas),
+                    output: null,
+                  },
             subtraces,
             traceAddress,
             type: item.type,
