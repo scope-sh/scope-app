@@ -135,9 +135,9 @@ function getRevert(
       if (result) {
         return result;
       }
-      if (child.error) {
-        return child;
-      }
+    }
+    if (parent.error !== null) {
+      return parent;
     }
     return null;
   }
