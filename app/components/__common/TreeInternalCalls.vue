@@ -53,7 +53,17 @@
         </div>
         <div class="sticky right">
           <div class="cell value">
-            {{ formatEther(item.value, nativeCurrency, false) }}
+            <ScopeTooltip
+              disable-closing-trigger
+              delay="medium"
+            >
+              <template #trigger>
+                {{ formatEther(item.value, nativeCurrency, false) }}
+              </template>
+              <template #default>
+                {{ formatEther(item.value, nativeCurrency, true) }}
+              </template>
+            </ScopeTooltip>
           </div>
         </div>
       </div>
@@ -67,6 +77,7 @@ import { ref, computed } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import ScopeTooltip from '@/components/__common/ScopeTooltip.vue';
 import useChain from '@/composables/useChain';
 import type { TransactionTrace } from '@/services/evm';
 import { formatEther } from '@/utils/formatting';
