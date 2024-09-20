@@ -104,6 +104,32 @@
               </template>
               <span v-else>—</span>
             </template>
+            <template v-else-if="cell.column.id === 'value'">
+              <ScopeTooltip
+                disable-closing-trigger
+                delay="medium"
+              >
+                <template #trigger>
+                  {{ formatEther(cell.getValue<bigint>(), nativeCurrency, false) }}
+                </template>
+                <template #default>
+                  {{ formatEther(cell.getValue<bigint>(), nativeCurrency, true) }}
+                </template>
+              </ScopeTooltip>
+            </template>
+            <template v-else-if="cell.column.id === 'gasPrice'">
+                <ScopeTooltip
+                disable-closing-trigger
+                delay="medium"
+              >
+                <template #trigger>
+                  {{ formatGasPrice(cell.getValue<bigint>(), false) }}
+                </template>
+                <template #default>
+                  {{ formatGasPrice(cell.getValue<bigint>(), true) }}
+                </template>
+              </ScopeTooltip>
+            </template>
             <FlexRender
               v-else
               :render="cell.column.columnDef.cell"
@@ -130,6 +156,7 @@ import { computed, watch } from 'vue';
 
 import LinkBlock from './LinkBlock.vue';
 import LinkTransaction from './LinkTransaction.vue';
+import ScopeTooltip from './ScopeTooltip.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
