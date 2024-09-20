@@ -6,7 +6,7 @@
   >
     <div class="scroll">
       <div
-        v-for="item in calls"
+        v-for="item in visibleCalls"
         :key="item.traceAddress.join('-')"
         class="item"
         :style="{ '--level': getLevel(item) }"
@@ -30,8 +30,24 @@
           </div>
           <div class="cell call">{{ formatType(item.type) }}</div>
         </div>
+        <div
+          v-for="index in getLevel(item)"
+          :key="index"
+          class="grid"
+          :style="{ '--index': index }"
+        />
         <div class="main">
           <div class="cell content">
+            <ScopeIcon
+              v-if="hasChildren(item)"
+              class="icon-marker"
+              :kind="item.folded ? 'chevron-right' : 'chevron-down'"
+              @click="toggleFold(item)"
+            />
+            <div
+              v-else
+              class="icon-marker"
+            />
             <div class="path">
               <LinkAddress
                 :address="item.from"
@@ -79,7 +95,7 @@
 
 <script setup lang="ts">
 import { type Address, type Hex, size, slice } from 'viem';
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
@@ -110,6 +126,7 @@ interface Call {
     limit: bigint;
   };
   traceAddress: number[];
+  folded: boolean;
 }
 
 const props = defineProps<{
@@ -124,40 +141,79 @@ const scrollable = computed(() => {
   return el.value.scrollWidth > el.value.clientWidth;
 });
 
-const calls = computed<Call[]>(() => {
-  if (!props.trace) {
-    return [];
+const calls = ref<Call[]>([]);
+watch(
+  () => props.trace,
+  (trace) => {
+    if (!trace) {
+      calls.value = [];
+      return;
+    }
+    calls.value = trace.map((transaction) => {
+      return {
+        success:
+          transaction.error === null
+            ? true
+            : transaction.error === 'OOG'
+              ? {
+                  type: 'OOG',
+                }
+              : {
+                  type: 'Revert',
+                  reason: '',
+                },
+        type:
+          transaction.type === 'create'
+            ? 'create'
+            : transaction.action.callType,
+        from: transaction.action.from,
+        to: transaction.type === 'call' ? transaction.action.to : null,
+        input:
+          transaction.type === 'call'
+            ? transaction.action.input
+            : transaction.action.init,
+        value: transaction.action.value,
+        gas: {
+          used: transaction.result.gasUsed,
+          limit: transaction.action.gas,
+        },
+        traceAddress: transaction.traceAddress,
+        folded: false,
+      };
+    });
+  },
+  {
+    immediate: true,
+  },
+);
+
+function toggleFold(item: Call): void {
+  item.folded = !item.folded;
+}
+
+function isDescendant(parent: Call, child: Call): boolean {
+  if (parent.traceAddress.length >= child.traceAddress.length) {
+    return false;
   }
-  return props.trace.map((transaction) => {
-    return {
-      success:
-        transaction.error === null
-          ? true
-          : transaction.error === 'OOG'
-            ? {
-                type: 'OOG',
-              }
-            : {
-                type: 'Revert',
-                reason: '',
-              },
-      type:
-        transaction.type === 'create' ? 'create' : transaction.action.callType,
-      from: transaction.action.from,
-      to: transaction.type === 'call' ? transaction.action.to : null,
-      input:
-        transaction.type === 'call'
-          ? transaction.action.input
-          : transaction.action.init,
-      value: transaction.action.value,
-      gas: {
-        used: transaction.result.gasUsed,
-        limit: transaction.action.gas,
-      },
-      traceAddress: transaction.traceAddress,
-    };
+  return parent.traceAddress.every((value, index) => {
+    return value === child.traceAddress[index];
+  });
+}
+
+const visibleCalls = computed<Call[]>(() => {
+  // Only show the calls for which all the parents are unfolded
+  return calls.value.filter((call) => {
+    return calls.value.every((parent) => {
+      return !isDescendant(parent, call) || !parent.folded;
+    });
   });
 });
+
+function hasChildren(item: Call): boolean {
+  return calls.value.some((call) => {
+    return isDescendant(item, call);
+  });
+}
 
 function formatType(
   value: 'call' | 'delegatecall' | 'staticcall' | 'create',
@@ -218,25 +274,43 @@ function getData(data: Hex): Hex {
   gap: var(--spacing-6);
 }
 
+.icon-marker {
+  width: var(--marker-size);
+  height: var(--marker-size);
+  opacity: 0.6;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
 .path {
   display: flex;
   gap: var(--spacing-3);
 }
 
 .item {
+  --padding: 10px;
+  --status-width: 24px;
+  --call-width: 80px;
+  --marker-size: 15px;
+  --level-margin: 20px;
+
   display: flex;
+  position: relative;
   transition: opacity 0.25s ease;
   opacity: 1;
 
   &:first-child {
     .cell {
-      padding: 10px 10px 6px;
+      padding: var(--padding) var(--padding) 6px;
     }
   }
 
   &:last-child {
     .cell {
-      padding: 6px 10px 10px;
+      padding: 6px var(--padding) var(--padding);
     }
   }
 
@@ -274,9 +348,21 @@ function getData(data: Hex): Hex {
   right: 0;
 }
 
-.main {
-  --level-margin: 20px;
+.grid {
+  display: flex;
+  position: absolute;
+  left: calc(
+    var(--status-width) + var(--call-width) + var(--padding) +
+      (var(--marker-size) - 1px) / 2 + (var(--index) - 1) * var(--level-margin)
+  );
+  align-items: center;
+  justify-content: center;
+  width: 1px;
+  height: 100%;
+  background: var(--color-border-tertiary);
+}
 
+.main {
   display: flex;
   flex-grow: 1;
   margin-left: calc(var(--level) * var(--level-margin));
