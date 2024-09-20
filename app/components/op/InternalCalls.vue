@@ -15,6 +15,10 @@
       <TreeInternalCalls :trace="trace.validation" />
     </div>
     <div class="section">
+      <div class="label">Payment</div>
+      <TreeInternalCalls :trace="trace.payment" />
+    </div>
+    <div class="section">
       <div class="label">Execution</div>
       <TreeInternalCalls :trace="trace.execution" />
     </div>

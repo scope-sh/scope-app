@@ -21,6 +21,7 @@ import type {
 interface OpTrace {
   creation: TransactionTracePart[];
   validation: TransactionTracePart[];
+  payment: TransactionTracePart[];
   execution: TransactionTracePart[];
 }
 
@@ -196,7 +197,6 @@ function getOpTrace(
   );
 
   // Get validation traces
-
   // Find the "validateUserOp" calls from the entrypoint
   const validateOpCalls = transactionTrace.filter(
     (part): part is TransactionTraceCallPart =>
@@ -224,6 +224,7 @@ function getOpTrace(
     validateOpCall,
   );
 
+  // Get payment traces
   // Find the "validatePaymasterUserOp" calls from the entrypoint
   const validatePaymasterOpCalls = transactionTrace.filter(
     (part): part is TransactionTraceCallPart =>
@@ -286,10 +287,8 @@ function getOpTrace(
 
   return {
     creation: createSenderCallInnerCalls,
-    validation: [
-      ...validateOpCallInnerCalls,
-      ...validatePaymasterOpCallInnerCalls,
-    ],
+    validation: validateOpCallInnerCalls,
+    payment: validatePaymasterOpCallInnerCalls,
     execution: innerHandleOpCallInnerCalls,
   };
 }
