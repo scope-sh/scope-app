@@ -496,7 +496,13 @@ const revertTrace = computed(() => {
   if (!transactionTrace.value) {
     return null;
   }
-  return getRevertTrace(transactionTrace.value);
+  const root = transactionTrace.value.find(
+    (trace) => trace.traceAddress.length === 0,
+  );
+  if (!root) {
+    return null;
+  }
+  return getRevertTrace(transactionTrace.value, root);
 });
 
 async function fetchAbis(): Promise<void> {

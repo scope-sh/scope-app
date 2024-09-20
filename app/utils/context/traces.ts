@@ -105,24 +105,37 @@ function convertDebugTraceToTransactionTrace(
   return processCall(debugTrace);
 }
 
+function getChildren(
+  trace: TransactionTracePart[],
+  parent: TransactionTracePart,
+): TransactionTracePart[] {
+  return trace.filter((part) => {
+    return (
+      part.traceAddress.length > parent.traceAddress.length &&
+      startsWith(part.traceAddress, parent.traceAddress)
+    );
+  });
+}
+
+function getDirectChildren(
+  trace: TransactionTracePart[],
+  parent: TransactionTracePart,
+): TransactionTracePart[] {
+  return trace.filter((part) => {
+    return (
+      part.traceAddress.length === parent.traceAddress.length + 1 &&
+      startsWith(part.traceAddress, parent.traceAddress)
+    );
+  });
+}
+
 // Finds the trace part that bubbles up the error
 // There should be a clear path from the top level to the error
 // Returns the lowest level error in the path or null if no error is found
 function getRevert(
   transactionTrace: TransactionTracePart[],
+  root: TransactionTracePart,
 ): TransactionTracePart | null {
-  function getDirectChildren(
-    trace: TransactionTracePart[],
-    parent: TransactionTracePart,
-  ): TransactionTracePart[] {
-    return trace.filter((part) => {
-      return (
-        part.traceAddress.length === parent.traceAddress.length + 1 &&
-        startsWith(part.traceAddress, parent.traceAddress)
-      );
-    });
-  }
-
   function getDirectChildRevert(
     parent: TransactionTracePart,
   ): TransactionTracePart | null {
@@ -139,11 +152,6 @@ function getRevert(
     if (parent.error !== null) {
       return parent;
     }
-    return null;
-  }
-
-  const root = transactionTrace.find((part) => part.traceAddress.length === 0);
-  if (!root) {
     return null;
   }
   // Use recursion to find the error
@@ -286,5 +294,11 @@ function getOpTrace(
   };
 }
 
-export { convertDebugTraceToTransactionTrace, getOpTrace, getRevert };
+export {
+  convertDebugTraceToTransactionTrace,
+  getOpTrace,
+  getRevert,
+  getDirectChildren,
+  getChildren,
+};
 export type { OpTrace };

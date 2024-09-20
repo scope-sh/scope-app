@@ -29,7 +29,10 @@
       title="UserOp"
       :subtitle="hash"
     >
-      <OpStatus :success="opUnpacked.success" />
+      <OpStatus
+        :success="opUnpacked.success"
+        :trace="revertTrace"
+      />
       <AttributeList>
         <AttributeItem>
           <AttributeItemLabel
@@ -321,7 +324,10 @@ import {
 import type { OpTrace } from '@/utils/context/traces';
 import {
   convertDebugTraceToTransactionTrace,
+  getChildren as getChildTrace,
+  getDirectChildren as getDirectChildTrace,
   getOpTrace,
+  getRevert as getRevertTrace,
 } from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
@@ -582,6 +588,24 @@ const opTrace = computed<OpTrace | null>(() => {
     return null;
   }
   return getOpTrace(transactionTrace.value, hash.value, op.value.sender);
+});
+const revertTrace = computed(() => {
+  if (!opTrace.value) {
+    return null;
+  }
+  const root = opTrace.value.execution[0];
+  if (!root) {
+    return null;
+  }
+  const directChildTrace = getDirectChildTrace(opTrace.value.execution, root);
+  for (const tracePart of directChildTrace) {
+    const childTrace = getChildTrace(opTrace.value.execution, tracePart);
+    const revertTrace = getRevertTrace(childTrace, tracePart);
+    if (revertTrace) {
+      return revertTrace;
+    }
+  }
+  return null;
 });
 
 async function fetchAbis(): Promise<void> {
