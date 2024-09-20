@@ -164,18 +164,20 @@ function getOpTrace(
   hash: Hex,
   sender: Address,
 ): OpTrace | null {
-  function getInternalCalls(
-    trace: TransactionTrace,
-    tracePart: TransactionTracePart | undefined,
+  function getSubtrace(
+    trace: TransactionTracePart[],
+    root: TransactionTracePart | undefined,
   ): TransactionTracePart[] {
-    if (!tracePart) {
+    if (!root) {
       return [];
     }
-    return trace.filter((part) => {
-      return (
-        part.traceAddress.length >= tracePart.traceAddress.length &&
-        startsWith(part.traceAddress, tracePart.traceAddress)
-      );
+    const children = getChildren(trace, root);
+    // Update trace addresses
+    return [root, ...children].map((part) => {
+      return {
+        ...part,
+        traceAddress: part.traceAddress.slice(root.traceAddress.length),
+      };
     });
   }
 
@@ -191,7 +193,7 @@ function getOpTrace(
   const createSenderCall = createSenderCalls.find(
     (item) => item.result.output === pad(sender.toLowerCase() as Address),
   );
-  const createSenderCallInnerCalls = getInternalCalls(
+  const createSenderCallInnerCalls = getSubtrace(
     transactionTrace,
     createSenderCall,
   );
@@ -219,7 +221,7 @@ function getOpTrace(
   if (!validateOpCall) {
     return null;
   }
-  const validateOpCallInnerCalls = getInternalCalls(
+  const validateOpCallInnerCalls = getSubtrace(
     transactionTrace,
     validateOpCall,
   );
@@ -244,7 +246,7 @@ function getOpTrace(
     }
     return decoded.args[1] === hash;
   });
-  const validatePaymasterOpCallInnerCalls = getInternalCalls(
+  const validatePaymasterOpCallInnerCalls = getSubtrace(
     transactionTrace,
     validatePaymasterOpCall,
   );
@@ -280,7 +282,7 @@ function getOpTrace(
   if (!innerHandleOpCall) {
     return null;
   }
-  const innerHandleOpCallInnerCalls = getInternalCalls(
+  const innerHandleOpCallInnerCalls = getSubtrace(
     transactionTrace,
     innerHandleOpCall,
   );
