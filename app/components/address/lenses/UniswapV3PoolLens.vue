@@ -22,13 +22,13 @@
     <AttributeItem>
       <AttributeItemLabel :value="'Swap fee'" />
       <AttributeItemValue v-if="fee">
-        {{ formatShare(fromWei(fee, 6)) }}
+        {{ formatShare(fromWei(fee, 6, 'number')) }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
       <AttributeItemLabel :value="'Protocol fee'" />
       <AttributeItemValue v-if="slot0">
-        {{ formatShare(fromWei(slot0.feeProtocol, 6)) }}
+        {{ formatShare(fromWei(slot0.feeProtocol, 6, 'number')) }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
@@ -46,9 +46,21 @@
     <AttributeItem>
       <AttributeItemLabel :value="'Composition'" />
       <AttributeItemValue v-if="composition">
-        {{ fromWei(composition.token0.balance, composition.token0.decimals) }}
+        {{
+          fromWei(
+            composition.token0.balance,
+            composition.token0.decimals,
+            'string',
+          )
+        }}
         {{ composition.token0.symbol }} +
-        {{ fromWei(composition.token1.balance, composition.token1.decimals) }}
+        {{
+          fromWei(
+            composition.token1.balance,
+            composition.token1.decimals,
+            'string',
+          )
+        }}
         {{ composition.token1.symbol }}
       </AttributeItemValue>
     </AttributeItem>
@@ -118,8 +130,8 @@ const price = computed<number | null>(() => {
   const sqrtPrice = (precision * sqrtPriceX96) / 2n ** 96n;
   const price = sqrtPrice ** 2n / precision;
   const priceFloat =
-    fromWei(price, composition.value.token1.decimals) /
-    fromWei(precision, composition.value.token0.decimals);
+    fromWei(price, composition.value.token1.decimals, 'number') /
+    fromWei(precision, composition.value.token0.decimals, 'number');
   return priceFloat;
 });
 

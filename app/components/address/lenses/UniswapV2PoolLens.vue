@@ -28,9 +28,21 @@
     <AttributeItem>
       <AttributeItemLabel :value="'Composition'" />
       <AttributeItemValue v-if="composition">
-        {{ fromWei(composition.token0.balance, composition.token0.decimals) }}
+        {{
+          fromWei(
+            composition.token0.balance,
+            composition.token0.decimals,
+            'string',
+          )
+        }}
         {{ composition.token0.symbol }} +
-        {{ fromWei(composition.token1.balance, composition.token1.decimals) }}
+        {{
+          fromWei(
+            composition.token1.balance,
+            composition.token1.decimals,
+            'string',
+          )
+        }}
         {{ composition.token1.symbol }}
       </AttributeItemValue>
     </AttributeItem>
@@ -85,8 +97,8 @@ const price = computed<number | null>(() => {
     (precision * composition.value.token1.balance) /
     composition.value.token0.balance;
   const priceFloat =
-    fromWei(price, composition.value.token1.decimals) /
-    fromWei(precision, composition.value.token0.decimals);
+    fromWei(price, composition.value.token1.decimals, 'number') /
+    fromWei(precision, composition.value.token0.decimals, 'number');
   return priceFloat;
 });
 

@@ -29,7 +29,7 @@
           :function-name="'balanceOf'"
           :formatter="
             (value) =>
-              decimals ? fromWei(value, decimals).toString() : value.toString()
+              decimals ? fromWei(value, decimals, 'string') : value.toString()
           "
         />
       </AttributeItemValue>
@@ -67,7 +67,7 @@ const asset = ref<Address | null>(null);
 const name = ref<string | null>(null);
 const fee = ref<number | null>(null);
 const decimals = ref<number | null>(null);
-const totalSupply = ref<number | null>(null);
+const totalSupply = ref<string | null>(null);
 
 watch(
   () => props.address,
@@ -118,11 +118,13 @@ async function fetch(): Promise<void> {
       : null;
   name.value = result[1].status === 'success' ? result[1].result : null;
   fee.value =
-    result[2].status === 'success' ? fromWei(result[2].result, 18) : null;
+    result[2].status === 'success'
+      ? fromWei(result[2].result, 18, 'number')
+      : null;
   decimals.value = result[3].status === 'success' ? result[3].result : null;
   totalSupply.value =
     result[4].status === 'success' && decimals.value
-      ? fromWei(result[4].result, decimals.value)
+      ? fromWei(result[4].result, decimals.value, 'string')
       : null;
 
   isLoading.value = false;

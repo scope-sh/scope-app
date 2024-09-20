@@ -15,14 +15,14 @@ function formatEther(
   exact: boolean,
 ): string {
   return exact
-    ? `${fromWei(value, nativeCurrency.decimals)} ${nativeCurrency.symbol}`
-    : `${formatNumber(fromWei(value, nativeCurrency.decimals))} ${nativeCurrency.symbol}`;
+    ? `${fromWei(value, nativeCurrency.decimals, 'string')} ${nativeCurrency.symbol}`
+    : `${formatNumber(fromWei(value, nativeCurrency.decimals, 'number'))} ${nativeCurrency.symbol}`;
 }
 
 function formatGasPrice(value: bigint, exact: boolean): string {
   return exact
-    ? `${fromWei(value, 9)} Gwei`
-    : `${formatNumber(fromWei(value, 9))} Gwei`;
+    ? `${fromWei(value, 9, 'string')} Gwei`
+    : `${formatNumber(fromWei(value, 9, 'number'))} Gwei`;
 }
 
 function formatNumber(value: number): string {

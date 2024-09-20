@@ -5,11 +5,33 @@ interface RelativeTime {
   unit: Intl.RelativeTimeFormatUnit;
 }
 
-function fromWei(value: bigint | number, decimals: number): number {
-  if (typeof value === 'bigint') {
-    return parseFloat(formatUnits(value, decimals));
+type FromWeiOutput = 'string' | 'number';
+
+function fromWei(
+  value: bigint | number,
+  decimals: number,
+  output: 'string',
+): string;
+function fromWei(
+  value: bigint | number,
+  decimals: number,
+  output: 'number',
+): number;
+function fromWei(
+  value: bigint | number,
+  decimals: number,
+  output: FromWeiOutput,
+): string | number {
+  function fromWeiToString(value: bigint | number, decimals: number): string {
+    if (typeof value === 'bigint') {
+      return formatUnits(value, decimals);
+    }
+    return formatUnits(BigInt(value.toString()), decimals);
   }
-  return parseFloat(formatUnits(BigInt(value.toString()), decimals));
+
+  return output === 'string'
+    ? fromWeiToString(value, decimals)
+    : parseFloat(fromWeiToString(value, decimals));
 }
 
 function toBigInt(value: number | string): bigint | null {
