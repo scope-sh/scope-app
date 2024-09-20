@@ -13,11 +13,20 @@
       >
         <div class="sticky left">
           <div class="cell status">
-            <ScopeIcon
+            <ScopeTooltip
               v-if="item.success !== true"
-              kind="cross"
-              class="icon"
-            />
+              delay="small"
+            >
+              <template #trigger>
+                <ScopeIcon
+                  kind="cross"
+                  class="icon"
+                />
+              </template>
+              <template #default>
+                {{ item.success.type === 'OOG' ? 'Out of gas' : 'Reverted' }}
+              </template>
+            </ScopeTooltip>
           </div>
           <div class="cell call">{{ formatType(item.type) }}</div>
         </div>
