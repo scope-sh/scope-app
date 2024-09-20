@@ -18,7 +18,6 @@
           />
           <ScopeTooltip
             v-if="labelText"
-            disable-closing-trigger
             delay="medium"
           >
             <template #trigger>

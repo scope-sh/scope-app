@@ -106,7 +106,6 @@
             </template>
             <template v-else-if="cell.column.id === 'value'">
               <ScopeTooltip
-                disable-closing-trigger
                 delay="medium"
               >
                 <template #trigger>
@@ -119,7 +118,6 @@
             </template>
             <template v-else-if="cell.column.id === 'gasPrice'">
                 <ScopeTooltip
-                disable-closing-trigger
                 delay="medium"
               >
                 <template #trigger>

@@ -53,10 +53,7 @@
         </div>
         <div class="sticky right">
           <div class="cell value">
-            <ScopeTooltip
-              disable-closing-trigger
-              delay="medium"
-            >
+            <ScopeTooltip delay="medium">
               <template #trigger>
                 {{ formatEther(item.value, nativeCurrency, false) }}
               </template>
