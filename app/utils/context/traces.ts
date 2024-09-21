@@ -1,5 +1,5 @@
 import type { Address, Hex } from 'viem';
-import { decodeFunctionData, pad, slice } from 'viem';
+import { decodeFunctionData, pad, slice, zeroHash } from 'viem';
 
 import {
   ENTRY_POINT_0_6_ADDRESS,
@@ -12,10 +12,13 @@ import iAccountAbi from '@/abi/iAccount';
 import type {
   DebugTransactionTrace,
   DebugTransactionTraceCall,
+  DebugTransactionState,
+  DebugTransactionStatePart,
   TransactionTrace,
   TransactionTraceFrame,
   TransactionTraceCallFrame,
   TransactionTraceCreateFrame,
+  TransactionStateDiff,
 } from '@/services/evm';
 
 interface OpTrace {
@@ -104,6 +107,96 @@ function convertDebugTraceToTransactionTrace(
     return null;
   }
   return processCall(debugTrace);
+}
+
+function convertDebugStateToTransactionStateDiff(
+  debugState: DebugTransactionState | null,
+): TransactionStateDiff | null {
+  if (!debugState) {
+    return null;
+  }
+
+  const pre = debugState.pre;
+  const post = debugState.post ?? ({} as DebugTransactionStatePart);
+
+  const result: TransactionStateDiff = {};
+
+  for (const [addressString, preState] of Object.entries(pre)) {
+    const address = addressString as Address;
+    const postState = post[address];
+    const diff: TransactionStateDiff[Address] = {};
+
+    if (
+      postState &&
+      postState.balance &&
+      preState.balance !== postState.balance
+    ) {
+      diff.balance = {
+        from: preState.balance ?? 0n,
+        to: postState?.balance ?? 0n,
+      };
+    }
+
+    if (postState && postState.code && preState.code !== postState.code) {
+      diff.code = {
+        from: preState.code ?? zeroHash,
+        to: postState?.code ?? zeroHash,
+      };
+    }
+
+    if (postState && postState.nonce && preState.nonce !== postState.nonce) {
+      diff.nonce = {
+        from: preState.nonce ?? 0n,
+        to: postState?.nonce ?? 0n,
+      };
+    }
+
+    if (preState.storage || postState?.storage) {
+      diff.storage = {};
+      for (const slotString of new Set([
+        ...Object.keys(preState.storage ?? {}),
+        ...Object.keys(postState?.storage ?? {}),
+      ])) {
+        const slot = slotString as Hex;
+        if (preState.storage?.[slot] !== postState?.storage?.[slot]) {
+          diff.storage[slot] = {
+            from: preState.storage?.[slot] ?? zeroHash,
+            to: postState?.storage?.[slot] ?? zeroHash,
+          };
+        }
+      }
+    }
+
+    if (Object.keys(diff).length > 0) {
+      result[address] = diff;
+    }
+  }
+
+  // Handle new addresses in post-state
+  for (const [addressString, postState] of Object.entries(post ?? {})) {
+    const address = addressString as Address;
+    if (!pre[address]) {
+      result[address] = {
+        balance: postState.balance
+          ? { from: 0n, to: postState.balance }
+          : undefined,
+        code: postState.code
+          ? { from: zeroHash, to: postState.code }
+          : undefined,
+        nonce: postState.nonce ? { from: 0n, to: postState.nonce } : undefined,
+        storage: postState.storage
+          ? Object.fromEntries(
+              Object.entries(postState.storage).map(([key, value]) => [
+                key,
+                { from: zeroHash, to: value },
+              ]),
+            )
+          : undefined,
+      };
+    }
+  }
+
+  return result;
 }
 
 function getChildren(
@@ -297,6 +390,7 @@ function getOpTrace(
 
 export {
   convertDebugTraceToTransactionTrace,
+  convertDebugStateToTransactionStateDiff,
   getOpTrace,
   getRevert,
   getDirectChildren,

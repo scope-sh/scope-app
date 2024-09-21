@@ -246,12 +246,12 @@
           title="Internal"
         />
         <ScopePanel
-          v-else-if="transactionTrace"
+          v-else-if="transactionReplay"
           title="Internal"
         >
           <template #default>
             <ScopeLabelEmptyState
-              v-if="transactionTrace.length === 0"
+              v-if="transactionReplay.trace.length === 0"
               value="No internal transactions found"
             />
             <InternalCalls
@@ -304,7 +304,7 @@ import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
-import type { TransactionTrace } from '@/services/evm';
+import type { TransactionReplay } from '@/services/evm';
 import EvmService from '@/services/evm';
 import HypersyncService from '@/services/hypersync';
 import IndexerService from '@/services/indexer';
@@ -324,6 +324,7 @@ import {
 import type { OpTrace } from '@/utils/context/traces';
 import {
   convertDebugTraceToTransactionTrace,
+  convertDebugStateToTransactionStateDiff,
   getChildren as getChildTrace,
   getDirectChildren as getDirectChildTrace,
   getOpTrace,
@@ -418,7 +419,7 @@ const indexerService = computed(() =>
 const isLoading = ref(false);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
-const transactionTrace = ref<TransactionTrace | null>(null);
+const transactionReplay = ref<TransactionReplay | null>(null);
 
 const entryPoint = ref<Address | null>(null);
 const op = ref<Op | null>(null);
@@ -434,12 +435,9 @@ watch(transaction, async () => {
   if (!chain) {
     return;
   }
-  entryPoint.value = getEntryPoint(transaction.value, transactionTrace.value);
-  const ops = await getOps(
-    client.value,
-    transaction.value,
-    transactionTrace.value,
-  );
+  const transactonTrace = transactionReplay.value?.trace ?? null;
+  entryPoint.value = getEntryPoint(transaction.value, transactonTrace);
+  const ops = await getOps(client.value, transaction.value, transactonTrace);
   op.value =
     ops.find(
       (op) =>
@@ -529,7 +527,7 @@ async function fetch(): Promise<void> {
   await Promise.all([
     fetchTransaction(txHash),
     fetchTransactionReceipt(txHash),
-    fetchTransactionTrace(txHash),
+    fetchTransactionReplay(txHash),
   ]);
   isLoading.value = false;
   await fetchAbis();
@@ -569,25 +567,38 @@ async function fetchTransactionReceipt(txHash: Address): Promise<void> {
   isTransactionReceiptLoading.value = false;
 }
 
-async function fetchTransactionTrace(txHash: Hex): Promise<void> {
+async function fetchTransactionReplay(txHash: Hex): Promise<void> {
   if (!evmService.value) {
     return;
   }
   if (chainId.value === ARBITRUM || chainId.value === ARBITRUM_SEPOLIA) {
-    const debugTrace = await evmService.value.getDebugTransactionTrace(txHash);
-    transactionTrace.value = convertDebugTraceToTransactionTrace(debugTrace);
+    const [debugTrace, debugState] = await Promise.all([
+      evmService.value.getDebugTransactionTrace(txHash),
+      evmService.value.getDebugTransactionState(txHash),
+    ]);
+    const trace = convertDebugTraceToTransactionTrace(debugTrace);
+    const stateDiff = convertDebugStateToTransactionStateDiff(debugState);
+    if (!trace || !stateDiff) {
+      transactionReplay.value = null;
+    } else {
+      transactionReplay.value = {
+        trace,
+        stateDiff,
+      };
+    }
   } else {
-    transactionTrace.value = await evmService.value.getTransactionTrace(txHash);
+    transactionReplay.value =
+      await evmService.value.getTransactionReplay(txHash);
   }
 }
 const opTrace = computed<OpTrace | null>(() => {
-  if (!transactionTrace.value) {
+  if (!transactionReplay.value) {
     return null;
   }
   if (!op.value) {
     return null;
   }
-  return getOpTrace(transactionTrace.value, hash.value, op.value.sender);
+  return getOpTrace(transactionReplay.value.trace, hash.value, op.value.sender);
 });
 const revertTrace = computed(() => {
   if (!opTrace.value) {

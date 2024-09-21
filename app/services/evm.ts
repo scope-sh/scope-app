@@ -26,6 +26,20 @@ interface BlockWithTransactions extends BaseBlock {
   transactions: Transaction[];
 }
 
+type TransactionTraceResponseStateDiffItem =
+  | '='
+  | Record<'*', { from: Hex; to: Hex }>;
+
+type TransactionTraceResponseStateDiff = Record<
+  Address,
+  {
+    balance: TransactionTraceResponseStateDiffItem;
+    code: TransactionTraceResponseStateDiffItem;
+    nonce: TransactionTraceResponseStateDiffItem;
+    storage: Record<Hex, TransactionTraceResponseStateDiffItem>;
+  }
+>;
+
 interface TransactionTraceResponseCallTrace {
   action: {
     from: Address;
@@ -69,13 +83,19 @@ type TransactionTraceResponseTrace =
 
 interface TransactionTraceResponse {
   output: Hex;
-  stateDiff: null;
+  stateDiff: TransactionTraceResponseStateDiff;
   trace: TransactionTraceResponseTrace[];
   vmTrace: null;
   transactionHash: Hex;
 }
 
-interface TransactionTraceCallFrame {
+interface TransactionTraceBaseFrame {
+  error: null | 'OOG' | 'Reverted';
+  subtraces: number;
+  traceAddress: number[];
+}
+
+interface TransactionTraceCallFrame extends TransactionTraceBaseFrame {
   action: {
     from: Address;
     callType: 'call' | 'delegatecall' | 'staticcall';
@@ -84,31 +104,25 @@ interface TransactionTraceCallFrame {
     to: Address;
     value: bigint;
   };
-  error: null | 'OOG' | 'Reverted';
   result: {
     gasUsed: bigint;
     output: Hex | null;
   };
-  subtraces: number;
-  traceAddress: number[];
   type: 'call';
 }
 
-interface TransactionTraceCreateFrame {
+interface TransactionTraceCreateFrame extends TransactionTraceBaseFrame {
   action: {
     from: Address;
     gas: bigint;
     init: Hex;
     value: bigint;
   };
-  error: null | 'OOG' | 'Reverted';
   result: {
     gasUsed: bigint;
     address: Address | null;
     code: Hex | null;
   };
-  subtraces: number;
-  traceAddress: number[];
   type: 'create';
 }
 
@@ -117,6 +131,38 @@ type TransactionTraceFrame =
   | TransactionTraceCreateFrame;
 
 type TransactionTrace = TransactionTraceFrame[];
+
+type TransactionStateDiff = Record<
+  Address,
+  {
+    balance?: {
+      from: bigint;
+      to: bigint;
+    };
+    code?: {
+      from: Hex;
+      to: Hex;
+    };
+    nonce?: {
+      from: bigint;
+      to: bigint;
+    };
+    storage?: Record<
+      Hex,
+      {
+        from: Hex;
+        to: Hex;
+      }
+    >;
+  }
+>;
+
+interface TransactionReplay {
+  trace: TransactionTrace;
+  stateDiff: TransactionStateDiff;
+}
+
+type DebugTransactionTracer = 'callTracer' | 'prestateTracer';
 
 interface DebugTransactionTraceResponseCall {
   from: Address;
@@ -147,6 +193,21 @@ interface DebugTransactionTraceResponse
   }[];
 }
 
+type DebugTransactionStateResponsePart = Record<
+  Address,
+  {
+    balance?: Hex;
+    code?: Hex;
+    nonce?: number;
+    storage?: Record<Hex, Hex>;
+  }
+>;
+
+interface DebugTransactionStateResponse {
+  pre: DebugTransactionStateResponsePart;
+  post?: DebugTransactionStateResponsePart;
+}
+
 interface DebugTransactionTraceCall {
   from: Address;
   gas: bigint;
@@ -173,6 +234,21 @@ interface DebugTransactionTrace extends DebugTransactionTraceCall {
     to: null;
     value: bigint;
   }[];
+}
+
+type DebugTransactionStatePart = Record<
+  Address,
+  {
+    balance?: bigint;
+    code?: Hex;
+    nonce?: bigint;
+    storage?: Record<Hex, Hex>;
+  }
+>;
+
+interface DebugTransactionState {
+  pre: DebugTransactionStatePart;
+  post?: DebugTransactionStatePart;
 }
 
 class Service {
@@ -278,14 +354,15 @@ class Service {
     return balance;
   }
 
-  public async getTransactionTrace(
+  public async getTransactionReplay(
     hash: Hex,
-  ): Promise<TransactionTrace | null> {
+  ): Promise<TransactionReplay | null> {
     try {
       const traceResponse = await this.client.traceReplayTransaction(hash, [
         'trace',
+        'stateDiff',
       ]);
-      return traceResponse.trace.map((item) => {
+      const trace = traceResponse.trace.map((item) => {
         const error =
           item.error === undefined
             ? null
@@ -318,7 +395,7 @@ class Service {
             subtraces,
             traceAddress,
             type: item.type,
-          };
+          } as TransactionTraceCreateFrame;
         } else {
           return {
             action: {
@@ -343,9 +420,58 @@ class Service {
             subtraces,
             traceAddress,
             type: item.type,
-          };
+          } as TransactionTraceCallFrame;
         }
       });
+      const stateDiff = Object.fromEntries(
+        Object.entries(traceResponse.stateDiff).map(([address, diff]) => {
+          return [
+            address,
+            {
+              balance:
+                diff.balance === '='
+                  ? undefined
+                  : {
+                      from: BigInt(diff.balance['*'].from),
+                      to: BigInt(diff.balance['*'].to),
+                    },
+              code:
+                diff.code === '='
+                  ? undefined
+                  : {
+                      from: diff.code['*'].from,
+                      to: diff.code['*'].to,
+                    },
+              nonce:
+                diff.nonce === '='
+                  ? undefined
+                  : {
+                      from: BigInt(diff.nonce['*'].from),
+                      to: BigInt(diff.nonce['*'].to),
+                    },
+              storage: Object.fromEntries(
+                Object.entries(diff.storage)
+                  .map(([slot, value]) => {
+                    return [
+                      slot,
+                      value === '='
+                        ? undefined
+                        : {
+                            from: value['*'].from,
+                            to: value['*'].to,
+                          },
+                    ];
+                  })
+                  .filter(([, value]) => value !== undefined),
+              ),
+            },
+          ];
+        }),
+      );
+      return {
+        trace,
+        stateDiff,
+      };
     } catch {
       return null;
     }
@@ -380,6 +506,7 @@ class Service {
       const traceResponse = await this.client.debugTraceTransaction(
         hash,
         'callTracer',
+        undefined,
       );
       return {
         afterEVMTransfers: traceResponse.afterEVMTransfers.map((transfer) => ({
@@ -412,6 +539,49 @@ class Service {
       return null;
     }
   }
+
+  public async getDebugTransactionState(
+    hash: Hex,
+  ): Promise<DebugTransactionState | null> {
+    function formatPart(
+      part: DebugTransactionStateResponsePart,
+    ): DebugTransactionStatePart {
+      return Object.fromEntries(
+        Object.entries(part).map(([address, data]) => [
+          address,
+          {
+            balance: data.balance ? BigInt(data.balance) : undefined,
+            code: data.code,
+            nonce: data.nonce ? BigInt(data.nonce) : undefined,
+            storage: data.storage
+              ? Object.fromEntries(
+                  Object.entries(data.storage).map(([slot, value]) => [
+                    slot,
+                    value,
+                  ]),
+                )
+              : undefined,
+          },
+        ]),
+      );
+    }
+    try {
+      const traceResponse = await this.client.debugTraceTransaction(
+        hash,
+        'prestateTracer',
+        {
+          diffMode: true,
+        },
+      );
+      return {
+        pre: formatPart(traceResponse.pre),
+        post: traceResponse.post ? formatPart(traceResponse.post) : undefined,
+      };
+    } catch (e) {
+      console.error(e);
+      return null;
+    }
+  }
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
@@ -430,10 +600,19 @@ function getClient(client: PublicClient) {
         params: [hash, type],
       });
     },
-    async debugTraceTransaction(
+    async debugTraceTransaction<T extends DebugTransactionTracer>(
       hash: Hex,
-      tracer: 'callTracer' | 'prestateTracer',
-    ): Promise<DebugTransactionTraceResponse> {
+      tracer: T,
+      tracerConfig: T extends 'callTracer'
+        ? undefined
+        : {
+            diffMode: boolean;
+          },
+    ): Promise<
+      T extends 'callTracer'
+        ? DebugTransactionTraceResponse
+        : DebugTransactionStateResponse
+    > {
       return await client.request({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
@@ -443,7 +622,10 @@ function getClient(client: PublicClient) {
           {
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore
-            tracer: tracer,
+            tracer,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            tracerConfig,
           },
         ],
       });
@@ -460,10 +642,14 @@ export type {
   Transaction,
   TransactionReceipt,
   TransactionStatus,
+  TransactionReplay,
   TransactionTrace,
   TransactionTraceFrame,
   TransactionTraceCallFrame,
   TransactionTraceCreateFrame,
+  TransactionStateDiff,
   DebugTransactionTrace,
   DebugTransactionTraceCall,
+  DebugTransactionStatePart,
+  DebugTransactionState,
 };

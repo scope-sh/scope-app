@@ -231,18 +231,18 @@
         <ScopePanel title="Internal">
           <template #default>
             <ScopeLabelEmptyState
-              v-if="transactionTrace === null"
+              v-if="transactionReplay === null"
               value="Internal calls not available"
             />
             <ScopeLabelEmptyState
-              v-else-if="transactionTrace.length === 0"
+              v-else-if="transactionReplay.trace.length === 0"
               value="No internal calls found"
             />
             <div
               v-else
               class="internal"
             >
-              <TreeInternalCalls :trace="transactionTrace" />
+              <TreeInternalCalls :trace="transactionReplay.trace" />
             </div>
           </template>
         </ScopePanel>
@@ -292,7 +292,7 @@ import EvmService from '@/services/evm';
 import type {
   Transaction,
   TransactionReceipt,
-  TransactionTrace,
+  TransactionReplay,
   Block,
 } from '@/services/evm';
 import type { Command } from '@/stores/commands';
@@ -301,6 +301,7 @@ import type { Op } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getOps } from '@/utils/context/erc4337/entryPoint';
 import {
   convertDebugTraceToTransactionTrace,
+  convertDebugStateToTransactionStateDiff,
   getRevert as getRevertTraceFrame,
 } from '@/utils/context/traces';
 import { toRelativeTime } from '@/utils/conversion';
@@ -370,7 +371,7 @@ const isLoading = ref(false);
 const block = ref<Block | null>(null);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
-const transactionTrace = ref<TransactionTrace | null>(null);
+const transactionReplay = ref<TransactionReplay | null>(null);
 
 const hasPrevTransaction = computed(() => {
   if (!transaction.value || !transaction.value.transactionIndex) {
@@ -455,7 +456,7 @@ async function fetch(): Promise<void> {
   await Promise.all([
     fetchTransaction(hash.value),
     fetchTransactionReceipt(hash.value),
-    fetchTransactionTrace(hash.value),
+    fetchTransactionReplay(hash.value),
   ]);
   if (transaction.value && transaction.value.blockNumber) {
     block.value = await evmService.value.getBlock(
@@ -480,29 +481,40 @@ async function fetchTransactionReceipt(hash: Hex): Promise<void> {
   transactionReceipt.value = await evmService.value.getTransactionReceipt(hash);
 }
 
-async function fetchTransactionTrace(hash: Hex): Promise<void> {
+async function fetchTransactionReplay(hash: Hex): Promise<void> {
   if (!evmService.value) {
     return;
   }
   if (chainId.value === ARBITRUM || chainId.value === ARBITRUM_SEPOLIA) {
-    const debugTrace = await evmService.value.getDebugTransactionTrace(hash);
-    transactionTrace.value = convertDebugTraceToTransactionTrace(debugTrace);
+    const [debugTrace, debugState] = await Promise.all([
+      evmService.value.getDebugTransactionTrace(hash),
+      evmService.value.getDebugTransactionState(hash),
+    ]);
+    const trace = convertDebugTraceToTransactionTrace(debugTrace);
+    const stateDiff = convertDebugStateToTransactionStateDiff(debugState);
+    if (!trace || !stateDiff) {
+      transactionReplay.value = null;
+    } else {
+      transactionReplay.value = {
+        trace,
+        stateDiff,
+      };
+    }
   } else {
-    transactionTrace.value = await evmService.value.getTransactionTrace(hash);
+    transactionReplay.value = await evmService.value.getTransactionReplay(hash);
   }
 }
 
 const revertTraceFrame = computed(() => {
-  if (!transactionTrace.value) {
+  if (!transactionReplay.value) {
     return null;
   }
-  const root = transactionTrace.value.find(
-    (trace) => trace.traceAddress.length === 0,
-  );
+  const trace = transactionReplay.value.trace;
+  const root = trace.find((trace) => trace.traceAddress.length === 0);
   if (!root) {
     return null;
   }
-  return getRevertTraceFrame(transactionTrace.value, root);
+  return getRevertTraceFrame(trace, root);
 });
 
 async function fetchAbis(): Promise<void> {
@@ -667,12 +679,12 @@ watch(transaction, async () => {
   if (!transaction.value) {
     return;
   }
-  entryPoint.value = getEntryPoint(transaction.value, transactionTrace.value);
-  ops.value = await getOps(
-    client.value,
-    transaction.value,
-    transactionTrace.value,
-  );
+  if (!transactionReplay.value) {
+    return;
+  }
+  const transactionTrace = transactionReplay.value.trace;
+  entryPoint.value = getEntryPoint(transaction.value, transactionTrace);
+  ops.value = await getOps(client.value, transaction.value, transactionTrace);
 });
 
 async function handleTransactionIndexUpdate(index: number): Promise<void> {
