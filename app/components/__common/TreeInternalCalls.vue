@@ -11,115 +11,126 @@
         class="item"
         :style="{ '--level': getLevel(item) }"
       >
-        <div class="sticky left">
-          <div class="cell status">
-            <ScopeTooltip
-              v-if="item.success !== true"
-              delay="small"
-            >
-              <template #trigger>
-                <ScopeIcon
-                  kind="cross"
-                  class="icon"
-                />
-              </template>
-              <template #default>
-                {{ item.success.type === 'OOG' ? 'Out of gas' : 'Reverted' }}
-              </template>
-            </ScopeTooltip>
-          </div>
-          <div class="cell call">{{ formatType(item.type) }}</div>
-        </div>
         <div
-          v-for="index in getLevel(item)"
-          :key="index"
-          class="grid"
-          :style="{ '--index': index }"
-        />
-        <div class="main">
-          <div class="cell content">
-            <ScopeIcon
-              v-if="hasChildren(item)"
-              class="icon-marker"
-              :kind="item.folded ? 'chevron-right' : 'chevron-down'"
-              @click="toggleFold(item)"
-            />
-            <div
-              v-else
-              class="icon-marker"
-            />
-            <div class="path">
-              <LinkAddress
-                :address="item.from"
-                type="minimal"
+          class="item-content"
+          @click="toggleSelectCall(item)"
+        >
+          <div class="sticky left">
+            <div class="cell status">
+              <ScopeTooltip
+                v-if="item.success !== true"
+                delay="small"
+              >
+                <template #trigger>
+                  <ScopeIcon
+                    kind="cross"
+                    class="icon"
+                  />
+                </template>
+                <template #default>
+                  {{ item.success.type === 'OOG' ? 'Out of gas' : 'Reverted' }}
+                </template>
+              </ScopeTooltip>
+            </div>
+            <div class="cell call">{{ formatType(item.type) }}</div>
+          </div>
+          <div
+            v-for="index in getLevel(item)"
+            :key="index"
+            class="grid"
+            :style="{ '--index': index }"
+          />
+          <div class="main">
+            <div class="cell content">
+              <ScopeIcon
+                v-if="hasChildren(item)"
+                class="icon-marker"
+                :kind="item.folded ? 'chevron-right' : 'chevron-down'"
+                @click.stop="toggleFold(item)"
               />
-              <template v-if="item.to">
-                →
+              <div
+                v-else
+                class="icon-marker"
+              />
+              <div class="path">
                 <LinkAddress
-                  :address="item.to"
+                  :address="item.from"
                   type="minimal"
                 />
-              </template>
-            </div>
-            <div class="input">
-              <template v-if="item.type === 'create'">
-                {{ item.input }}
-              </template>
-              <template v-else>
-                <template v-if="size(getFunction(item.input))">
-                  {{ getFunction(item.input) }}
-                  <template v-if="size(getData(item.input))">
-                    ({{ getData(item.input) }})
+                <template v-if="item.to">
+                  →
+                  <LinkAddress
+                    :address="item.to"
+                    type="minimal"
+                  />
+                </template>
+              </div>
+              <div class="input">
+                <template v-if="item.type === 'create'">
+                  {{ item.input }}
+                </template>
+                <template v-else>
+                  <template v-if="size(getFunction(item.input))">
+                    {{ getFunction(item.input) }}
+                    <template v-if="size(getData(item.input))">
+                      ({{ getData(item.input) }})
+                    </template>
                   </template>
                 </template>
-              </template>
+              </div>
+            </div>
+          </div>
+          <div class="sticky right">
+            <div class="cell value">
+              <ScopeTooltip delay="medium">
+                <template #trigger>
+                  {{ formatEther(item.value, nativeCurrency, false) }}
+                </template>
+                <template #default>
+                  {{ formatEther(item.value, nativeCurrency, true) }}
+                </template>
+              </ScopeTooltip>
             </div>
           </div>
         </div>
-        <div class="sticky right">
-          <div class="cell value">
-            <ScopeTooltip delay="medium">
-              <template #trigger>
-                {{ formatEther(item.value, nativeCurrency, false) }}
-              </template>
-              <template #default>
-                {{ formatEther(item.value, nativeCurrency, true) }}
-              </template>
-            </ScopeTooltip>
-          </div>
-        </div>
+        <CallDetails
+          v-if="item === selectedCall"
+          :call="item"
+          :width
+        />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useResizeObserver } from '@vueuse/core';
 import { type Address, type Hex, size, slice } from 'viem';
 import { ref, computed, watch } from 'vue';
 
-import LinkAddress from '@/components/__common/LinkAddress.vue';
-import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import ScopeTooltip from '@/components/__common/ScopeTooltip.vue';
+import CallDetails from './CallDetails.vue';
+import LinkAddress from './LinkAddress.vue';
+import ScopeIcon from './ScopeIcon.vue';
+import ScopeTooltip from './ScopeTooltip.vue';
+
 import useChain from '@/composables/useChain';
 import type { TransactionTrace } from '@/services/evm';
 import { formatEther } from '@/utils/formatting';
 
 const { nativeCurrency } = useChain();
 
+type CallStatus = true | { type: 'OOG' } | { type: 'Revert'; reason: string };
+type CallType = 'call' | 'delegatecall' | 'staticcall' | 'create';
+
 interface Call {
-  success:
-    | true
-    | {
-        type: 'OOG';
-      }
-    | {
-        type: 'Revert';
-        reason: string;
-      };
-  type: 'call' | 'delegatecall' | 'staticcall' | 'create';
+  success: CallStatus;
+  type: CallType;
   from: Address;
   to: Address | null;
   input: Hex;
+  output: Hex | null;
+  code: Hex | null;
+  address: Address | null;
   value: bigint;
   gas: {
     used: bigint;
@@ -133,12 +144,21 @@ const props = defineProps<{
   trace: TransactionTrace | null;
 }>();
 
-const el = ref<HTMLElement | null>(null);
+const width = ref('0px');
+const el = ref(null);
 const scrollable = computed(() => {
   if (!el.value) {
     return false;
   }
-  return el.value.scrollWidth > el.value.clientWidth;
+  const element = el.value as HTMLElement;
+  return element.scrollWidth > element.clientWidth;
+});
+useResizeObserver(el, (entries) => {
+  const entry = entries[0];
+  if (!entry) {
+    return;
+  }
+  width.value = `${entry.contentRect.width}px`;
 });
 
 const calls = ref<Call[]>([]);
@@ -172,6 +192,10 @@ watch(
           transaction.type === 'call'
             ? transaction.action.input
             : transaction.action.init,
+        output: transaction.type === 'call' ? transaction.result.output : null,
+        code: transaction.type === 'create' ? transaction.result.code : null,
+        address:
+          transaction.type === 'create' ? transaction.result.address : null,
         value: transaction.action.value,
         gas: {
           used: transaction.result.gasUsed,
@@ -186,6 +210,12 @@ watch(
     immediate: true,
   },
 );
+
+const selectedCall = ref<Call | null>(null);
+
+function toggleSelectCall(item: Call): void {
+  selectedCall.value = selectedCall.value === item ? null : item;
+}
 
 function toggleFold(item: Call): void {
   item.folded = !item.folded;
@@ -215,9 +245,7 @@ function hasChildren(item: Call): boolean {
   });
 }
 
-function formatType(
-  value: 'call' | 'delegatecall' | 'staticcall' | 'create',
-): string {
+function formatType(value: CallType): string {
   return value === 'create'
     ? 'CREATE'
     : value === 'call'
@@ -238,6 +266,8 @@ function getFunction(data: Hex): Hex {
 function getData(data: Hex): Hex {
   return size(data) > 4 ? slice(data, 4) : '0x';
 }
+
+export type { Call, CallType, CallStatus };
 </script>
 
 <style scoped>
@@ -265,7 +295,6 @@ function getData(data: Hex): Hex {
   padding: 6px 10px;
   font-weight: var(--font-weight-light);
   line-height: 1;
-  cursor: default;
 }
 
 .content {
@@ -290,47 +319,6 @@ function getData(data: Hex): Hex {
   gap: var(--spacing-3);
 }
 
-.item {
-  --padding: 10px;
-  --status-width: 24px;
-  --call-width: 80px;
-  --marker-size: 15px;
-  --level-margin: 20px;
-
-  display: flex;
-  position: relative;
-  transition: opacity 0.25s ease;
-  opacity: 1;
-
-  &:first-child {
-    .cell {
-      padding: var(--padding) var(--padding) 6px;
-    }
-  }
-
-  &:last-child {
-    .cell {
-      padding: 6px var(--padding) var(--padding);
-    }
-  }
-
-  .cell.status {
-    padding-right: 0;
-  }
-
-  &:only-child {
-    .cell {
-      padding: 10px;
-    }
-  }
-}
-
-.tree:hover {
-  .item:not(:hover) {
-    opacity: 0.5;
-  }
-}
-
 .sticky {
   display: flex;
   position: sticky;
@@ -346,6 +334,52 @@ function getData(data: Hex): Hex {
 
 .sticky.right {
   right: 0;
+}
+
+.item {
+  --padding: 10px;
+  --status-width: 24px;
+  --call-width: 80px;
+  --marker-size: 15px;
+  --level-margin: 20px;
+
+  &:first-child {
+    .cell {
+      padding: var(--padding) var(--padding) 6px;
+    }
+  }
+
+  &:last-child {
+    .cell {
+      padding: 6px var(--padding) var(--padding);
+    }
+  }
+
+  &:only-child {
+    .cell {
+      padding: 10px;
+    }
+  }
+}
+
+.item-content {
+  display: flex;
+  position: relative;
+  transition: opacity 0.25s ease;
+
+  &:hover {
+    background: var(--color-background-secondary);
+    cursor: pointer;
+
+    .sticky {
+      background: var(--color-background-secondary);
+      cursor: pointer;
+    }
+  }
+
+  .cell.status {
+    padding-right: 0;
+  }
 }
 
 .grid {
@@ -386,10 +420,5 @@ function getData(data: Hex): Hex {
   font-family: var(--font-mono);
   font-size: var(--font-size-m);
   font-weight: var(--font-weight-light);
-}
-
-.value {
-  width: 110px;
-  text-align: end;
 }
 </style>
