@@ -75,7 +75,7 @@ interface TransactionTraceResponse {
   transactionHash: Hex;
 }
 
-interface TransactionTraceCallPart {
+interface TransactionTraceCallFrame {
   action: {
     from: Address;
     callType: 'call' | 'delegatecall' | 'staticcall';
@@ -94,7 +94,7 @@ interface TransactionTraceCallPart {
   type: 'call';
 }
 
-interface TransactionTraceCreatePart {
+interface TransactionTraceCreateFrame {
   action: {
     from: Address;
     gas: bigint;
@@ -112,11 +112,11 @@ interface TransactionTraceCreatePart {
   type: 'create';
 }
 
-type TransactionTracePart =
-  | TransactionTraceCallPart
-  | TransactionTraceCreatePart;
+type TransactionTraceFrame =
+  | TransactionTraceCallFrame
+  | TransactionTraceCreateFrame;
 
-type TransactionTrace = TransactionTracePart[];
+type TransactionTrace = TransactionTraceFrame[];
 
 interface DebugTransactionTraceResponseCall {
   from: Address;
@@ -461,9 +461,9 @@ export type {
   TransactionReceipt,
   TransactionStatus,
   TransactionTrace,
-  TransactionTracePart,
-  TransactionTraceCallPart,
-  TransactionTraceCreatePart,
+  TransactionTraceFrame,
+  TransactionTraceCallFrame,
+  TransactionTraceCreateFrame,
   DebugTransactionTrace,
   DebugTransactionTraceCall,
 };

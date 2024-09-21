@@ -13,16 +13,16 @@ import type {
   DebugTransactionTrace,
   DebugTransactionTraceCall,
   TransactionTrace,
-  TransactionTracePart,
-  TransactionTraceCallPart,
-  TransactionTraceCreatePart,
+  TransactionTraceFrame,
+  TransactionTraceCallFrame,
+  TransactionTraceCreateFrame,
 } from '@/services/evm';
 
 interface OpTrace {
-  creation: TransactionTracePart[];
-  validation: TransactionTracePart[];
-  payment: TransactionTracePart[];
-  execution: TransactionTracePart[];
+  creation: TransactionTraceFrame[];
+  validation: TransactionTraceFrame[];
+  payment: TransactionTraceFrame[];
+  execution: TransactionTraceFrame[];
 }
 
 function startsWith(a: number[], b: number[]): boolean {
@@ -36,9 +36,9 @@ function convertDebugTraceToTransactionTrace(
   function processCall(
     call: DebugTransactionTraceCall,
     traceAddress: number[] = [],
-  ): TransactionTracePart[] {
+  ): TransactionTraceFrame[] {
     const basePart: Pick<
-      TransactionTracePart,
+      TransactionTraceFrame,
       'error' | 'subtraces' | 'traceAddress'
     > = {
       error: call.error,
@@ -46,14 +46,14 @@ function convertDebugTraceToTransactionTrace(
       traceAddress,
     };
 
-    const result: TransactionTracePart[] = [];
+    const result: TransactionTraceFrame[] = [];
 
     if (
       call.type === 'CALL' ||
       call.type === 'STATICCALL' ||
       call.type === 'DELEGATECALL'
     ) {
-      const callPart: TransactionTraceCallPart = {
+      const callPart: TransactionTraceCallFrame = {
         ...basePart,
         type: 'call',
         action: {
@@ -74,7 +74,7 @@ function convertDebugTraceToTransactionTrace(
       };
       result.push(callPart);
     } else if (call.type === 'CREATE' || call.type === 'CREATE2') {
-      const createPart: TransactionTraceCreatePart = {
+      const createPart: TransactionTraceCreateFrame = {
         ...basePart,
         type: 'create',
         action: {
@@ -107,9 +107,9 @@ function convertDebugTraceToTransactionTrace(
 }
 
 function getChildren(
-  trace: TransactionTracePart[],
-  parent: TransactionTracePart,
-): TransactionTracePart[] {
+  trace: TransactionTraceFrame[],
+  parent: TransactionTraceFrame,
+): TransactionTraceFrame[] {
   return trace.filter((part) => {
     return (
       part.traceAddress.length > parent.traceAddress.length &&
@@ -119,9 +119,9 @@ function getChildren(
 }
 
 function getDirectChildren(
-  trace: TransactionTracePart[],
-  parent: TransactionTracePart,
-): TransactionTracePart[] {
+  trace: TransactionTraceFrame[],
+  parent: TransactionTraceFrame,
+): TransactionTraceFrame[] {
   return trace.filter((part) => {
     return (
       part.traceAddress.length === parent.traceAddress.length + 1 &&
@@ -134,12 +134,12 @@ function getDirectChildren(
 // There should be a clear path from the top level to the error
 // Returns the lowest level error in the path or null if no error is found
 function getRevert(
-  transactionTrace: TransactionTracePart[],
-  root: TransactionTracePart,
-): TransactionTracePart | null {
+  transactionTrace: TransactionTraceFrame[],
+  root: TransactionTraceFrame,
+): TransactionTraceFrame | null {
   function getDirectChildRevert(
-    parent: TransactionTracePart,
-  ): TransactionTracePart | null {
+    parent: TransactionTraceFrame,
+  ): TransactionTraceFrame | null {
     if (parent.error === null) {
       return null;
     }
@@ -160,14 +160,14 @@ function getRevert(
 }
 
 function getOpTrace(
-  transactionTrace: TransactionTracePart[],
+  transactionTrace: TransactionTraceFrame[],
   hash: Hex,
   sender: Address,
 ): OpTrace | null {
   function getSubtrace(
-    trace: TransactionTracePart[],
-    root: TransactionTracePart | undefined,
-  ): TransactionTracePart[] {
+    trace: TransactionTraceFrame[],
+    root: TransactionTraceFrame | undefined,
+  ): TransactionTraceFrame[] {
     if (!root) {
       return [];
     }
@@ -184,7 +184,7 @@ function getOpTrace(
   // Get creation traces
   // Find the "createSender" calls from the entrypoint
   const createSenderCalls = transactionTrace.filter(
-    (part): part is TransactionTraceCallPart =>
+    (part): part is TransactionTraceCallFrame =>
       part.type === 'call' &&
       (part.action.from === ENTRY_POINT_0_6_ADDRESS ||
         part.action.from === ENTRY_POINT_0_7_ADDRESS) &&
@@ -201,7 +201,7 @@ function getOpTrace(
   // Get validation traces
   // Find the "validateUserOp" calls from the entrypoint
   const validateOpCalls = transactionTrace.filter(
-    (part): part is TransactionTraceCallPart =>
+    (part): part is TransactionTraceCallFrame =>
       part.type === 'call' &&
       ((part.action.from === ENTRY_POINT_0_6_ADDRESS &&
         slice(part.action.input, 0, 4) === '0x3a871cdd') ||
@@ -229,7 +229,7 @@ function getOpTrace(
   // Get payment traces
   // Find the "validatePaymasterUserOp" calls from the entrypoint
   const validatePaymasterOpCalls = transactionTrace.filter(
-    (part): part is TransactionTraceCallPart =>
+    (part): part is TransactionTraceCallFrame =>
       part.type === 'call' &&
       ((part.action.from === ENTRY_POINT_0_6_ADDRESS &&
         slice(part.action.input, 0, 4) === '0xf465c77e') ||
@@ -254,7 +254,7 @@ function getOpTrace(
   // Get execution traces
   // Find the "innerHandleOp" calls from the entrypoint to the entrypoint
   const innerHandleOpCalls = transactionTrace.filter(
-    (part): part is TransactionTraceCallPart =>
+    (part): part is TransactionTraceCallFrame =>
       part.type === 'call' &&
       ((part.action.from === ENTRY_POINT_0_6_ADDRESS &&
         part.action.to === ENTRY_POINT_0_6_ADDRESS &&

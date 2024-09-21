@@ -17,7 +17,7 @@
         :kind="'cross-circled'"
         class="icon"
       />
-      <template v-if="trace === null">
+      <template v-if="traceFrame === null">
         {{
           status === null
             ? 'Executed'
@@ -27,20 +27,22 @@
         }}
       </template>
       <template v-else>
-        <template v-if="trace.error === null || trace.error === 'Reverted'">
+        <template
+          v-if="traceFrame.error === null || traceFrame.error === 'Reverted'"
+        >
           <div
-            v-if="trace.type === 'call'"
+            v-if="traceFrame.type === 'call'"
             class="address"
           >
             Reverted in
             <LinkAddress
-              :address="trace.action.to"
+              :address="traceFrame.action.to"
               type="copyable"
             />
           </div>
           <template v-else> Reverted </template>
         </template>
-        <div v-else-if="trace.error === 'OOG'">Out of gas</div>
+        <div v-else-if="traceFrame.error === 'OOG'">Out of gas</div>
       </template>
     </div>
   </div>
@@ -49,11 +51,11 @@
 <script setup lang="ts">
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import type { TransactionStatus, TransactionTracePart } from '@/services/evm';
+import type { TransactionStatus, TransactionTraceFrame } from '@/services/evm';
 
 defineProps<{
   status: TransactionStatus | null;
-  trace: TransactionTracePart | null;
+  traceFrame: TransactionTraceFrame | null;
 }>();
 </script>
 

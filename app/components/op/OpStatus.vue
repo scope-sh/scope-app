@@ -40,11 +40,11 @@
 <script setup lang="ts">
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import type { TransactionTracePart } from '@/services/evm';
+import type { TransactionTraceFrame } from '@/services/evm';
 
 defineProps<{
   success: boolean;
-  trace: TransactionTracePart | null;
+  trace: TransactionTraceFrame | null;
 }>();
 </script>
 

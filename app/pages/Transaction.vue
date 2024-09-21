@@ -41,7 +41,7 @@
       <TransactionStatus
         v-if="transactionReceipt"
         :status="transactionReceipt.status"
-        :trace="revertTrace"
+        :trace-frame="revertTraceFrame"
       />
       <AttributeList v-if="transaction && transactionReceipt">
         <AttributeItem v-if="transaction.blockNumber">
@@ -301,7 +301,7 @@ import type { Op } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getOps } from '@/utils/context/erc4337/entryPoint';
 import {
   convertDebugTraceToTransactionTrace,
-  getRevert as getRevertTrace,
+  getRevert as getRevertTraceFrame,
 } from '@/utils/context/traces';
 import { toRelativeTime } from '@/utils/conversion';
 import {
@@ -492,7 +492,7 @@ async function fetchTransactionTrace(hash: Hex): Promise<void> {
   }
 }
 
-const revertTrace = computed(() => {
+const revertTraceFrame = computed(() => {
   if (!transactionTrace.value) {
     return null;
   }
@@ -502,7 +502,7 @@ const revertTrace = computed(() => {
   if (!root) {
     return null;
   }
-  return getRevertTrace(transactionTrace.value, root);
+  return getRevertTraceFrame(transactionTrace.value, root);
 });
 
 async function fetchAbis(): Promise<void> {
