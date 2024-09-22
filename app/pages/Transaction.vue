@@ -223,29 +223,11 @@
           </template>
         </ScopePanel>
       </template>
-      <template v-if="section === SECTION_INTERNAL">
-        <ScopePanelLoading
-          v-if="isLoading"
-          title="Internal"
+      <template v-if="section === SECTION_TRACES">
+        <PanelTraces
+          :is-loading
+          :transaction-replay
         />
-        <ScopePanel title="Internal">
-          <template #default>
-            <ScopeLabelEmptyState
-              v-if="transactionReplay === null"
-              value="Internal calls not available"
-            />
-            <ScopeLabelEmptyState
-              v-else-if="transactionReplay.trace.length === 0"
-              value="No internal calls found"
-            />
-            <div
-              v-else
-              class="internal"
-            >
-              <TreeInternalCalls :trace="transactionReplay.trace" />
-            </div>
-          </template>
-        </ScopePanel>
       </template>
     </template>
   </ScopePage>
@@ -271,7 +253,6 @@ import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
-import TreeInternalCalls from '@/components/__common/TreeInternalCalls.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -280,6 +261,7 @@ import {
 } from '@/components/__common/attributes';
 import CardHighlights from '@/components/transaction/CardHighlights.vue';
 import CardOp from '@/components/transaction/CardOp.vue';
+import PanelTraces from '@/components/transaction/PanelTraces.vue';
 import TransactionStatus from '@/components/transaction/TransactionStatus.vue';
 import ViewCallData from '@/components/transaction/ViewCallData.vue';
 import type { CallDataView } from '@/components/transaction/ViewCallData.vue';
@@ -316,7 +298,7 @@ import { getRouteLocation } from '@/utils/routing';
 
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
-const SECTION_INTERNAL = 'internal';
+const SECTION_TRACES = 'internal';
 
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
@@ -340,8 +322,8 @@ const sections = computed<Section[]>(() => {
     });
   }
   list.push({
-    label: 'Internal',
-    value: SECTION_INTERNAL,
+    label: 'Traces',
+    value: SECTION_TRACES,
   });
   return list;
 });

@@ -132,30 +132,28 @@ type TransactionTraceFrame =
 
 type TransactionTrace = TransactionTraceFrame[];
 
-type TransactionStateDiff = Record<
-  Address,
-  {
-    balance?: {
-      from: bigint;
-      to: bigint;
-    };
-    code?: {
+interface TransactionStateDiffAddress {
+  balance: {
+    from: bigint;
+    to: bigint;
+  } | null;
+  code: {
+    from: Hex;
+    to: Hex;
+  } | null;
+  nonce: {
+    from: bigint;
+    to: bigint;
+  } | null;
+  storage: Record<
+    Hex,
+    {
       from: Hex;
       to: Hex;
-    };
-    nonce?: {
-      from: bigint;
-      to: bigint;
-    };
-    storage?: Record<
-      Hex,
-      {
-        from: Hex;
-        to: Hex;
-      }
-    >;
-  }
->;
+    }
+  > | null;
+}
+type TransactionStateDiff = Record<Address, TransactionStateDiffAddress>;
 
 interface TransactionReplay {
   trace: TransactionTrace;
@@ -430,21 +428,21 @@ class Service {
             {
               balance:
                 diff.balance === '='
-                  ? undefined
+                  ? null
                   : {
                       from: BigInt(diff.balance['*'].from),
                       to: BigInt(diff.balance['*'].to),
                     },
               code:
                 diff.code === '='
-                  ? undefined
+                  ? null
                   : {
                       from: diff.code['*'].from,
                       to: diff.code['*'].to,
                     },
               nonce:
                 diff.nonce === '='
-                  ? undefined
+                  ? null
                   : {
                       from: BigInt(diff.nonce['*'].from),
                       to: BigInt(diff.nonce['*'].to),
@@ -455,14 +453,14 @@ class Service {
                     return [
                       slot,
                       value === '='
-                        ? undefined
+                        ? null
                         : {
                             from: value['*'].from,
                             to: value['*'].to,
                           },
                     ];
                   })
-                  .filter(([, value]) => value !== undefined),
+                  .filter(([, value]) => value !== null),
               ),
             },
           ];
@@ -648,6 +646,7 @@ export type {
   TransactionTraceCallFrame,
   TransactionTraceCreateFrame,
   TransactionStateDiff,
+  TransactionStateDiffAddress,
   DebugTransactionTrace,
   DebugTransactionTraceCall,
   DebugTransactionStatePart,

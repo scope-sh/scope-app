@@ -124,7 +124,12 @@ function convertDebugStateToTransactionStateDiff(
   for (const [addressString, preState] of Object.entries(pre)) {
     const address = addressString as Address;
     const postState = post[address];
-    const diff: TransactionStateDiff[Address] = {};
+    const diff: TransactionStateDiff[Address] = {
+      balance: null,
+      code: null,
+      nonce: null,
+      storage: null,
+    };
 
     if (
       postState &&
@@ -139,8 +144,8 @@ function convertDebugStateToTransactionStateDiff(
 
     if (postState && postState.code && preState.code !== postState.code) {
       diff.code = {
-        from: preState.code ?? zeroHash,
-        to: postState?.code ?? zeroHash,
+        from: preState.code ?? '0x',
+        to: postState?.code ?? '0x',
       };
     }
 
@@ -177,13 +182,9 @@ function convertDebugStateToTransactionStateDiff(
     const address = addressString as Address;
     if (!pre[address]) {
       result[address] = {
-        balance: postState.balance
-          ? { from: 0n, to: postState.balance }
-          : undefined,
-        code: postState.code
-          ? { from: zeroHash, to: postState.code }
-          : undefined,
-        nonce: postState.nonce ? { from: 0n, to: postState.nonce } : undefined,
+        balance: postState.balance ? { from: 0n, to: postState.balance } : null,
+        code: postState.code ? { from: '0x', to: postState.code } : null,
+        nonce: postState.nonce ? { from: 0n, to: postState.nonce } : null,
         storage: postState.storage
           ? Object.fromEntries(
               Object.entries(postState.storage).map(([key, value]) => [
@@ -191,7 +192,7 @@ function convertDebugStateToTransactionStateDiff(
                 { from: zeroHash, to: value },
               ]),
             )
-          : undefined,
+          : null,
       };
     }
   }
