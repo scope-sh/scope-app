@@ -18,7 +18,24 @@
       </div>
       <div v-if="diff.code">
         <div class="title">Code</div>
-        <div>{{ diff.code.from }} → {{ diff.code.to }}</div>
+        <div class="code">
+          <div
+            class="code-content"
+            :class="{ expanded: isCodeExpanded }"
+          >
+            {{ diff.code.from }} → {{ diff.code.to }}
+          </div>
+          <button
+            class="expand-toggle"
+            @click="toggleExpandCode"
+          >
+            <ScopeIcon
+              class="icon"
+              :kind="isCodeExpanded ? 'chevron-up' : 'chevron-down'"
+            />
+            {{ isCodeExpanded ? 'Less' : 'More' }}
+          </button>
+        </div>
       </div>
       <div v-if="diff.storage && Object.keys(diff.storage).length > 0">
         <div class="title">Storage</div>
@@ -38,8 +55,10 @@
 
 <script setup lang="ts">
 import type { Address } from 'viem';
+import { ref } from 'vue';
 
 import LinkAddress from './LinkAddress.vue';
+import ScopeIcon from './ScopeIcon.vue';
 
 import useChain from '@/composables/useChain.js';
 import type { TransactionStateDiffAddress } from '@/services/evm';
@@ -51,19 +70,24 @@ defineProps<{
   address: Address;
   diff: TransactionStateDiffAddress;
 }>();
+
+const isCodeExpanded = ref(false);
+function toggleExpandCode(): void {
+  isCodeExpanded.value = !isCodeExpanded.value;
+}
 </script>
 
 <style scoped>
 .view {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-3);
+  flex-direction: column;
 }
 
 .diff {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-3);
+  flex-direction: column;
 }
 
 .title {
@@ -74,13 +98,49 @@ defineProps<{
 .slots {
   overflow-wrap: break-word;
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-2);
+  flex-direction: column;
   font-family: var(--font-mono);
   font-size: var(--font-size-l);
 }
 
 .slot {
   color: var(--color-text-secondary);
+}
+
+.code {
+  overflow-wrap: break-word;
+}
+
+.code-content {
+  overflow: hidden;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-l);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.code-content.expanded {
+  white-space: normal;
+}
+
+.expand-toggle {
+  display: flex;
+  gap: var(--spacing-2);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-s);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
+}
+
+.icon {
+  width: 15px;
+  height: 15px;
 }
 </style>
