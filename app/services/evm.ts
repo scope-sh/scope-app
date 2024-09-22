@@ -457,7 +457,7 @@ class Service {
             address,
             {
               balance: parseStateDiffItem(diff.balance, 0n, BigInt),
-              code: parseStateDiffItem(diff.code, zeroHash, (value) => value),
+              code: parseStateDiffItem(diff.code, '0x', (value) => value),
               nonce: parseStateDiffItem(diff.nonce, 0n, BigInt),
               storage: Object.fromEntries(
                 Object.entries(diff.storage)
