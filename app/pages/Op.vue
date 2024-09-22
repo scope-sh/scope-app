@@ -246,19 +246,21 @@
           title="Internal"
         />
         <ScopePanel
-          v-else-if="transactionReplay"
+          v-else
           title="Internal"
         >
-          <template #default>
-            <ScopeLabelEmptyState
-              v-if="transactionReplay.trace.length === 0"
-              value="No internal transactions found"
-            />
-            <InternalCalls
-              v-else
-              :trace="opTrace"
-            />
-          </template>
+          <ScopeLabelEmptyState
+            v-if="transactionReplay === null"
+            value="Internal calls not available"
+          />
+          <ScopeLabelEmptyState
+            v-else-if="transactionReplay.trace.length === 0"
+            value="No internal calls found"
+          />
+          <InternalCalls
+            v-else
+            :trace="opTrace"
+          />
         </ScopePanel>
       </template>
     </template>
@@ -587,8 +589,10 @@ async function fetchTransactionReplay(txHash: Hex): Promise<void> {
       };
     }
   } else {
+    console.log('fetchTransactionReplay 1', txHash);
     transactionReplay.value =
       await evmService.value.getTransactionReplay(txHash);
+    console.log('fetchTransactionReplay 2', transactionReplay.value);
   }
 }
 const opTrace = computed<OpTrace | null>(() => {
