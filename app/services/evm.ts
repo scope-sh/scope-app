@@ -1,10 +1,11 @@
-import type {
-  Address,
-  Hex,
-  Log,
-  PublicClient,
-  Transaction,
-  TransactionReceipt,
+import {
+  zeroHash,
+  type Address,
+  type Hex,
+  type Log,
+  type PublicClient,
+  type Transaction,
+  type TransactionReceipt,
 } from 'viem';
 
 type BlockStatus = 'executed';
@@ -28,6 +29,8 @@ interface BlockWithTransactions extends BaseBlock {
 
 type TransactionTraceResponseStateDiffItem =
   | '='
+  | Record<'+', Hex>
+  | Record<'-', Hex>
   | Record<'*', { from: Hex; to: Hex }>;
 
 type TransactionTraceResponseStateDiff = Record<
@@ -355,6 +358,33 @@ class Service {
   public async getTransactionReplay(
     hash: Hex,
   ): Promise<TransactionReplay | null> {
+    function parseStateDiffItem<T>(
+      item: TransactionTraceResponseStateDiffItem,
+      zeroValue: T,
+      parse: (value: Hex) => T,
+    ): {
+      from: T;
+      to: T;
+    } | null {
+      if (item === '=') {
+        return null;
+      } else if ('+' in item) {
+        return {
+          from: zeroValue,
+          to: item['+'] as T,
+        };
+      } else if ('-' in item) {
+        return {
+          from: item['-'] as T,
+          to: zeroValue,
+        };
+      } else {
+        return {
+          from: parse(item['*'].from),
+          to: parse(item['*'].to),
+        };
+      }
+    }
     try {
       const traceResponse = await this.client.traceReplayTransaction(hash, [
         'trace',
@@ -426,38 +456,15 @@ class Service {
           return [
             address,
             {
-              balance:
-                diff.balance === '='
-                  ? null
-                  : {
-                      from: BigInt(diff.balance['*'].from),
-                      to: BigInt(diff.balance['*'].to),
-                    },
-              code:
-                diff.code === '='
-                  ? null
-                  : {
-                      from: diff.code['*'].from,
-                      to: diff.code['*'].to,
-                    },
-              nonce:
-                diff.nonce === '='
-                  ? null
-                  : {
-                      from: BigInt(diff.nonce['*'].from),
-                      to: BigInt(diff.nonce['*'].to),
-                    },
+              balance: parseStateDiffItem(diff.balance, 0n, BigInt),
+              code: parseStateDiffItem(diff.code, zeroHash, (value) => value),
+              nonce: parseStateDiffItem(diff.nonce, 0n, BigInt),
               storage: Object.fromEntries(
                 Object.entries(diff.storage)
                   .map(([slot, value]) => {
                     return [
                       slot,
-                      value === '='
-                        ? null
-                        : {
-                            from: value['*'].from,
-                            to: value['*'].to,
-                          },
+                      parseStateDiffItem(value, zeroHash, (value) => value),
                     ];
                   })
                   .filter(([, value]) => value !== null),
