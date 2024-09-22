@@ -369,13 +369,16 @@ class Service {
       if (item === '=') {
         return null;
       } else if ('+' in item) {
+        if (parse(item['+']) === zeroValue) {
+          return null;
+        }
         return {
           from: zeroValue,
-          to: item['+'] as T,
+          to: parse(item['+']),
         };
       } else if ('-' in item) {
         return {
-          from: item['-'] as T,
+          from: parse(item['-']),
           to: zeroValue,
         };
       } else {
