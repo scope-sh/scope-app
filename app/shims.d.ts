@@ -5,6 +5,8 @@ declare module '*.vue' {
   export default component;
 }
 
+declare module '@fontsource-variable/inter' {}
+
 interface ImportMeta {
   env: {
     VITE_QUICKNODE_APP_NAME?: string;
