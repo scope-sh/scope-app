@@ -50,8 +50,8 @@ const isChainPage = computed(() => route.name === 'chain');
   --font-general: 'Inter Variable', -apple-system, 'BlinkMacSystemFont',
     avenir next, avenir, segoe ui, helvetica neue, helvetica, 'Ubuntu', roboto,
     noto, arial, sans-serif;
-  --font-mono: 'Inconsolata', 'Menlo', 'Consolas', 'Monaco', 'Liberation Mono',
-    'Lucida Console', monospace;
+  --font-mono: 'Inconsolata Variable', 'Menlo', 'Consolas', 'Monaco',
+    'Liberation Mono', 'Lucida Console', monospace;
   --font-weight-light: 200;
   --font-weight-regular: 400;
   --font-weight-heavy: 600;
