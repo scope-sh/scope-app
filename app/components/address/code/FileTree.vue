@@ -24,7 +24,7 @@ import FileTreeDirectory, {
   type FileSelection,
 } from './FileTreeDirectory.vue';
 
-const props = defineProps<{
+const { directory } = defineProps<{
   directory: Directory;
   selection: FileSelection | null;
 }>();
@@ -37,7 +37,7 @@ function handleSelect(directory: Directory, index: number): void {
   emit('select', directory, index);
 }
 
-const items = computed<Node[]>(() => [props.directory]);
+const items = computed<Node[]>(() => [directory]);
 
 function getChildren(item: Node): Node[] | undefined {
   if (!('files' in item)) {
@@ -53,10 +53,10 @@ function getChildren(item: Node): Node[] | undefined {
 const directoryIds = ref<string[]>([]);
 
 watch(
-  () => props.directory,
+  () => directory,
   () => {
     const ids = new Set<string>();
-    const stack = [props.directory];
+    const stack = [directory];
 
     while (stack.length > 0) {
       const current = stack.pop();

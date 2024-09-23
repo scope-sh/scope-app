@@ -77,7 +77,7 @@ import ScopeToggle from '@/components/__common/ScopeToggle.vue';
 import SelectPerPage from '@/components/__common/SelectPerPage.vue';
 import type { Log as AddressLog } from '@/services/hypersync';
 
-const props = defineProps<{
+const { items } = defineProps<{
   isLoading: boolean;
   items: AddressLog[];
   maxPage: number;
@@ -107,7 +107,7 @@ const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
 ]);
 
 const rows = computed<Log[]>(() => {
-  return props.items
+  return items
     .map((log) => {
       return {
         blockNumber: log.blockNumber,

@@ -20,20 +20,20 @@ import {
 } from '@/components/__common/arguments';
 import type { Output as AbiOutput } from '@/utils/validation/abi';
 
-const props = defineProps<{
+const { abiOutputs, value } = defineProps<{
   abiOutputs: readonly AbiOutput[];
   value: unknown;
 }>();
 
 const args = computed(() => {
-  if (props.value === null) {
+  if (value === null) {
     return null;
   }
-  if (props.value === undefined) {
+  if (value === undefined) {
     return null;
   }
-  const values = props.abiOutputs.length > 1 ? props.value : [props.value];
-  return getArguments(props.abiOutputs, values as Values);
+  const values = abiOutputs.length > 1 ? value : [value];
+  return getArguments(abiOutputs, values as Values);
 });
 </script>
 

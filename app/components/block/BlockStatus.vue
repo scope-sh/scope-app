@@ -20,7 +20,7 @@ import { computed } from 'vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import type { BlockStatus } from '@/services/evm.js';
 
-const props = defineProps<{
+const { status } = defineProps<{
   status: BlockStatus;
 }>();
 
@@ -28,7 +28,7 @@ const label = computed(() => {
   const map: Record<BlockStatus, string> = {
     executed: 'Executed',
   };
-  return map[props.status];
+  return map[status];
 });
 </script>
 

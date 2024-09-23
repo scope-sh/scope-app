@@ -73,7 +73,7 @@ import {
   unpackOp,
 } from '@/utils/context/erc4337/entryPoint';
 
-const props = defineProps<{
+const { entryPoint, op, transactionReceipt } = defineProps<{
   entryPoint: Address | null;
   op: Op;
   transaction: Transaction;
@@ -83,13 +83,13 @@ const props = defineProps<{
 const { id: chainId } = useChain();
 
 const hash = computed<Hex | null>(() => {
-  if (!props.entryPoint) {
+  if (!entryPoint) {
     return null;
   }
   if (!chainId.value) {
     return null;
   }
-  return getOpHash(chainId.value, props.entryPoint, props.op);
+  return getOpHash(chainId.value, entryPoint, op);
 });
 
 const opUnpacked = computed(() => {
@@ -99,19 +99,19 @@ const opUnpacked = computed(() => {
   if (!chainId.value) {
     return null;
   }
-  if (!props.entryPoint) {
+  if (!entryPoint) {
     return null;
   }
   const event = getOpEvent(
     chainId.value,
-    props.entryPoint,
-    props.transactionReceipt.logs,
-    props.op,
+    entryPoint,
+    transactionReceipt.logs,
+    op,
   );
   if (!event) {
     return null;
   }
-  return unpackOp(hash.value, props.op, event);
+  return unpackOp(hash.value, op, event);
 });
 </script>
 

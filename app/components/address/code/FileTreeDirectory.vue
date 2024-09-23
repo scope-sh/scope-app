@@ -60,21 +60,22 @@ import { Tree } from 'radix-vue/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
-const props = withDefaults(
-  defineProps<{
-    directory: Directory;
-    selection: FileSelection | null;
-    level?: number;
-  }>(),
-  { level: 0 },
-);
+const {
+  directory,
+  selection,
+  level = 0,
+} = defineProps<{
+  directory: Directory;
+  selection: FileSelection | null;
+  level?: number;
+}>();
 
 const emit = defineEmits<{
   select: [directory: Directory, index: number];
 }>();
 
 function handleFileSelect(index: number): void {
-  emit('select', props.directory, index);
+  emit('select', directory, index);
 }
 
 function handleInnerSelect(directory: Directory, fileIndex: number): void {
@@ -82,12 +83,12 @@ function handleInnerSelect(directory: Directory, fileIndex: number): void {
 }
 
 function isFileSelected(index: number): boolean {
-  if (!props.selection) {
+  if (!selection) {
     return false;
   }
   return (
-    isSameDirectory(props.directory, props.selection.directory) &&
-    index === props.selection.fileIndex
+    isSameDirectory(directory, selection.directory) &&
+    index === selection.fileIndex
   );
 }
 

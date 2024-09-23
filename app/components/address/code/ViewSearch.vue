@@ -51,7 +51,7 @@ import type { File } from './FileView.vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
-const props = defineProps<{
+const { files } = defineProps<{
   files: File[];
 }>();
 
@@ -116,7 +116,7 @@ function search(query: string): Result[] {
     return [];
   }
   const results: Result[] = [];
-  for (const file of props.files) {
+  for (const file of files) {
     const lines = file.content.split('\n');
     for (let i = 0; i < lines.length; i += 1) {
       const line = lines[i];

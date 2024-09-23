@@ -47,16 +47,16 @@ import {
   type ArrayInput as AbiArrayInput,
 } from '@/utils/validation/abi';
 
-const props = defineProps<{
+const { abiInput } = defineProps<{
   abiInput: AbiArrayInput;
 }>();
 
 const model = defineModel<unknown[]>();
 
-const length = computed(() => getArrayLength(props.abiInput));
+const length = computed(() => getArrayLength(abiInput));
 
 onMounted(() => {
-  const initialValue = getInitialValue(getArrayItemInput(props.abiInput));
+  const initialValue = getInitialValue(getArrayItemInput(abiInput));
   model.value = length.value
     ? Array.from({ length: length.value }, () => initialValue)
     : [initialValue];
@@ -73,7 +73,7 @@ function addItem(): void {
   if (!model.value) {
     return;
   }
-  model.value.push(getInitialValue(getArrayItemInput(props.abiInput)));
+  model.value.push(getInitialValue(getArrayItemInput(abiInput)));
 }
 
 function removeItem(index: number): void {

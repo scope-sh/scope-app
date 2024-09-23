@@ -48,16 +48,16 @@ import {
   getArrayLength,
 } from '@/utils/validation/abi';
 
-const props = defineProps<{
+const { abiInput } = defineProps<{
   abiInput: AbiTupleArrayInput;
 }>();
 
 const model = defineModel<unknown[]>();
 
-const length = computed(() => getArrayLength(props.abiInput));
+const length = computed(() => getArrayLength(abiInput));
 
 onMounted(() => {
-  const initialValue = getInitialValue(getTupleArrayItemInput(props.abiInput));
+  const initialValue = getInitialValue(getTupleArrayItemInput(abiInput));
   model.value = length.value
     ? Array.from({ length: length.value }, () => initialValue)
     : [initialValue];
@@ -74,7 +74,7 @@ function addItem(): void {
   if (!model.value) {
     return;
   }
-  const itemInput = getTupleArrayItemInput(props.abiInput);
+  const itemInput = getTupleArrayItemInput(abiInput);
   const initialValue = getInitialValue(itemInput);
   model.value.push(initialValue);
 }

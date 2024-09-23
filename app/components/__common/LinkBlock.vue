@@ -23,13 +23,8 @@
 import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { type Type } from './ScopeLinkInternal.vue';
 
-withDefaults(
-  defineProps<{
-    number: bigint;
-    type?: Type;
-  }>(),
-  {
-    type: 'normal',
-  },
-);
+const { type = 'normal' } = defineProps<{
+  number: bigint;
+  type?: Type;
+}>();
 </script>

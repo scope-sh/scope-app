@@ -54,7 +54,7 @@ import ArgumentTreeLeaf from './ArgumentTreeLeaf.vue';
 import type { Argument } from './common';
 import { isPrimitiveType } from './common';
 
-const props = defineProps<{
+const { topLevel } = defineProps<{
   args: Argument[];
   topLevel: boolean;
 }>();
@@ -68,12 +68,12 @@ function getAddress(value: unknown): Address {
 }
 
 function getKey(arg: Argument, index: number): string {
-  const type = props.topLevel
+  const type = topLevel
     ? arg.internalType || arg.type
     : arg.name
       ? arg.internalType || arg.type
       : '';
-  const name = props.topLevel ? arg.name : arg.name || index;
+  const name = topLevel ? arg.name : arg.name || index;
   return `${type} ${arg.indexed ? 'indexed' : ''} ${name}`;
 }
 </script>

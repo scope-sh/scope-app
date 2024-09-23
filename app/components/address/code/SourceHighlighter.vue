@@ -23,19 +23,19 @@ import ButtonCopy from '@/components/__common/ButtonCopy.vue';
 
 type Language = 'Solidity' | 'Vyper' | 'JSON' | 'plaintext';
 
-const props = withDefaults(
-  defineProps<{
-    value: string;
-    language: Language;
-    lineNumbers: boolean;
-    initialLine?: number;
-    highlight?: string | null;
-  }>(),
-  {
-    initialLine: 1,
-    highlight: null,
-  },
-);
+const {
+  value,
+  language,
+  lineNumbers,
+  initialLine = 1,
+  highlight = null,
+} = defineProps<{
+  value: string;
+  language: Language;
+  lineNumbers: boolean;
+  initialLine?: number;
+  highlight?: string | null;
+}>();
 
 const emit = defineEmits<{
   scroll: [];
@@ -58,22 +58,21 @@ const html = computed(() => {
   if (!highlighter.value) {
     return '';
   }
-  const source =
-    getHighlightSnippet(props.language, props.highlight) + props.value;
+  const source = getHighlightSnippet(language, highlight) + value;
   return highlighter.value.codeToHtml(source, {
-    lang: props.language.toLowerCase(),
+    lang: language.toLowerCase(),
     theme: 'ayu-dark',
     transformers: [transformerNotationWordHighlight()],
   });
 });
 
 watch(
-  () => props.initialLine,
+  () => initialLine,
   () => {
-    if (props.initialLine === 1) {
+    if (initialLine === 1) {
       return;
     }
-    scrollToLine(props.initialLine);
+    scrollToLine(initialLine);
   },
   {
     immediate: true,
@@ -127,7 +126,7 @@ function getHighlightSnippet(language: Language, word: string | null): string {
 }
 
 const lineBeforeDisplay = computed(() =>
-  props.lineNumbers ? 'inline-block' : 'none',
+  lineNumbers ? 'inline-block' : 'none',
 );
 </script>
 

@@ -3,15 +3,10 @@
 </template>
 
 <script setup lang="ts">
-withDefaults(
-  defineProps<{
-    value: string;
-    size?: Size;
-  }>(),
-  {
-    size: 'medium',
-  },
-);
+const { size = 'medium' } = defineProps<{
+  value: string;
+  size?: Size;
+}>();
 </script>
 
 <script lang="ts">

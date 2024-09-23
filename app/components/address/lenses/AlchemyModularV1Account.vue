@@ -36,7 +36,7 @@ import useChain from '@/composables/useChain';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -46,7 +46,7 @@ const nonce = ref<bigint | null>(null);
 const plugins = ref<Address[] | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -61,12 +61,12 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ALCHEMY_MODULAR_V1_ACCOUNT,
         functionName: 'getInstalledPlugins',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ALCHEMY_MODULAR_V1_ACCOUNT,
         functionName: 'getNonce',
       },

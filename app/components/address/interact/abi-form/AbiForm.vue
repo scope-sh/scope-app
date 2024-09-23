@@ -86,7 +86,7 @@ import {
   normalize,
 } from '@/utils/validation/abi';
 
-const props = defineProps<{
+const { fragment, error } = defineProps<{
   fragment: AbiFunction;
   isLoading: boolean;
   result: unknown;
@@ -112,10 +112,10 @@ const namingService = computed(() =>
     : null,
 );
 
-const abiInputs = computed(() => props.fragment.inputs as AbiInput[]);
-const abiOutputs = computed(() => props.fragment.outputs as AbiOutput[]);
-const isPayable = computed(() => isFragmentPayable(props.fragment));
-const isNonpayable = computed(() => isFragmentNonpayable(props.fragment));
+const abiInputs = computed(() => fragment.inputs as AbiInput[]);
+const abiOutputs = computed(() => fragment.outputs as AbiOutput[]);
+const isPayable = computed(() => isFragmentPayable(fragment));
+const isNonpayable = computed(() => isFragmentNonpayable(fragment));
 const isWriteFunction = computed(() => isPayable.value || isNonpayable.value);
 
 const accountString = ref<string>('');
@@ -141,18 +141,18 @@ const isValid = computed(() => {
 });
 const validated = ref<boolean>(false);
 const errorLabel = computed(() => {
-  if (!props.error) {
+  if (!error) {
     return null;
   }
-  if (props.error.type === 'fetch') {
+  if (error.type === 'fetch') {
     return 'Fetch failed';
   }
-  if (props.error.type === 'revert') {
-    return `Call reverted: ${props.error.reason}`;
+  if (error.type === 'revert') {
+    return `Call reverted: ${error.reason}`;
   }
-  if (props.error.type === 'ens') {
-    return props.error.name
-      ? `Unable to resolve ${props.error.name}`
+  if (error.type === 'ens') {
+    return error.name
+      ? `Unable to resolve ${error.name}`
       : 'ENS resolution failed';
   }
   return 'Unknown error';

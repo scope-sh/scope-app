@@ -56,26 +56,21 @@ defineOptions({
   inheritAttrs: false,
 });
 
-const props = withDefaults(
-  defineProps<{
-    address: Address;
-    type?: Type;
-  }>(),
-  {
-    type: 'normal',
-  },
-);
+const { address, type = 'normal' } = defineProps<{
+  address: Address;
+  type?: Type;
+}>();
 
 watch(
-  () => props.address,
+  () => address,
   (value) => {
     requestLabel(value, 'primary');
   },
   { immediate: true },
 );
 
-const labelText = computed(() => getLabelText(props.address));
-const labelIcon = computed(() => getLabelIcon(props.address));
+const labelText = computed(() => getLabelText(address));
+const labelIcon = computed(() => getLabelIcon(address));
 </script>
 
 <style scoped>

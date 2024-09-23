@@ -94,7 +94,7 @@ import type { Log as AddressLog } from '@/services/hypersync';
 import { toRelativeTime } from '@/utils/conversion';
 import { formatRelativeTime } from '@/utils/formatting';
 
-const props = defineProps<{
+const { log } = defineProps<{
   log: Log;
   type: 'address' | 'transaction';
   view: LogView;
@@ -108,15 +108,15 @@ interface DecodedLog {
 }
 
 const date = computed<Date | null>(() => {
-  if ('blockTimestamp' in props.log) {
-    return new Date(props.log.blockTimestamp);
+  if ('blockTimestamp' in log) {
+    return new Date(log.blockTimestamp);
   }
   return null;
 });
 
 const abi = computed<AbiEvent | null>(() => {
-  const signature = props.log.topics[0];
-  return signature ? getEventAbi(props.log.address, signature) : null;
+  const signature = log.topics[0];
+  return signature ? getEventAbi(log.address, signature) : null;
 });
 
 const decoded = computed<DecodedLog | null>(() => {
@@ -124,8 +124,8 @@ const decoded = computed<DecodedLog | null>(() => {
 
   const decodedLog = decodeEventLog({
     abi: [abi.value],
-    data: props.log.data,
-    topics: props.log.topics as [Hex, ...Hex[]],
+    data: log.data,
+    topics: log.topics as [Hex, ...Hex[]],
     strict: false,
   });
 

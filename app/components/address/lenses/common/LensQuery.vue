@@ -42,7 +42,7 @@ import {
   getInitialValue,
 } from '@/utils/validation/abi';
 
-const props = defineProps<{
+const { address, abi, functionName, formatter } = defineProps<{
   address: Address;
   abi: abi;
   functionName: functionName;
@@ -57,8 +57,8 @@ const abiInputs = computed<AbiInput[]>(() => {
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const abiItem = getAbiItem({
-    abi: props.abi,
-    name: props.functionName,
+    abi: abi,
+    name: functionName,
   }) as AbiFunction | undefined;
   return (abiItem?.inputs as AbiInput[]) ?? [];
 });
@@ -87,13 +87,13 @@ async function fetch(inputs: unknown[]): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     const result = await client.value.readContract({
-      address: props.address as Address,
-      abi: props.abi,
-      functionName: props.functionName,
+      address,
+      abi,
+      functionName,
       args,
     });
     isLoading.value = false;
-    value.value = props.formatter ? props.formatter(result) : result;
+    value.value = formatter ? formatter(result) : result;
   } catch {
     isLoading.value = false;
     isError.value = true;

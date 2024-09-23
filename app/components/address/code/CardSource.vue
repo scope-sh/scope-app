@@ -64,7 +64,7 @@ import ViewSearch, { type Result as SearchResult } from './ViewSearch.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
 import type { SourceCode } from '@/services/api.js';
 
-const props = defineProps<{
+const { source } = defineProps<{
   source: SourceCode;
   isSearching: boolean;
 }>();
@@ -74,7 +74,7 @@ const emit = defineEmits<{
 }>();
 
 watch(
-  () => props.source,
+  () => source,
   () => {
     selectedFileIndex.value = 0;
   },
@@ -100,7 +100,7 @@ function handleSourceScroll(): void {
 }
 
 const files = computed<File[]>(() =>
-  Object.entries(props.source.files).map(([name, content]) => ({
+  Object.entries(source.files).map(([name, content]) => ({
     name,
     content,
   })),
@@ -108,7 +108,7 @@ const files = computed<File[]>(() =>
 const singleFile = computed(() => files.value.length === 1);
 
 const selectedFileIndex = ref<number>(
-  files.value.findIndex((file) => file.name === props.source.entry) || 0,
+  files.value.findIndex((file) => file.name === source.entry) || 0,
 );
 const selectedFile = computed(() => {
   return files.value[selectedFileIndex.value] || null;

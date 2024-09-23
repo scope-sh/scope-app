@@ -64,7 +64,7 @@ import TableTransfers from '@/components/address/TableTransfers.vue';
 import type { Transfer as TransferRow } from '@/components/address/TableTransfers.vue';
 import type { Transfer as AddressTransfer } from '@/services/hypersync';
 
-const props = defineProps<{
+const { isLoading, items } = defineProps<{
   address: Address;
   isLoading: boolean;
   items: AddressTransfer[];
@@ -83,7 +83,7 @@ const emit = defineEmits<{
 }>();
 
 const rows = computed<TransferRow[]>(() => {
-  return props.isLoading
+  return isLoading
     ? new Array<TransferRow>(page.value * perPage.value).fill({
         blockNumber: 0,
         blockTimestamp: 0,
@@ -94,7 +94,7 @@ const rows = computed<TransferRow[]>(() => {
         type: 'erc20',
         amount: '0',
       })
-    : props.items.map((transfer) => {
+    : items.map((transfer) => {
         return transfer.type === 'erc20'
           ? {
               blockNumber: transfer.blockNumber,

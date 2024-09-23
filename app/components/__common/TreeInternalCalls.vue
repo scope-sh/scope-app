@@ -140,7 +140,7 @@ interface Call {
   folded: boolean;
 }
 
-const props = defineProps<{
+const { trace } = defineProps<{
   trace: TransactionTrace | null;
 }>();
 
@@ -163,7 +163,7 @@ useResizeObserver(el, (entries) => {
 
 const calls = ref<Call[]>([]);
 watch(
-  () => props.trace,
+  () => trace,
   (trace) => {
     if (!trace) {
       calls.value = [];

@@ -49,7 +49,7 @@ import useChain from '@/composables/useChain';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -61,7 +61,7 @@ const totalSupply = ref<bigint | null>(null);
 const owner = ref<Address | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -76,22 +76,22 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ZORA_721_TOKEN,
         functionName: 'symbol',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ZORA_721_TOKEN,
         functionName: 'name',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ZORA_721_TOKEN,
         functionName: 'totalSupply',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ZORA_721_TOKEN,
         functionName: 'owner',
       },

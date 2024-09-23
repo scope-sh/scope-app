@@ -16,14 +16,14 @@ import { getContractDeployment, getLogs } from '@/utils/context/highlights';
 
 const { getLabel } = useLabels();
 
-const props = defineProps<{
+const { transaction, logs } = defineProps<{
   transaction: Transaction;
   logs: Log[];
 }>();
 
 const items = computed<Item[]>(() => {
-  const contractDeployment = getContractDeployment(props.transaction);
-  const logItems = getLogs(props.logs, getLabel);
+  const contractDeployment = getContractDeployment(transaction);
+  const logItems = getLogs(logs, getLabel);
   return [...contractDeployment, ...logItems];
 });
 </script>

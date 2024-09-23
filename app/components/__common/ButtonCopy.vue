@@ -25,15 +25,10 @@ import { onMounted } from 'vue';
 
 import ScopeIcon from './ScopeIcon.vue';
 
-const props = withDefaults(
-  defineProps<{
-    value: string;
-    compact?: boolean;
-  }>(),
-  {
-    compact: false,
-  },
-);
+const { value, compact = false } = defineProps<{
+  value: string;
+  compact?: boolean;
+}>();
 
 onMounted(() => {
   stop();
@@ -42,7 +37,7 @@ onMounted(() => {
 const { ready, start, stop } = useTimeout(2000, { controls: true });
 
 function copy(): void {
-  navigator.clipboard.writeText(props.value);
+  navigator.clipboard.writeText(value);
   start();
 }
 </script>

@@ -11,7 +11,7 @@
       <span>{{ name }}</span>
     </div>
     <ButtonCopy
-      :value="props.value"
+      :value="value"
       compact
     />
   </div>
@@ -22,12 +22,12 @@ import { computed } from 'vue';
 
 import ButtonCopy from '@/components/__common/ButtonCopy.vue';
 
-const props = defineProps<{
+const { value } = defineProps<{
   value: string;
 }>();
 
-const dirs = computed(() => props.value.split('/').slice(0, -1));
-const name = computed(() => props.value.split('/').pop());
+const dirs = computed(() => value.split('/').slice(0, -1));
+const name = computed(() => value.split('/').pop());
 </script>
 
 <style scoped>

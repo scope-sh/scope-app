@@ -29,7 +29,7 @@ import { isPrimitiveValid } from '@/utils/validation/abi';
 
 const model = defineModel<unknown>();
 
-const props = defineProps<{
+const { abiInput } = defineProps<{
   abiInput: PrimitiveInput;
 }>();
 
@@ -51,7 +51,7 @@ const id = computed(
 
 const inputValidated = ref<boolean>(false);
 const isInputValid = computed(() =>
-  isPrimitiveValid(model.value, props.abiInput.type),
+  isPrimitiveValid(model.value, abiInput.type),
 );
 const isValid = computed<boolean>(() =>
   inputValidated.value ? isInputValid.value : true,

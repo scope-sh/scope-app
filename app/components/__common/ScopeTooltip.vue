@@ -26,12 +26,12 @@ import { computed } from 'vue';
 
 type Delay = 'small' | 'medium' | 'large';
 
-const props = defineProps<{
+const { delay } = defineProps<{
   delay: Delay;
 }>();
 
 const delayDuration = computed<number>(() => {
-  switch (props.delay) {
+  switch (delay) {
     case 'small':
       return 300;
     case 'medium':

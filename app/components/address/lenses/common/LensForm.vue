@@ -40,7 +40,7 @@ import {
   type Input as AbiInput,
 } from '@/utils/validation/abi';
 
-const props = defineProps<{
+const { abiInputs } = defineProps<{
   abiInputs: readonly AbiInput[];
   isLoading: boolean;
 }>();
@@ -59,10 +59,10 @@ const namingService = computed(() =>
 );
 
 const inputs = ref<unknown[]>([]);
-const isValid = computed(() => isAbiValid(inputs.value, props.abiInputs));
+const isValid = computed(() => isAbiValid(inputs.value, abiInputs));
 
 onMounted(() => {
-  inputs.value = props.abiInputs.map((input) => getInitialValue(input));
+  inputs.value = abiInputs.map((input) => getInitialValue(input));
 });
 
 function handleInputUpdate(index: number, newValue: unknown): void {
@@ -75,7 +75,7 @@ async function handleSubmit(): Promise<void> {
   }
   const normalizedInputs = await normalize(
     inputs.value,
-    props.abiInputs,
+    abiInputs,
     namingService.value,
   );
   emit('submit', normalizedInputs);

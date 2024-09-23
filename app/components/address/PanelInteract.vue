@@ -66,7 +66,7 @@ import {
 } from '@/utils/context/evm';
 import type { AbiFragment, QueryError } from '@/utils/context/evm';
 
-const props = defineProps<{
+const { address, contract } = defineProps<{
   address: Address;
   contract: Contract | null;
 }>();
@@ -132,17 +132,15 @@ function isLoading(fragment: AbiFunction): boolean {
   return isFunctionLoading.value[toFunctionSelector(fragment)] || false;
 }
 
-const isProxy = computed(() => props.contract && props.contract.implementation);
+const isProxy = computed(() => contract && contract.implementation);
 const implementation = computed(() =>
-  props.contract && props.contract.implementation
-    ? props.contract.implementation.address
-    : null,
+  contract && contract.implementation ? contract.implementation.address : null,
 );
 const abi = computed(() =>
-  props.contract
-    ? showAsProxy.value && props.contract.implementation
-      ? props.contract.implementation.abi
-      : props.contract.abi
+  contract
+    ? showAsProxy.value && contract.implementation
+      ? contract.implementation.abi
+      : contract.abi
     : null,
 );
 
@@ -248,7 +246,7 @@ async function fetchParamlessFragment(fragment: AbiFunction): Promise<void> {
   }
   try {
     const result = await readContract(client.value, {
-      address: props.address,
+      address: address,
       abi: abi.value || [],
       functionName: fragment.name,
       args: [],
@@ -284,7 +282,7 @@ async function handleSubmit(
   errors.value[toFunctionSelector(fragment)] = null;
   try {
     const { result } = await simulateContract(client.value, {
-      address: props.address,
+      address: address,
       abi: abi.value || [],
       functionName: fragment.name,
       args,

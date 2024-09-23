@@ -64,7 +64,7 @@ import TableTransactions from '@/components/__common/TableTransactions.vue';
 import type { Transaction as TransactionRow } from '@/components/__common/TableTransactions.vue';
 import type { Transaction as AddressTransaction } from '@/services/hypersync';
 
-const props = defineProps<{
+const { isLoading, items } = defineProps<{
   address: Address;
   isLoading: boolean;
   items: AddressTransaction[];
@@ -83,7 +83,7 @@ const emit = defineEmits<{
 }>();
 
 const transactionRows = computed<TransactionRow[]>(() => {
-  return props.isLoading
+  return isLoading
     ? new Array<TransactionRow>(page.value * perPage.value).fill({
         success: false,
         blockNumber: 0,
@@ -97,7 +97,7 @@ const transactionRows = computed<TransactionRow[]>(() => {
         value: 0n,
         gasPrice: 0n,
       })
-    : props.items.map((transaction) => {
+    : items.map((transaction) => {
         return {
           success: transaction.status > 0,
           blockNumber: transaction.blockNumber,

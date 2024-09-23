@@ -27,7 +27,7 @@ import ScopeTextStrip from '@/components/__common/ScopeTextStrip.vue';
 import useChain from '@/composables/useChain';
 import EvmService from '@/services/evm';
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
   balance: bigint | null;
 }>();
@@ -53,7 +53,7 @@ async function query(): Promise<void> {
     return;
   }
   isLoading.value = true;
-  const balance = await ethereumService.value.getBalance(props.address);
+  const balance = await ethereumService.value.getBalance(address);
   emit('update:balance', balance);
   isLoading.value = false;
 }

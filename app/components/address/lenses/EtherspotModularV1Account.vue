@@ -30,7 +30,7 @@ import useChain from '@/composables/useChain';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -39,7 +39,7 @@ const isLoading = ref(true);
 const validators = ref<Address[] | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -54,7 +54,7 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ETHERSPOT_MODULAR_V1_ACCOUNT,
         functionName: 'getValidatorPaginated',
         args: ['0x0000000000000000000000000000000000000001', 1000n],

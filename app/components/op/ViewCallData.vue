@@ -50,7 +50,7 @@ import type { LabelTypeId } from '@/services/api';
 import { decode as decodeCalls } from '@/utils/context/erc4337/callData';
 import type { Call } from '@/utils/context/erc4337/callData';
 
-const props = defineProps<{
+const { address, callData } = defineProps<{
   address: Address | null;
   callData: Hex;
   view: CallDataView;
@@ -65,10 +65,10 @@ interface DecodedCallData {
 }
 
 const labelType = computed<LabelTypeId | null>(() => {
-  if (!props.address) {
+  if (!address) {
     return null;
   }
-  const label = getLabel(props.address);
+  const label = getLabel(address);
   if (!label) {
     return null;
   }
@@ -77,19 +77,19 @@ const labelType = computed<LabelTypeId | null>(() => {
   }
   return label.type.id;
 });
-const signature = computed<Hex>(() => props.callData.substring(0, 10) as Hex);
+const signature = computed<Hex>(() => callData.substring(0, 10) as Hex);
 
 const abi = computed<AbiFunction | null>(() => {
-  if (!props.address) {
+  if (!address) {
     return null;
   }
   return size(signature.value) === 4
-    ? getFunctionAbi(props.address, signature.value)
+    ? getFunctionAbi(address, signature.value)
     : null;
 });
 
 const calls = computed<Call[] | null>(() =>
-  decodeCalls(labelType.value, props.callData),
+  decodeCalls(labelType.value, callData),
 );
 
 const decoded = computed<DecodedCallData | null>(() => {
@@ -97,7 +97,7 @@ const decoded = computed<DecodedCallData | null>(() => {
 
   const decodedCallData = decodeFunctionData({
     abi: [abi.value],
-    data: props.callData,
+    data: callData,
   });
 
   const args = getArguments(abi.value.inputs, decodedCallData.args);

@@ -20,7 +20,7 @@
       <AttributeItemLabel :value="'Balance'" />
       <AttributeItemValue>
         <LensQuery
-          :address="address"
+          :address
           :abi="ABI_AAVE_V3_TOKEN"
           :function-name="'balanceOf'"
           :formatter="
@@ -52,7 +52,7 @@ import { fromWei } from '@/utils/conversion';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -64,7 +64,7 @@ const decimals = ref<number | null>(null);
 const totalSupply = ref<string | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -79,22 +79,22 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AAVE_V3_TOKEN,
         functionName: 'UNDERLYING_ASSET_ADDRESS',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AAVE_V3_TOKEN,
         functionName: 'POOL',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AAVE_V3_TOKEN,
         functionName: 'decimals',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AAVE_V3_TOKEN,
         functionName: 'totalSupply',
       },

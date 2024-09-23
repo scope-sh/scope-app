@@ -85,7 +85,7 @@ interface Composition {
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -114,7 +114,7 @@ const price = computed<number | null>(() => {
 });
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -129,22 +129,22 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AERODROME_V1_POOL,
         functionName: 'token0',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AERODROME_V1_POOL,
         functionName: 'token1',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AERODROME_V1_POOL,
         functionName: 'factory',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_AERODROME_V1_POOL,
         functionName: 'getReserves',
       },
@@ -175,7 +175,7 @@ async function fetch(): Promise<void> {
           address: token0.value as Address,
           abi: ABI_ERC20,
           functionName: 'balanceOf',
-          args: [props.address as Address],
+          args: [address],
         },
         {
           address: token0.value as Address,
@@ -191,7 +191,7 @@ async function fetch(): Promise<void> {
           address: token1.value as Address,
           abi: ABI_ERC20,
           functionName: 'balanceOf',
-          args: [props.address as Address],
+          args: [address],
         },
         {
           address: token1.value as Address,

@@ -48,7 +48,7 @@ import useChain from '@/composables/useChain';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -60,7 +60,7 @@ const modules = ref<readonly Address[] | null>(null);
 const nonce = ref<bigint | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -75,23 +75,23 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_SAFE_1_4_1_ACCOUNT,
         functionName: 'getOwners',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_SAFE_1_4_1_ACCOUNT,
         functionName: 'getThreshold',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_SAFE_1_4_1_ACCOUNT,
         functionName: 'getModulesPaginated',
         args: ['0x0000000000000000000000000000000000000001', 1000n],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_SAFE_1_4_1_ACCOUNT,
         functionName: 'nonce',
       },

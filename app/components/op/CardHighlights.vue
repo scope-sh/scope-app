@@ -16,14 +16,14 @@ import { getOp, getLogs, type Item } from '@/utils/context/highlights';
 
 const { getLabel } = useLabels();
 
-const props = defineProps<{
+const { op, logs } = defineProps<{
   op: OpUnpacked;
   logs: Log[];
 }>();
 
 const items = computed<Item[]>(() => {
-  const opItems = getOp(props.op, getLabel);
-  const logItems = getLogs(props.logs, getLabel);
+  const opItems = getOp(op, getLabel);
+  const logItems = getLogs(logs, getLabel);
   return [...opItems, ...logItems];
 });
 </script>

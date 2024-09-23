@@ -32,13 +32,11 @@ import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkTransaction from '@/components/__common/LinkTransaction.vue';
 import type { Deployment } from '@/services/api';
 
-const props = defineProps<{
+const { deployment } = defineProps<{
   deployment: Deployment;
 }>();
 
-const isGenesis = computed(
-  () => (props.deployment.deployer as string) === 'GENESIS',
-);
+const isGenesis = computed(() => (deployment.deployer as string) === 'GENESIS');
 </script>
 
 <style scoped>

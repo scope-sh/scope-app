@@ -25,13 +25,8 @@ import type { Hex } from 'viem';
 import LinkBase from './LinkBase.vue';
 import ScopeLinkInternal, { type Type } from './ScopeLinkInternal.vue';
 
-withDefaults(
-  defineProps<{
-    hash: Hex;
-    type?: Type;
-  }>(),
-  {
-    type: 'normal',
-  },
-);
+const { type = 'normal' } = defineProps<{
+  hash: Hex;
+  type?: Type;
+}>();
 </script>

@@ -33,7 +33,7 @@ import useTimerFn from '@/composables/useTimerFn';
 import type { Toast } from '@/utils/ui';
 import { TOAST_DURATION } from '@/utils/ui';
 
-const props = defineProps<{
+const { expanded } = defineProps<{
   value: Toast | null;
   before: number;
   expanded: boolean;
@@ -48,7 +48,7 @@ function close(): void {
 }
 
 watch(
-  () => props.expanded,
+  () => expanded,
   (value) => {
     if (value) {
       pause();

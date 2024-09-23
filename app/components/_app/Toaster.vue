@@ -29,7 +29,7 @@ import type { Toast as ToastData } from '@/utils/ui';
 
 const isHovered = ref(false);
 
-const props = defineProps<{
+const { value } = defineProps<{
   value: ToastData[];
 }>();
 
@@ -43,7 +43,7 @@ function hideToast(index: number): void {
 
 const el = ref<HTMLElement | null>(null);
 
-const count = computed(() => props.value.length);
+const count = computed(() => value.length);
 </script>
 
 <style scoped>

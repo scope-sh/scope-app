@@ -73,7 +73,7 @@ import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import type { Contract } from '@/services/api';
 
-const props = defineProps<{
+const { contract } = defineProps<{
   address: Address;
   bytecode: Hex | null;
   contract: Contract | null;
@@ -81,24 +81,22 @@ const props = defineProps<{
 
 const showAsProxy = ref(true);
 
-const isProxy = computed(() => props.contract && props.contract.implementation);
+const isProxy = computed(() => contract && contract.implementation);
 const implementation = computed(() =>
-  props.contract && props.contract.implementation
-    ? props.contract.implementation.address
-    : null,
+  contract && contract.implementation ? contract.implementation.address : null,
 );
 const abi = computed(() =>
-  props.contract
-    ? showAsProxy.value && props.contract.implementation
-      ? props.contract.implementation.abi
-      : props.contract.abi
+  contract
+    ? showAsProxy.value && contract.implementation
+      ? contract.implementation.abi
+      : contract.abi
     : null,
 );
 const source = computed(() =>
-  props.contract
-    ? showAsProxy.value && props.contract.implementation
-      ? props.contract.implementation.source
-      : props.contract.source
+  contract
+    ? showAsProxy.value && contract.implementation
+      ? contract.implementation.source
+      : contract.source
     : null,
 );
 

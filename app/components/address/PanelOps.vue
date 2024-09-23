@@ -63,7 +63,7 @@ import TableOps from '@/components/address/TableOps.vue';
 import type { Op as OpRow } from '@/components/address/TableOps.vue';
 import type { Op } from '@/services/indexer';
 
-const props = defineProps<{
+const { isLoading, items } = defineProps<{
   isLoading: boolean;
   items: Op[];
   maxPage: number;
@@ -81,7 +81,7 @@ const emit = defineEmits<{
 }>();
 
 const rows = computed<OpRow[]>(() => {
-  return props.isLoading
+  return isLoading
     ? new Array<OpRow>(page.value * perPage.value).fill({
         success: false,
         entryPoint: zeroAddress,
@@ -93,7 +93,7 @@ const rows = computed<OpRow[]>(() => {
         bundler: zeroAddress,
         paymaster: zeroAddress,
       })
-    : props.items.map((op) => {
+    : items.map((op) => {
         return {
           success: op.success,
           entryPoint: op.entryPoint,

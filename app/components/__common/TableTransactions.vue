@@ -170,7 +170,7 @@ import {
 const { nativeCurrency } = useChain();
 const { getLabelText } = useLabels();
 
-const props = defineProps<{
+const { address, transactions, page, perPage, type } = defineProps<{
   address?: Address;
   transactions: Transaction[];
   page: number;
@@ -183,7 +183,7 @@ const columnHelper = createColumnHelper<Transaction>();
 const columns = computed(() => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const columns: ColumnDef<Transaction, any>[] = [];
-  if (props.type === 'address') {
+  if (type === 'address') {
     columns.push(
       columnHelper.accessor('success', {
         header: '',
@@ -213,7 +213,7 @@ const columns = computed(() => {
         cell: (cell) => cell.getValue(),
       }),
     );
-  } else if (props.type === 'block') {
+  } else if (type === 'block') {
     columns.push(
       columnHelper.accessor('blockPosition', {
         header: 'pos.',
@@ -259,26 +259,26 @@ const columns = computed(() => {
 
 const table = useVueTable({
   get data() {
-    return props.transactions;
+    return transactions;
   },
   columns: columns.value,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
 });
-table.setPageSize(props.perPage);
-table.setPageIndex(props.page);
+table.setPageSize(perPage);
+table.setPageIndex(page);
 
 watch(
-  () => props.perPage,
+  () => perPage,
   () => {
-    table.setPageSize(props.perPage);
+    table.setPageSize(perPage);
   },
 );
 
 watch(
-  () => props.page,
+  () => page,
   () => {
-    table.setPageIndex(props.page);
+    table.setPageIndex(page);
   },
 );
 

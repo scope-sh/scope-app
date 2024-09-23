@@ -2,10 +2,10 @@
   <div
     class="view"
     :class="{
-      tiny: props.size === 'tiny',
-      regular: props.size === 'regular',
-      large: props.size === 'large',
-      error: props.type === 'error',
+      tiny: size === 'tiny',
+      regular: size === 'regular',
+      large: size === 'large',
+      error: type === 'error',
     }"
   >
     {{ value }}
@@ -13,18 +13,11 @@
 </template>
 
 <script setup lang="ts">
-const props = withDefaults(
-  defineProps<{
-    value: string;
-    size: Size;
-    type?: Type;
-    label?: string;
-  }>(),
-  {
-    type: 'text',
-    label: undefined,
-  },
-);
+const { type = 'text' } = defineProps<{
+  value: string;
+  size: Size;
+  type?: Type;
+}>();
 </script>
 
 <script lang="ts">

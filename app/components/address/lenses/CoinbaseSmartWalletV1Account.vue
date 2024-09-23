@@ -48,7 +48,7 @@ type Owner =
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -57,7 +57,7 @@ const isLoading = ref(true);
 const owners = ref<Owner[] | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -73,7 +73,7 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_COINBASE_SMART_WALLET_ACCOUNT,
         functionName: 'nextOwnerIndex',
       },
@@ -90,7 +90,7 @@ async function fetch(): Promise<void> {
 
   const ownersResult = await client.value.multicall({
     contracts: Array.from({ length: Number(nextOwnerIndex) }, (_, i) => ({
-      address: props.address as Address,
+      address,
       abi: ABI_COINBASE_SMART_WALLET_ACCOUNT,
       functionName: 'ownerAtIndex',
       args: [BigInt(i)],

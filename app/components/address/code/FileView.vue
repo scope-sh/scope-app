@@ -19,7 +19,7 @@ import { computed, ref } from 'vue';
 import FileTree from './FileTree.vue';
 import type { Directory, FileSelection } from './FileTreeDirectory.vue';
 
-const props = defineProps<{
+const { files, selectedFileIndex } = defineProps<{
   files: File[];
   selectedFileIndex: number;
 }>();
@@ -29,7 +29,7 @@ const emit = defineEmits<{
 }>();
 
 const fileSelection = computed<FileSelection | null>(() => {
-  const file = props.files[props.selectedFileIndex];
+  const file = files[selectedFileIndex];
   if (!file) {
     return null;
   }
@@ -68,7 +68,7 @@ const rootDirectory = computed<Directory>(() => {
     id: generateId(),
   };
 
-  props.files.forEach((file) => {
+  files.forEach((file) => {
     const path = file.name.split('/');
     let current = root;
 
@@ -144,9 +144,7 @@ function handleFileSelect(directory: Directory, fileIndex: number): void {
   }
   const path = getFullPath(directory);
   const filePath = path === '' ? file.name : `${path}/${file.name}`;
-  const selectedFileIndex = props.files.findIndex(
-    (file) => file.name === filePath,
-  );
+  const selectedFileIndex = files.findIndex((file) => file.name === filePath);
   emit('update:selectedFileIndex', selectedFileIndex);
 }
 

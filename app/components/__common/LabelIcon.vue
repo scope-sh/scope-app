@@ -10,18 +10,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 
-const props = defineProps<{
+const { uri } = defineProps<{
   uri: string | null;
 }>();
 
 const url = computed<string | null>(() => {
-  if (!props.uri) {
+  if (!uri) {
     return null;
   }
-  if (props.uri.startsWith('ipfs://')) {
-    return `https://ipfs.io/ipfs/${props.uri.slice(7)}`;
+  if (uri.startsWith('ipfs://')) {
+    return `https://ipfs.io/ipfs/${uri.slice(7)}`;
   }
-  return props.uri;
+  return uri;
 });
 
 const canLoad = ref(true);

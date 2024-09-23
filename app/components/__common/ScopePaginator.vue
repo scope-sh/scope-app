@@ -37,27 +37,24 @@ import { Pagination } from 'radix-vue/namespaced';
 
 import ScopeIcon from './ScopeIcon.vue';
 
-const props = withDefaults(
-  defineProps<{
-    total?: number;
-    zeroBased?: boolean;
-    showPage?: boolean;
-    disabled?: boolean;
-  }>(),
-  {
-    total: undefined,
-    zeroBased: false,
-    showPage: true,
-    disabled: false,
-  },
-);
+const {
+  total = undefined,
+  zeroBased = false,
+  showPage = true,
+  disabled = false,
+} = defineProps<{
+  total?: number;
+  zeroBased?: boolean;
+  showPage?: boolean;
+  disabled?: boolean;
+}>();
 
 const page = defineModel<number>({
   required: true,
 });
 
 function handlePageUpdate(newValue: number): void {
-  page.value = props.zeroBased ? newValue - 1 : newValue;
+  page.value = zeroBased ? newValue - 1 : newValue;
 }
 </script>
 

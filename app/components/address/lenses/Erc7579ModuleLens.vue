@@ -33,7 +33,7 @@ import {
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -42,7 +42,7 @@ const isLoading = ref(true);
 const types = ref<number[]>([]);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -57,43 +57,43 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ERC7579_MODULE,
         functionName: 'isModuleType',
         args: [BigInt(TYPE_VALIDATION)],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ERC7579_MODULE,
         functionName: 'isModuleType',
         args: [BigInt(TYPE_EXECUTION)],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ERC7579_MODULE,
         functionName: 'isModuleType',
         args: [BigInt(TYPE_FALLBACK)],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ERC7579_MODULE,
         functionName: 'isModuleType',
         args: [BigInt(TYPE_HOOK)],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ERC7579_MODULE,
         functionName: 'isModuleType',
         args: [BigInt(TYPE_POLICY)],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ERC7579_MODULE,
         functionName: 'isModuleType',
         args: [BigInt(TYPE_SIGNER)],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_ERC7579_MODULE,
         functionName: 'isModuleType',
         args: [BigInt(TYPE_ACTION)],

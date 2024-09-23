@@ -27,27 +27,22 @@ import { getRouteLocation } from '@/utils/routing';
 
 const { route: hoveredRoute, setRoute: setHoveredRoute } = useLinkHover();
 
-const props = withDefaults(
-  defineProps<{
-    route: Route;
-    type?: Type;
-  }>(),
-  {
-    type: 'normal',
-  },
-);
+const { route, type = 'normal' } = defineProps<{
+  route: Route;
+  type?: Type;
+}>();
 
 const el = ref();
 const isHovered = useElementHover(el);
 watch(isHovered, (value) => {
   if (value) {
-    setHoveredRoute(props.route);
+    setHoveredRoute(route);
   } else {
     setHoveredRoute(null);
   }
 });
 
-const to = computed(() => getRouteLocation(props.route));
+const to = computed(() => getRouteLocation(route));
 
 const isHighlighted = computed(() => {
   if (isHovered.value) {
@@ -57,24 +52,19 @@ const isHighlighted = computed(() => {
     switch (hoveredRoute.value.name) {
       case 'block':
         return (
-          props.route.name === 'block' &&
-          props.route.number === hoveredRoute.value.number
+          route.name === 'block' && route.number === hoveredRoute.value.number
         );
       case 'transaction':
         return (
-          props.route.name === 'transaction' &&
-          props.route.hash === hoveredRoute.value.hash
+          route.name === 'transaction' && route.hash === hoveredRoute.value.hash
         );
       case 'address':
         return (
-          props.route.name === 'address' &&
-          props.route.address === hoveredRoute.value.address
+          route.name === 'address' &&
+          route.address === hoveredRoute.value.address
         );
       case 'op':
-        return (
-          props.route.name === 'op' &&
-          props.route.hash === hoveredRoute.value.hash
-        );
+        return route.name === 'op' && route.hash === hoveredRoute.value.hash;
     }
   }
   return false;

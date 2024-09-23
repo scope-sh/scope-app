@@ -57,7 +57,7 @@ import { formatShare } from '@/utils/formatting';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -70,7 +70,7 @@ const decimals = ref<number | null>(null);
 const totalSupply = ref<string | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -85,27 +85,27 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_MORPHO_VAULT,
         functionName: 'asset',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_MORPHO_VAULT,
         functionName: 'name',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_MORPHO_VAULT,
         functionName: 'fee',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_MORPHO_VAULT,
         functionName: 'decimals',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_MORPHO_VAULT,
         functionName: 'totalSupply',
       },

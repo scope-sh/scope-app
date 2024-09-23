@@ -74,7 +74,7 @@ const TYPE_PERMISSION = '0x02';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -97,7 +97,7 @@ const moduleTypeSupportLabel = computed(() => {
 });
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -112,12 +112,12 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_KERNEL_V3_ACCOUNT,
         functionName: 'accountId',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_KERNEL_V3_ACCOUNT,
         functionName: 'rootValidator',
       },
@@ -139,7 +139,7 @@ async function fetch(): Promise<void> {
       const permissionResult = await client.value.multicall({
         contracts: [
           {
-            address: props.address as Address,
+            address,
             abi: ABI_KERNEL_V3_ACCOUNT,
             functionName: 'permissionConfig',
             args: [permissionId],

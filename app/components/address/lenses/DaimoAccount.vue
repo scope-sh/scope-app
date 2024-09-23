@@ -50,7 +50,7 @@ import useChain from '@/composables/useChain';
 
 const { client } = useChain();
 
-const props = defineProps<{
+const { address } = defineProps<{
   address: Address;
 }>();
 
@@ -62,7 +62,7 @@ const activeSlots = ref<string | null>(null);
 const key = ref<string | null>(null);
 
 watch(
-  () => props.address,
+  () => address,
   () => {
     fetch();
   },
@@ -77,12 +77,12 @@ async function fetch(): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_DAIMO_ACCOUNT,
         functionName: 'numActiveKeys',
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_DAIMO_ACCOUNT,
         functionName: 'getActiveSigningKeys',
       },
@@ -106,13 +106,13 @@ async function fetchKey(args: unknown[]): Promise<void> {
   const result = await client.value.multicall({
     contracts: [
       {
-        address: props.address as Address,
+        address,
         abi: ABI_DAIMO_ACCOUNT,
         functionName: 'keys',
         args: [index, 0n],
       },
       {
-        address: props.address as Address,
+        address,
         abi: ABI_DAIMO_ACCOUNT,
         functionName: 'keys',
         args: [index, 1n],

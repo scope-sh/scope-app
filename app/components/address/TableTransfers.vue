@@ -135,7 +135,7 @@ import { formatRelativeTime } from '@/utils/formatting';
 
 const { getLabelText } = useLabels();
 
-const props = defineProps<{
+const { transfers, page, perPage } = defineProps<{
   transfers: Transfer[];
   address: Address;
   page: number;
@@ -193,26 +193,26 @@ const columns = computed(() => [
 
 const table = useVueTable({
   get data() {
-    return props.transfers;
+    return transfers;
   },
   columns: columns.value,
   getCoreRowModel: getCoreRowModel(),
   getPaginationRowModel: getPaginationRowModel(),
 });
-table.setPageSize(props.perPage);
-table.setPageIndex(props.page);
+table.setPageSize(perPage);
+table.setPageIndex(page);
 
 watch(
-  () => props.perPage,
+  () => perPage,
   () => {
-    table.setPageSize(props.perPage);
+    table.setPageSize(perPage);
   },
 );
 
 watch(
-  () => props.page,
+  () => page,
   () => {
-    table.setPageIndex(props.page);
+    table.setPageIndex(page);
   },
 );
 

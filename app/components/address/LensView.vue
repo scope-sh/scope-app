@@ -112,12 +112,12 @@ import ZoraToken721Lens from './lenses/ZoraToken721.vue';
 
 import type { LabelTypeId } from '@/services/api.js';
 
-const props = defineProps<{
+const { labelTypes } = defineProps<{
   labelTypes: LabelTypeId[];
   address: Address;
 }>();
 
 function hasLabelTypeId(labelTypeId: LabelTypeId): boolean {
-  return props.labelTypes.includes(labelTypeId);
+  return labelTypes.includes(labelTypeId);
 }
 </script>
