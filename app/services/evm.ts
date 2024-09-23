@@ -585,8 +585,7 @@ class Service {
         pre: formatPart(traceResponse.pre),
         post: traceResponse.post ? formatPart(traceResponse.post) : undefined,
       };
-    } catch (e) {
-      console.error(e);
+    } catch {
       return null;
     }
   }
