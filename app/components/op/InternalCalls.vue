@@ -14,7 +14,10 @@
       <div class="label">Validation</div>
       <TreeInternalCalls :trace="trace.validation" />
     </div>
-    <div class="section">
+    <div
+      v-if="trace.payment.length > 0"
+      class="section"
+    >
       <div class="label">Payment</div>
       <TreeInternalCalls :trace="trace.payment" />
     </div>
