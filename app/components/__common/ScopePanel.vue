@@ -6,6 +6,7 @@
         <ScopeTooltip
           v-if="subtitle"
           delay="large"
+          disable-closing-trigger
         >
           <template #trigger>
             <div
