@@ -15,12 +15,6 @@ export default defineNuxtConfig({
 
   ssr: false,
 
-  vite: {
-    css: {
-      transformer: 'lightningcss',
-    },
-  },
-
   nitro: {
     preset: 'vercel',
     vercel: {
