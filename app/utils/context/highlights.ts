@@ -155,21 +155,91 @@ function getOp(
     if (!decodedNonce) {
       return [];
     }
-    return [
-      {
-        icon: label.iconUrl,
-        parts: [
-          {
-            type: 'text',
-            value: 'Validate with',
-          },
-          {
-            type: 'address',
-            address: decodedNonce.identifier,
-          },
-        ],
-      },
-    ] as Item[];
+    if (decodedNonce.mode === 'enable') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: 'Enable',
+            },
+            {
+              type: 'address',
+              address: decodedNonce.identifier,
+            },
+            {
+              type: 'text',
+              value: 'validator',
+            },
+          ],
+        },
+      ];
+    }
+    if (decodedNonce.mode === 'install') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: 'Install',
+            },
+            {
+              type: 'address',
+              address: decodedNonce.identifier,
+            },
+            {
+              type: 'text',
+              value: 'validator',
+            },
+          ],
+        },
+      ];
+    }
+    if (decodedNonce.vType === 'root') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: 'Validate with root validator',
+            },
+          ],
+        },
+      ];
+    }
+    if (decodedNonce.vType === 'validator') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: 'Validate with',
+            },
+            {
+              type: 'address',
+              address: decodedNonce.identifier,
+            },
+          ],
+        },
+      ];
+    }
+    if (decodedNonce.vType === 'permission') {
+      return [
+        {
+          icon: label.iconUrl,
+          parts: [
+            {
+              type: 'text',
+              value: `Validate with permission ${decodedNonce.identifier}`,
+            },
+          ],
+        },
+      ];
+    }
   }
   if (labelType.id === 'biconomy-v2-account') {
     const signature = op.signature;
