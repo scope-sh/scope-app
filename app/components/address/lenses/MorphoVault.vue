@@ -1,32 +1,32 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Asset'" />
+      <AttributeItemLabel value="Asset" />
       <AttributeItemValue v-if="asset">
         <LinkAddress :address="asset" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Name'" />
+      <AttributeItemLabel value="Name" />
       <AttributeItemValue v-if="name">{{ name }} </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Total Supply'" />
+      <AttributeItemLabel value="Total Supply" />
       <AttributeItemValue> {{ totalSupply }} </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Fee'" />
+      <AttributeItemLabel value="Fee" />
       <AttributeItemValue v-if="fee">
         {{ formatShare(fee) }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Balance'" />
+      <AttributeItemLabel value="Balance" />
       <AttributeItemValue>
         <LensQuery
           :address="address"
           :abi="ABI_MORPHO_VAULT"
-          :function-name="'balanceOf'"
+          function-name="balanceOf"
           :formatter="
             (value) =>
               decimals ? fromWei(value, decimals, 'string') : value.toString()
@@ -55,11 +55,11 @@ import useChain from '@/composables/useChain';
 import { fromWei } from '@/utils/conversion';
 import { formatShare } from '@/utils/formatting';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

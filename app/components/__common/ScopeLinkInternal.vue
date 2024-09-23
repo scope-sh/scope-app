@@ -3,13 +3,13 @@
     ref="el"
     class="root"
   >
-    <router-link
+    <RouterLink
       :to="to"
       class="link"
       :class="{ trimmed: type !== 'normal', highlighted: isHighlighted }"
     >
       <slot />
-    </router-link>
+    </RouterLink>
     <div
       class="background"
       :class="{ trimmed: type !== 'normal', highlighted: isHighlighted }"
@@ -20,17 +20,18 @@
 <script setup lang="ts">
 import { useElementHover } from '@vueuse/core';
 import { computed, useTemplateRef, watch } from 'vue';
+import { RouterLink } from 'vue-router';
 
 import useLinkHover from '@/composables/useLinkHover.js';
 import type { Route } from '@/utils/routing';
 import { getRouteLocation } from '@/utils/routing';
 
-const { route: hoveredRoute, setRoute: setHoveredRoute } = useLinkHover();
-
 const { route, type = 'normal' } = defineProps<{
   route: Route;
   type?: Type;
 }>();
+
+const { route: hoveredRoute, setRoute: setHoveredRoute } = useLinkHover();
 
 const el = useTemplateRef('el');
 const isHovered = useElementHover(el);

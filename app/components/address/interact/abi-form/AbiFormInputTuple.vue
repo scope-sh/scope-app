@@ -27,11 +27,11 @@ import AbiFormInput from './AbiFormInput.vue';
 
 import type { TupleInput as AbiTupleInput } from '@/utils/validation/abi';
 
+const model = defineModel<unknown>();
+
 defineProps<{
   abiInput: AbiTupleInput;
 }>();
-
-const model = defineModel<unknown>();
 </script>
 
 <style scoped>

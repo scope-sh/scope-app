@@ -17,7 +17,7 @@
         type="submit"
         :disabled="isLoading || !isValid"
       >
-        <ScopeIcon :kind="'arrow-right'" />
+        <ScopeIcon kind="arrow-right" />
       </button>
     </form>
     <slot name="output" />

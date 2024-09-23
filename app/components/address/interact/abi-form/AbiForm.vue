@@ -45,8 +45,8 @@
           <ScopeTextView
             v-if="errorLabel"
             :value="errorLabel"
-            :type="'error'"
-            :size="'tiny'"
+            type="error"
+            size="tiny"
           />
           <AbiFormOutput
             v-else

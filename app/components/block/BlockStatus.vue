@@ -6,7 +6,7 @@
     >
       <ScopeIcon
         v-if="status === 'executed'"
-        :kind="'check-circled'"
+        kind="check-circled"
         class="icon"
       />
       {{ label }}

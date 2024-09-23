@@ -57,7 +57,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Address, Hex } from 'viem';
+import type { Hex } from 'viem';
 import { computed, ref } from 'vue';
 
 import CardSource from './code/CardSource.vue';
@@ -71,7 +71,6 @@ import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import type { Contract } from '@/services/api';
 
 const { contract } = defineProps<{
-  address: Address;
   bytecode: Hex | null;
   contract: Contract | null;
 }>();

@@ -24,13 +24,13 @@ import { useTemplateRef } from 'vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
-defineProps<{
-  isLoading: boolean;
-}>();
-
 const value = defineModel<string>({
   required: true,
 });
+
+defineProps<{
+  isLoading: boolean;
+}>();
 
 const emit = defineEmits<{
   submit: [];

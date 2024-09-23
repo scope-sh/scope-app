@@ -1,5 +1,6 @@
 <template>
   <div
+    ref="el"
     class="tree"
     :class="{ scrollable }"
   >
@@ -12,7 +13,7 @@
       >
         <div
           class="item-content"
-          @click="toggleSelectCall(item)"
+          @click="() => toggleSelectCall(item)"
         >
           <div class="sticky left">
             <div class="cell status">
@@ -45,7 +46,7 @@
                 v-if="hasChildren(item)"
                 class="icon-marker"
                 :kind="item.folded ? 'chevron-right' : 'chevron-down'"
-                @click.stop="toggleFold(item)"
+                @click.stop="() => toggleFold(item)"
               />
               <div
                 v-else
@@ -105,7 +106,7 @@
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
 import { type Address, type Hex, size, slice } from 'viem';
-import { ref, computed, watch } from 'vue';
+import { ref, computed, watch, useTemplateRef } from 'vue';
 
 import CallDetails from './CallDetails.vue';
 import LinkAddress from './LinkAddress.vue';
@@ -115,6 +116,10 @@ import ScopeTooltip from './ScopeTooltip.vue';
 import useChain from '@/composables/useChain';
 import type { TransactionTrace } from '@/services/evm';
 import { formatEther } from '@/utils/formatting';
+
+const { trace } = defineProps<{
+  trace: TransactionTrace | null;
+}>();
 
 const { nativeCurrency } = useChain();
 
@@ -139,12 +144,8 @@ interface Call {
   folded: boolean;
 }
 
-const { trace } = defineProps<{
-  trace: TransactionTrace | null;
-}>();
-
 const width = ref('0px');
-const el = ref(null);
+const el = useTemplateRef('el');
 const scrollable = computed(() => {
   if (!el.value) {
     return false;

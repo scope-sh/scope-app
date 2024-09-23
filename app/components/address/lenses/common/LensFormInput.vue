@@ -19,11 +19,11 @@ import {
   type Input as AbiInput,
 } from '@/utils/validation/abi';
 
+const model = defineModel<unknown>('input');
+
 defineProps<{
   abiInput: AbiInput;
 }>();
-
-const model = defineModel<unknown>('input');
 
 const id = useId();
 </script>

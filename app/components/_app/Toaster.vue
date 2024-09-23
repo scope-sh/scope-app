@@ -3,9 +3,9 @@
     ref="el"
     class="root"
     :class="{ expanded: isHovered }"
-    @mouseenter="isHovered = true"
-    @mousemove="isHovered = true"
-    @mouseleave="isHovered = false"
+    @mouseenter="handleMouseEnter"
+    @mousemove="handleMouseMove"
+    @mouseleave="handleMouseLeave"
   >
     <TransitionGroup name="slide-fade">
       <Toast
@@ -14,7 +14,7 @@
         :before="value.length - index - 1"
         :value="toast"
         :expanded="isHovered"
-        @close="hideToast(toast.id)"
+        @close="() => hideToast(toast.id)"
       />
     </TransitionGroup>
   </div>
@@ -27,8 +27,6 @@ import Toast from './Toast.vue';
 
 import type { Toast as ToastData } from '@/utils/ui';
 
-const isHovered = ref(false);
-
 const { value } = defineProps<{
   value: ToastData[];
 }>();
@@ -36,6 +34,17 @@ const { value } = defineProps<{
 const emit = defineEmits<{
   hide: [index: number];
 }>();
+
+const isHovered = ref(false);
+function handleMouseEnter(): void {
+  isHovered.value = true;
+}
+function handleMouseMove(): void {
+  isHovered.value = true;
+}
+function handleMouseLeave(): void {
+  isHovered.value = false;
+}
 
 function hideToast(index: number): void {
   emit('hide', index);

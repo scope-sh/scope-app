@@ -27,7 +27,7 @@
     <Select.Portal>
       <Select.Content
         :side-offset="4"
-        :position="'popper'"
+        position="popper"
       >
         <div class="panel">
           <Select.ScrollUpButton class="scroll-button">
@@ -66,14 +66,14 @@ import { Select } from 'radix-vue/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
+const model = defineModel<Option['value']>({
+  required: true,
+});
+
 defineProps<{
   options: Option[];
   placeholder: string;
 }>();
-
-const model = defineModel<Option['value']>({
-  required: true,
-});
 
 function handleModelValueUpdate(newValue: string): void {
   model.value = newValue;

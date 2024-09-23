@@ -34,7 +34,7 @@
       <template #header>
         <ScopePaginator
           v-if="block"
-          :zero-based="true"
+          zero-based
           :show-page="false"
           :model-value="block.number"
           @update:model-value="handleBlockNumberUpdate"
@@ -42,7 +42,7 @@
       </template>
       <BlockStatus
         v-if="block"
-        :status="'executed'"
+        status="executed"
       />
       <AttributeList v-if="block">
         <AttributeItem>

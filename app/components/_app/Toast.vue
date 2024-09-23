@@ -7,18 +7,18 @@
     <div class="content">
       <ScopeIcon
         v-if="value.type === 'success'"
-        :kind="'check-circled'"
+        kind="check-circled"
         class="icon"
       />
       <ScopeIcon
         v-if="value.type === 'error'"
-        :kind="'cross-circled'"
+        kind="cross-circled"
         class="icon"
       />
       <span class="message">{{ value.message }}</span>
     </div>
     <ScopeIcon
-      :kind="'cross'"
+      kind="cross"
       class="icon-close"
       @click="close"
     />

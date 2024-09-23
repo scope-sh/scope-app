@@ -1,13 +1,13 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Nonce'" />
+      <AttributeItemLabel value="Nonce" />
       <AttributeItemValue>
         {{ nonce }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Plugins'" />
+      <AttributeItemLabel value="Plugins" />
       <AttributeItemValue>
         <LinkAddress
           v-for="plugin in plugins"
@@ -34,11 +34,11 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

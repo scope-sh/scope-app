@@ -1,7 +1,7 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Types'" />
+      <AttributeItemLabel value="Types" />
       <AttributeItemValue>{{ typesLabel }}</AttributeItemValue>
     </AttributeItem>
   </LensBase>
@@ -31,11 +31,11 @@ import {
   TYPE_ACTION,
 } from '@/utils/context/erc7579/modules';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

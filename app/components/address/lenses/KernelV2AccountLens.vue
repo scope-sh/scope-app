@@ -1,22 +1,22 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Nonce'" />
+      <AttributeItemLabel value="Nonce" />
       <AttributeItemValue>{{ nonce }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem v-if="defaultValidator">
-      <AttributeItemLabel :value="'Default Validator'" />
+      <AttributeItemLabel value="Default Validator" />
       <AttributeItemValue>
         <LinkAddress :address="defaultValidator" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Execution'" />
+      <AttributeItemLabel value="Execution" />
       <AttributeItemValue>
         <LensQuery
           :address="address"
           :abi="ABI_KERNEL_V2_ACCOUNT"
-          :function-name="'getExecution'"
+          function-name="getExecution"
           :formatter="formatExecution"
         />
       </AttributeItemValue>
@@ -40,11 +40,11 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 interface ExecutionData {
   validAfter: number;

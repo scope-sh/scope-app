@@ -1,50 +1,50 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Token 0'" />
+      <AttributeItemLabel value="Token 0" />
       <AttributeItemValue v-if="token0">
         <LinkAddress :address="token0" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Token 1'" />
+      <AttributeItemLabel value="Token 1" />
       <AttributeItemValue v-if="token1">
         <LinkAddress :address="token1" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Price'" />
+      <AttributeItemLabel value="Price" />
       <AttributeItemValue v-if="price && composition">
         1 {{ composition.token0.symbol }} = {{ price }}
         {{ composition.token1.symbol }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Swap fee'" />
+      <AttributeItemLabel value="Swap fee" />
       <AttributeItemValue v-if="fee">
         {{ formatShare(fromWei(fee, 6, 'number')) }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Protocol fee'" />
+      <AttributeItemLabel value="Protocol fee" />
       <AttributeItemValue v-if="slot0">
         {{ formatShare(fromWei(slot0.feeProtocol, 6, 'number')) }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Tick spacing'" />
+      <AttributeItemLabel value="Tick spacing" />
       <AttributeItemValue v-if="tickSpacing">
         {{ tickSpacing }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Factory'" />
+      <AttributeItemLabel value="Factory" />
       <AttributeItemValue v-if="factory">
         <LinkAddress :address="factory" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Composition'" />
+      <AttributeItemLabel value="Composition" />
       <AttributeItemValue v-if="composition">
         {{
           fromWei(
@@ -106,11 +106,11 @@ interface Slot0 {
   unlocked: boolean;
 }
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

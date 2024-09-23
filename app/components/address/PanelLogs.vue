@@ -77,18 +77,19 @@ import ScopeToggle from '@/components/__common/ScopeToggle.vue';
 import SelectPerPage from '@/components/__common/SelectPerPage.vue';
 import type { Log as AddressLog } from '@/services/hypersync';
 
+const page = defineModel<number>('page', {
+  required: true,
+});
+
+const perPage = defineModel<number>('perPage', {
+  required: true,
+});
+
 const { items } = defineProps<{
   isLoading: boolean;
   items: AddressLog[];
   maxPage: number;
 }>();
-
-const page = defineModel<number>('page', {
-  required: true,
-});
-const perPage = defineModel<number>('perPage', {
-  required: true,
-});
 
 const emit = defineEmits<{
   refresh: [];

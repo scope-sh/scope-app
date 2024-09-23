@@ -208,31 +208,31 @@
         >
           <AttributeList>
             <AttributeItem v-if="transaction.blockNumber">
-              <AttributeItemLabel :value="'Block'" />
+              <AttributeItemLabel value="Block" />
               <AttributeItemValue>
                 <LinkBlock :number="transaction.blockNumber" />
               </AttributeItemValue>
             </AttributeItem>
             <AttributeItem>
-              <AttributeItemLabel :value="'Hash'" />
+              <AttributeItemLabel value="Hash" />
               <AttributeItemValue>
                 <LinkTransaction :hash="transaction.hash" />
               </AttributeItemValue>
             </AttributeItem>
             <AttributeItem>
-              <AttributeItemLabel :value="'From'" />
+              <AttributeItemLabel value="From" />
               <AttributeItemValue>
                 <LinkAddress :address="transaction.from" />
               </AttributeItemValue>
             </AttributeItem>
             <AttributeItem v-if="transaction.to">
-              <AttributeItemLabel :value="'To'" />
+              <AttributeItemLabel value="To" />
               <AttributeItemValue>
                 <LinkAddress :address="transaction.to" />
               </AttributeItemValue>
             </AttributeItem>
             <AttributeItem v-if="beneficiary">
-              <AttributeItemLabel :value="'Beneficiary'" />
+              <AttributeItemLabel value="Beneficiary" />
               <AttributeItemValue>
                 <LinkAddress :address="beneficiary" />
               </AttributeItemValue>

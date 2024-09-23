@@ -1,28 +1,28 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Underlying'" />
+      <AttributeItemLabel value="Underlying" />
       <AttributeItemValue v-if="underlying">
         <LinkAddress :address="underlying" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Pool'" />
+      <AttributeItemLabel value="Pool" />
       <AttributeItemValue v-if="pool">
         <LinkAddress :address="pool" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Total Supply'" />
+      <AttributeItemLabel value="Total Supply" />
       <AttributeItemValue> {{ totalSupply }} </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Balance'" />
+      <AttributeItemLabel value="Balance" />
       <AttributeItemValue>
         <LensQuery
           :address
           :abi="ABI_AAVE_V3_TOKEN"
-          :function-name="'balanceOf'"
+          function-name="balanceOf"
           :formatter="
             (value) =>
               decimals ? fromWei(value, decimals, 'string') : value.toString()
@@ -50,11 +50,11 @@ import {
 import useChain from '@/composables/useChain';
 import { fromWei } from '@/utils/conversion';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

@@ -1,7 +1,7 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Owners'" />
+      <AttributeItemLabel value="Owners" />
       <AttributeItemValue v-if="owners">
         <div
           v-for="owner in owners"
@@ -46,11 +46,11 @@ type Owner =
       value: Address;
     };
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

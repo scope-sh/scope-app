@@ -13,7 +13,7 @@
         />
         <Combobox.Cancel
           v-if="model"
-          @click="model = undefined"
+          @click="handleCancelClick"
         >
           <ScopeIcon
             kind="cross"
@@ -77,16 +77,20 @@ import ScopeLabelEmptyState from './ScopeLabelEmptyState.vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
+const model = defineModel<Option<T> | undefined>();
+
 defineProps<{
   options: OptionGroup<T>[];
 }>();
-
-const model = defineModel<Option<T> | undefined>();
 
 function filterOptions(options: Option<T>[], query: string): Option<T>[] {
   return options.filter((option) =>
     option.label.toLowerCase().includes(query.toLowerCase()),
   );
+}
+
+function handleCancelClick(): void {
+  model.value = undefined;
 }
 </script>
 

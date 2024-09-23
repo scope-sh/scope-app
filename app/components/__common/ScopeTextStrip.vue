@@ -5,7 +5,6 @@
 <script setup lang="ts">
 defineProps<{
   value: string;
-  id?: string;
 }>();
 </script>
 

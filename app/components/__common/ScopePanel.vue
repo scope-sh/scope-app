@@ -10,7 +10,7 @@
           <template #trigger>
             <div
               class="subtitle"
-              @click="copyToClipboard(subtitle)"
+              @click="handleSubtitleClick"
             >
               {{ subtitle }}
             </div>
@@ -50,7 +50,7 @@ import { onMounted } from 'vue';
 import IconLoading from './IconLoading.vue';
 import ScopeTooltip from './ScopeTooltip.vue';
 
-defineProps<{
+const { subtitle = '' } = defineProps<{
   title: string;
   subtitle?: string;
   loading?: boolean;
@@ -61,6 +61,10 @@ onMounted(() => {
 });
 
 const { ready, start, stop } = useTimeout(2000, { controls: true });
+
+function handleSubtitleClick(): void {
+  copyToClipboard(subtitle);
+}
 
 function copyToClipboard(text: string): void {
   navigator.clipboard.writeText(text);

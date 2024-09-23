@@ -31,7 +31,7 @@
         <AttributeItemValue>
           <ScopeTextView
             :value="opUnpacked.initCode"
-            :size="'tiny'"
+            size="tiny"
           />
         </AttributeItemValue>
       </AttributeItem>
@@ -40,7 +40,7 @@
         <AttributeItemValue>
           <ScopeTextView
             :value="opUnpacked.callData"
-            :size="'tiny'"
+            size="tiny"
           />
         </AttributeItemValue>
       </AttributeItem>
@@ -65,7 +65,7 @@ import {
   AttributeList,
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
-import type { Transaction, TransactionReceipt } from '@/services/evm';
+import type { TransactionReceipt } from '@/services/evm';
 import {
   type Op,
   getOpHash,
@@ -76,7 +76,6 @@ import {
 const { entryPoint, op, transactionReceipt } = defineProps<{
   entryPoint: Address | null;
   op: Op;
-  transaction: Transaction;
   transactionReceipt: TransactionReceipt;
 }>();
 

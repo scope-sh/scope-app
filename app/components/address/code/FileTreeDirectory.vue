@@ -46,7 +46,7 @@
           :key="file.id"
           :class="{ selected: isFileSelected(index) }"
           class="item"
-          @click="handleFileSelect(index)"
+          @click="() => handleFileSelect(index)"
         >
           {{ file.name }}
         </li>

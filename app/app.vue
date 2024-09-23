@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <AppHeader v-if="!isChainPage" />
+    <!-- eslint-disable-next-line vue/no-undef-components -->
     <NuxtPage />
     <AppFooter v-if="!isChainPage" />
     <CommandPalette />
@@ -28,6 +29,7 @@ const { items: toasts, hide: hideToast } = useToast();
 const isChainPage = computed(() => route.name === 'chain');
 </script>
 
+<!-- eslint-disable-next-line vue/enforce-style-attribute -->
 <style>
 :root {
   --color-text-primary: oklch(90.67% 0 0deg);

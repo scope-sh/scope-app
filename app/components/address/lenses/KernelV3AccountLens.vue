@@ -1,15 +1,15 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Account Id'" />
+      <AttributeItemLabel value="Account Id" />
       <AttributeItemValue>{{ accountId }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Supported Module Types'" />
+      <AttributeItemLabel value="Supported Module Types" />
       <AttributeItemValue>{{ moduleTypeSupportLabel }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem v-if="rootValidator">
-      <AttributeItemLabel :value="'Root Validator'" />
+      <AttributeItemLabel value="Root Validator" />
       <AttributeItemValue v-if="rootValidator.type === 'validator'">
         <LinkAddress :address="rootValidator.address" />
       </AttributeItemValue>
@@ -24,7 +24,7 @@
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Modules'" />
+      <AttributeItemLabel value="Modules" />
       <AttributeItemValue>
         <div class="soon">coming soon</div>
       </AttributeItemValue>
@@ -69,14 +69,13 @@ interface Permission {
 
 type RootValidator = Validator | Permission;
 
+const { address } = defineProps<{
+  address: Address;
+}>();
 const TYPE_VALIDATOR = '0x01';
 const TYPE_PERMISSION = '0x02';
 
 const { client } = useChain();
-
-const { address } = defineProps<{
-  address: Address;
-}>();
 
 const isLoading = ref(true);
 

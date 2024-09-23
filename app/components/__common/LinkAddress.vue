@@ -50,16 +50,16 @@ import ScopeTooltip from './ScopeTooltip.vue';
 
 import useLabels from '@/composables/useLabels.js';
 
+const { address, type = 'normal' } = defineProps<{
+  address: Address;
+  type?: Type;
+}>();
+
 const { getLabelIcon, getLabelText, requestLabel } = useLabels();
 
 defineOptions({
   inheritAttrs: false,
 });
-
-const { address, type = 'normal' } = defineProps<{
-  address: Address;
-  type?: Type;
-}>();
 
 watch(
   () => address,

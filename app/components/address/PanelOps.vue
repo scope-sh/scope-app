@@ -63,18 +63,19 @@ import TableOps from '@/components/address/TableOps.vue';
 import type { Op as OpRow } from '@/components/address/TableOps.vue';
 import type { Op } from '@/services/indexer';
 
+const page = defineModel<number>('page', {
+  required: true,
+});
+
+const perPage = defineModel<number>('perPage', {
+  required: true,
+});
+
 const { isLoading, items } = defineProps<{
   isLoading: boolean;
   items: Op[];
   maxPage: number;
 }>();
-
-const page = defineModel<number>('page', {
-  required: true,
-});
-const perPage = defineModel<number>('perPage', {
-  required: true,
-});
 
 const emit = defineEmits<{
   refresh: [];

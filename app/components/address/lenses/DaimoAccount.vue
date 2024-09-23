@@ -1,15 +1,15 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Active Keys'" />
+      <AttributeItemLabel value="Active Keys" />
       <AttributeItemValue>{{ activeKeys }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Active Slots'" />
+      <AttributeItemLabel value="Active Slots" />
       <AttributeItemValue>{{ activeSlots }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Key'" />
+      <AttributeItemLabel value="Key" />
       <AttributeItemValue>
         <LensForm
           :abi-inputs="[
@@ -48,11 +48,11 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 const isKeyLoading = ref(false);

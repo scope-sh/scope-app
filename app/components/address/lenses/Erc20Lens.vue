@@ -1,28 +1,28 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Symbol'" />
+      <AttributeItemLabel value="Symbol" />
       <AttributeItemValue>{{ symbol }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Name'" />
+      <AttributeItemLabel value="Name" />
       <AttributeItemValue>{{ name }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Decimals'" />
+      <AttributeItemLabel value="Decimals" />
       <AttributeItemValue> {{ decimals }} </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Total Supply'" />
+      <AttributeItemLabel value="Total Supply" />
       <AttributeItemValue> {{ totalSupply }} </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Balance'" />
+      <AttributeItemLabel value="Balance" />
       <AttributeItemValue>
         <LensQuery
           :address="address"
           :abi="ABI_ERC20"
-          :function-name="'balanceOf'"
+          function-name="balanceOf"
           :formatter="
             (value) =>
               decimals ? fromWei(value, decimals, 'string') : value.toString()
@@ -31,12 +31,12 @@
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Allowance'" />
+      <AttributeItemLabel value="Allowance" />
       <AttributeItemValue>
         <LensQuery
           :address="address"
           :abi="ABI_ERC20"
-          :function-name="'allowance'"
+          function-name="allowance"
           :formatter="
             (value) =>
               decimals ? fromWei(value, decimals, 'string') : value.toString()
@@ -63,11 +63,11 @@ import {
 import useChain from '@/composables/useChain';
 import { fromWei } from '@/utils/conversion';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

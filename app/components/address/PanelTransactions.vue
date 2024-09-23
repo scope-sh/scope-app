@@ -64,19 +64,20 @@ import TableTransactions from '@/components/__common/TableTransactions.vue';
 import type { Transaction as TransactionRow } from '@/components/__common/TableTransactions.vue';
 import type { Transaction as AddressTransaction } from '@/services/hypersync';
 
+const page = defineModel<number>('page', {
+  required: true,
+});
+
+const perPage = defineModel<number>('perPage', {
+  required: true,
+});
+
 const { isLoading, items } = defineProps<{
   address: Address;
   isLoading: boolean;
   items: AddressTransaction[];
   maxPage: number;
 }>();
-
-const page = defineModel<number>('page', {
-  required: true,
-});
-const perPage = defineModel<number>('perPage', {
-  required: true,
-});
 
 const emit = defineEmits<{
   refresh: [];

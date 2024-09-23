@@ -5,6 +5,7 @@
       <a
         href="https://github.com/scope-sh"
         target="_blank"
+        rel="noopener noreferrer"
         class="social"
       >
         <svg
@@ -23,6 +24,7 @@
       <a
         href="https://warpcast.com/scope"
         target="_blank"
+        rel="noopener noreferrer"
         class="social"
       >
         <svg
@@ -41,6 +43,7 @@
       <a
         href="https://twitter.com/scope_sh"
         target="_blank"
+        rel="noopener noreferrer"
         class="social"
       >
         <svg

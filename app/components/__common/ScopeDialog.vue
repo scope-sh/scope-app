@@ -29,15 +29,15 @@
 import { VisuallyHidden } from 'radix-vue';
 import { Dialog } from 'radix-vue/namespaced';
 
+const open = defineModel<boolean>('open', {
+  required: true,
+});
+
 defineProps<{
   title: string;
   description?: string;
   withContext?: boolean;
 }>();
-
-const open = defineModel<boolean>('open', {
-  required: true,
-});
 
 function handleOpen(value: boolean): void {
   if (!value) {

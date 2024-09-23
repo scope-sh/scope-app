@@ -1,30 +1,30 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem v-if="symbol">
-      <AttributeItemLabel :value="'Symbol'" />
+      <AttributeItemLabel value="Symbol" />
       <AttributeItemValue>{{ symbol }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Name'" />
+      <AttributeItemLabel value="Name" />
       <AttributeItemValue>{{ name }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Total Supply'" />
+      <AttributeItemLabel value="Total Supply" />
       <AttributeItemValue> {{ totalSupply }} </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Owner'" />
+      <AttributeItemLabel value="Owner" />
       <AttributeItemValue v-if="owner">
         <LinkAddress :address="owner" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Balance'" />
+      <AttributeItemLabel value="Balance" />
       <AttributeItemValue>
         <LensQuery
           :address="address"
           :abi="ABI_ZORA_721_TOKEN"
-          :function-name="'balanceOf'"
+          function-name="balanceOf"
         />
       </AttributeItemValue>
     </AttributeItem>
@@ -47,11 +47,11 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

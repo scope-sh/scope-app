@@ -129,12 +129,12 @@ import {
 import useChain from '@/composables/useChain';
 import { formatEther, formatShare } from '@/utils/formatting';
 
-const { nativeCurrency } = useChain();
-
 defineProps<{
   call: Call;
   width: string;
 }>();
+
+const { nativeCurrency } = useChain();
 
 function getGasUsedShare(item: Call): string {
   const gasUsed = parseInt(item.gas.used.toString());

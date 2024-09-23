@@ -41,11 +41,11 @@ import {
   type Input as AbiInput,
 } from '@/utils/validation/abi';
 
+const model = defineModel<unknown>('input');
+
 defineProps<{
   abiInput: AbiInput;
 }>();
-
-const model = defineModel<unknown>('input');
 
 function isUnknownArray(value: unknown): value is unknown[] {
   return Array.isArray(value);

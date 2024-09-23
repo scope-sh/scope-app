@@ -1,32 +1,32 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Token 0'" />
+      <AttributeItemLabel value="Token 0" />
       <AttributeItemValue v-if="token0">
         <LinkAddress :address="token0" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Token 1'" />
+      <AttributeItemLabel value="Token 1" />
       <AttributeItemValue v-if="token1">
         <LinkAddress :address="token1" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Price'" />
+      <AttributeItemLabel value="Price" />
       <AttributeItemValue v-if="price && composition">
         1 {{ composition.token0.symbol }} = {{ price }}
         {{ composition.token1.symbol }}
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Factory'" />
+      <AttributeItemLabel value="Factory" />
       <AttributeItemValue v-if="factory">
         <LinkAddress :address="factory" />
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Composition'" />
+      <AttributeItemLabel value="Composition" />
       <AttributeItemValue v-if="composition">
         {{
           fromWei(
@@ -83,11 +83,11 @@ interface Composition {
   token1: Token;
 }
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

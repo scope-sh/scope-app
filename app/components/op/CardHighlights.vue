@@ -14,12 +14,12 @@ import useLabels from '@/composables/useLabels';
 import type { OpUnpacked } from '@/utils/context/erc4337/entryPoint';
 import { getOp, getLogs, type Item } from '@/utils/context/highlights';
 
-const { getLabel } = useLabels();
-
 const { op, logs } = defineProps<{
   op: OpUnpacked;
   logs: Log[];
 }>();
+
+const { getLabel } = useLabels();
 
 const items = computed<Item[]>(() => {
   const opItems = getOp(op, getLabel);

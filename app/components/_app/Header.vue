@@ -1,9 +1,9 @@
 <template>
   <header>
     <div class="side">
-      <router-link :to="chainRoute">
+      <RouterLink :to="chainRoute">
         <IconBrand class="icon" />
-      </router-link>
+      </RouterLink>
       <CommandPaletteTrigger />
     </div>
     <div class="side">
@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 import CommandPaletteTrigger from './header/CommandPaletteTrigger.vue';
 import ChainSelector from './header/SelectChain.vue';

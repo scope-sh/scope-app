@@ -24,11 +24,11 @@
 <script setup lang="ts">
 import { Tabs } from 'radix-vue/namespaced';
 
+const model = defineModel<Item['value']>();
+
 defineProps<{
   options: Item[];
 }>();
-
-const model = defineModel<Item['value']>();
 
 function handleUpdate(value: string): void {
   model.value = value;

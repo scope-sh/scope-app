@@ -9,7 +9,7 @@
       ref="contentEl"
       @keydown.up.prevent="handleUp"
       @keydown.down.prevent="handleDown"
-      @keyup.enter="handleCommand()"
+      @keyup.enter="handleCommand"
       @keydown.esc.prevent="close"
     >
       <div
@@ -46,8 +46,8 @@
           :aria-selected="command === selectedCommand"
           class="option"
           :class="{ selected: command === selectedCommand }"
-          @mouseover="handleMouseOver(index)"
-          @click="handleCommand()"
+          @mouseover="() => handleMouseOver(index)"
+          @click="handleCommand"
         >
           <ScopeIcon
             :kind="command.icon"
@@ -124,7 +124,7 @@ const isOpen = computed(() => uiStore.isPaletteOpen);
 
 const inputEl = useTemplateRef('inputEl');
 const contentEl = useTemplateRef('contentEl');
-const itemEls = useTemplateRef('itemEls');
+const itemEls = useTemplateRef<HTMLElement[]>('itemEls');
 
 let bouncePanel: () => void = () => {};
 
@@ -721,6 +721,9 @@ watch(selectedCommand, (newValue) => {
 });
 
 function scrollSelectedIntoView(): void {
+  if (!itemEls.value) {
+    return;
+  }
   const selectedItemEl = itemEls.value[selectedCommandIndex.value];
   selectedItemEl?.scrollIntoView({ block: 'nearest' });
 }

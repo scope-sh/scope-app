@@ -133,14 +133,14 @@ import useLabels from '@/composables/useLabels.js';
 import { toRelativeTime } from '@/utils/conversion';
 import { formatRelativeTime } from '@/utils/formatting';
 
-const { getLabelText } = useLabels();
-
 const { transfers, page, perPage } = defineProps<{
   transfers: Transfer[];
   address: Address;
   page: number;
   perPage: number;
 }>();
+
+const { getLabelText } = useLabels();
 
 const columnHelper = createColumnHelper<Transfer>();
 

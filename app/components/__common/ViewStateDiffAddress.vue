@@ -67,12 +67,12 @@ import useChain from '@/composables/useChain.js';
 import type { TransactionStateDiffAddress } from '@/services/evm';
 import { formatEther } from '@/utils/formatting.js';
 
-const { nativeCurrency } = useChain();
-
 defineProps<{
   address: Address;
   diff: TransactionStateDiffAddress;
 }>();
+
+const { nativeCurrency } = useChain();
 
 const isCodeOverflowing = ref(false);
 const codeContentEl = useTemplateRef('codeContentEl');

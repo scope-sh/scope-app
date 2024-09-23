@@ -34,7 +34,7 @@
           v-for="result in fileResults"
           :key="result.line"
           class="result"
-          @click="handleResultClick(result)"
+          @click="() => handleResultClick(result)"
         >
           {{ result.match }}
         </div>

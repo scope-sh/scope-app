@@ -33,7 +33,7 @@
         <ScopePaginator
           v-if="block && transaction && transaction.transactionIndex !== null"
           :total="block.transactions"
-          :zero-based="true"
+          zero-based
           :model-value="transaction.transactionIndex"
           @update:model-value="handleTransactionIndexUpdate"
         />

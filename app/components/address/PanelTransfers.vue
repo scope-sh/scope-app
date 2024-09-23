@@ -64,19 +64,20 @@ import TableTransfers from '@/components/address/TableTransfers.vue';
 import type { Transfer as TransferRow } from '@/components/address/TableTransfers.vue';
 import type { Transfer as AddressTransfer } from '@/services/hypersync';
 
+const page = defineModel<number>('page', {
+  required: true,
+});
+
+const perPage = defineModel<number>('perPage', {
+  required: true,
+});
+
 const { isLoading, items } = defineProps<{
   address: Address;
   isLoading: boolean;
   items: AddressTransfer[];
   maxPage: number;
 }>();
-
-const page = defineModel<number>('page', {
-  required: true,
-});
-const perPage = defineModel<number>('perPage', {
-  required: true,
-});
 
 const emit = defineEmits<{
   refresh: [];

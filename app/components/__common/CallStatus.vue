@@ -9,12 +9,12 @@
     >
       <ScopeIcon
         v-if="status === true"
-        :kind="'check-circled'"
+        kind="check-circled"
         class="icon"
       />
       <ScopeIcon
         v-else
-        :kind="'cross-circled'"
+        kind="cross-circled"
         class="icon"
       />
       {{ label }}

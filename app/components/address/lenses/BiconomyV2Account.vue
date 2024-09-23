@@ -1,7 +1,7 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Modules'" />
+      <AttributeItemLabel value="Modules" />
       <AttributeItemValue>
         <LinkAddress
           v-for="module in modules"
@@ -28,11 +28,11 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

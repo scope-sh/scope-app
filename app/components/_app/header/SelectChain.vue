@@ -3,7 +3,7 @@
     <ScopeSelect
       :model-value="model.toString()"
       :options
-      :placeholder="'Select chain'"
+      placeholder="Select chain"
       @update:model-value="handleModelUpdate"
     >
       <template #trigger>

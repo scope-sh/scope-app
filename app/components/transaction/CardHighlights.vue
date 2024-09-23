@@ -14,12 +14,12 @@ import useLabels from '@/composables/useLabels';
 import type { Item } from '@/utils/context/highlights';
 import { getContractDeployment, getLogs } from '@/utils/context/highlights';
 
-const { getLabel } = useLabels();
-
 const { transaction, logs } = defineProps<{
   transaction: Transaction;
   logs: Log[];
 }>();
+
+const { getLabel } = useLabels();
 
 const items = computed<Item[]>(() => {
   const contractDeployment = getContractDeployment(transaction);

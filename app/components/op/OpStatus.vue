@@ -6,12 +6,12 @@
     >
       <ScopeIcon
         v-if="success"
-        :kind="'check-circled'"
+        kind="check-circled"
         class="icon"
       />
       <ScopeIcon
         v-else
-        :kind="'cross-circled'"
+        kind="cross-circled"
         class="icon"
       />
       <template v-if="trace === null">

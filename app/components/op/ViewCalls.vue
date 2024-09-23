@@ -43,11 +43,11 @@ import useChain from '@/composables/useChain';
 import type { Call } from '@/utils/context/erc4337/callData';
 import { formatEther } from '@/utils/formatting';
 
-const { nativeCurrency } = useChain();
-
 defineProps<{
   calls: Call[];
 }>();
+
+const { nativeCurrency } = useChain();
 </script>
 
 <style scoped>

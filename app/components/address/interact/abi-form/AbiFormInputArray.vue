@@ -17,7 +17,7 @@
         <button
           v-if="!length"
           type="button"
-          @click="removeItem(index)"
+          @click="() => removeItem(index)"
         >
           <ScopeIcon kind="minus" />
         </button>
@@ -47,11 +47,11 @@ import {
   type ArrayInput as AbiArrayInput,
 } from '@/utils/validation/abi';
 
+const model = defineModel<unknown[]>();
+
 const { abiInput } = defineProps<{
   abiInput: AbiArrayInput;
 }>();
-
-const model = defineModel<unknown[]>();
 
 const length = computed(() => getArrayLength(abiInput));
 

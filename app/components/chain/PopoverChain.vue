@@ -15,7 +15,7 @@
             ref="optionEls"
             :key="chain"
             class="item"
-            @click="handleOptionClick(chain)"
+            @click="() => handleOptionClick(chain)"
           >
             <Popover.Close as="div">
               <IconChain

@@ -30,11 +30,11 @@ import { ToggleGroup } from 'radix-vue/namespaced';
 import ScopeIcon from './ScopeIcon.vue';
 import type { Kind as IconKind } from './icon/general';
 
+const modelValue = defineModel<string>();
+
 defineProps<{
   options: Option[];
 }>();
-
-const modelValue = defineModel<string>();
 
 function handleModelValueUpdate(value: string | string[] | undefined): void {
   if (value === undefined) {

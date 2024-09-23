@@ -1,7 +1,7 @@
 <template>
   <LensBase :is-loading="isLoading">
     <AttributeItem>
-      <AttributeItemLabel :value="'Owners'" />
+      <AttributeItemLabel value="Owners" />
       <AttributeItemValue>
         <LinkAddress
           v-for="owner in owners"
@@ -11,11 +11,11 @@
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Threshold'" />
+      <AttributeItemLabel value="Threshold" />
       <AttributeItemValue>{{ threshold }}</AttributeItemValue>
     </AttributeItem>
     <AttributeItem v-if="modules && modules.length > 0">
-      <AttributeItemLabel :value="'Modules'" />
+      <AttributeItemLabel value="Modules" />
       <AttributeItemValue>
         <LinkAddress
           v-for="mod in modules"
@@ -25,7 +25,7 @@
       </AttributeItemValue>
     </AttributeItem>
     <AttributeItem>
-      <AttributeItemLabel :value="'Nonce'" />
+      <AttributeItemLabel value="Nonce" />
       <AttributeItemValue>{{ nonce }}</AttributeItemValue>
     </AttributeItem>
   </LensBase>
@@ -46,11 +46,11 @@ import {
 } from '@/components/__common/attributes';
 import useChain from '@/composables/useChain';
 
-const { client } = useChain();
-
 const { address } = defineProps<{
   address: Address;
 }>();
+
+const { client } = useChain();
 
 const isLoading = ref(true);
 

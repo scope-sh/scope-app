@@ -21,11 +21,11 @@
 <script setup lang="ts">
 import ScopeTabs from './ScopeTabs.vue';
 
+const section = defineModel<Section['value']>('section');
+
 defineProps<{
   sections: Section[];
 }>();
-
-const section = defineModel<Section['value']>('section');
 </script>
 
 <script lang="ts">

@@ -167,9 +167,6 @@ import {
   formatRelativeTime,
 } from '@/utils/formatting';
 
-const { nativeCurrency } = useChain();
-const { getLabelText } = useLabels();
-
 const { address, transactions, page, perPage, type } = defineProps<{
   address?: Address;
   transactions: Transaction[];
@@ -177,6 +174,8 @@ const { address, transactions, page, perPage, type } = defineProps<{
   perPage: number;
   type: 'address' | 'block';
 }>();
+const { nativeCurrency } = useChain();
+const { getLabelText } = useLabels();
 
 const columnHelper = createColumnHelper<Transaction>();
 
