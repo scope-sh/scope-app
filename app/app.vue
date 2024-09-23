@@ -13,6 +13,8 @@
 </template>
 
 <script setup lang="ts">
+import '@fontsource-variable/inter';
+import '@fontsource-variable/inconsolata';
 import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -72,11 +74,6 @@ const isChainPage = computed(() => route.name === 'chain');
   --border-radius-s: 4px;
   --border-radius-m: 8px;
   --border-radius-l: 12px;
-
-  /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-  font-family: 'Inter Variable';
-  /* stylelint-disable-next-line font-family-no-missing-generic-family-keyword */
-  font-family: Inconsolata;
 }
 
 body {
