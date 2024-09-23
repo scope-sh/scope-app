@@ -19,7 +19,7 @@
 
 <script setup lang="ts">
 import { useElementHover } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import { computed, useTemplateRef, watch } from 'vue';
 
 import useLinkHover from '@/composables/useLinkHover.js';
 import type { Route } from '@/utils/routing';
@@ -32,7 +32,7 @@ const { route, type = 'normal' } = defineProps<{
   type?: Type;
 }>();
 
-const el = ref();
+const el = useTemplateRef('el');
 const isHovered = useElementHover(el);
 watch(isHovered, (value) => {
   if (value) {

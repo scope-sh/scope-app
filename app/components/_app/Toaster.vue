@@ -21,7 +21,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef } from 'vue';
 
 import Toast from './Toast.vue';
 
@@ -41,7 +41,7 @@ function hideToast(index: number): void {
   emit('hide', index);
 }
 
-const el = ref<HTMLElement | null>(null);
+const el = useTemplateRef('el');
 
 const count = computed(() => value.length);
 </script>

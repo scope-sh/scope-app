@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { useElementHover } from '@vueuse/core';
 import { Popover } from 'radix-vue/namespaced';
-import { computed, ref } from 'vue';
+import { computed, useTemplateRef } from 'vue';
 
 import IconChain from '@/components/__common/IconChain.vue';
 import ScopePopover from '@/components/__common/ScopePopover.vue';
@@ -50,9 +50,9 @@ function handleOptionClick(option: Chain): void {
   selectedChain.value = option;
 }
 
-const optionEls = ref<HTMLElement[]>([]);
+const optionEls = useTemplateRef<HTMLElement[]>('optionEls');
 const isHovered = computed(() =>
-  optionEls.value.map((el) => useElementHover(el)),
+  optionEls.value ? optionEls.value.map((el) => useElementHover(el)) : [],
 );
 const label = computed(() => {
   const hoveredIndex = isHovered.value.findIndex((hovered) => hovered.value);

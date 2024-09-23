@@ -11,7 +11,7 @@
       :type
     >
       <slot>
-        <div ref="el">
+        <div>
           {{ number }}
         </div>
       </slot>

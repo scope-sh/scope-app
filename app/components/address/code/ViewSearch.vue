@@ -45,7 +45,7 @@
 
 <script setup lang="ts">
 import { useDebounceFn, useFocus } from '@vueuse/core';
-import { computed, ref, watch } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 
 import type { File } from './FileView.vue';
 
@@ -63,7 +63,7 @@ const emit = defineEmits<{
 
 const MAX_RESULTS = 500;
 
-const inputEl = ref();
+const inputEl = useTemplateRef('inputEl');
 useFocus(inputEl, { initialValue: true });
 
 const query = ref('');

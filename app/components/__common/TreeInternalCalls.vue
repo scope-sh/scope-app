@@ -1,6 +1,5 @@
 <template>
   <div
-    ref="el"
     class="tree"
     :class="{ scrollable }"
   >

@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { useFocus } from '@vueuse/core';
-import { ref } from 'vue';
+import { useTemplateRef } from 'vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
@@ -36,7 +36,7 @@ const emit = defineEmits<{
   submit: [];
 }>();
 
-const inputEl = ref();
+const inputEl = useTemplateRef('inputEl');
 useFocus(inputEl, { initialValue: true });
 
 function handleInput(event: Event): void {

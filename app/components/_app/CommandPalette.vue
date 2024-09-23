@@ -66,7 +66,7 @@
 <script setup lang="ts">
 import { useDebounceFn, useMagicKeys, useAnimate } from '@vueuse/core';
 import type { Address, Hex } from 'viem';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, useTemplateRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import ScopeDialog from '@/components/__common/ScopeDialog.vue';
@@ -122,9 +122,9 @@ const { id: chainId, client } = useChain();
 
 const isOpen = computed(() => uiStore.isPaletteOpen);
 
-const inputEl = ref<HTMLInputElement | null>(null);
-const contentEl = ref();
-const itemEls = ref<HTMLDivElement[]>([]);
+const inputEl = useTemplateRef('inputEl');
+const contentEl = useTemplateRef('contentEl');
+const itemEls = useTemplateRef('itemEls');
 
 let bouncePanel: () => void = () => {};
 

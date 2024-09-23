@@ -17,7 +17,7 @@
 <script setup lang="ts">
 import { transformerNotationWordHighlight } from '@shikijs/transformers';
 import { type HighlighterGeneric, createHighlighter } from 'shiki';
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref, useTemplateRef, watch } from 'vue';
 
 import ButtonCopy from '@/components/__common/ButtonCopy.vue';
 
@@ -41,7 +41,7 @@ const emit = defineEmits<{
   scroll: [];
 }>();
 
-const textEl = ref<HTMLElement | null>(null);
+const textEl = useTemplateRef('textEl');
 
 const highlighter = ref<HighlighterGeneric<'solidity', 'ayu-dark'> | null>(
   null,

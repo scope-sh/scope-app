@@ -58,7 +58,7 @@
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
 import type { Address } from 'viem';
-import { ref } from 'vue';
+import { ref, useTemplateRef } from 'vue';
 
 import LinkAddress from './LinkAddress.vue';
 import ScopeIcon from './ScopeIcon.vue';
@@ -75,7 +75,7 @@ defineProps<{
 }>();
 
 const isCodeOverflowing = ref(false);
-const codeContentEl = ref(null);
+const codeContentEl = useTemplateRef('codeContentEl');
 useResizeObserver(codeContentEl, (entries) => {
   const entry = entries[0];
   if (!entry) {

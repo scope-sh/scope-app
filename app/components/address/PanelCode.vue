@@ -1,8 +1,5 @@
 <template>
-  <ScopePanel
-    ref="panelEl"
-    title="Code"
-  >
+  <ScopePanel title="Code">
     <NoticeProxy
       v-if="isProxy"
       v-model:show-as-proxy="showAsProxy"
