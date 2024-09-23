@@ -20,7 +20,7 @@
 
 <script setup lang="ts">
 import { whenever } from '@vueuse/core';
-import { computed, inject, ref } from 'vue';
+import { computed, inject, ref, useId } from 'vue';
 
 import { injectionKey, type Injection } from './AbiForm.vue';
 
@@ -45,9 +45,7 @@ whenever(containerValidated, () => {
   inputValidated.value = true;
 });
 
-const id = computed(
-  () => `input-${Math.random().toString(36).substring(2, 15)}`,
-);
+const id = useId();
 
 const inputValidated = ref<boolean>(false);
 const isInputValid = computed(() =>

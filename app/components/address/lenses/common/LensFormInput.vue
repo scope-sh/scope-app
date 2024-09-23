@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { useId } from 'vue';
 
 import LensFormInputPrimitive from './LensFormInputPrimitive.vue';
 
@@ -25,7 +25,5 @@ defineProps<{
 
 const model = defineModel<unknown>('input');
 
-const id = computed(
-  () => `input-${Math.random().toString(36).substring(2, 15)}`,
-);
+const id = useId();
 </script>

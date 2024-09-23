@@ -11,7 +11,7 @@ interface UseCommands {
 function useCommands(): UseCommands {
   const commandStore = useCommandStore();
 
-  const id = ref<string>(generateId());
+  const id = ref<string>(Math.random().toString(16).slice(2));
 
   const commands = computed<Command[]>(() =>
     Object.values<Command[]>(commandStore.commands).flat(1),
@@ -24,10 +24,6 @@ function useCommands(): UseCommands {
   onUnmounted(() => {
     commandStore.removeCommands(id.value);
   });
-
-  function generateId(): string {
-    return Math.random().toString(16).slice(2);
-  }
 
   return { commands, setCommands };
 }

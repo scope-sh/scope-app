@@ -25,7 +25,7 @@
 
 <script setup lang="ts">
 import { Checkbox } from 'radix-vue/namespaced';
-import { computed } from 'vue';
+import { useId } from 'vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import type { Input as AbiInput } from '@/utils/validation/abi';
@@ -36,9 +36,7 @@ defineProps<{
   abiInput: AbiInput;
 }>();
 
-const id = computed(
-  () => `input-${Math.random().toString(36).substring(2, 15)}`,
-);
+const id = useId();
 </script>
 
 <style scoped>
