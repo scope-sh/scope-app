@@ -45,7 +45,7 @@ type Type = 'text' | 'error';
   }
 
   width: 100%;
-  height: calc(
+  max-height: calc(
     2 * var(--padding) + 2 * var(--border) + var(--row-count) *
       round(down, calc(var(--font-size) * var(--line-height)), 1px)
   );
