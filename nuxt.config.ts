@@ -80,7 +80,6 @@ export default defineNuxtConfig({
     '@vueuse/nuxt',
     '@pinia/nuxt',
     '@nuxt/eslint',
-    '@nuxt/fonts',
     'nuxt-shiki',
     'nuxt-posthog',
   ],
