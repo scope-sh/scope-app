@@ -589,10 +589,8 @@ async function fetchTransactionReplay(txHash: Hex): Promise<void> {
       };
     }
   } else {
-    console.log('fetchTransactionReplay 1', txHash);
     transactionReplay.value =
       await evmService.value.getTransactionReplay(txHash);
-    console.log('fetchTransactionReplay 2', transactionReplay.value);
   }
 }
 const opTrace = computed<OpTrace | null>(() => {
