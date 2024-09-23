@@ -28,6 +28,8 @@
   },
   "dependencies": {
     "@envio-dev/hypersync-client": "^0.6.2",
+    "@fontsource-variable/inconsolata": "^5.1.0",
+    "@fontsource-variable/inter": "^5.1.0",
     "@nuxt/fonts": "^0.8.0",
     "@pinia/nuxt": "^0.5.4",
     "@shikijs/transformers": "^1.12.1",
