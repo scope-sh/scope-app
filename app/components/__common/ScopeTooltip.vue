@@ -1,5 +1,8 @@
 <template>
-  <Tooltip.Provider :delay-duration>
+  <Tooltip.Provider
+    :delay-duration
+    :disable-closing-trigger
+  >
     <Tooltip.Root>
       <Tooltip.Trigger as-child>
         <button class="trigger">
@@ -26,8 +29,9 @@ import { computed } from 'vue';
 
 type Delay = 'small' | 'medium' | 'large';
 
-const { delay } = defineProps<{
+const { delay, disableClosingTrigger = false } = defineProps<{
   delay: Delay;
+  disableClosingTrigger?: boolean;
 }>();
 
 const delayDuration = computed<number>(() => {
