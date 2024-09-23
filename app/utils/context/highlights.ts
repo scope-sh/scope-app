@@ -156,25 +156,40 @@ function getOp(
       return [];
     }
     if (decodedNonce.mode === 'enable') {
-      return [
-        {
-          icon: label.iconUrl,
-          parts: [
-            {
-              type: 'text',
-              value: 'Enable',
-            },
-            {
-              type: 'address',
-              address: decodedNonce.identifier,
-            },
-            {
-              type: 'text',
-              value: 'validator',
-            },
-          ],
-        },
-      ];
+      if (decodedNonce.vType === 'permission') {
+        return [
+          {
+            icon: label.iconUrl,
+            parts: [
+              {
+                type: 'text',
+                value: `Enable permission ${decodedNonce.identifier}`,
+              },
+            ],
+          },
+        ];
+      }
+      if (decodedNonce.vType === 'validator') {
+        return [
+          {
+            icon: label.iconUrl,
+            parts: [
+              {
+                type: 'text',
+                value: 'Enable',
+              },
+              {
+                type: 'address',
+                address: decodedNonce.identifier,
+              },
+              {
+                type: 'text',
+                value: 'validator',
+              },
+            ],
+          },
+        ];
+      }
     }
     if (decodedNonce.mode === 'install') {
       return [
