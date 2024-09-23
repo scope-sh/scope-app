@@ -27,7 +27,7 @@ interface ExecMode {
 interface NonceDecoded {
   mode: ValidationMode;
   vType: ValidationType;
-  identifier: Address;
+  identifier: Hex;
 }
 
 interface Execution {
@@ -55,8 +55,8 @@ interface CallDataDelegate {
 type CallDataDecoded = CallDataBatch | CallDataSingle | CallDataDelegate;
 
 function bitwiseAndHexStrings(hex1: Hex, hex2: Hex): Hex {
-  const num1 = BigInt(`0x${hex1}`);
-  const num2 = BigInt(`0x${hex2}`);
+  const num1 = BigInt(hex1);
+  const num2 = BigInt(hex2);
   const result = num1 & num2;
   return result.toString(16) as Hex;
 }
