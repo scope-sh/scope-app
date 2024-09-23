@@ -30,7 +30,7 @@
     "@envio-dev/hypersync-client": "^0.6.2",
     "@fontsource-variable/inter": "^5.0.20",
     "@fontsource/inconsolata": "^5.0.18",
-    "@pinia/nuxt": "^0.5.3",
+    "@pinia/nuxt": "^0.5.4",
     "@shikijs/transformers": "^1.12.1",
     "@tanstack/vue-table": "^8.20.4",
     "@unhead/vue": "^1.9.16",
@@ -39,8 +39,8 @@
     "abitype": "^1.0.6",
     "evm-providers": "^0.4.6",
     "ky": "^1.5.0",
-    "nuxt": "3.12.2",
-    "nuxt-posthog": "^1.5.1",
+    "nuxt": "^3.13.2",
+    "nuxt-posthog": "^1.5.3",
     "nuxt-shiki": "^0.3.0",
     "pinia": "^2.2.1",
     "radix-vue": "^1.9.6",
@@ -50,7 +50,7 @@
     "vue-router": "^4.4.5"
   },
   "devDependencies": {
-    "@nuxt/eslint": "^0.5.0",
+    "@nuxt/eslint": "^0.5.7",
     "@typescript-eslint/eslint-plugin": "^8.6.0",
     "@vitejs/plugin-vue": "^5.1.4",
     "@vue/compiler-sfc": "^3.5.8",
