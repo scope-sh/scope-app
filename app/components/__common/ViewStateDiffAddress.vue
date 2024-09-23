@@ -20,12 +20,14 @@
         <div class="title">Code</div>
         <div class="code">
           <div
+            ref="codeContentEl"
             class="code-content"
             :class="{ expanded: isCodeExpanded }"
           >
             {{ diff.code.from }} → {{ diff.code.to }}
           </div>
           <button
+            v-if="isCodeOverflowing || isCodeExpanded"
             class="expand-toggle"
             @click="toggleExpandCode"
           >
@@ -54,6 +56,7 @@
 </template>
 
 <script setup lang="ts">
+import { useResizeObserver } from '@vueuse/core';
 import type { Address } from 'viem';
 import { ref } from 'vue';
 
@@ -71,6 +74,15 @@ defineProps<{
   diff: TransactionStateDiffAddress;
 }>();
 
+const isCodeOverflowing = ref(false);
+const codeContentEl = ref(null);
+useResizeObserver(codeContentEl, (entries) => {
+  const entry = entries[0];
+  if (!entry) {
+    return;
+  }
+  isCodeOverflowing.value = entry.contentRect.width < entry.target.scrollWidth;
+});
 const isCodeExpanded = ref(false);
 function toggleExpandCode(): void {
   isCodeExpanded.value = !isCodeExpanded.value;
