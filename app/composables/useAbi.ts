@@ -9,6 +9,7 @@ interface UseAbi {
   addAbis: (value: Abis) => void;
   getEventAbi: (address: Address, signature: Hex) => AbiEvent | null;
   getFunctionAbi: (address: Address, signature: Hex) => AbiFunction | null;
+  getFunctionName: (address: Address, signature: Hex) => string | null;
 }
 
 function useAbi(): UseAbi {
@@ -30,10 +31,15 @@ function useAbi(): UseAbi {
     return store.getFunctionAbi(chain.value, address, signature);
   }
 
+  function getFunctionName(address: Address, signature: Hex): string | null {
+    return store.getFunctionName(chain.value, address, signature);
+  }
+
   return {
     addAbis,
     getEventAbi,
     getFunctionAbi,
+    getFunctionName,
   };
 }
 

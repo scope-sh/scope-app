@@ -144,6 +144,7 @@ interface Deployment {
 type Abis = Record<
   Address,
   {
+    functionNames: Record<Hex, string>;
     functions: Record<Hex, AbiFunction>;
     events: Record<Hex, AbiEvent>;
   }
@@ -229,6 +230,7 @@ class Service {
       {
         events: Hex[];
         functions: Hex[];
+        functionNames: Hex[];
       }
     >,
   ): Promise<Abis> {

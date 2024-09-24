@@ -413,6 +413,9 @@ watch(contract, (contract) => {
     .map((abi) => [toEventSelector(abi), abi]);
   addAbis({
     [address.value]: {
+      functionNames: Object.fromEntries(
+        addressFunctions.map(([selector, abi]) => [selector, abi.name]),
+      ),
       functions: Object.fromEntries(addressFunctions),
       events: Object.fromEntries(addressEvents),
     },

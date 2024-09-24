@@ -138,6 +138,7 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
+import type { Address, Hex } from 'viem';
 import { slice, zeroAddress } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -162,9 +163,11 @@ import {
   AttributeList,
 } from '@/components/__common/attributes';
 import BlockStatus from '@/components/block/BlockStatus.vue';
+import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useToast from '@/composables/useToast';
+import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
 import type { BlockWithTransactions } from '@/services/evm';
 import type { Command } from '@/stores/commands';
@@ -190,7 +193,8 @@ const sections = computed<Section[]>(() => {
 
 const route = useRoute();
 const router = useRouter();
-const { name: chainName, client } = useChain();
+const { addAbis } = useAbi();
+const { id: chainId, name: chainName, client } = useChain();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
@@ -251,6 +255,9 @@ useHead({
   title: () => `Block ${number.value} on ${chainName.value} | Scope`,
 });
 
+const apiService = computed(() =>
+  chainId.value ? new ApiService(chainId.value) : null,
+);
 const evmService = computed(() =>
   client.value ? new EvmService(client.value) : null,
 );
@@ -272,6 +279,48 @@ async function fetch(): Promise<void> {
   }
   block.value = await evmService.value.getBlockWithTransactions(number.value);
   isLoading.value = false;
+}
+
+watch(block, () => {
+  if (!block.value) {
+    return;
+  }
+  fetchAbis(block.value);
+});
+
+async function fetchAbis(block: BlockWithTransactions): Promise<void> {
+  if (!apiService.value) {
+    return;
+  }
+  // Group block transactions by contract address, then by function signature
+  const contracts = block.transactions.reduce(
+    (acc, transaction) => {
+      if (!transaction.to) {
+        return acc;
+      }
+      const transactionAcc = acc[transaction.to] || {
+        functionNames: [],
+        functions: [],
+        events: [],
+      };
+      const functionSignature = slice(transaction.input, 0, 4);
+      if (!transactionAcc.functionNames.includes(functionSignature)) {
+        transactionAcc.functionNames.push(functionSignature);
+      }
+      acc[transaction.to] = transactionAcc;
+      return acc;
+    },
+    {} as Record<
+      Address,
+      {
+        functionNames: Hex[];
+        functions: Hex[];
+        events: Hex[];
+      }
+    >,
+  );
+  const abis = await apiService.value.getContractAbi(contracts);
+  addAbis(abis);
 }
 
 const blockRelativeTime = computed(() => {

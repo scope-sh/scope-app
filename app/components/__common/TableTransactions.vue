@@ -20,7 +20,6 @@
               hash: header.column.id === 'hash',
               address: header.column.id === 'from' || header.column.id === 'to',
               func: header.column.id === 'function',
-              data: header.column.id === 'data',
               value:
                 header.column.id === 'value' || header.column.id === 'gasPrice',
             }"
@@ -51,7 +50,6 @@
               hash: cell.column.id === 'hash',
               address: cell.column.id === 'from' || cell.column.id === 'to',
               func: cell.column.id === 'function',
-              data: cell.column.id === 'data',
               value:
                 cell.column.id === 'value' || cell.column.id === 'gasPrice',
             }"
@@ -158,6 +156,7 @@ import ScopeTooltip from './ScopeTooltip.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import useAbi from '@/composables/useAbi.js';
 import useChain from '@/composables/useChain.js';
 import useLabels from '@/composables/useLabels.js';
 import { toRelativeTime } from '@/utils/conversion';
@@ -174,6 +173,7 @@ const { address, transactions, page, perPage, type } = defineProps<{
   perPage: number;
   type: 'address' | 'block';
 }>();
+const { getFunctionName } = useAbi();
 const { nativeCurrency } = useChain();
 const { getLabelText } = useLabels();
 
@@ -236,11 +236,7 @@ const columns = computed(() => {
       }),
       columnHelper.accessor('function', {
         header: 'function',
-        cell: (cell) => formatFunction(cell.getValue()),
-      }),
-      columnHelper.accessor('data', {
-        header: 'data',
-        cell: (cell) => formatData(cell.getValue()),
+        cell: (cell) => formatFunction(address, cell.row.getValue('to'), cell.getValue()),
       }),
       columnHelper.accessor('value', {
         header: 'value',
@@ -286,15 +282,16 @@ function getAddress(value: Address): string {
   return labelText ? labelText : value;
 }
 
-function formatFunction(value: Hex): string {
-  return size(value) === 0 ? '—' : value;
-}
-
-function formatData(value: Hex): string {
+function formatFunction(address: Address | undefined, to: Address | undefined, value: Hex): string {
   if (size(value) === 0) {
     return '—';
   }
-  return value;
+  const target = to ? to : address;
+  if (!target) {
+    return value;
+  }
+  const functionName = getFunctionName(target, value);
+  return functionName ? functionName : value;
 }
 
 function toBlockNumber(value: unknown): bigint {
@@ -320,7 +317,6 @@ interface AddressTransaction {
   from: Address;
   to: Address | null;
   function: Hex;
-  data: Hex;
   value: bigint;
   gasPrice: bigint;
 }
@@ -331,7 +327,6 @@ interface BlockTransaction {
   from: Address;
   to: Address | null;
   function: Hex;
-  data: Hex;
   value: bigint;
   gasPrice: bigint;
 }
@@ -463,11 +458,7 @@ tbody {
 }
 
 .func {
-  width: 80px;
-}
-
-.data {
-  width: 260px;
+  width: 200px;
 }
 
 .value {

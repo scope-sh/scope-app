@@ -14,7 +14,11 @@ const store = defineStore('abi', () => {
 
     for (const addressString in value) {
       const address = addressString as Address;
-      const addressAbis = chainAbis[address] || { events: {}, functions: {} };
+      const addressAbis = chainAbis[address] || {
+        events: {},
+        functionNames: {},
+        functions: {},
+      };
       chainAbis[address] = addressAbis;
 
       const newAddressAbis = value[address];
@@ -40,6 +44,16 @@ const store = defineStore('abi', () => {
           continue;
         }
         addressAbis.functions[signature] = newFunction;
+      }
+
+      const newFunctionNames = newAddressAbis.functionNames;
+      for (const signatureString in newFunctionNames) {
+        const signature = signatureString as Hex;
+        const newFunctionName = newFunctionNames[signature];
+        if (!newFunctionName) {
+          continue;
+        }
+        addressAbis.functionNames[signature] = newFunctionName;
       }
     }
   }
@@ -76,10 +90,27 @@ const store = defineStore('abi', () => {
     return addressAbis.functions[signature] || null;
   }
 
+  function getFunctionName(
+    chain: Chain,
+    address: Address,
+    signature: Hex,
+  ): string | null {
+    const chainAbis = abis.value[chain];
+    if (!chainAbis) {
+      return null;
+    }
+    const addressAbis = chainAbis[address];
+    if (!addressAbis) {
+      return null;
+    }
+    return addressAbis.functionNames[signature] || null;
+  }
+
   return {
     addAbis,
     getEventAbi,
     getFunctionAbi,
+    getFunctionName,
   };
 });
 
