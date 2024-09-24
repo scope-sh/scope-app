@@ -31,10 +31,17 @@
       <AttributeItem>
         <AttributeItemLabel value="Constructor Arguments" />
         <AttributeItemValue>
-          <ScopeTextView
-            :value="source.constructorArguments"
-            size="tiny"
-          />
+          <div class="constructor">
+            <ScopeToggle
+              v-model="selectedConstructorView"
+              :options="constructorViewOptions"
+            />
+            <ViewConstructor
+              :view="selectedConstructorView"
+              :address
+              :constructor-data="source.constructorArguments"
+            />
+          </div>
         </AttributeItemValue>
       </AttributeItem>
     </AttributeList>
@@ -42,9 +49,15 @@
 </template>
 
 <script setup lang="ts">
+import type { Address } from 'viem';
 import { size } from 'viem';
+import { computed, ref } from 'vue';
 
-import ScopeTextView from '@/components/__common/ScopeTextView.vue';
+import ViewConstructor from './ViewConstructor.vue';
+import type { ConstructorView } from './ViewConstructor.vue';
+
+import type { Option as ToggleOption } from '@/components/__common/ScopeToggle.vue';
+import ScopeToggle from '@/components/__common/ScopeToggle.vue';
 import {
   AttributeItem,
   AttributeItemLabel,
@@ -53,9 +66,22 @@ import {
 } from '@/components/__common/attributes';
 import type { SourceCode } from '@/services/api';
 
-defineProps<{
+const { source } = defineProps<{
+  address: Address;
   source: SourceCode;
 }>();
+
+const selectedConstructorView = ref<ConstructorView>('decoded');
+const constructorViewOptions = computed<ToggleOption<ConstructorView>[]>(() => [
+  {
+    value: 'decoded',
+    icon: 'text',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
 </script>
 
 <style scoped>
@@ -82,5 +108,12 @@ defineProps<{
 
 .side {
   flex: 1;
+}
+
+.constructor {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-2);
 }
 </style>

@@ -1,3 +1,4 @@
+import type { AbiConstructor } from 'abitype';
 import ky, { type KyInstance } from 'ky';
 import type { Abi, AbiEvent, AbiFunction, Address, Hex } from 'viem';
 
@@ -144,6 +145,7 @@ interface Deployment {
 type Abis = Record<
   Address,
   {
+    constructors: AbiConstructor[];
     functionNames: Record<Hex, string>;
     functions: Record<Hex, AbiFunction>;
     events: Record<Hex, AbiEvent>;
@@ -228,6 +230,7 @@ class Service {
     contracts: Record<
       Address,
       {
+        constructors: boolean;
         events: Hex[];
         functions: Hex[];
         functionNames: Hex[];

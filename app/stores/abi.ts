@@ -1,3 +1,4 @@
+import type { AbiConstructor } from 'abitype';
 import { defineStore } from 'pinia';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import { ref } from 'vue';
@@ -15,6 +16,7 @@ const store = defineStore('abi', () => {
     for (const addressString in value) {
       const address = addressString as Address;
       const addressAbis = chainAbis[address] || {
+        constructors: [],
         events: {},
         functionNames: {},
         functions: {},
@@ -24,6 +26,14 @@ const store = defineStore('abi', () => {
       const newAddressAbis = value[address];
       if (!newAddressAbis) {
         continue;
+      }
+
+      const newConstructors = newAddressAbis.constructors;
+      for (const constructor of newConstructors) {
+        if (addressAbis.constructors.includes(constructor)) {
+          continue;
+        }
+        addressAbis.constructors.push(constructor);
       }
 
       const newEvents = newAddressAbis.events;
@@ -56,6 +66,18 @@ const store = defineStore('abi', () => {
         addressAbis.functionNames[signature] = newFunctionName;
       }
     }
+  }
+
+  function getConstructors(chain: Chain, address: Address): AbiConstructor[] {
+    const chainAbis = abis.value[chain];
+    if (!chainAbis) {
+      return [];
+    }
+    const addressAbis = chainAbis[address];
+    if (!addressAbis) {
+      return [];
+    }
+    return addressAbis.constructors;
   }
 
   function getEventAbi(
@@ -108,6 +130,7 @@ const store = defineStore('abi', () => {
 
   return {
     addAbis,
+    getConstructors,
     getEventAbi,
     getFunctionAbi,
     getFunctionName,

@@ -517,6 +517,8 @@ async function fetchAbis(): Promise<void> {
   const contracts: Record<
     Address,
     {
+      constructors: boolean;
+      functionNames: Hex[];
       functions: Hex[];
       events: Hex[];
     }
@@ -527,6 +529,8 @@ async function fetchAbis(): Promise<void> {
     }
     if (!contracts[log.address]) {
       contracts[log.address] = {
+        constructors: false,
+        functionNames: [],
         functions: [],
         events: [],
       };
@@ -550,7 +554,9 @@ async function fetchAbis(): Promise<void> {
   const input = transaction.value.input;
   if (!contracts[address]) {
     contracts[address] = {
+      constructors: false,
       functions: [],
+      functionNames: [],
       events: [],
     };
   }

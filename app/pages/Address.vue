@@ -109,9 +109,9 @@
       <template v-else-if="section === SECTION_CODE">
         <PanelCode
           v-if="isContract && bytecode"
+          :address
           :bytecode
           :contract
-          :address
         />
       </template>
       <template v-else-if="section === SECTION_INTERACT">
@@ -413,6 +413,7 @@ watch(contract, (contract) => {
     .map((abi) => [toEventSelector(abi), abi]);
   addAbis({
     [address.value]: {
+      constructors: abi.filter((abi) => abi.type === 'constructor'),
       functionNames: Object.fromEntries(
         addressFunctions.map(([selector, abi]) => [selector, abi.name]),
       ),
