@@ -6,93 +6,20 @@
   >
     <div class="scroll">
       <div
-        v-for="item in visibleCalls"
+        v-for="(item, callIndex) in visibleCalls"
         :key="item.traceAddress.join('-')"
         class="item"
         :style="{ '--level': getLevel(item) }"
       >
-        <div
-          class="item-content"
-          @click="() => toggleSelectCall(item)"
-        >
-          <div class="sticky left">
-            <div class="cell status">
-              <ScopeTooltip
-                v-if="item.success !== true"
-                delay="small"
-              >
-                <template #trigger>
-                  <ScopeIcon
-                    kind="cross"
-                    class="icon"
-                  />
-                </template>
-                <template #default>
-                  {{ item.success.type === 'OOG' ? 'Out of gas' : 'Reverted' }}
-                </template>
-              </ScopeTooltip>
-            </div>
-            <div class="cell call">{{ formatType(item.type) }}</div>
-          </div>
-          <div
-            v-for="index in getLevel(item)"
-            :key="index"
-            class="grid"
-            :style="{ '--index': index }"
-          />
-          <div class="main">
-            <div class="cell content">
-              <ScopeIcon
-                v-if="hasChildren(item)"
-                class="icon-marker"
-                :kind="item.folded ? 'chevron-right' : 'chevron-down'"
-                @click.stop="() => toggleFold(item)"
-              />
-              <div
-                v-else
-                class="icon-marker"
-              />
-              <div class="path">
-                <LinkAddress
-                  :address="item.from"
-                  type="minimal"
-                />
-                <template v-if="item.to">
-                  →
-                  <LinkAddress
-                    :address="item.to"
-                    type="minimal"
-                  />
-                </template>
-              </div>
-              <div class="input">
-                <template v-if="item.type === 'create'">
-                  {{ item.input }}
-                </template>
-                <template v-else>
-                  <template v-if="size(getFunction(item.input))">
-                    {{ getFunction(item.input) }}
-                    <template v-if="size(getData(item.input))">
-                      ({{ getData(item.input) }})
-                    </template>
-                  </template>
-                </template>
-              </div>
-            </div>
-          </div>
-          <div class="sticky right">
-            <div class="cell value">
-              <ScopeTooltip delay="medium">
-                <template #trigger>
-                  {{ formatEther(item.value, nativeCurrency, false) }}
-                </template>
-                <template #default>
-                  {{ formatEther(item.value, nativeCurrency, true) }}
-                </template>
-              </ScopeTooltip>
-            </div>
-          </div>
-        </div>
+        <CallRow
+          :call="item"
+          :level="getLevel(item)"
+          :is-parent="hasChildren(item)"
+          :first-child="callIndex === 0"
+          :last-child="callIndex === visibleCalls.length - 1"
+          @toggle-fold="() => toggleFold(item)"
+          @toggle-expand="() => toggleSelectCall(item)"
+        />
         <CallDetails
           v-if="item === selectedCall"
           :call="item"
@@ -105,23 +32,17 @@
 
 <script setup lang="ts">
 import { useResizeObserver } from '@vueuse/core';
-import { type Address, type Hex, size, slice } from 'viem';
+import type { Address, Hex } from 'viem';
 import { ref, computed, watch, useTemplateRef } from 'vue';
 
 import CallDetails from './CallDetails.vue';
-import LinkAddress from './LinkAddress.vue';
-import ScopeIcon from './ScopeIcon.vue';
-import ScopeTooltip from './ScopeTooltip.vue';
+import CallRow from './CallRow.vue';
 
-import useChain from '@/composables/useChain';
 import type { TransactionTrace } from '@/services/evm';
-import { formatEther } from '@/utils/formatting';
 
 const { trace } = defineProps<{
   trace: TransactionTrace | null;
 }>();
-
-const { nativeCurrency } = useChain();
 
 type CallStatus = true | { type: 'OOG' } | { type: 'Revert'; reason: string };
 type CallType = 'call' | 'delegatecall' | 'staticcall' | 'create';
@@ -245,26 +166,8 @@ function hasChildren(item: Call): boolean {
   });
 }
 
-function formatType(value: CallType): string {
-  return value === 'create'
-    ? 'CREATE'
-    : value === 'call'
-      ? 'CALL'
-      : value === 'delegatecall'
-        ? 'D•CALL'
-        : 'S•CALL';
-}
-
 function getLevel(row: Call): number {
   return row.traceAddress.length;
-}
-
-function getFunction(data: Hex): Hex {
-  return size(data) > 0 ? slice(data, 0, 4) : '0x';
-}
-
-function getData(data: Hex): Hex {
-  return size(data) > 4 ? slice(data, 4) : '0x';
 }
 
 export type { Call, CallType, CallStatus };
@@ -289,136 +192,5 @@ export type { Call, CallType, CallStatus };
   flex-direction: column;
   width: max-content;
   min-width: 100%;
-}
-
-.cell {
-  padding: 6px 10px;
-  font-weight: var(--font-weight-light);
-  line-height: 1;
-}
-
-.content {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-6);
-}
-
-.icon-marker {
-  width: var(--marker-size);
-  height: var(--marker-size);
-  opacity: 0.6;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
-.path {
-  display: flex;
-  gap: var(--spacing-3);
-}
-
-.sticky {
-  display: flex;
-  position: sticky;
-  z-index: 1;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-background-primary);
-}
-
-.sticky.left {
-  left: 0;
-}
-
-.sticky.right {
-  right: 0;
-}
-
-.item {
-  --padding: 10px;
-  --status-width: 24px;
-  --call-width: 80px;
-  --marker-size: 15px;
-  --level-margin: 20px;
-
-  &:first-child {
-    .cell {
-      padding: var(--padding) var(--padding) 6px;
-    }
-  }
-
-  &:last-child {
-    .cell {
-      padding: 6px var(--padding) var(--padding);
-    }
-  }
-
-  &:only-child {
-    .cell {
-      padding: 10px;
-    }
-  }
-}
-
-.item-content {
-  display: flex;
-  position: relative;
-  transition: opacity 0.25s ease;
-
-  &:hover {
-    background: var(--color-background-secondary);
-    cursor: pointer;
-
-    .sticky {
-      background: var(--color-background-secondary);
-      cursor: pointer;
-    }
-  }
-
-  .cell.status {
-    padding-right: 0;
-  }
-}
-
-.grid {
-  display: flex;
-  position: absolute;
-  left: calc(
-    var(--status-width) + var(--call-width) + var(--padding) +
-      (var(--marker-size) - 1px) / 2 + (var(--index) - 1) * var(--level-margin)
-  );
-  align-items: center;
-  justify-content: center;
-  width: 1px;
-  height: 100%;
-  background: var(--color-border-tertiary);
-}
-
-.main {
-  display: flex;
-  flex-grow: 1;
-  margin-left: calc(var(--level) * var(--level-margin));
-}
-
-.icon {
-  width: 12px;
-  height: 12px;
-}
-
-.status {
-  width: 24px;
-}
-
-.call {
-  width: 80px;
-}
-
-.input {
-  color: var(--color-text-secondary);
-  font-family: var(--font-mono);
-  font-size: var(--font-size-m);
-  font-weight: var(--font-weight-light);
 }
 </style>

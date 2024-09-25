@@ -69,10 +69,18 @@
           "
         />
         <AttributeItemValue>
-          <ScopeTextView
-            size="regular"
-            :value="call.input"
-          />
+          <div class="input">
+            <ScopeToggle
+              v-if="call.type !== 'create'"
+              v-model="selectedCallDataView"
+              :options="callDataViewOptions"
+            />
+            <ViewCallData
+              :address="call.to"
+              :call-data="call.input"
+              :view="selectedCallDataView"
+            />
+          </div>
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem v-if="call.output && size(call.output) > 0">
@@ -81,10 +89,14 @@
           note="The result of the call"
         />
         <AttributeItemValue>
-          <ScopeTextView
-            size="regular"
-            :value="call.output"
-          />
+          <div class="output">
+            <ViewCallData
+              :address="call.to"
+              :call-data="call.input"
+              :output="call.output"
+              :view="selectedCallDataView"
+            />
+          </div>
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem v-if="call.address">
@@ -114,10 +126,13 @@
 
 <script setup lang="ts">
 import { size } from 'viem';
+import { computed, ref } from 'vue';
 
 import CallStatus from './CallStatus.vue';
 import LinkAddress from './LinkAddress.vue';
 import ScopeTextView from './ScopeTextView.vue';
+import ScopeToggle from './ScopeToggle.vue';
+import type { Option as ToggleOption } from './ScopeToggle.vue';
 import type { Call, CallType } from './TreeInternalCalls.vue';
 import {
   AttributeList,
@@ -126,6 +141,8 @@ import {
   AttributeItemValue,
 } from './attributes';
 
+import ViewCallData from '@/components/transaction/ViewCallData.vue';
+import type { CallDataView } from '@/components/transaction/ViewCallData.vue';
 import useChain from '@/composables/useChain';
 import { formatEther, formatShare } from '@/utils/formatting';
 
@@ -151,6 +168,18 @@ function formatType(value: CallType): string {
         ? 'Delegate Call'
         : 'Static Call';
 }
+
+const selectedCallDataView = ref<CallDataView>('decoded');
+const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
+  {
+    value: 'decoded',
+    icon: 'text',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
 </script>
 
 <style scoped>
@@ -164,5 +193,13 @@ function formatType(value: CallType): string {
   padding: var(--spacing-8) var(--spacing-10);
   border-top: 1px solid var(--color-border-tertiary);
   border-bottom: 1px solid var(--color-border-tertiary);
+}
+
+.input,
+.output {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: var(--spacing-2);
 }
 </style>

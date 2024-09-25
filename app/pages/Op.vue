@@ -459,6 +459,8 @@ watch(op, async () => {
 
   const abis = await apiService.value.getContractAbi({
     [sender]: {
+      constructors: false,
+      functionNames: [],
       functions: [slice(callData, 0, 4)],
       events: [],
     },
@@ -639,6 +641,8 @@ async function fetchAbis(): Promise<void> {
   const contracts: Record<
     Address,
     {
+      constructors: boolean;
+      functionNames: Hex[];
       functions: Hex[];
       events: Hex[];
     }
@@ -649,6 +653,8 @@ async function fetchAbis(): Promise<void> {
     }
     if (!contracts[log.address]) {
       contracts[log.address] = {
+        constructors: false,
+        functionNames: [],
         functions: [],
         events: [],
       };
@@ -668,6 +674,37 @@ async function fetchAbis(): Promise<void> {
       continue;
     }
     contract.events.push(topic);
+  }
+  if (!opTrace.value) {
+    return;
+  }
+  const opTraces = [
+    ...opTrace.value.creation,
+    ...opTrace.value.validation,
+    ...opTrace.value.payment,
+    ...opTrace.value.execution,
+  ];
+  for (const call of opTraces) {
+    if (call.type !== 'call') {
+      continue;
+    }
+    const to = call.action.to;
+    const input = call.action.input;
+    if (!contracts[to]) {
+      contracts[to] = {
+        constructors: false,
+        functionNames: [],
+        functions: [],
+        events: [],
+      };
+    }
+    const contract = contracts[to];
+    if (!contract) {
+      continue;
+    }
+    if (size(input) > 0) {
+      contract.functions.push(input.slice(0, 10) as Hex);
+    }
   }
   const abis = await apiService.value.getContractAbi(contracts);
   addAbis(abis);

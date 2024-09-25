@@ -3,7 +3,10 @@
     v-if="view === 'decoded' && decoded"
     class="decoded"
   >
-    <div class="name">
+    <div
+      v-if="decoded.name"
+      class="name"
+    >
       {{ decoded.name }}
       <ButtonCopy
         :value="signature"
@@ -16,7 +19,7 @@
   <ScopeTextView
     v-else
     size="regular"
-    :value="callData"
+    :value="output === undefined ? callData : output"
   />
 </template>
 
@@ -25,6 +28,7 @@ import {
   type AbiFunction,
   type Address,
   type Hex,
+  decodeAbiParameters,
   decodeFunctionData,
   size,
 } from 'viem';
@@ -39,16 +43,21 @@ import {
 } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
 
-const { address, callData } = defineProps<{
+const {
+  address,
+  callData,
+  output = undefined,
+} = defineProps<{
   address: Address | null;
   callData: Hex;
   view: CallDataView;
+  output?: Hex;
 }>();
 
 const { getFunctionAbi } = useAbi();
 
 interface DecodedCallData {
-  name: string;
+  name?: string;
   args: Argument[];
 }
 
@@ -66,12 +75,21 @@ const abi = computed<AbiFunction | null>(() => {
 const decoded = computed<DecodedCallData | null>(() => {
   if (!abi.value) return null;
 
-  const decodedCallData = decodeFunctionData({
-    abi: [abi.value],
-    data: callData,
-  });
+  const decodedCallData =
+    output === undefined
+      ? decodeFunctionData({
+          abi: [abi.value],
+          data: callData,
+        })
+      : {
+          functionName: undefined,
+          args: decodeAbiParameters(abi.value.outputs, output),
+        };
 
-  const args = getArguments(abi.value.inputs, decodedCallData.args);
+  const args = getArguments(
+    output === undefined ? abi.value.inputs : abi.value.outputs,
+    decodedCallData.args,
+  );
 
   return {
     name: decodedCallData.functionName,

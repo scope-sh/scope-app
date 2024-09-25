@@ -235,7 +235,7 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import type { Address, Hex, TransactionType } from 'viem';
+import { size, type Address, type Hex, type TransactionType } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -565,6 +565,31 @@ async function fetchAbis(): Promise<void> {
     return;
   }
   contract.functions.push(input.slice(0, 10) as Hex);
+  if (!transactionReplay.value) {
+    return;
+  }
+  for (const call of transactionReplay.value.trace) {
+    if (call.type !== 'call') {
+      continue;
+    }
+    const to = call.action.to;
+    const input = call.action.input;
+    if (!contracts[to]) {
+      contracts[to] = {
+        constructors: false,
+        functions: [],
+        functionNames: [],
+        events: [],
+      };
+    }
+    const contract = contracts[to];
+    if (!contract) {
+      continue;
+    }
+    if (size(input) > 0) {
+      contract.functions.push(input.slice(0, 10) as Hex);
+    }
+  }
   const abis = await apiService.value.getContractAbi(contracts);
   addAbis(abis);
 }
