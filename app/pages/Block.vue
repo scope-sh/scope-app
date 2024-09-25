@@ -299,10 +299,7 @@ async function fetchAbis(block: BlockWithTransactions): Promise<void> {
         return acc;
       }
       const transactionAcc = acc[transaction.to] || {
-        constructors: false,
         functionNames: [],
-        functions: [],
-        events: [],
       };
       const functionSignature = slice(transaction.input, 0, 4);
       if (!transactionAcc.functionNames.includes(functionSignature)) {
@@ -314,10 +311,7 @@ async function fetchAbis(block: BlockWithTransactions): Promise<void> {
     {} as Record<
       Address,
       {
-        constructors: boolean;
         functionNames: Hex[];
-        functions: Hex[];
-        events: Hex[];
       }
     >,
   );

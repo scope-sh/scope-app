@@ -230,10 +230,11 @@ class Service {
     contracts: Record<
       Address,
       {
-        constructors: boolean;
-        events: Hex[];
-        functions: Hex[];
-        functionNames: Hex[];
+        constructors?: boolean;
+        events?: Hex[];
+        functions?: Hex[];
+        functionNames?: Hex[];
+        errors?: Hex[];
       }
     >,
   ): Promise<Abis> {
