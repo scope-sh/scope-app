@@ -1,6 +1,6 @@
 <template>
   <div
-    class="root"
+    class="row"
     @click="handleRootClick"
   >
     <div class="sticky left">
@@ -232,7 +232,7 @@ const padding = computed(() =>
   right: 0;
 }
 
-.root {
+.row {
   --padding: 10px;
   --status-width: 24px;
   --call-width: 80px;
