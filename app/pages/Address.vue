@@ -138,6 +138,7 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
+import type { AbiError } from 'abitype';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import { toEventSelector, toFunctionSelector } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
@@ -182,6 +183,7 @@ import HypersyncService from '@/services/hypersync';
 import type { Op } from '@/services/indexer';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
+import { toErrorSelector } from '~/utils/context/errors';
 
 const SECTION_OPS = 'ops';
 const SECTION_TRANSACTIONS = 'transactions';
@@ -411,6 +413,9 @@ watch(contract, (contract) => {
   const addressEvents: [Hex, AbiEvent][] = abi
     .filter((abi): abi is AbiEvent => abi.type === 'event')
     .map((abi) => [toEventSelector(abi), abi]);
+  const addressErrors: [Hex, AbiError][] = abi
+    .filter((abi): abi is AbiError => abi.type === 'error')
+    .map((abi) => [toErrorSelector(abi), abi]);
   addAbis({
     [address.value]: {
       constructors: abi.filter((abi) => abi.type === 'constructor'),
@@ -419,6 +424,7 @@ watch(contract, (contract) => {
       ),
       functions: Object.fromEntries(addressFunctions),
       events: Object.fromEntries(addressEvents),
+      errors: Object.fromEntries(addressErrors),
     },
   });
 });

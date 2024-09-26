@@ -142,6 +142,16 @@ interface Deployment {
   transactionHash: Hex;
 }
 
+type AbiRequests = Record<Address, AbiRequest>;
+
+interface AbiRequest {
+  constructors?: boolean;
+  events?: Hex[];
+  functions?: Hex[];
+  functionNames?: Hex[];
+  errors?: Hex[];
+}
+
 type Abis = Record<
   Address,
   {
@@ -227,18 +237,7 @@ class Service {
     return response.json<Contract>();
   }
 
-  public async getContractAbi(
-    contracts: Record<
-      Address,
-      {
-        constructors?: boolean;
-        events?: Hex[];
-        functions?: Hex[];
-        functionNames?: Hex[];
-        errors?: Hex[];
-      }
-    >,
-  ): Promise<Abis> {
+  public async getContractAbi(contracts: AbiRequests): Promise<Abis> {
     const response = await this.client.post('contract/abi', {
       searchParams: {
         chain: this.chainId,
@@ -274,5 +273,7 @@ export type {
   SourceCode,
   ContractSelectors,
   Abis,
+  AbiRequests,
+  AbiRequest,
   Deployment,
 };

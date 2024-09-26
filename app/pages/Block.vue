@@ -138,7 +138,6 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import type { Address, Hex } from 'viem';
 import { slice, zeroAddress } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -193,7 +192,7 @@ const sections = computed<Section[]>(() => {
 
 const route = useRoute();
 const router = useRouter();
-const { addAbis } = useAbi();
+const { requestAbi } = useAbi();
 const { id: chainId, name: chainName, client } = useChain();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
@@ -292,31 +291,15 @@ async function fetchAbis(block: BlockWithTransactions): Promise<void> {
   if (!apiService.value) {
     return;
   }
-  // Group block transactions by contract address, then by function signature
-  const contracts = block.transactions.reduce(
-    (acc, transaction) => {
-      if (!transaction.to) {
-        return acc;
-      }
-      const transactionAcc = acc[transaction.to] || {
-        functionNames: [],
-      };
-      const functionSignature = slice(transaction.input, 0, 4);
-      if (!transactionAcc.functionNames.includes(functionSignature)) {
-        transactionAcc.functionNames.push(functionSignature);
-      }
-      acc[transaction.to] = transactionAcc;
-      return acc;
-    },
-    {} as Record<
-      Address,
-      {
-        functionNames: Hex[];
-      }
-    >,
-  );
-  const abis = await apiService.value.getContractAbi(contracts);
-  addAbis(abis);
+  for (const transaction of block.transactions) {
+    if (!transaction.to) {
+      continue;
+    }
+    const functionSignature = slice(transaction.input, 0, 4);
+    requestAbi(transaction.to, {
+      functionNames: [functionSignature],
+    });
+  }
 }
 
 const blockRelativeTime = computed(() => {

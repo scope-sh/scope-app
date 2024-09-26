@@ -295,7 +295,6 @@ import {
   formatTime,
 } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
-import { STANDARD_ERROR_SIGNATURE } from '~/utils/context/errors';
 
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
@@ -307,7 +306,7 @@ const { send: sendToast } = useToast();
 const route = useRoute();
 const router = useRouter();
 const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
-const { addAbis } = useAbi();
+const { requestAbi } = useAbi();
 
 const section = ref<Section['value']>(SECTION_LOGS);
 const sections = computed<Section[]>(() => {
@@ -511,31 +510,18 @@ async function fetchAbis(): Promise<void> {
   if (!address) {
     return;
   }
+  const input = transaction.value.input;
+  requestAbi(address, {
+    functions: size(input) > 0 ? [input.slice(0, 10) as Hex] : [],
+    events: [],
+    errors: [],
+  });
   if (!transactionReceipt.value) {
     return;
   }
   const logs = transactionReceipt.value.logs;
-  const contracts: Record<
-    Address,
-    {
-      functions: Hex[];
-      events: Hex[];
-      errors: Hex[];
-    }
-  > = {};
   for (const log of logs) {
     if (!log.address) {
-      continue;
-    }
-    if (!contracts[log.address]) {
-      contracts[log.address] = {
-        functions: [],
-        events: [],
-        errors: [],
-      };
-    }
-    const contract = contracts[log.address];
-    if (!contract) {
       continue;
     }
     if (log.topics.length === 0) {
@@ -545,24 +531,12 @@ async function fetchAbis(): Promise<void> {
     if (!topic) {
       continue;
     }
-    if (contract.events.includes(topic)) {
-      continue;
-    }
-    contract.events.push(topic);
-  }
-  const input = transaction.value.input;
-  if (!contracts[address]) {
-    contracts[address] = {
+    requestAbi(address, {
       functions: [],
-      events: [],
+      events: [topic],
       errors: [],
-    };
+    });
   }
-  const contract = contracts[address];
-  if (!contract) {
-    return;
-  }
-  contract.functions.push(input.slice(0, 10) as Hex);
   if (!transactionReplay.value) {
     return;
   }
@@ -572,34 +546,23 @@ async function fetchAbis(): Promise<void> {
     }
     const to = call.action.to;
     const input = call.action.input;
-    if (!contracts[to]) {
-      contracts[to] = {
-        functions: [],
-        events: [],
-        errors: [],
-      };
-    }
-    const contract = contracts[to];
-    if (!contract) {
-      continue;
-    }
-    if (size(input) > 0) {
-      contract.functions.push(input.slice(0, 10) as Hex);
-    }
+    requestAbi(to, {
+      functions: size(input) > 0 ? [input.slice(0, 10) as Hex] : [],
+      events: [],
+      errors: [],
+    });
     if (call.error !== null) {
       const output = call.result.output;
       if (!output) {
         continue;
       }
-      if (output.startsWith(STANDARD_ERROR_SIGNATURE)) {
-        // Standard revert
-        continue;
-      }
-      contract.errors.push(output.slice(0, 10) as Hex);
+      requestAbi(to, {
+        functions: [],
+        events: [],
+        errors: size(output) > 0 ? [output.slice(0, 10) as Hex] : [],
+      });
     }
   }
-  const abis = await apiService.value.getContractAbi(contracts);
-  addAbis(abis);
 }
 
 const selectedLogView = ref<LogView>('decoded');

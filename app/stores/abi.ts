@@ -1,13 +1,17 @@
+import { useDebounceFn } from '@vueuse/core';
 import type { AbiConstructor, AbiError } from 'abitype';
 import { defineStore } from 'pinia';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import { ref } from 'vue';
 
-import type { Abis } from '@/services/api.js';
+import type { Abis, AbiRequest } from '@/services/api.js';
 import type { Chain } from '@/utils/chains.js';
+
+type AbiRequestMap = Map<Address, AbiRequest>;
 
 const store = defineStore('abi', () => {
   const abis = ref<Partial<Record<Chain, Abis>>>({});
+  const requests: AbiRequestMap = new Map();
 
   function addAbis(chain: Chain, value: Abis): void {
     const chainAbis = abis.value[chain] || {};
@@ -155,6 +159,58 @@ const store = defineStore('abi', () => {
     return addressAbis.errors[signature] || null;
   }
 
+  const debouncedFn = useDebounceFn(
+    (onFetch: (requests: AbiRequestMap) => void) => {
+      onFetch(requests);
+      requests.clear();
+    },
+    50,
+    { maxWait: 500 },
+  );
+
+  async function requestAbi(
+    address: Address,
+    request: AbiRequest,
+    onFetch: (requests: AbiRequestMap) => void,
+  ): Promise<void> {
+    // If we receive two requests for the same address, make sure to merge them
+    const oldRequest = requests.get(address);
+    const newRequest: AbiRequest = {};
+    if (oldRequest) {
+      if (oldRequest.constructors || request.constructors) {
+        newRequest.constructors = true;
+      }
+      if (oldRequest.events || request.events) {
+        newRequest.events = [
+          ...(oldRequest.events || []),
+          ...(request.events || []),
+        ];
+      }
+      if (oldRequest.functions || request.functions) {
+        newRequest.functions = [
+          ...(oldRequest.functions || []),
+          ...(request.functions || []),
+        ];
+      }
+      if (oldRequest.functionNames || request.functionNames) {
+        newRequest.functionNames = [
+          ...(oldRequest.functionNames || []),
+          ...(request.functionNames || []),
+        ];
+      }
+      if (oldRequest.errors || request.errors) {
+        newRequest.errors = [
+          ...(oldRequest.errors || []),
+          ...(request.errors || []),
+        ];
+      }
+    } else {
+      Object.assign(newRequest, request);
+    }
+    requests.set(address, newRequest);
+    debouncedFn(onFetch);
+  }
+
   return {
     addAbis,
     getConstructors,
@@ -162,7 +218,9 @@ const store = defineStore('abi', () => {
     getFunctionAbi,
     getFunctionName,
     getErrorAbi,
+    requestAbi,
   };
 });
 
 export default store;
+export type { AbiRequestMap };
