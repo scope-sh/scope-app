@@ -1,4 +1,4 @@
-import type { AbiConstructor } from 'abitype';
+import type { AbiConstructor, AbiError } from 'abitype';
 import { defineStore } from 'pinia';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import { ref } from 'vue';
@@ -20,6 +20,7 @@ const store = defineStore('abi', () => {
         events: {},
         functionNames: {},
         functions: {},
+        errors: {},
       };
       chainAbis[address] = addressAbis;
 
@@ -64,6 +65,16 @@ const store = defineStore('abi', () => {
           continue;
         }
         addressAbis.functionNames[signature] = newFunctionName;
+      }
+
+      const newErrors = newAddressAbis.errors;
+      for (const signatureString in newErrors) {
+        const signature = signatureString as Hex;
+        const newError = newErrors[signature];
+        if (!newError) {
+          continue;
+        }
+        addressAbis.errors[signature] = newError;
       }
     }
   }
@@ -128,12 +139,29 @@ const store = defineStore('abi', () => {
     return addressAbis.functionNames[signature] || null;
   }
 
+  function getErrorAbi(
+    chain: Chain,
+    address: Address,
+    signature: Hex,
+  ): AbiError | null {
+    const chainAbis = abis.value[chain];
+    if (!chainAbis) {
+      return null;
+    }
+    const addressAbis = chainAbis[address];
+    if (!addressAbis) {
+      return null;
+    }
+    return addressAbis.errors[signature] || null;
+  }
+
   return {
     addAbis,
     getConstructors,
     getEventAbi,
     getFunctionAbi,
     getFunctionName,
+    getErrorAbi,
   };
 });
 

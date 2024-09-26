@@ -1,4 +1,4 @@
-import type { AbiConstructor } from 'abitype';
+import type { AbiConstructor, AbiError } from 'abitype';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 
 import useChain from './useChain';
@@ -12,6 +12,7 @@ interface UseAbi {
   getEventAbi: (address: Address, signature: Hex) => AbiEvent | null;
   getFunctionAbi: (address: Address, signature: Hex) => AbiFunction | null;
   getFunctionName: (address: Address, signature: Hex) => string | null;
+  getErrorAbi: (address: Address, signature: Hex) => AbiError | null;
 }
 
 function useAbi(): UseAbi {
@@ -41,12 +42,17 @@ function useAbi(): UseAbi {
     return store.getFunctionName(chain.value, address, signature);
   }
 
+  function getErrorAbi(address: Address, signature: Hex): AbiError | null {
+    return store.getErrorAbi(chain.value, address, signature);
+  }
+
   return {
     addAbis,
     getConstructors,
     getEventAbi,
     getFunctionAbi,
     getFunctionName,
+    getErrorAbi,
   };
 }
 

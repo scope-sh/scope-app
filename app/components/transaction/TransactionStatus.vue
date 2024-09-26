@@ -35,10 +35,13 @@
             class="address"
           >
             Reverted in
-            <LinkAddress
-              :address="traceFrame.action.to"
-              type="copyable"
-            />
+            <div class="source">
+              <LinkAddress
+                :address="traceFrame.action.to"
+                type="minimal"
+              />
+              <template v-if="decoded">: {{ decoded.name }}</template>
+            </div>
           </div>
           <template v-else> Reverted </template>
         </template>
@@ -49,14 +52,76 @@
 </template>
 
 <script setup lang="ts">
+import type { AbiError } from 'abitype';
+import { decodeErrorResult, size, slice } from 'viem';
+import { computed } from 'vue';
+
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import { getArguments, type Argument } from '@/components/__common/arguments';
+import useAbi from '@/composables/useAbi';
 import type { TransactionStatus, TransactionTraceFrame } from '@/services/evm';
 
-defineProps<{
+interface DecodedError {
+  name: string;
+  args: Argument[];
+}
+
+const { traceFrame } = defineProps<{
   status: TransactionStatus | null;
   traceFrame: TransactionTraceFrame | null;
 }>();
+
+const { getErrorAbi } = useAbi();
+
+const address = computed(() =>
+  traceFrame
+    ? traceFrame.type === 'call'
+      ? traceFrame.action.to
+      : null
+    : null,
+);
+const data = computed(() =>
+  traceFrame
+    ? traceFrame.type === 'call'
+      ? traceFrame.result.output
+      : null
+    : null,
+);
+
+const signature = computed(() => {
+  if (!data.value) {
+    return null;
+  }
+  if (size(data.value) < 4) {
+    return null;
+  }
+  return slice(data.value, 0, 4);
+});
+
+const abi = computed<AbiError | null>(() => {
+  if (!address.value) {
+    return null;
+  }
+  return signature.value ? getErrorAbi(address.value, signature.value) : null;
+});
+
+const decoded = computed<DecodedError | null>(() => {
+  if (!abi.value) return null;
+  if (!data.value) return null;
+
+  const decodedCallData = decodeErrorResult({
+    abi: [abi.value],
+    data: data.value,
+  });
+
+  const args = getArguments(abi.value.inputs, decodedCallData.args);
+
+  return {
+    name: decodedCallData.errorName,
+    args,
+  };
+});
 </script>
 
 <style scoped>
@@ -92,5 +157,9 @@ defineProps<{
 .address {
   display: flex;
   gap: var(--spacing-3);
+}
+
+.source {
+  display: flex;
 }
 </style>

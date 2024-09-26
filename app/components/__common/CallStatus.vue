@@ -23,25 +23,76 @@
 </template>
 
 <script setup lang="ts">
+import type { AbiError } from 'abitype';
+import { decodeErrorResult, size, slice, type Address, type Hex } from 'viem';
 import { computed } from 'vue';
+
+import { getArguments, type Argument } from './arguments';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import type { CallStatus } from '@/components/__common/TreeInternalCalls.vue';
+import useAbi from '@/composables/useAbi';
 
-const props = defineProps<{
+const { address, status, data } = defineProps<{
+  address: Address | null;
   status: CallStatus;
+  data: Hex | null;
 }>();
 
+interface DecodedError {
+  name: string;
+  args: Argument[];
+}
+
+const { getErrorAbi } = useAbi();
+
 const label = computed(() => {
-  if (props.status === true) {
+  if (decoded.value) {
+    return decoded.value.name;
+  }
+  if (status === true) {
     return 'Success';
-  } else if (props.status.type === 'Revert') {
+  } else if (status.type === 'Revert') {
     return 'Reverted';
-  } else if (props.status.type === 'OOG') {
+  } else if (status.type === 'OOG') {
     return 'Out of gas';
   } else {
     return 'Unknown error';
   }
+});
+
+const signature = computed(() => {
+  if (!data) {
+    return null;
+  }
+  if (size(data) < 4) {
+    return null;
+  }
+  return slice(data, 0, 4);
+});
+
+const abi = computed<AbiError | null>(() => {
+  if (!address) {
+    return null;
+  }
+  return signature.value ? getErrorAbi(address, signature.value) : null;
+});
+
+const decoded = computed<DecodedError | null>(() => {
+  if (!abi.value) return null;
+  if (!data) return null;
+
+  const decodedCallData = decodeErrorResult({
+    abi: [abi.value],
+    data,
+  });
+
+  const args = getArguments(abi.value.inputs, decodedCallData.args);
+
+  return {
+    name: decodedCallData.errorName,
+    args,
+  };
 });
 </script>
 

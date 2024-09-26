@@ -1,4 +1,4 @@
-import type { AbiConstructor } from 'abitype';
+import type { AbiConstructor, AbiError } from 'abitype';
 import ky, { type KyInstance } from 'ky';
 import type { Abi, AbiEvent, AbiFunction, Address, Hex } from 'viem';
 
@@ -149,6 +149,7 @@ type Abis = Record<
     functionNames: Record<Hex, string>;
     functions: Record<Hex, AbiFunction>;
     events: Record<Hex, AbiEvent>;
+    errors: Record<Hex, AbiError>;
   }
 >;
 

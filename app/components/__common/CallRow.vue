@@ -16,7 +16,13 @@
             />
           </template>
           <template #default>
-            {{ item.success.type === 'OOG' ? 'Out of gas' : 'Reverted' }}
+            {{
+              item.success.type === 'OOG'
+                ? 'Out of gas'
+                : errorDecoded
+                  ? errorDecoded.name
+                  : 'Reverted'
+            }}
           </template>
         </ScopeTooltip>
       </div>
@@ -58,8 +64,8 @@
             {{ item.input }}
           </template>
           <template v-else>
-            <template v-if="decoded">
-              {{ decoded.name }}
+            <template v-if="callDataDecoded">
+              {{ callDataDecoded.name }}
             </template>
             <template v-else-if="func">
               {{ func }}
@@ -85,8 +91,9 @@
 </template>
 
 <script setup lang="ts">
+import type { AbiError } from 'abitype';
 import type { AbiFunction } from 'viem';
-import { decodeFunctionData, size, slice } from 'viem';
+import { decodeErrorResult, decodeFunctionData, size, slice } from 'viem';
 import { computed } from 'vue';
 
 import LinkAddress from './LinkAddress.vue';
@@ -99,6 +106,10 @@ import { getArguments } from './arguments';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import { formatEther } from '@/utils/formatting';
+import {
+  STANDARD_ERROR,
+  STANDARD_ERROR_SIGNATURE,
+} from '~/utils/context/errors';
 
 const {
   call: item,
@@ -118,10 +129,15 @@ const emit = defineEmits<{
   'toggle-expand': [];
 }>();
 
-const { getFunctionAbi } = useAbi();
+const { getFunctionAbi, getErrorAbi } = useAbi();
 
 interface DecodedCallData {
   name?: string;
+  args: Argument[];
+}
+
+interface DecodedError {
+  name: string;
   args: Argument[];
 }
 
@@ -142,25 +158,68 @@ const data = computed(() =>
   size(item.input) > 4 ? slice(item.input, 4) : null,
 );
 
-const abi = computed<AbiFunction | null>(() => {
+const functionAbi = computed<AbiFunction | null>(() => {
   if (!item.to) {
     return null;
   }
   return func.value ? getFunctionAbi(item.to, func.value) : null;
 });
 
-const decoded = computed<DecodedCallData | null>(() => {
-  if (!abi.value) return null;
+const callDataDecoded = computed<DecodedCallData | null>(() => {
+  if (!functionAbi.value) return null;
 
   const decodedCallData = decodeFunctionData({
-    abi: [abi.value],
+    abi: [functionAbi.value],
     data: item.input,
   });
 
-  const args = getArguments(abi.value.inputs, decodedCallData.args);
+  const args = getArguments(functionAbi.value.inputs, decodedCallData.args);
 
   return {
     name: decodedCallData.functionName,
+    args,
+  };
+});
+
+const error = computed(() => (item.success === true ? null : item.output));
+const errorSignature = computed(() => {
+  if (!error.value) {
+    return null;
+  }
+  if (size(error.value) < 4) {
+    return null;
+  }
+  return slice(error.value, 0, 4);
+});
+
+const errorAbi = computed<AbiError | null>(() => {
+  if (!item.to) {
+    return null;
+  }
+  if (!errorSignature.value) {
+    return null;
+  }
+  if (errorSignature.value === STANDARD_ERROR_SIGNATURE) {
+    return STANDARD_ERROR;
+  }
+  return errorSignature.value
+    ? getErrorAbi(item.to, errorSignature.value)
+    : null;
+});
+
+const errorDecoded = computed<DecodedError | null>(() => {
+  if (!errorAbi.value) return null;
+  if (!error.value) return null;
+
+  const decodedCallData = decodeErrorResult({
+    abi: [errorAbi.value],
+    data: error.value,
+  });
+
+  const args = getArguments(errorAbi.value.inputs, decodedCallData.args);
+
+  return {
+    name: decodedCallData.errorName,
     args,
   };
 });

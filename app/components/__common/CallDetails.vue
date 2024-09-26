@@ -2,7 +2,9 @@
   <div class="root">
     <CallStatus
       v-if="call.success !== true"
+      :address="call.to"
       :status="call.success"
+      :data="call.output"
     />
     <AttributeList>
       <AttributeItem>
@@ -83,7 +85,9 @@
           </div>
         </AttributeItemValue>
       </AttributeItem>
-      <AttributeItem v-if="call.output && size(call.output) > 0">
+      <AttributeItem
+        v-if="call.success === true && call.output && size(call.output) > 0"
+      >
         <AttributeItemLabel
           value="Output"
           note="The result of the call"

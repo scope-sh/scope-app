@@ -334,6 +334,7 @@ import {
 } from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { getRouteLocation } from '@/utils/routing';
+import { STANDARD_ERROR_SIGNATURE } from '~/utils/context/errors';
 
 const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
@@ -640,6 +641,7 @@ async function fetchAbis(): Promise<void> {
     {
       functions: Hex[];
       events: Hex[];
+      errors: Hex[];
     }
   > = {};
   for (const log of logs) {
@@ -650,6 +652,7 @@ async function fetchAbis(): Promise<void> {
       contracts[log.address] = {
         functions: [],
         events: [],
+        errors: [],
       };
     }
     const contract = contracts[log.address];
@@ -687,6 +690,7 @@ async function fetchAbis(): Promise<void> {
       contracts[to] = {
         functions: [],
         events: [],
+        errors: [],
       };
     }
     const contract = contracts[to];
@@ -695,6 +699,17 @@ async function fetchAbis(): Promise<void> {
     }
     if (size(input) > 0) {
       contract.functions.push(input.slice(0, 10) as Hex);
+    }
+    if (call.error !== null) {
+      const output = call.result.output;
+      if (!output) {
+        continue;
+      }
+      if (output.startsWith(STANDARD_ERROR_SIGNATURE)) {
+        // Standard revert
+        continue;
+      }
+      contract.errors.push(output.slice(0, 10) as Hex);
     }
   }
   const abis = await apiService.value.getContractAbi(contracts);
