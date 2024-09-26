@@ -27,11 +27,13 @@ import type { AbiError } from 'abitype';
 import { decodeErrorResult, size, slice, type Address, type Hex } from 'viem';
 import { computed } from 'vue';
 
-import { getArguments, type Argument } from './arguments';
+import { getArguments } from './arguments';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import type { CallStatus } from '@/components/__common/TreeInternalCalls.vue';
 import useAbi from '@/composables/useAbi';
+import type { DecodedError } from '@/utils/context/errors';
+import { formatError } from '@/utils/context/errors';
 
 const { address, status, data } = defineProps<{
   address: Address | null;
@@ -39,16 +41,11 @@ const { address, status, data } = defineProps<{
   data: Hex | null;
 }>();
 
-interface DecodedError {
-  name: string;
-  args: Argument[];
-}
-
 const { getErrorAbi } = useAbi();
 
 const label = computed(() => {
   if (decoded.value) {
-    return decoded.value.name;
+    return formatError(decoded.value);
   }
   if (status === true) {
     return 'Success';

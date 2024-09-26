@@ -20,7 +20,7 @@
               item.success.type === 'OOG'
                 ? 'Out of gas'
                 : errorDecoded
-                  ? errorDecoded.name
+                  ? formatError(errorDecoded)
                   : 'Reverted'
             }}
           </template>
@@ -66,6 +66,9 @@
           <template v-else>
             <template v-if="callDataDecoded">
               {{ callDataDecoded.name }}
+              <template v-if="callDataDecoded.args.length > 0">
+                ({{ formatArguments(callDataDecoded.args) }})
+              </template>
             </template>
             <template v-else-if="func">
               {{ func }}
@@ -102,14 +105,22 @@ import ScopeTooltip from './ScopeTooltip.vue';
 import type { Call, CallType } from './TreeInternalCalls.vue';
 import type { Argument } from './arguments';
 import { getArguments } from './arguments';
+import type {
+  BaseArgument,
+  TupleArgument,
+  TupleArrayArgument,
+} from './arguments/common';
+import { isPrimitiveType } from './arguments/common';
 
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
-import { formatEther } from '@/utils/formatting';
+import type { DecodedError } from '@/utils/context/errors';
 import {
   STANDARD_ERROR,
   STANDARD_ERROR_SIGNATURE,
-} from '~/utils/context/errors';
+  formatError,
+} from '@/utils/context/errors';
+import { formatEther } from '@/utils/formatting';
 
 const {
   call: item,
@@ -133,11 +144,6 @@ const { getFunctionAbi, getErrorAbi } = useAbi();
 
 interface DecodedCallData {
   name?: string;
-  args: Argument[];
-}
-
-interface DecodedError {
-  name: string;
   args: Argument[];
 }
 
@@ -223,6 +229,27 @@ const errorDecoded = computed<DecodedError | null>(() => {
     args,
   };
 });
+
+function formatArguments(args: BaseArgument[]): string {
+  function formatArgument(arg: BaseArgument): string {
+    if (isPrimitiveType(arg.type)) {
+      return `${arg.name} = ${arg.value}`;
+    }
+    if (arg.type === 'tuple') {
+      return `${arg.name} = (${formatArguments((arg as TupleArgument).value)})`;
+    }
+    console.log('formatArguments', arg);
+    if (arg.type === 'tuple[]') {
+      return `${arg.name} = [${(arg as TupleArrayArgument).value.map(formatArguments).join(', ')}]`;
+    }
+    return '';
+  }
+
+  if (args.length === 0) {
+    return '';
+  }
+  return args.map(formatArgument).join(', ');
+}
 
 function formatType(value: CallType): string {
   return value === 'create'

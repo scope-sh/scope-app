@@ -18,10 +18,10 @@ import { decodeDeployData } from 'viem';
 import { computed } from 'vue';
 
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
+import type { Argument } from '@/components/__common/arguments';
+import { getArguments } from '@/components/__common/arguments';
+import ArgumentTree from '@/components/__common/arguments/ArgumentTree.vue';
 import useAbi from '@/composables/useAbi';
-import type { Argument } from '~/components/__common/arguments';
-import { getArguments } from '~/components/__common/arguments';
-import ArgumentTree from '~/components/__common/arguments/ArgumentTree.vue';
 
 const { view, address, constructorData } = defineProps<{
   view: ConstructorView;

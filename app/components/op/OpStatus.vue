@@ -29,7 +29,7 @@
                 :address="trace.action.to"
                 type="minimal"
               />
-              <template v-if="decoded">: {{ decoded.name }}</template>
+              <template v-if="decoded">: {{ formatError(decoded) }}</template>
             </div>
           </div>
           <template v-else> Failed </template>
@@ -47,19 +47,16 @@ import { computed } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import { getArguments, type Argument } from '@/components/__common/arguments';
+import { getArguments } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
 import type { TransactionTraceFrame } from '@/services/evm';
+import type { DecodedError } from '@/utils/context/errors';
+import { formatError } from '@/utils/context/errors';
 
 const { trace } = defineProps<{
   success: boolean;
   trace: TransactionTraceFrame | null;
 }>();
-
-interface DecodedError {
-  name: string;
-  args: Argument[];
-}
 
 const { getErrorAbi } = useAbi();
 

@@ -183,7 +183,7 @@ import HypersyncService from '@/services/hypersync';
 import type { Op } from '@/services/indexer';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
-import { toErrorSelector } from '~/utils/context/errors';
+import { toErrorSelector } from '@/utils/context/errors';
 
 const SECTION_OPS = 'ops';
 const SECTION_TRANSACTIONS = 'transactions';

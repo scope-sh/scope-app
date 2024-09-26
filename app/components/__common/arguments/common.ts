@@ -118,4 +118,10 @@ function getArguments(
 }
 
 export { getArguments, isPrimitiveType };
-export type { Argument, Values };
+export type {
+  BaseArgument,
+  Argument,
+  TupleArgument,
+  TupleArrayArgument,
+  Values,
+};

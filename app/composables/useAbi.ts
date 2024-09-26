@@ -8,6 +8,10 @@ import ApiService from '@/services/api.js';
 import type { AbiRequest, Abis } from '@/services/api.js';
 import type { AbiRequestMap } from '@/stores/abi';
 import useStore from '@/stores/abi';
+import {
+  STANDARD_ERROR,
+  STANDARD_ERROR_SIGNATURE,
+} from '@/utils/context/errors';
 
 interface UseAbi {
   requestAbi: (address: Address, request: AbiRequest) => Promise<void>;
@@ -123,6 +127,9 @@ function useAbi(): UseAbi {
   }
 
   function getErrorAbi(address: Address, signature: Hex): AbiError | null {
+    if (signature === STANDARD_ERROR_SIGNATURE) {
+      return STANDARD_ERROR;
+    }
     return store.getErrorAbi(chain.value, address, signature);
   }
 

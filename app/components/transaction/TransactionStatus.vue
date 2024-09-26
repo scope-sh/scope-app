@@ -40,7 +40,7 @@
                 :address="traceFrame.action.to"
                 type="minimal"
               />
-              <template v-if="decoded">: {{ decoded.name }}</template>
+              <template v-if="decoded">: {{ formatError(decoded) }}</template>
             </div>
           </div>
           <template v-else> Reverted </template>
@@ -58,14 +58,11 @@ import { computed } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import { getArguments, type Argument } from '@/components/__common/arguments';
+import { getArguments } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
 import type { TransactionStatus, TransactionTraceFrame } from '@/services/evm';
-
-interface DecodedError {
-  name: string;
-  args: Argument[];
-}
+import type { DecodedError } from '@/utils/context/errors';
+import { formatError } from '@/utils/context/errors';
 
 const { traceFrame } = defineProps<{
   status: TransactionStatus | null;
