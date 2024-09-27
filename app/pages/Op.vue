@@ -643,7 +643,7 @@ async function fetchAbis(): Promise<void> {
     if (!topic) {
       continue;
     }
-    requestAbi(address, {
+    requestAbi(log.address, {
       functions: [],
       events: [topic],
       errors: [],
