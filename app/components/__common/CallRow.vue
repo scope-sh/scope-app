@@ -238,7 +238,6 @@ function formatArguments(args: BaseArgument[]): string {
     if (arg.type === 'tuple') {
       return `${arg.name} = (${formatArguments((arg as TupleArgument).value)})`;
     }
-    console.log('formatArguments', arg);
     if (arg.type === 'tuple[]') {
       return `${arg.name} = [${(arg as TupleArrayArgument).value.map(formatArguments).join(', ')}]`;
     }
