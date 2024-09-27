@@ -232,17 +232,23 @@ const errorDecoded = computed<DecodedError | null>(() => {
 });
 
 function formatArguments(args: BaseArgument[]): string {
+  function formatName(arg: BaseArgument): string {
+    if (!arg.name) {
+      return '';
+    }
+    return `${arg.name} = `;
+  }
   function formatArgument(arg: BaseArgument): string {
     if (isPrimitiveType(arg.type)) {
-      return `${arg.name} = ${arg.value}`;
+      return `${formatName(arg)}${arg.value}`;
     }
     if (arg.type === 'tuple') {
-      return `${arg.name} = (${formatArguments((arg as TupleArgument).value)})`;
+      return `${formatName(arg)}(${formatArguments((arg as TupleArgument).value)})`;
     }
     if (arg.type === 'tuple[]') {
-      return `${arg.name} = [${(arg as TupleArrayArgument).value.map(formatArguments).join(', ')}]`;
+      return `${formatName(arg)}[${(arg as TupleArrayArgument).value.map(formatArguments).join(', ')}]`;
     }
-    return `${arg.name} = [${(arg as ArrayArgument).value.map((argItem) => argItem.value).join(', ')}]`;
+    return `${formatName(arg)}[${(arg as ArrayArgument).value.map((argItem) => argItem.value).join(', ')}]`;
   }
 
   if (args.length === 0) {
