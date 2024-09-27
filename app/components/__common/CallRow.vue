@@ -106,6 +106,7 @@ import type { Call, CallType } from './TreeInternalCalls.vue';
 import type { Argument } from './arguments';
 import { getArguments } from './arguments';
 import type {
+  ArrayArgument,
   BaseArgument,
   TupleArgument,
   TupleArrayArgument,
@@ -241,7 +242,7 @@ function formatArguments(args: BaseArgument[]): string {
     if (arg.type === 'tuple[]') {
       return `${arg.name} = [${(arg as TupleArrayArgument).value.map(formatArguments).join(', ')}]`;
     }
-    return '';
+    return `${arg.name} = [${(arg as ArrayArgument).value.map((argItem) => argItem.value).join(', ')}]`;
   }
 
   if (args.length === 0) {
