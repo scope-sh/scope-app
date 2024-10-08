@@ -20,6 +20,8 @@ interface Log {
   data: Hex;
 }
 
+const envioHypersyncApiKey = process.env.ENVIO_HYPERSYNC_API_KEY || '';
+
 export default defineEventHandler(async (event) => {
   const {
     chain,
@@ -39,6 +41,7 @@ export default defineEventHandler(async (event) => {
   const endpointUrl = `https://${chain}.hypersync.xyz`;
   const client = HypersyncClient.new({
     url: endpointUrl,
+    bearerToken: envioHypersyncApiKey,
   });
 
   const query: Query = {

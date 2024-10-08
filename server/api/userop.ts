@@ -12,6 +12,8 @@ import {
   ENTRY_POINT_0_7_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
 
+const envioHypersyncApiKey = process.env.ENVIO_HYPERSYNC_API_KEY || '';
+
 const USER_OPERATION_EVENT_TOPIC =
   '0x49628fd1471006c1482da88028e9ce4dbb080b815c9b0344d39e5a8e6ec1419f';
 
@@ -23,6 +25,7 @@ export default defineEventHandler(async (event) => {
   const endpointUrl = `https://${chain}.hypersync.xyz`;
   const client = HypersyncClient.new({
     url: endpointUrl,
+    bearerToken: envioHypersyncApiKey,
   });
 
   const query: Query = {
