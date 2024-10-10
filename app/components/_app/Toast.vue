@@ -98,7 +98,6 @@ const { pause, resume } = useTimerFn(() => {
 
   &:not(.expanded) {
     --lift-amount: -8px;
-    --scale: v-bind('before') * 0.05 + 1;
     --y: translateY(calc(var(--lift-amount) * v-bind('before')))
       scale(calc(-1 * var(--scale)));
   }
