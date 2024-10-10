@@ -1,6 +1,6 @@
 import type { Address, Hex } from 'viem';
 
-const TOAST_DURATION = 60 * 1000;
+const TOAST_DURATION = 5 * 1000;
 const MAX_TOASTS = 3;
 
 interface ToastData {
