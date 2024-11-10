@@ -123,8 +123,8 @@ const { pause, resume } = useTimerFn(() => {
 
 .message {
   width: calc(
-    320px - var(--icon-size) - var(--icon-close-size) - var(--item-gap) -
-      var(--item-gap) - 2 * var(--toast-padding)
+    var(--item-width) - var(--icon-size) - var(--icon-close-size) -
+      var(--item-gap) - var(--item-gap) - 2 * var(--toast-padding)
   );
   font-size: var(--font-size-m);
 }
