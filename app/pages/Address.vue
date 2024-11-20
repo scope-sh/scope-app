@@ -356,7 +356,7 @@ async function fetch(): Promise<void> {
   await Promise.all([
     fetchBalance(),
     fetchCode(),
-    fethcContract(),
+    fetchContract(),
     fetchTransactions(),
     fetchLogs(),
     fetchOps(),
@@ -384,7 +384,7 @@ async function fetchCode(): Promise<void> {
   isLoadingCode.value = false;
 }
 
-async function fethcContract(): Promise<void> {
+async function fetchContract(): Promise<void> {
   contract.value = null;
   if (!address.value || !apiService.value) {
     return;
