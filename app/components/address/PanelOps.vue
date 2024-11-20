@@ -25,7 +25,7 @@
       />
       <template v-else>
         <div class="label-issue">
-          Recent operations not showing up, investigating
+          EntryPoint 0.6 operations are temporarily not indexed
         </div>
         <TableOps
           :ops="rows"
