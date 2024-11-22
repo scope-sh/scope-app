@@ -24,9 +24,6 @@
         value="No ops found"
       />
       <template v-else>
-        <div class="label-issue">
-          EntryPoint 0.6 operations are temporarily not indexed
-        </div>
         <TableOps
           :ops="rows"
           :per-page="perPage"
@@ -118,12 +115,6 @@ function refresh(): void {
 </script>
 
 <style scoped>
-.label-issue {
-  color: var(--color-text-primary);
-  font-size: var(--font-size-m);
-  font-style: italic;
-}
-
 .panel-header {
   display: flex;
   gap: var(--spacing-6);
