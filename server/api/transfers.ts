@@ -28,7 +28,7 @@ import erc1155Abi from '@/abi/erc1155';
 import erc20Abi from '@/abi/erc20';
 import { getChainData, parseChain } from '@/utils/chains.js';
 
-const alchemyApiKey = process.env.ALCHEMY_KEY || '';
+const alchemyApiKey = process.env.ALCHEMY_API_KEY || '';
 const envioHypersyncApiKey = process.env.ENVIO_HYPERSYNC_API_KEY || '';
 
 interface TransferData {
