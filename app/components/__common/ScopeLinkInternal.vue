@@ -7,6 +7,7 @@
       :to="to"
       class="link"
       :class="{ trimmed: type !== 'normal', highlighted: isHighlighted }"
+      @click.stop
     >
       <slot />
     </RouterLink>
