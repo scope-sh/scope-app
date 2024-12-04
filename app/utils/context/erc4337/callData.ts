@@ -1,29 +1,13 @@
 import type { Address, Hex } from 'viem';
 import { decodeFunctionData } from 'viem';
 
-import { decodeCallData as decodeAlchemyLightV2CallData } from './alchemyLightV2.js';
-import { decodeCallData as decodeBiconomyV2CallData } from './biconomyV2.js';
-import { decodeCallData as decodeDaimoCallData } from './daimo.js';
-import { decodeCallData as decodeFunV1CallData } from './funV1.js';
-import { decodeCallData as decodeKernelV2CallData } from './kernelV2.js';
-import { decodeCallData as decodeKernelV3CallData } from './kernelV3.js';
-import { decodeCallData as decodeSafeCoreCallData } from './safeCore.js';
-
-import type { LabelTypeId } from '@/services/api.js';
-
 interface Call {
   to: Address;
   value: bigint;
   data: Hex;
 }
 
-function decode(labelTypeId: LabelTypeId | null, callData: Hex): Call[] | null {
-  if (labelTypeId !== null) {
-    const calls = decodeLabelledCallData(labelTypeId, callData);
-    if (calls !== null) {
-      return calls;
-    }
-  }
+function decode(callData: Hex): Call[] | null {
   try {
     const decodedCallData = decodeFunctionData({
       abi: [
@@ -163,32 +147,6 @@ function isObjectArray(arg: BatchExecuteArgs): arg is BatchExecuteArgTuple {
 
 function isStringArray(arg: BatchExecuteArgs): arg is BatchExecuteArgArray {
   return typeof arg[0] === 'string';
-}
-
-function decodeLabelledCallData(
-  labelTypeId: LabelTypeId,
-  callData: Hex,
-): Call[] | null {
-  switch (labelTypeId) {
-    case 'alchemy-v1.0-light-account':
-    case 'alchemy-v1.1-light-account':
-    case 'alchemy-v2-light-account':
-      return decodeAlchemyLightV2CallData(callData);
-    case 'biconomy-v2-account':
-      return decodeBiconomyV2CallData(callData);
-    case 'daimo-v1-account':
-      return decodeDaimoCallData(callData);
-    case 'fun-v1-account':
-      return decodeFunV1CallData(callData);
-    case 'kernel-v2-account':
-      return decodeKernelV2CallData(callData);
-    case 'kernel-v3-account':
-      return decodeKernelV3CallData(callData);
-    case 'safe-v1.4.1-account':
-    case 'safe7579-v1.0.0-account':
-      return decodeSafeCoreCallData(callData);
-  }
-  return null;
 }
 
 export { decode };

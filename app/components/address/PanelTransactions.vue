@@ -94,7 +94,6 @@ const transactionRows = computed<TransactionRow[]>(() => {
         from: zeroAddress,
         to: zeroAddress,
         function: '0x',
-        data: '0x',
         value: 0n,
         gasPrice: 0n,
       })
