@@ -75,6 +75,7 @@ label:hover .root {
   color: var(--color-text-secondary);
   font-size: var(--font-size-s);
   cursor: pointer;
+  user-select: none;
 }
 
 label:hover .label {
