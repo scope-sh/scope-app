@@ -297,20 +297,28 @@ tr {
   transition: opacity 0.25s ease;
   opacity: 1;
 
+  td.status {
+    padding-right: 0;
+  }
+
   &:first-child {
     td {
       padding: 10px 10px 6px;
+
+      &.status {
+        padding-right: 0;
+      }
     }
   }
 
   &:last-child {
     td {
       padding: 6px 10px 10px;
-    }
-  }
 
-  td.status {
-    padding-right: 0;
+      &.status {
+        padding-right: 0;
+      }
+    }
   }
 
   &:only-child {
@@ -346,6 +354,8 @@ tbody {
 }
 
 .status {
+  display: flex;
+  align-items: center;
   width: 24px;
 }
 
