@@ -73,7 +73,7 @@ function getKey(arg: Argument, index: number): string {
     : arg.name
       ? arg.internalType || arg.type
       : '';
-  const name = topLevel ? arg.name : arg.name || index;
+  const name = topLevel ? arg.name || '' : arg.name || index;
   return `${type} ${arg.indexed ? 'indexed' : ''} ${name}`;
 }
 </script>
