@@ -74,6 +74,7 @@ const abi = computed<AbiFunction | null>(() => {
 
 const decoded = computed<DecodedCallData | null>(() => {
   if (!abi.value) return null;
+  if (output && abi.value.outputs.length === 0) return null;
 
   const decodedCallData =
     output === undefined
