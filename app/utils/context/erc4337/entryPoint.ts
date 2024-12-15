@@ -38,6 +38,8 @@ type TxType =
   | typeof TX_TYPE_SAFE_PAYMASTER
   | typeof TX_TYPE_UNKNOWN;
 
+type Phase = 'creation' | 'validation' | 'payment' | 'execution' | 'unknown';
+
 interface Op_0_6 {
   sender: Address;
   nonce: bigint;
@@ -588,6 +590,46 @@ function getBeneficiary(transaction: Transaction): Address | null {
   return null;
 }
 
+function getPhaseByEntryPointError(error: string): Phase {
+  const CREATION_ERRORS = [
+    'AA10 sender already constructed',
+    'AA13 initCode failed or OOG',
+    'AA14 initCode must return sender',
+    'AA15 initCode must create sender',
+  ];
+
+  const VALIDATION_ERRORS = [
+    'AA20 account not deployed',
+    "AA21 didn't pay prefund",
+    'AA22 expired or not due',
+    'AA23 reverted (or OOG)',
+    'AA24 signature error',
+    'AA25 invalid account nonce',
+  ];
+
+  const PAYMENT_ERRORS = [
+    'AA30 paymaster not deployed',
+    'AA31 paymaster deposit too low',
+    'AA32 paymaster expired or not due',
+    'AA33 reverted (or OOG)',
+    'AA34 signature error',
+    'AA50 postOp reverted',
+    'AA51 prefund below actualGasCost',
+    'AA93 invalid paymasterAndData',
+  ];
+
+  if (CREATION_ERRORS.includes(error)) {
+    return 'creation';
+  }
+  if (VALIDATION_ERRORS.includes(error)) {
+    return 'validation';
+  }
+  if (PAYMENT_ERRORS.includes(error)) {
+    return 'payment';
+  }
+  return 'unknown';
+}
+
 export {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
@@ -603,6 +645,7 @@ export {
   getAccountDeployments,
   getBeneficiary,
   getOpLogs,
+  getPhaseByEntryPointError,
   unpackOp,
 };
-export type { TxType, Op, OpUnpacked, Op_0_6, Op_0_7 };
+export type { TxType, Phase, Op, OpUnpacked, Op_0_6, Op_0_7 };

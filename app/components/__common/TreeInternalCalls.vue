@@ -2,7 +2,7 @@
   <div
     ref="el"
     class="tree"
-    :class="{ scrollable }"
+    :class="{ scrollable, error: hasError }"
   >
     <div class="scroll">
       <div
@@ -40,8 +40,9 @@ import CallRow from './CallRow.vue';
 
 import type { TransactionTrace } from '@/services/evm';
 
-const { trace } = defineProps<{
+const { trace, hasError = false } = defineProps<{
   trace: TransactionTrace | null;
+  hasError?: boolean;
 }>();
 
 type CallStatus = true | { type: 'OOG' } | { type: 'Revert'; reason: string };
@@ -185,6 +186,10 @@ export type { Call, CallType, CallStatus };
 
   &.scrollable {
     padding-bottom: var(--spacing-4);
+  }
+
+  &.error {
+    border-color: var(--color-error);
   }
 }
 

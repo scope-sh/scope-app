@@ -180,8 +180,9 @@
       <template v-if="section === SECTION_INTERNAL">
         <PanelTraces
           :is-loading="isLoading"
-          :op-trace="opTrace"
-          :state-diff="stateDiff"
+          :op-trace
+          :state-diff
+          :revert-phase
         />
       </template>
     </template>
@@ -191,8 +192,12 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import type { Address, Hex, Log } from 'viem';
-import { encodeFunctionData, size, slice } from 'viem';
-import { entryPoint06Abi, entryPoint07Abi } from 'viem/account-abstraction';
+import { decodeErrorResult, encodeFunctionData, size, slice } from 'viem';
+import {
+  entryPoint06Abi,
+  entryPoint06Address,
+  entryPoint07Abi,
+} from 'viem/account-abstraction';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
@@ -227,11 +232,12 @@ import ApiService from '@/services/api';
 import type { TransactionReplay, TransactionStateDiff } from '@/services/evm';
 import EvmService from '@/services/evm';
 import type { Command } from '@/stores/commands';
-import type { Op } from '@/utils/context/erc4337/entryPoint';
+import type { Op, Phase } from '@/utils/context/erc4337/entryPoint';
 import {
   getOpEvent,
   getOpHash,
   getOpLogs,
+  getPhaseByEntryPointError,
   unpackOp,
 } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace } from '@/utils/context/traces';
@@ -593,6 +599,44 @@ const revertTraceFrame = computed(() => {
     return null;
   }
   return getRevertTraceFrame(trace, root);
+});
+
+const revertPhase = computed<Phase | undefined>(() => {
+  if (!entryPoint.value) {
+    return undefined;
+  }
+  if (!revertTraceFrame.value) {
+    return undefined;
+  }
+  if (revertTraceFrame.value.type !== 'call') {
+    return 'unknown';
+  }
+  if (revertTraceFrame.value.action.to !== entryPoint.value) {
+    return 'execution';
+  }
+  const error = revertTraceFrame.value.error;
+  if (error !== 'Reverted') {
+    return 'unknown';
+  }
+  const errorData = revertTraceFrame.value.result.output;
+  if (!errorData) {
+    return 'unknown';
+  }
+  const decodedError = decodeErrorResult({
+    abi:
+      entryPoint.value === entryPoint06Address
+        ? entryPoint06Abi
+        : entryPoint07Abi,
+    data: errorData,
+  });
+  if (
+    decodedError.errorName !== 'FailedOp' &&
+    decodedError.errorName !== 'FailedOpWithRevert'
+  ) {
+    return 'unknown';
+  }
+  const reason = decodedError.args[1];
+  return getPhaseByEntryPointError(reason);
 });
 
 async function fetchAbis(): Promise<void> {

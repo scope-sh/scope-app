@@ -21,6 +21,7 @@
         <InternalCalls
           v-else
           :trace="opTrace"
+          :revert-phase
         />
       </template>
       <template v-if="activeTab === 'state'">
@@ -48,12 +49,14 @@ import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import ViewStateDiff from '@/components/__common/ViewStateDiff.vue';
 import type { TransactionStateDiff } from '@/services/evm';
+import type { Phase } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace } from '@/utils/context/traces';
 
 defineProps<{
   isLoading: boolean;
   opTrace: OpTrace | null;
   stateDiff: TransactionStateDiff | null;
+  revertPhase?: Phase;
 }>();
 
 const activeTab = ref<string>('calls');
