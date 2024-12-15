@@ -16,5 +16,6 @@ interface ImportMeta {
     VITE_APP_BASE_URL?: string;
     VITE_API_ENDPOINT?: string;
     VITE_INDEXER_ENDPOINT?: string;
+    VITE_TENDERLY_NODE_ACCESS_KEY?: string;
   };
 }

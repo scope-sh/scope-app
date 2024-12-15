@@ -4,6 +4,7 @@ interface EnvironmentVariables {
   apiEndpoint: string;
   appBaseUrl: string;
   indexerEndpoint: string;
+  tenderlyNodeAccessKey: string;
 }
 
 function useEnv(): EnvironmentVariables {
@@ -14,6 +15,7 @@ function useEnv(): EnvironmentVariables {
     apiEndpoint: env.VITE_API_ENDPOINT || '',
     appBaseUrl: env.VITE_APP_BASE_URL || '',
     indexerEndpoint: env.VITE_INDEXER_ENDPOINT || '',
+    tenderlyNodeAccessKey: env.VITE_TENDERLY_NODE_ACCESS_KEY || '',
   };
 }
 
