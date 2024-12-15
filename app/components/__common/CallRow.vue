@@ -218,15 +218,15 @@ const errorDecoded = computed<DecodedError | null>(() => {
   if (!errorAbi.value) return null;
   if (!error.value) return null;
 
-  const decodedCallData = decodeErrorResult({
+  const decodedError = decodeErrorResult({
     abi: [errorAbi.value],
     data: error.value,
   });
 
-  const args = getArguments(errorAbi.value.inputs, decodedCallData.args);
+  const args = getArguments(errorAbi.value.inputs, decodedError.args);
 
   return {
-    name: decodedCallData.errorName,
+    name: decodedError.errorName,
     args,
   };
 });

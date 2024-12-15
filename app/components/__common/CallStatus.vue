@@ -79,15 +79,15 @@ const decoded = computed<DecodedError | null>(() => {
   if (!abi.value) return null;
   if (!data) return null;
 
-  const decodedCallData = decodeErrorResult({
+  const decodedError = decodeErrorResult({
     abi: [abi.value],
     data,
   });
 
-  const args = getArguments(abi.value.inputs, decodedCallData.args);
+  const args = getArguments(abi.value.inputs, decodedError.args);
 
   return {
-    name: decodedCallData.errorName,
+    name: decodedError.errorName,
     args,
   };
 });
