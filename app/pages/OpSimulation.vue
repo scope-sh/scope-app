@@ -540,7 +540,14 @@ const stateDiff = computed<TransactionStateDiff | null>(() => {
   if (!transactionReplay.value) {
     return null;
   }
-  return transactionReplay.value.stateDiff;
+  // Remove bundler address from state diff
+  const stateDiff = transactionReplay.value.stateDiff;
+  if (!stateDiff) {
+    return null;
+  }
+  return Object.fromEntries(
+    Object.entries(stateDiff).filter(([address]) => address !== MOCK_BUNDLER),
+  );
 });
 const revertTraceFrame = computed(() => {
   if (!transactionReplay.value) {
