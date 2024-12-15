@@ -14,19 +14,19 @@
         kind="cross-circled"
         class="icon"
       />
-      <template v-if="trace === null">
+      <template v-if="frame === null">
         {{ success ? 'Success' : 'Failed' }}
       </template>
       <template v-else>
-        <template v-if="trace.error === null || trace.error === 'Reverted'">
+        <template v-if="frame.error === null || frame.error === 'Reverted'">
           <div
-            v-if="trace.type === 'call'"
+            v-if="frame.type === 'call'"
             class="address"
           >
             Failed in
             <div class="source">
               <LinkAddress
-                :address="trace.action.to"
+                :address="frame.action.to"
                 type="minimal"
               />
               <template v-if="decoded">: {{ formatError(decoded) }}</template>
@@ -34,7 +34,7 @@
           </div>
           <template v-else> Failed </template>
         </template>
-        <div v-else-if="trace.error === 'OOG'">Out of gas</div>
+        <div v-else-if="frame.error === 'OOG'">Out of gas</div>
       </template>
     </div>
   </div>
@@ -53,18 +53,18 @@ import type { TransactionTraceFrame } from '@/services/evm';
 import type { DecodedError } from '@/utils/context/errors';
 import { formatError } from '@/utils/context/errors';
 
-const { trace } = defineProps<{
+const { traceFrame: frame } = defineProps<{
   success: boolean;
-  trace: TransactionTraceFrame | null;
+  traceFrame: TransactionTraceFrame | null;
 }>();
 
 const { getErrorAbi } = useAbi();
 
 const address = computed(() =>
-  trace ? (trace.type === 'call' ? trace.action.to : null) : null,
+  frame ? (frame.type === 'call' ? frame.action.to : null) : null,
 );
 const data = computed(() =>
-  trace ? (trace.type === 'call' ? trace.result.output : null) : null,
+  frame ? (frame.type === 'call' ? frame.result.output : null) : null,
 );
 
 const signature = computed(() => {
@@ -118,12 +118,14 @@ const decoded = computed<DecodedError | null>(() => {
 }
 
 .status.success {
-  border-color: var(--color-success);
+  border-color: rgb(from var(--color-success) r g b / 60%);
+  background: rgb(from var(--color-success) r g b / 5%);
   color: var(--color-success);
 }
 
 .status.error {
-  border-color: var(--color-error);
+  border-color: rgb(from var(--color-error) r g b / 60%);
+  background: rgb(from var(--color-error) r g b / 5%);
   color: var(--color-error);
 }
 

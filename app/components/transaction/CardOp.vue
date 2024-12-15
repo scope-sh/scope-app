@@ -1,5 +1,5 @@
 <template>
-  <ScopeCard v-if="opUnpacked">
+  <ScopeCard v-if="opEvent && opUnpacked">
     <AttributeList>
       <AttributeItem>
         <AttributeItemLabel value="Hash" />
@@ -10,7 +10,7 @@
       <AttributeItem>
         <AttributeItemLabel value="Success" />
         <AttributeItemValue>
-          {{ opUnpacked.success }}
+          {{ opEvent.success }}
         </AttributeItemValue>
       </AttributeItem>
       <AttributeItem>
@@ -101,16 +101,17 @@ const opUnpacked = computed(() => {
   if (!entryPoint) {
     return null;
   }
-  const event = getOpEvent(
-    chainId.value,
-    entryPoint,
-    transactionReceipt.logs,
-    op,
-  );
-  if (!event) {
+  return unpackOp(hash.value, op);
+});
+
+const opEvent = computed(() => {
+  if (!chainId.value) {
     return null;
   }
-  return unpackOp(hash.value, op, event);
+  if (!entryPoint) {
+    return null;
+  }
+  return getOpEvent(chainId.value, entryPoint, transactionReceipt.logs, op);
 });
 </script>
 

@@ -21,7 +21,10 @@
       <div class="label">Payment</div>
       <TreeInternalCalls :trace="trace.payment" />
     </div>
-    <div class="section">
+    <div
+      v-if="trace.execution.length > 0"
+      class="section"
+    >
       <div class="label">Execution</div>
       <TreeInternalCalls :trace="trace.execution" />
     </div>

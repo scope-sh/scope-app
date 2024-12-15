@@ -373,9 +373,6 @@ function getOpTrace(
     }
     return decoded.args[1].userOpHash === hash;
   });
-  if (!innerHandleOpCall) {
-    return null;
-  }
   const innerHandleOpCallInnerCalls = getSubtrace(
     transactionTrace,
     innerHandleOpCall,

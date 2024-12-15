@@ -68,7 +68,6 @@ type Op = Op_0_6 | Op_0_7;
 
 interface OpUnpacked {
   hash: Hex;
-  success: boolean;
   sender: Address;
   nonce: bigint;
   initCode: Hex;
@@ -83,10 +82,8 @@ interface OpUnpacked {
   preVerificationGas: bigint;
   verificationGasLimit: bigint;
   callGasLimit: bigint;
-  actualGasUsed: bigint;
   maxFeePerGas: bigint;
   maxPriorityFeePerGas: bigint;
-  actualGasCost: bigint;
 }
 
 interface AccountDeployment {
@@ -432,7 +429,7 @@ function getOpHash(chain: Chain, entryPoint: Address, op: Op): Hex | null {
   return null;
 }
 
-function unpackOp(hash: Hex, op: Op, event: OpEvent): OpUnpacked {
+function unpackOp(hash: Hex, op: Op): OpUnpacked {
   const initCodeUnpacked =
     size(op.initCode) > 0
       ? {
@@ -485,9 +482,8 @@ function unpackOp(hash: Hex, op: Op, event: OpEvent): OpUnpacked {
       : BigInt(slice(op.gasFees, 16));
   return {
     hash,
-    success: event.success,
-    sender: event.sender.toLowerCase() as Address,
-    nonce: event.nonce,
+    sender: op.sender.toLowerCase() as Address,
+    nonce: op.nonce,
     initCode: op.initCode,
     factory: initCodeUnpacked.factory,
     initData: initCodeUnpacked.initData,
@@ -501,10 +497,8 @@ function unpackOp(hash: Hex, op: Op, event: OpEvent): OpUnpacked {
     preVerificationGas: op.preVerificationGas,
     verificationGasLimit: verificationGasLimit,
     callGasLimit: callGasLimit,
-    actualGasUsed: event.actualGasUsed,
     maxFeePerGas,
     maxPriorityFeePerGas,
-    actualGasCost: event.actualGasCost,
   };
 }
 

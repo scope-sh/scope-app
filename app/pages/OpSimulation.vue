@@ -3,34 +3,14 @@
     v-model:section="section"
     :sections="sections"
   >
-    <ScopePanelLoading
-      v-if="isLoading"
-      title="UserOp"
-      :subtitle="hash"
-    />
     <ScopePanel
-      v-if="!isLoading && op === null"
-      title="UserOp"
-      :subtitle="hash"
-    >
-      <ScopeEmptyState label="Couldn't find this UserOp">
-        <template #actions>
-          <ScopeButton
-            kind="primary"
-            @click="handleOpenAsTransactionClick"
-          >
-            Open as transaction
-          </ScopeButton>
-        </template>
-      </ScopeEmptyState>
-    </ScopePanel>
-    <ScopePanel
-      v-else-if="opEvent && opUnpacked"
-      title="UserOp"
+      v-if="opUnpacked && hash"
+      title="Simulated UserOp"
       :subtitle="hash"
     >
       <OpStatus
-        :success="opEvent.success"
+        v-if="opStatus !== null"
+        :success="opStatus"
         :trace-frame="revertTraceFrame"
       />
       <AttributeList>
@@ -129,7 +109,7 @@
         </AttributeItem>
       </AttributeList>
       <AttributeList>
-        <AttributeItem>
+        <AttributeItem v-if="opEvent">
           <AttributeItemLabel
             value="Gas Used"
             note="The total amount of gas consumed by the operation execution"
@@ -147,7 +127,7 @@
             {{ formatGasPrice(gasPrice, true) }}
           </AttributeItemValue>
         </AttributeItem>
-        <AttributeItem>
+        <AttributeItem v-if="opEvent">
           <AttributeItemLabel
             value="Cost"
             note="The total operation fee paid by the sender or paymaster, calculated as gas used multiplied by gas price"
@@ -197,49 +177,6 @@
           </template>
         </ScopePanel>
       </template>
-      <template v-if="section === SECTION_TRANSACTION">
-        <ScopePanelLoading
-          v-if="isTransactionLoading"
-          title="Transaction"
-        />
-        <ScopePanel
-          v-else-if="transaction !== null"
-          title="Transaction"
-        >
-          <AttributeList>
-            <AttributeItem v-if="transaction.blockNumber">
-              <AttributeItemLabel value="Block" />
-              <AttributeItemValue>
-                <LinkBlock :number="transaction.blockNumber" />
-              </AttributeItemValue>
-            </AttributeItem>
-            <AttributeItem>
-              <AttributeItemLabel value="Hash" />
-              <AttributeItemValue>
-                <LinkTransaction :hash="transaction.hash" />
-              </AttributeItemValue>
-            </AttributeItem>
-            <AttributeItem>
-              <AttributeItemLabel value="From" />
-              <AttributeItemValue>
-                <LinkAddress :address="transaction.from" />
-              </AttributeItemValue>
-            </AttributeItem>
-            <AttributeItem v-if="transaction.to">
-              <AttributeItemLabel value="To" />
-              <AttributeItemValue>
-                <LinkAddress :address="transaction.to" />
-              </AttributeItemValue>
-            </AttributeItem>
-            <AttributeItem v-if="beneficiary">
-              <AttributeItemLabel value="Beneficiary" />
-              <AttributeItemValue>
-                <LinkAddress :address="beneficiary" />
-              </AttributeItemValue>
-            </AttributeItem>
-          </AttributeList>
-        </ScopePanel>
-      </template>
       <template v-if="section === SECTION_INTERNAL">
         <ScopePanelLoading
           v-if="isLoading"
@@ -250,11 +187,11 @@
           title="Internal"
         >
           <ScopeLabelEmptyState
-            v-if="transactionReplay === null"
+            v-if="transactionSimulation === null"
             value="Internal calls not available"
           />
           <ScopeLabelEmptyState
-            v-else-if="transactionReplay.trace.length === 0"
+            v-else-if="transactionSimulation.trace.length === 0"
             value="No internal calls found"
           />
           <InternalCalls
@@ -269,18 +206,15 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import type { Address, Hex, Log, Transaction, TransactionReceipt } from 'viem';
-import { size, slice } from 'viem';
-import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import type { Address, Hex, Log } from 'viem';
+import { encodeFunctionData, size, slice } from 'viem';
+import { entryPoint06Abi, entryPoint07Abi } from 'viem/account-abstraction';
+import { computed, ref, onMounted, watch } from 'vue';
+import { useRoute } from 'vue-router';
 
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
-import LinkBlock from '@/components/__common/LinkBlock.vue';
-import LinkTransaction from '@/components/__common/LinkTransaction.vue';
-import ScopeButton from '@/components/__common/ScopeButton.vue';
-import ScopeEmptyState from '@/components/__common/ScopeEmptyState.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
@@ -303,68 +237,134 @@ import ViewCallData from '@/components/op/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
-import useEnv from '@/composables/useEnv';
+// import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
-import type { TransactionReplay } from '@/services/evm';
+import type { TransactionSimulation } from '@/services/evm';
 import EvmService from '@/services/evm';
-import HypersyncService from '@/services/hypersync';
-import IndexerService from '@/services/indexer';
+// import HypersyncService from '@/services/hypersync';
+// import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
-import { raceNonNull } from '@/utils';
-import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
+// import { raceNonNull } from '@/utils';
+// import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type { Op } from '@/utils/context/erc4337/entryPoint';
 import {
   getOpEvent,
+  // getOpEvent,
   getOpHash,
-  getOps,
-  getBeneficiary,
-  getOpLogs,
+  // getBeneficiary,
   unpackOp,
-  getEntryPoint,
 } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace } from '@/utils/context/traces';
 import {
-  convertDebugTraceToTransactionTrace,
-  convertDebugStateToTransactionStateDiff,
-  getChildren as getChildTrace,
-  getDirectChildren as getDirectChildTrace,
+  // convertDebugTraceToTransactionTrace,
+  // convertDebugStateToTransactionStateDiff,
   getOpTrace,
   getRevert as getRevertTraceFrame,
 } from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
-import { getRouteLocation } from '@/utils/routing';
+// import { getRouteLocation } from '@/utils/routing';
 
-const SECTION_TRANSACTION = 'transaction';
+// const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
 const SECTION_INTERNAL = 'internal';
+
+const MOCK_BUNDLER = '0x0000000000000000000000000000000000000001';
 
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
-const { appBaseUrl, indexerEndpoint } = useEnv();
+// const { appBaseUrl, indexerEndpoint } = useEnv();
 const route = useRoute();
-const router = useRouter();
-const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
+// const router = useRouter();
+const {
+  id: chainId,
+  tenderlyClient,
+  name: chainName,
+  nativeCurrency,
+} = useChain();
 const { requestAbi } = useAbi();
 
-const section = ref<Section['value']>(SECTION_LOGS);
+const section = ref<Section['value']>(SECTION_INTERNAL);
 const sections = computed<Section[]>(() => [
-  {
-    label: 'Logs',
-    value: SECTION_LOGS,
-  },
-  {
-    label: 'Transaction',
-    value: SECTION_TRANSACTION,
-  },
   {
     label: 'Internal',
     value: SECTION_INTERNAL,
   },
+  {
+    label: 'Logs',
+    value: SECTION_LOGS,
+  },
+  // {
+  //   label: 'Transaction',
+  //   value: SECTION_TRANSACTION,
+  // },
 ]);
 
-const hash = computed(() => route.params.hash as Address);
+const entryPoint = computed(
+  () => route.query.entryPoint as Address | undefined,
+);
+const sender = computed(() => route.query.sender as Address | undefined);
+const nonce = computed(() => route.query.nonce as Hex | undefined);
+const initCode = computed(() => route.query.initCode as Hex | undefined);
+const callData = computed(() => route.query.callData as Hex | undefined);
+const accountGasLimits = computed(
+  () => route.query.accountGasLimits as Hex | undefined,
+);
+const preVerificationGas = computed(
+  () => route.query.preVerificationGas as Hex | undefined,
+);
+const gasFees = computed(() => route.query.gasFees as Hex | undefined);
+const paymasterAndData = computed(
+  () => route.query.paymasterAndData as Hex | undefined,
+);
+const signature = computed(() => route.query.signature as Hex | undefined);
+
+const op = computed<Op | null>(() => {
+  if (!sender.value) {
+    return null;
+  }
+  if (!nonce.value) {
+    return null;
+  }
+  if (!initCode.value) {
+    return null;
+  }
+  if (!callData.value) {
+    return null;
+  }
+  if (!accountGasLimits.value) {
+    return null;
+  }
+  if (!preVerificationGas.value) {
+    return null;
+  }
+  if (!gasFees.value) {
+    return null;
+  }
+  if (!paymasterAndData.value) {
+    return null;
+  }
+  if (!signature.value) {
+    return null;
+  }
+  return {
+    sender: sender.value,
+    nonce: BigInt(nonce.value),
+    initCode: initCode.value,
+    callData: callData.value,
+    accountGasLimits: accountGasLimits.value,
+    preVerificationGas: BigInt(preVerificationGas.value),
+    gasFees: gasFees.value,
+    paymasterAndData: paymasterAndData.value,
+    signature: signature.value,
+  };
+});
+const hash = computed(() =>
+  op.value && entryPoint.value
+    ? getOpHash(chainId.value, entryPoint.value, op.value)
+    : null,
+);
 
 const commands = computed<Command[]>(() => [
   {
@@ -402,51 +402,19 @@ watch(hash, () => {
 });
 
 useHead({
-  title: () => `UserOp ${hash.value} on ${chainName.value} | Scope`,
+  title: () => `Simulated UserOp ${hash.value} on ${chainName.value} | Scope`,
 });
 
 const apiService = computed(() =>
   chainId.value ? new ApiService(chainId.value) : null,
 );
 const evmService = computed(() =>
-  client.value ? new EvmService(client.value) : null,
-);
-const hypersyncService = computed(() =>
-  chainId.value ? new HypersyncService(chainId.value, appBaseUrl) : null,
-);
-const indexerService = computed(() =>
-  chainId.value ? new IndexerService(indexerEndpoint, chainId.value) : null,
+  tenderlyClient.value ? new EvmService(tenderlyClient.value) : null,
 );
 
 const isLoading = ref(false);
-const transaction = ref<Transaction | null>(null);
-const transactionReceipt = ref<TransactionReceipt | null>(null);
-const transactionReplay = ref<TransactionReplay | null>(null);
+const transactionSimulation = ref<TransactionSimulation | null>(null);
 
-const entryPoint = ref<Address | null>(null);
-const op = ref<Op | null>(null);
-watch(transaction, async () => {
-  if (!transaction.value) {
-    return;
-  }
-  const to = transaction.value.to;
-  if (!to) {
-    return;
-  }
-  const chain = chainId.value;
-  if (!chain) {
-    return;
-  }
-  const transactonTrace = transactionReplay.value?.trace ?? null;
-  entryPoint.value = getEntryPoint(transaction.value, transactonTrace);
-  const ops = await getOps(client.value, transaction.value, transactonTrace);
-  op.value =
-    ops.find(
-      (op) =>
-        entryPoint.value &&
-        getOpHash(chain, entryPoint.value, op) === hash.value,
-    ) || null;
-});
 watch(op, async () => {
   if (!apiService.value) {
     return;
@@ -468,12 +436,6 @@ const opUnpacked = computed(() => {
   if (!entryPoint.value) {
     return null;
   }
-  if (!transactionReceipt.value) {
-    return null;
-  }
-  if (!op.value) {
-    return null;
-  }
   if (!hash.value) {
     return null;
   }
@@ -489,18 +451,22 @@ const opEvent = computed(() => {
   if (!entryPoint.value) {
     return null;
   }
-  if (!transactionReceipt.value) {
-    return null;
-  }
   if (!op.value) {
     return null;
   }
-  return getOpEvent(
-    chainId.value,
-    entryPoint.value,
-    transactionReceipt.value.logs,
-    op.value,
-  );
+  return getOpEvent(chainId.value, entryPoint.value, logs.value, op.value);
+});
+const opStatus = computed(() => {
+  if (!transactionSimulation.value) {
+    return null;
+  }
+  if (!transactionSimulation.value.status) {
+    return false;
+  }
+  if (!opEvent.value) {
+    return false;
+  }
+  return opEvent.value.success;
 });
 const gasPrice = computed(() => {
   if (!opEvent.value) {
@@ -508,142 +474,138 @@ const gasPrice = computed(() => {
   }
   return opEvent.value.actualGasCost / opEvent.value.actualGasUsed;
 });
-const beneficiary = computed<Address | null>(() => {
-  if (!transaction.value) {
-    return null;
-  }
-  return getBeneficiary(transaction.value);
-});
 const logs = computed<Log[]>(() => {
-  if (!transactionReceipt.value) {
+  if (!transactionSimulation.value) {
     return [];
   }
   if (!hash.value) {
     return [];
   }
-  return getOpLogs(transactionReceipt.value.logs, hash.value);
+  return transactionSimulation.value.logs.map((log, index) => ({
+    address: log.address,
+    data: log.data,
+    topics: log.topics as [Hex, ...Hex[]],
+    logIndex: index,
+    blockHash: null,
+    blockNumber: null,
+    transactionHash: null,
+    transactionIndex: null,
+    removed: false,
+  }));
 });
 
-const isTransactionLoading = ref(false);
+// const isTransactionLoading = ref(false);
 const isTransactionReceiptLoading = ref(false);
 async function fetch(): Promise<void> {
-  isLoading.value = true;
-  const txHash = await getTxHashByOp(hash.value);
-  if (!txHash) {
-    isLoading.value = false;
+  if (!entryPoint.value) {
     return;
   }
-  await Promise.all([
-    fetchTransaction(txHash),
-    fetchTransactionReceipt(txHash),
-    fetchTransactionReplay(txHash),
-  ]);
+  if (!op.value) {
+    return;
+  }
+  isLoading.value = true;
+  await Promise.all([fetchTransactionSimulation(entryPoint.value, op.value)]);
   isLoading.value = false;
   await fetchAbis();
 }
 
-async function getTxHashByOp(hash: Hex): Promise<Hex | null> {
-  if (!hypersyncService.value || !indexerService.value) {
-    return null;
-  }
-  // Race to get the tx hash from hypersync or indexer
-  // But ignore the promise if it resolves as null
-  const hypersyncRequest = hypersyncService.value.getOpTxHash(hash);
-  const indexerRequest = indexerService.value.getTxHashByOpHash(hash);
-  const txHash = await raceNonNull([hypersyncRequest, indexerRequest]);
-  if (!txHash) {
-    return null;
-  }
-  return txHash;
-}
-
-async function fetchTransaction(txHash: Address): Promise<void> {
+async function fetchTransactionSimulation(
+  entryPoint: Address,
+  op: Op,
+): Promise<void> {
   if (!evmService.value) {
     return;
   }
-  isTransactionLoading.value = true;
-  transaction.value = await evmService.value.getTransaction(txHash);
-  isTransactionLoading.value = false;
-}
-
-async function fetchTransactionReceipt(txHash: Address): Promise<void> {
-  if (!evmService.value) {
-    return;
-  }
-  isTransactionReceiptLoading.value = true;
-  transactionReceipt.value =
-    await evmService.value.getTransactionReceipt(txHash);
-  isTransactionReceiptLoading.value = false;
-}
-
-async function fetchTransactionReplay(txHash: Hex): Promise<void> {
-  if (!evmService.value) {
-    return;
-  }
-  if (chainId.value === ARBITRUM || chainId.value === ARBITRUM_SEPOLIA) {
-    const [debugTrace, debugState] = await Promise.all([
-      evmService.value.getDebugTransactionTrace(txHash),
-      evmService.value.getDebugTransactionState(txHash),
-    ]);
-    const trace = convertDebugTraceToTransactionTrace(debugTrace);
-    const stateDiff = convertDebugStateToTransactionStateDiff(debugState);
-    if (!trace || !stateDiff) {
-      transactionReplay.value = null;
-    } else {
-      transactionReplay.value = {
-        trace,
-        stateDiff,
-      };
-    }
-  } else {
-    transactionReplay.value =
-      await evmService.value.getTransactionReplay(txHash);
-  }
+  const opData =
+    'gasFees' in op
+      ? encodeFunctionData({
+          abi: entryPoint07Abi,
+          functionName: 'handleOps',
+          args: [[op], MOCK_BUNDLER],
+        })
+      : encodeFunctionData({
+          abi: entryPoint06Abi,
+          functionName: 'handleOps',
+          args: [[op], MOCK_BUNDLER],
+        });
+  transactionSimulation.value = await evmService.value.simulateTransaction({
+    from: MOCK_BUNDLER,
+    to: entryPoint,
+    value: BigInt(0),
+    data: opData,
+  });
 }
 const opTrace = computed<OpTrace | null>(() => {
-  if (!transactionReplay.value) {
+  if (!transactionSimulation.value) {
     return null;
   }
   if (!op.value) {
     return null;
   }
-  return getOpTrace(transactionReplay.value.trace, hash.value, op.value.sender);
-});
-const revertTraceFrame = computed(() => {
-  if (!opTrace.value) {
+  if (!hash.value) {
     return null;
   }
-  const root = opTrace.value.execution[0];
+  return getOpTrace(
+    transactionSimulation.value.trace,
+    hash.value,
+    op.value.sender,
+  );
+});
+// const revertTrace = computed(() => {
+//   // if (!opTrace.value) {
+//   //   return null;
+//   // }
+//   // const root = opTrace.value.execution[0];
+//   // if (!root) {
+//   //   return null;
+//   // }
+//   console.log('revertTrace 1');
+//   if (!transactionSimulation.value) {
+//     return null;
+//   }
+//   console.log('revertTrace 2');
+//   const trace = transactionSimulation.value.trace;
+//   if (!trace) {
+//     return null;
+//   }
+//   console.log('revertTrace 3');
+//   const root = trace[0];
+//   if (!root) {
+//     return null;
+//   }
+//   console.log('revertTrace 4');
+//   const directChildTrace = getDirectChildTrace(trace, root);
+//   console.log('revertTrace 5', directChildTrace);
+//   for (const tracePart of directChildTrace) {
+//     const childTrace = getChildTrace(trace, tracePart);
+//     const revertTrace = getRevertTrace(childTrace, tracePart);
+//     console.log('revertTrace 6', tracePart, revertTrace);
+//     if (revertTrace) {
+//       console.log('revertTrace 7');
+//       return revertTrace;
+//     }
+//   }
+//   console.log('revertTrace 8');
+//   return null;
+// });
+const revertTraceFrame = computed(() => {
+  if (!transactionSimulation.value) {
+    return null;
+  }
+  const trace = transactionSimulation.value.trace;
+  const root = trace.find((trace) => trace.traceAddress.length === 0);
   if (!root) {
     return null;
   }
-  const directChildTrace = getDirectChildTrace(opTrace.value.execution, root);
-  for (const traceFrame of directChildTrace) {
-    const childTrace = getChildTrace(opTrace.value.execution, traceFrame);
-    const revertTraceFrame = getRevertTraceFrame(childTrace, traceFrame);
-    if (revertTraceFrame) {
-      return revertTraceFrame;
-    }
-  }
-  return null;
+  return getRevertTraceFrame(trace, root);
 });
 
 async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
     return;
   }
-  if (!transaction.value) {
-    return;
-  }
-  const address = transaction.value.to;
-  if (!address) {
-    return;
-  }
-  if (!transactionReceipt.value) {
-    return;
-  }
-  const logs = transactionReceipt.value.logs;
-  for (const log of logs) {
+  const opLogs = logs.value;
+  for (const log of opLogs) {
     if (!log.address) {
       continue;
     }
@@ -720,10 +682,6 @@ const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
     icon: 'hex-string',
   },
 ]);
-
-function handleOpenAsTransactionClick(): void {
-  router.push(getRouteLocation({ name: 'transaction', hash: hash.value }));
-}
 </script>
 
 <style scoped>

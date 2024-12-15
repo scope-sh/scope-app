@@ -4,6 +4,7 @@ import Address from '@/pages/Address.vue';
 import Block from '@/pages/Block.vue';
 import Chain from '@/pages/Chain.vue';
 import Op from '@/pages/Op.vue';
+import OpSimulation from '@/pages/OpSimulation.vue';
 import Transaction from '@/pages/Transaction.vue';
 
 export default <RouterConfig>{
@@ -37,6 +38,11 @@ export default <RouterConfig>{
       path: '/:chain/op/:hash',
       name: 'op',
       component: Op,
+    },
+    {
+      path: '/:chain/op/simulation',
+      name: 'op-simulation',
+      component: OpSimulation,
     },
   ],
 };
