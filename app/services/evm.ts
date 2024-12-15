@@ -1,11 +1,13 @@
 import {
   zeroHash,
+  toHex,
   type Address,
   type Hex,
   type Log,
   type PublicClient,
   type Transaction,
   type TransactionReceipt,
+  type BlockTag,
 } from 'viem';
 
 type BlockStatus = 'executed';
@@ -252,6 +254,71 @@ interface DebugTransactionState {
   post?: DebugTransactionStatePart;
 }
 
+interface TenderlyTrasnactionTracePart {
+  type: 'CALL' | 'STATICCALL' | 'DELEGATECALL' | 'CREATE' | 'CREATE2';
+  from: Address;
+  to: Address;
+  gas: Hex;
+  gasUsed: Hex;
+  value?: Hex;
+  error?: 'execution reverted' | 'out of gas';
+  errorReason?: string;
+  input: Hex;
+  output: Hex;
+  subtraces: number;
+  traceAddress: number[];
+}
+
+interface TenderlyTransactionSimulationResponse {
+  status: boolean;
+  gasUsed: Hex;
+  cumulativeGasUsed: Hex;
+  blockNumber: Hex;
+  type: Hex;
+  logsBloom: Hex;
+  logs: {
+    raw: {
+      address: Address;
+      topics: Hex[];
+      data: Hex;
+    };
+  }[];
+  trace: TenderlyTrasnactionTracePart[];
+  assetChanges: unknown;
+  balanceChanges: unknown;
+  stateChanges: {
+    address: Address;
+    storage?: {
+      slot: Hex;
+      previousValue: Hex;
+      newValue: Hex;
+    }[];
+    nonce?: {
+      previousValue: Hex;
+      newValue: Hex;
+    };
+    balance?: {
+      previousValue: Hex;
+      newValue: Hex;
+    };
+    code?: {
+      previousValue: Hex;
+      newValue: Hex;
+    };
+  }[];
+}
+
+interface TransactionSimulation {
+  status: boolean;
+  trace: TransactionTrace;
+  stateDiff: TransactionStateDiff;
+  logs: {
+    address: Address;
+    topics: Hex[];
+    data: Hex;
+  }[];
+}
+
 class Service {
   client: ReturnType<typeof getClient>;
 
@@ -353,6 +420,120 @@ class Service {
       address,
     });
     return balance;
+  }
+
+  public async simulateTransaction(transaction: {
+    from: Address;
+    to: Address;
+    value: bigint;
+    data: Hex;
+    gas?: bigint;
+    gasPrice?: bigint;
+  }): Promise<TransactionSimulation | null> {
+    try {
+      const response = await this.client.tenderlySimulateTransaction(
+        {
+          from: transaction.from,
+          to: transaction.to,
+          value: toHex(transaction.value),
+          data: transaction.data,
+          gas: transaction.gas ? toHex(transaction.gas) : undefined,
+          gasPrice: transaction.gasPrice
+            ? toHex(transaction.gasPrice)
+            : undefined,
+        },
+        'latest',
+      );
+      return {
+        status: response.status,
+        trace: response.trace.map((item) => {
+          return item.type === 'CREATE' || item.type === 'CREATE2'
+            ? {
+                type: 'create',
+                action: {
+                  from: item.from,
+                  gas: BigInt(item.gas),
+                  init: item.input,
+                  value: item.value ? BigInt(item.value) : 0n,
+                },
+                error:
+                  item.error === 'execution reverted'
+                    ? 'Reverted'
+                    : item.error === 'out of gas'
+                      ? 'OOG'
+                      : null,
+                result: {
+                  address: item.to,
+                  code: item.output,
+                  gasUsed: BigInt(item.gasUsed),
+                },
+                subtraces: item.subtraces,
+                traceAddress: item.traceAddress,
+              }
+            : {
+                type: 'call',
+                action: {
+                  from: item.from,
+                  callType:
+                    item.type === 'CALL'
+                      ? 'call'
+                      : item.type === 'STATICCALL'
+                        ? 'staticcall'
+                        : 'delegatecall',
+                  gas: BigInt(item.gas),
+                  input: item.input,
+                  to: item.to,
+                  value: item.value ? BigInt(item.value) : 0n,
+                },
+                error:
+                  item.error === 'execution reverted'
+                    ? 'Reverted'
+                    : item.error === 'out of gas'
+                      ? 'OOG'
+                      : null,
+                result: {
+                  gasUsed: BigInt(item.gasUsed),
+                  output: item.output,
+                },
+                subtraces: item.subtraces,
+                traceAddress: item.traceAddress,
+              };
+        }),
+        stateDiff: Object.fromEntries(
+          response.stateChanges.map((change) => [
+            change.address,
+            {
+              balance: change.balance
+                ? {
+                    from: BigInt(change.balance.previousValue),
+                    to: BigInt(change.balance.newValue),
+                  }
+                : null,
+              code: change.code
+                ? { from: change.code.previousValue, to: change.code.newValue }
+                : null,
+              nonce: change.nonce
+                ? {
+                    from: BigInt(change.nonce.previousValue),
+                    to: BigInt(change.nonce.newValue),
+                  }
+                : null,
+              storage: change.storage
+                ? Object.fromEntries(
+                    change.storage.map((storage) => [
+                      storage.slot,
+                      { from: storage.previousValue, to: storage.newValue },
+                    ]),
+                  )
+                : null,
+            },
+          ]),
+        ),
+        logs: response.logs.map((log) => log.raw),
+      };
+    } catch {
+      return null;
+    }
   }
 
   public async getTransactionReplay(
@@ -594,6 +775,46 @@ class Service {
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getClient(client: PublicClient) {
   return client.extend((client) => ({
+    async tenderlySimulateTransaction(
+      call: {
+        from?: Address;
+        to: Address;
+        gas?: Hex;
+        gasPrice?: Hex;
+        value?: Hex;
+        data?: Hex;
+        maxFeePerGas?: Hex;
+        maxPriorityFeePerGas?: Hex;
+      },
+      block: BlockTag | number,
+      stateOverrides?: Record<
+        Address,
+        {
+          nonce?: Hex;
+          balance?: Hex;
+          stateDiff?: Record<Hex, Hex>;
+          code?: Hex;
+        }
+      >,
+      blockOverrides?: {
+        number?: Hex;
+        difficulty?: Hex;
+        time?: Hex;
+        gasLimit?: Hex;
+        coinbase?: Hex;
+        random?: Hex;
+        baseFee?: Hex;
+      },
+    ): Promise<TenderlyTransactionSimulationResponse> {
+      return await client.request({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        method: 'tenderly_simulateTransaction',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        params: [call, block, stateOverrides, blockOverrides],
+      });
+    },
     async traceReplayTransaction(
       hash: Hex,
       type: ('trace' | 'stateDiff' | 'vmTrace')[],
@@ -660,4 +881,5 @@ export type {
   DebugTransactionTraceCall,
   DebugTransactionStatePart,
   DebugTransactionState,
+  TransactionSimulation,
 };
