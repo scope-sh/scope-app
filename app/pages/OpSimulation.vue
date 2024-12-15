@@ -178,27 +178,11 @@
         </ScopePanel>
       </template>
       <template v-if="section === SECTION_INTERNAL">
-        <ScopePanelLoading
-          v-if="isLoading"
-          title="Internal"
+        <PanelTraces
+          :is-loading="isLoading"
+          :op-trace="opTrace"
+          :state-diff="stateDiff"
         />
-        <ScopePanel
-          v-else
-          title="Internal"
-        >
-          <ScopeLabelEmptyState
-            v-if="transactionSimulation === null"
-            value="Internal calls not available"
-          />
-          <ScopeLabelEmptyState
-            v-else-if="transactionSimulation.trace.length === 0"
-            value="No internal calls found"
-          />
-          <InternalCalls
-            v-else
-            :trace="opTrace"
-          />
-        </ScopePanel>
       </template>
     </template>
   </ScopePage>
@@ -230,8 +214,8 @@ import {
   AttributeList,
 } from '@/components/__common/attributes';
 import CardHighlights from '@/components/op/CardHighlights.vue';
-import InternalCalls from '@/components/op/InternalCalls.vue';
 import OpStatus from '@/components/op/OpStatus.vue';
+import PanelTraces from '@/components/op/PanelTraces.vue';
 import type { CallDataView } from '@/components/op/ViewCallData.vue';
 import ViewCallData from '@/components/op/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
@@ -240,32 +224,25 @@ import useCommands from '@/composables/useCommands';
 // import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
-import type { TransactionSimulation } from '@/services/evm';
+import type {
+  TransactionSimulation,
+  TransactionStateDiff,
+} from '@/services/evm';
 import EvmService from '@/services/evm';
-// import HypersyncService from '@/services/hypersync';
-// import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
-// import { raceNonNull } from '@/utils';
-// import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type { Op } from '@/utils/context/erc4337/entryPoint';
 import {
   getOpEvent,
-  // getOpEvent,
   getOpHash,
-  // getBeneficiary,
   unpackOp,
 } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace } from '@/utils/context/traces';
 import {
-  // convertDebugTraceToTransactionTrace,
-  // convertDebugStateToTransactionStateDiff,
   getOpTrace,
   getRevert as getRevertTraceFrame,
 } from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
-// import { getRouteLocation } from '@/utils/routing';
 
-// const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
 const SECTION_INTERNAL = 'internal';
 
@@ -274,9 +251,7 @@ const MOCK_BUNDLER = '0x0000000000000000000000000000000000000001';
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
-// const { appBaseUrl, indexerEndpoint } = useEnv();
 const route = useRoute();
-// const router = useRouter();
 const {
   id: chainId,
   tenderlyClient,
@@ -295,10 +270,6 @@ const sections = computed<Section[]>(() => [
     label: 'Logs',
     value: SECTION_LOGS,
   },
-  // {
-  //   label: 'Transaction',
-  //   value: SECTION_TRANSACTION,
-  // },
 ]);
 
 const entryPoint = computed(
@@ -494,7 +465,6 @@ const logs = computed<Log[]>(() => {
   }));
 });
 
-// const isTransactionLoading = ref(false);
 const isTransactionReceiptLoading = ref(false);
 async function fetch(): Promise<void> {
   if (!entryPoint.value) {
@@ -551,43 +521,12 @@ const opTrace = computed<OpTrace | null>(() => {
     op.value.sender,
   );
 });
-// const revertTrace = computed(() => {
-//   // if (!opTrace.value) {
-//   //   return null;
-//   // }
-//   // const root = opTrace.value.execution[0];
-//   // if (!root) {
-//   //   return null;
-//   // }
-//   console.log('revertTrace 1');
-//   if (!transactionSimulation.value) {
-//     return null;
-//   }
-//   console.log('revertTrace 2');
-//   const trace = transactionSimulation.value.trace;
-//   if (!trace) {
-//     return null;
-//   }
-//   console.log('revertTrace 3');
-//   const root = trace[0];
-//   if (!root) {
-//     return null;
-//   }
-//   console.log('revertTrace 4');
-//   const directChildTrace = getDirectChildTrace(trace, root);
-//   console.log('revertTrace 5', directChildTrace);
-//   for (const tracePart of directChildTrace) {
-//     const childTrace = getChildTrace(trace, tracePart);
-//     const revertTrace = getRevertTrace(childTrace, tracePart);
-//     console.log('revertTrace 6', tracePart, revertTrace);
-//     if (revertTrace) {
-//       console.log('revertTrace 7');
-//       return revertTrace;
-//     }
-//   }
-//   console.log('revertTrace 8');
-//   return null;
-// });
+const stateDiff = computed<TransactionStateDiff | null>(() => {
+  if (!transactionSimulation.value) {
+    return null;
+  }
+  return transactionSimulation.value.stateDiff;
+});
 const revertTraceFrame = computed(() => {
   if (!transactionSimulation.value) {
     return null;
