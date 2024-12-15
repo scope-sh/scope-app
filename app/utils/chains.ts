@@ -1,4 +1,4 @@
-import { quicknode } from 'evm-providers';
+import { quicknode, tenderly } from 'evm-providers';
 import type { Chain as ChainData } from 'viem';
 import {
   mainnet,
@@ -129,6 +129,13 @@ function getEndpointUrl(
   return quicknode(chainId, quicknodeAppName, quicknodeAppKey);
 }
 
+function getTenderlyEndpointUrl(
+  chainId: Chain,
+  tenderlyNodeAccessKey: string,
+): string {
+  return tenderly(chainId, tenderlyNodeAccessKey);
+}
+
 function parseChain(value: string): Chain | null {
   const chain = CHAINS.find((chain) => value === chain.toString());
   return chain ?? null;
@@ -152,6 +159,7 @@ export {
   getChainName,
   getChainNames,
   getEndpointUrl,
+  getTenderlyEndpointUrl,
   isChainName,
   parseChain,
 };
