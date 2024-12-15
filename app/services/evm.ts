@@ -279,7 +279,7 @@ interface TenderlyTransactionSimulationResponse {
   logs: {
     raw: {
       address: Address;
-      topics: Hex[];
+      topics: [Hex, ...Hex[]];
       data: Hex;
     };
   }[];
@@ -305,17 +305,6 @@ interface TenderlyTransactionSimulationResponse {
       previousValue: Hex;
       newValue: Hex;
     };
-  }[];
-}
-
-interface TransactionSimulation {
-  status: boolean;
-  trace: TransactionTrace;
-  stateDiff: TransactionStateDiff;
-  logs: {
-    address: Address;
-    topics: Hex[];
-    data: Hex;
   }[];
 }
 
@@ -422,115 +411,63 @@ class Service {
     return balance;
   }
 
-  public async simulateTransaction(transaction: {
+  public async getCallLogs(call: {
     from: Address;
     to: Address;
     value: bigint;
     data: Hex;
     gas?: bigint;
     gasPrice?: bigint;
-  }): Promise<TransactionSimulation | null> {
+  }): Promise<Log[] | null> {
     try {
       const response = await this.client.tenderlySimulateTransaction(
         {
-          from: transaction.from,
-          to: transaction.to,
-          value: toHex(transaction.value),
-          data: transaction.data,
-          gas: transaction.gas ? toHex(transaction.gas) : undefined,
-          gasPrice: transaction.gasPrice
-            ? toHex(transaction.gasPrice)
-            : undefined,
+          from: call.from,
+          to: call.to,
+          value: toHex(call.value),
+          data: call.data,
+          gas: call.gas ? toHex(call.gas) : undefined,
+          gasPrice: call.gasPrice ? toHex(call.gasPrice) : undefined,
         },
         'latest',
       );
-      return {
-        status: response.status,
-        trace: response.trace.map((item) => {
-          return item.type === 'CREATE' || item.type === 'CREATE2'
-            ? {
-                type: 'create',
-                action: {
-                  from: item.from,
-                  gas: BigInt(item.gas),
-                  init: item.input,
-                  value: item.value ? BigInt(item.value) : 0n,
-                },
-                error:
-                  item.error === 'execution reverted'
-                    ? 'Reverted'
-                    : item.error === 'out of gas'
-                      ? 'OOG'
-                      : null,
-                result: {
-                  address: item.to,
-                  code: item.output,
-                  gasUsed: BigInt(item.gasUsed),
-                },
-                subtraces: item.subtraces,
-                traceAddress: item.traceAddress,
-              }
-            : {
-                type: 'call',
-                action: {
-                  from: item.from,
-                  callType:
-                    item.type === 'CALL'
-                      ? 'call'
-                      : item.type === 'STATICCALL'
-                        ? 'staticcall'
-                        : 'delegatecall',
-                  gas: BigInt(item.gas),
-                  input: item.input,
-                  to: item.to,
-                  value: item.value ? BigInt(item.value) : 0n,
-                },
-                error:
-                  item.error === 'execution reverted'
-                    ? 'Reverted'
-                    : item.error === 'out of gas'
-                      ? 'OOG'
-                      : null,
-                result: {
-                  gasUsed: BigInt(item.gasUsed),
-                  output: item.output,
-                },
-                subtraces: item.subtraces,
-                traceAddress: item.traceAddress,
-              };
-        }),
-        stateDiff: Object.fromEntries(
-          response.stateChanges.map((change) => [
-            change.address,
-            {
-              balance: change.balance
-                ? {
-                    from: BigInt(change.balance.previousValue),
-                    to: BigInt(change.balance.newValue),
-                  }
-                : null,
-              code: change.code
-                ? { from: change.code.previousValue, to: change.code.newValue }
-                : null,
-              nonce: change.nonce
-                ? {
-                    from: BigInt(change.nonce.previousValue),
-                    to: BigInt(change.nonce.newValue),
-                  }
-                : null,
-              storage: change.storage
-                ? Object.fromEntries(
-                    change.storage.map((storage) => [
-                      storage.slot,
-                      { from: storage.previousValue, to: storage.newValue },
-                    ]),
-                  )
-                : null,
-            },
-          ]),
-        ),
-        logs: response.logs.map((log) => log.raw),
-      };
+      return response.logs.map((log, index) => ({
+        address: log.raw.address,
+        topics: log.raw.topics,
+        data: log.raw.data,
+        blockHash: null,
+        blockNumber: null,
+        logIndex: index,
+        transactionHash: null,
+        transactionIndex: null,
+        removed: false,
+      }));
+    } catch {
+      return null;
+    }
+  }
+
+  public async getCallReplay(call: {
+    from: Address;
+    to: Address;
+    value: bigint;
+    data: Hex;
+    gas?: bigint;
+    gasPrice?: bigint;
+  }): Promise<TransactionReplay | null> {
+    try {
+      const traceResponse = await this.client.traceCall(
+        {
+          from: call.from,
+          to: call.to,
+          value: toHex(call.value),
+          data: call.data,
+          gas: call.gas ? toHex(call.gas) : undefined,
+          gasPrice: call.gasPrice ? toHex(call.gasPrice) : undefined,
+        },
+        ['trace', 'stateDiff'],
+      );
+      return traceResponseToReplay(traceResponse);
     } catch {
       return null;
     }
@@ -539,128 +476,12 @@ class Service {
   public async getTransactionReplay(
     hash: Hex,
   ): Promise<TransactionReplay | null> {
-    function parseStateDiffItem<T>(
-      item: TransactionTraceResponseStateDiffItem,
-      zeroValue: T,
-      parse: (value: Hex) => T,
-    ): {
-      from: T;
-      to: T;
-    } | null {
-      if (item === '=') {
-        return null;
-      } else if ('+' in item) {
-        if (parse(item['+']) === zeroValue) {
-          return null;
-        }
-        return {
-          from: zeroValue,
-          to: parse(item['+']),
-        };
-      } else if ('-' in item) {
-        return {
-          from: parse(item['-']),
-          to: zeroValue,
-        };
-      } else {
-        return {
-          from: parse(item['*'].from),
-          to: parse(item['*'].to),
-        };
-      }
-    }
     try {
       const traceResponse = await this.client.traceReplayTransaction(hash, [
         'trace',
         'stateDiff',
       ]);
-      const trace = traceResponse.trace.map((item) => {
-        const error =
-          item.error === undefined
-            ? null
-            : item.error === 'Reverted'
-              ? 'Reverted'
-              : 'OOG';
-        const subtraces = item.subtraces;
-        const traceAddress = item.traceAddress;
-        if (item.type === 'create') {
-          return {
-            action: {
-              from: item.action.from,
-              gas: BigInt(item.action.gas),
-              init: item.action.init,
-              value: BigInt(item.action.value),
-            },
-            error,
-            result:
-              item.result !== null
-                ? {
-                    gasUsed: BigInt(item.result.gasUsed),
-                    address: item.result.address,
-                    code: item.result.code,
-                  }
-                : {
-                    gasUsed: BigInt(item.action.gas),
-                    address: null,
-                    code: null,
-                  },
-            subtraces,
-            traceAddress,
-            type: item.type,
-          } as TransactionTraceCreateFrame;
-        } else {
-          return {
-            action: {
-              from: item.action.from,
-              callType: item.action.callType,
-              gas: BigInt(item.action.gas),
-              input: item.action.input,
-              to: item.action.to,
-              value: BigInt(item.action.value),
-            },
-            error,
-            result:
-              item.result !== null
-                ? {
-                    gasUsed: BigInt(item.result.gasUsed),
-                    output: item.result.output,
-                  }
-                : {
-                    gasUsed: BigInt(item.action.gas),
-                    output: null,
-                  },
-            subtraces,
-            traceAddress,
-            type: item.type,
-          } as TransactionTraceCallFrame;
-        }
-      });
-      const stateDiff = Object.fromEntries(
-        Object.entries(traceResponse.stateDiff).map(([address, diff]) => {
-          return [
-            address,
-            {
-              balance: parseStateDiffItem(diff.balance, 0n, BigInt),
-              code: parseStateDiffItem(diff.code, '0x', (value) => value),
-              nonce: parseStateDiffItem(diff.nonce, 0n, BigInt),
-              storage: Object.fromEntries(
-                Object.entries(diff.storage)
-                  .map(([slot, value]) => {
-                    return [
-                      slot,
-                      parseStateDiffItem(value, zeroHash, (value) => value),
-                    ];
-                  })
-                  .filter(([, value]) => value !== null),
-              ),
-            },
-          ];
-        }),
-      );
-      return {
-        trace,
-        stateDiff,
-      };
+      return traceResponseToReplay(traceResponse);
     } catch {
       return null;
     }
@@ -772,6 +593,129 @@ class Service {
   }
 }
 
+function traceResponseToReplay(
+  traceResponse: TransactionTraceResponse,
+): TransactionReplay {
+  function parseStateDiffItem<T>(
+    item: TransactionTraceResponseStateDiffItem,
+    zeroValue: T,
+    parse: (value: Hex) => T,
+  ): {
+    from: T;
+    to: T;
+  } | null {
+    if (item === '=') {
+      return null;
+    } else if ('+' in item) {
+      if (parse(item['+']) === zeroValue) {
+        return null;
+      }
+      return {
+        from: zeroValue,
+        to: parse(item['+']),
+      };
+    } else if ('-' in item) {
+      return {
+        from: parse(item['-']),
+        to: zeroValue,
+      };
+    } else {
+      return {
+        from: parse(item['*'].from),
+        to: parse(item['*'].to),
+      };
+    }
+  }
+
+  const trace = traceResponse.trace.map((item) => {
+    const error =
+      item.error === undefined
+        ? null
+        : item.error === 'Reverted'
+          ? 'Reverted'
+          : 'OOG';
+    const subtraces = item.subtraces;
+    const traceAddress = item.traceAddress;
+    if (item.type === 'create') {
+      return {
+        action: {
+          from: item.action.from,
+          gas: BigInt(item.action.gas),
+          init: item.action.init,
+          value: BigInt(item.action.value),
+        },
+        error,
+        result:
+          item.result !== null
+            ? {
+                gasUsed: BigInt(item.result.gasUsed),
+                address: item.result.address,
+                code: item.result.code,
+              }
+            : {
+                gasUsed: BigInt(item.action.gas),
+                address: null,
+                code: null,
+              },
+        subtraces,
+        traceAddress,
+        type: item.type,
+      } as TransactionTraceCreateFrame;
+    } else {
+      return {
+        action: {
+          from: item.action.from,
+          callType: item.action.callType,
+          gas: BigInt(item.action.gas),
+          input: item.action.input,
+          to: item.action.to,
+          value: BigInt(item.action.value),
+        },
+        error,
+        result:
+          item.result !== null
+            ? {
+                gasUsed: BigInt(item.result.gasUsed),
+                output: item.result.output,
+              }
+            : {
+                gasUsed: BigInt(item.action.gas),
+                output: null,
+              },
+        subtraces,
+        traceAddress,
+        type: item.type,
+      } as TransactionTraceCallFrame;
+    }
+  });
+  const stateDiff = Object.fromEntries(
+    Object.entries(traceResponse.stateDiff).map(([address, diff]) => {
+      return [
+        address,
+        {
+          balance: parseStateDiffItem(diff.balance, 0n, BigInt),
+          code: parseStateDiffItem(diff.code, '0x', (value) => value),
+          nonce: parseStateDiffItem(diff.nonce, 0n, BigInt),
+          storage: Object.fromEntries(
+            Object.entries(diff.storage)
+              .map(([slot, value]) => {
+                return [
+                  slot,
+                  parseStateDiffItem(value, zeroHash, (value) => value),
+                ];
+              })
+              .filter(([, value]) => value !== null),
+          ),
+        },
+      ];
+    }),
+  );
+  return {
+    trace,
+    stateDiff,
+  };
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getClient(client: PublicClient) {
   return client.extend((client) => ({
@@ -813,6 +757,28 @@ function getClient(client: PublicClient) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         params: [call, block, stateOverrides, blockOverrides],
+      });
+    },
+    async traceCall(
+      call: {
+        from?: Address;
+        to: Address;
+        gas?: Hex;
+        gasPrice?: Hex;
+        value?: Hex;
+        data?: Hex;
+        maxFeePerGas?: Hex;
+        maxPriorityFeePerGas?: Hex;
+      },
+      type: ('trace' | 'stateDiff' | 'vmTrace')[],
+    ): Promise<TransactionTraceResponse> {
+      return await client.request({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        method: 'trace_call',
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        params: [call, type],
       });
     },
     async traceReplayTransaction(
@@ -881,5 +847,4 @@ export type {
   DebugTransactionTraceCall,
   DebugTransactionStatePart,
   DebugTransactionState,
-  TransactionSimulation,
 };

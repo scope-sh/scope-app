@@ -140,7 +140,7 @@
       <CardHighlights
         v-if="opUnpacked"
         :op="opUnpacked"
-        :logs="logs"
+        :logs="opLogs"
       />
     </ScopePanel>
     <template #section>
@@ -155,7 +155,7 @@
         >
           <template #default>
             <ScopeLabelEmptyState
-              v-if="!logs.length"
+              v-if="!opLogs.length"
               value="No logs found"
             />
             <div
@@ -167,7 +167,7 @@
                 :options="logViewOptions"
               />
               <CardLog
-                v-for="(log, index) in logs"
+                v-for="(log, index) in opLogs"
                 :key="index"
                 :log="log"
                 :view="selectedLogView"
@@ -221,19 +221,16 @@ import ViewCallData from '@/components/op/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
-// import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
-import type {
-  TransactionSimulation,
-  TransactionStateDiff,
-} from '@/services/evm';
+import type { TransactionReplay, TransactionStateDiff } from '@/services/evm';
 import EvmService from '@/services/evm';
 import type { Command } from '@/stores/commands';
 import type { Op } from '@/utils/context/erc4337/entryPoint';
 import {
   getOpEvent,
   getOpHash,
+  getOpLogs,
   unpackOp,
 } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace } from '@/utils/context/traces';
@@ -254,6 +251,7 @@ const { send: sendToast } = useToast();
 const route = useRoute();
 const {
   id: chainId,
+  client,
   tenderlyClient,
   name: chainName,
   nativeCurrency,
@@ -380,11 +378,15 @@ const apiService = computed(() =>
   chainId.value ? new ApiService(chainId.value) : null,
 );
 const evmService = computed(() =>
+  client.value ? new EvmService(client.value) : null,
+);
+const tenderlyService = computed(() =>
   tenderlyClient.value ? new EvmService(tenderlyClient.value) : null,
 );
 
 const isLoading = ref(false);
-const transactionSimulation = ref<TransactionSimulation | null>(null);
+const transactionLogs = ref<Log[] | null>(null);
+const transactionReplay = ref<TransactionReplay | null>(null);
 
 watch(op, async () => {
   if (!apiService.value) {
@@ -425,14 +427,11 @@ const opEvent = computed(() => {
   if (!op.value) {
     return null;
   }
-  return getOpEvent(chainId.value, entryPoint.value, logs.value, op.value);
+  return getOpEvent(chainId.value, entryPoint.value, opLogs.value, op.value);
 });
 const opStatus = computed(() => {
-  if (!transactionSimulation.value) {
+  if (!transactionReplay.value) {
     return null;
-  }
-  if (!transactionSimulation.value.status) {
-    return false;
   }
   if (!opEvent.value) {
     return false;
@@ -445,24 +444,14 @@ const gasPrice = computed(() => {
   }
   return opEvent.value.actualGasCost / opEvent.value.actualGasUsed;
 });
-const logs = computed<Log[]>(() => {
-  if (!transactionSimulation.value) {
-    return [];
-  }
+const opLogs = computed<Log[]>(() => {
   if (!hash.value) {
     return [];
   }
-  return transactionSimulation.value.logs.map((log, index) => ({
-    address: log.address,
-    data: log.data,
-    topics: log.topics as [Hex, ...Hex[]],
-    logIndex: index,
-    blockHash: null,
-    blockNumber: null,
-    transactionHash: null,
-    transactionIndex: null,
-    removed: false,
-  }));
+  if (!transactionLogs.value) {
+    return [];
+  }
+  return getOpLogs(transactionLogs.value, hash.value);
 });
 
 const isTransactionReceiptLoading = ref(false);
@@ -474,12 +463,42 @@ async function fetch(): Promise<void> {
     return;
   }
   isLoading.value = true;
-  await Promise.all([fetchTransactionSimulation(entryPoint.value, op.value)]);
+  await Promise.all([
+    fetchTransactionLogs(entryPoint.value, op.value),
+    fetchTransactionReplay(entryPoint.value, op.value),
+  ]);
   isLoading.value = false;
   await fetchAbis();
 }
 
-async function fetchTransactionSimulation(
+async function fetchTransactionLogs(
+  entryPoint: Address,
+  op: Op,
+): Promise<void> {
+  if (!tenderlyService.value) {
+    return;
+  }
+  const opData =
+    'gasFees' in op
+      ? encodeFunctionData({
+          abi: entryPoint07Abi,
+          functionName: 'handleOps',
+          args: [[op], MOCK_BUNDLER],
+        })
+      : encodeFunctionData({
+          abi: entryPoint06Abi,
+          functionName: 'handleOps',
+          args: [[op], MOCK_BUNDLER],
+        });
+  transactionLogs.value = await tenderlyService.value.getCallLogs({
+    from: MOCK_BUNDLER,
+    to: entryPoint,
+    value: BigInt(0),
+    data: opData,
+  });
+}
+
+async function fetchTransactionReplay(
   entryPoint: Address,
   op: Op,
 ): Promise<void> {
@@ -498,7 +517,7 @@ async function fetchTransactionSimulation(
           functionName: 'handleOps',
           args: [[op], MOCK_BUNDLER],
         });
-  transactionSimulation.value = await evmService.value.simulateTransaction({
+  transactionReplay.value = await evmService.value.getCallReplay({
     from: MOCK_BUNDLER,
     to: entryPoint,
     value: BigInt(0),
@@ -506,7 +525,7 @@ async function fetchTransactionSimulation(
   });
 }
 const opTrace = computed<OpTrace | null>(() => {
-  if (!transactionSimulation.value) {
+  if (!transactionReplay.value) {
     return null;
   }
   if (!op.value) {
@@ -515,23 +534,19 @@ const opTrace = computed<OpTrace | null>(() => {
   if (!hash.value) {
     return null;
   }
-  return getOpTrace(
-    transactionSimulation.value.trace,
-    hash.value,
-    op.value.sender,
-  );
+  return getOpTrace(transactionReplay.value.trace, hash.value, op.value.sender);
 });
 const stateDiff = computed<TransactionStateDiff | null>(() => {
-  if (!transactionSimulation.value) {
+  if (!transactionReplay.value) {
     return null;
   }
-  return transactionSimulation.value.stateDiff;
+  return transactionReplay.value.stateDiff;
 });
 const revertTraceFrame = computed(() => {
-  if (!transactionSimulation.value) {
+  if (!transactionReplay.value) {
     return null;
   }
-  const trace = transactionSimulation.value.trace;
+  const trace = transactionReplay.value.trace;
   const root = trace.find((trace) => trace.traceAddress.length === 0);
   if (!root) {
     return null;
@@ -543,8 +558,7 @@ async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
     return;
   }
-  const opLogs = logs.value;
-  for (const log of opLogs) {
+  for (const log of opLogs.value) {
     if (!log.address) {
       continue;
     }
@@ -561,10 +575,18 @@ async function fetchAbis(): Promise<void> {
       errors: [],
     });
   }
+  if (!transactionReplay.value) {
+    return;
+  }
+  const rootTraceFrame = transactionReplay.value.trace[0];
+  if (!rootTraceFrame) {
+    return;
+  }
   if (!opTrace.value) {
     return;
   }
   const opTraces = [
+    rootTraceFrame,
     ...opTrace.value.creation,
     ...opTrace.value.validation,
     ...opTrace.value.payment,
