@@ -243,7 +243,7 @@ import { formatEther, formatGasPrice } from '@/utils/formatting';
 const SECTION_LOGS = 'logs';
 const SECTION_INTERNAL = 'internal';
 
-const MOCK_BUNDLER = '0x0000000000000000000000000000000000000001';
+const MOCK_BUNDLER = '0x433704c40f80cbff02e86fd36bc8bac5e31eb0c1';
 
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
