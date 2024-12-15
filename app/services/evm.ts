@@ -487,64 +487,71 @@ class Service {
     }
   }
 
+  public async getDebugCallTrace(
+    call: {
+      from: Address;
+      to: Address;
+      gas?: Hex;
+      gasPrice?: Hex;
+      value?: Hex;
+      data?: Hex;
+    },
+    block: BlockTag | Hex,
+  ): Promise<DebugTransactionTrace | null> {
+    try {
+      const traceResponse = await this.client.debugTraceCall(
+        call,
+        block,
+        'callTracer',
+        undefined,
+      );
+      return debugTraceResponseToTransactionTrace(traceResponse);
+    } catch {
+      return null;
+    }
+  }
+
+  public async getDebugCallState(
+    call: {
+      from: Address;
+      to: Address;
+      gas?: Hex;
+      gasPrice?: Hex;
+      value?: Hex;
+      data?: Hex;
+    },
+    block: BlockTag | Hex,
+  ): Promise<DebugTransactionState | null> {
+    try {
+      const traceResponse = await this.client.debugTraceCall(
+        call,
+        block,
+        'prestateTracer',
+        {
+          diffMode: true,
+        },
+      );
+      return {
+        pre: formatDebugTransactionStatePart(traceResponse.pre),
+        post: traceResponse.post
+          ? formatDebugTransactionStatePart(traceResponse.post)
+          : undefined,
+      };
+    } catch {
+      return null;
+    }
+  }
+
   public async getDebugTransactionTrace(
     hash: Hex,
   ): Promise<DebugTransactionTrace | null> {
-    function parseCall(
-      call: DebugTransactionTraceResponseCall,
-    ): DebugTransactionTraceCall {
-      return {
-        calls: (call.calls || []).map(parseCall),
-        from: call.from,
-        gas: BigInt(call.gas),
-        gasUsed: BigInt(call.gasUsed),
-        input: call.input,
-        output: call.output || '0x',
-        to: call.to,
-        type: call.type,
-        value: BigInt(call.value || '0'),
-        error:
-          call.error === 'execution reverted'
-            ? 'Reverted'
-            : call.error === 'out of gas'
-              ? 'OOG'
-              : null,
-      };
-    }
-
     try {
       const traceResponse = await this.client.debugTraceTransaction(
         hash,
         'callTracer',
         undefined,
       );
-      return {
-        afterEVMTransfers: traceResponse.afterEVMTransfers.map((transfer) => ({
-          from: transfer.from,
-          purpose: transfer.purpose,
-          to: transfer.to,
-          value: BigInt(transfer.value),
-        })),
-        beforeEVMTransfers: traceResponse.beforeEVMTransfers.map(
-          (transfer) => ({
-            from: transfer.from,
-            purpose: transfer.purpose,
-            to: transfer.to,
-            value: BigInt(transfer.value),
-          }),
-        ),
-        ...parseCall({
-          from: traceResponse.from,
-          gas: traceResponse.gas,
-          gasUsed: traceResponse.gasUsed,
-          input: traceResponse.input,
-          output: traceResponse.output,
-          to: traceResponse.to,
-          type: traceResponse.type,
-          value: traceResponse.value,
-          calls: traceResponse.calls,
-        }),
-      };
+      return debugTraceResponseToTransactionTrace(traceResponse);
     } catch {
       return null;
     }
@@ -553,28 +560,6 @@ class Service {
   public async getDebugTransactionState(
     hash: Hex,
   ): Promise<DebugTransactionState | null> {
-    function formatPart(
-      part: DebugTransactionStateResponsePart,
-    ): DebugTransactionStatePart {
-      return Object.fromEntries(
-        Object.entries(part).map(([address, data]) => [
-          address,
-          {
-            balance: data.balance ? BigInt(data.balance) : undefined,
-            code: data.code,
-            nonce: data.nonce ? BigInt(data.nonce) : undefined,
-            storage: data.storage
-              ? Object.fromEntries(
-                  Object.entries(data.storage).map(([slot, value]) => [
-                    slot,
-                    value,
-                  ]),
-                )
-              : undefined,
-          },
-        ]),
-      );
-    }
     try {
       const traceResponse = await this.client.debugTraceTransaction(
         hash,
@@ -584,8 +569,10 @@ class Service {
         },
       );
       return {
-        pre: formatPart(traceResponse.pre),
-        post: traceResponse.post ? formatPart(traceResponse.post) : undefined,
+        pre: formatDebugTransactionStatePart(traceResponse.pre),
+        post: traceResponse.post
+          ? formatDebugTransactionStatePart(traceResponse.post)
+          : undefined,
       };
     } catch {
       return null;
@@ -716,6 +703,81 @@ function traceResponseToReplay(
   };
 }
 
+function debugTraceResponseToTransactionTrace(
+  traceResponse: DebugTransactionTraceResponse,
+): DebugTransactionTrace {
+  function parseCall(
+    call: DebugTransactionTraceResponseCall,
+  ): DebugTransactionTraceCall {
+    return {
+      calls: (call.calls || []).map(parseCall),
+      from: call.from,
+      gas: BigInt(call.gas),
+      gasUsed: BigInt(call.gasUsed),
+      input: call.input,
+      output: call.output || '0x',
+      to: call.to,
+      type: call.type,
+      value: BigInt(call.value || '0'),
+      error:
+        call.error === 'execution reverted'
+          ? 'Reverted'
+          : call.error === 'out of gas'
+            ? 'OOG'
+            : null,
+    };
+  }
+  return {
+    afterEVMTransfers: traceResponse.afterEVMTransfers.map((transfer) => ({
+      from: transfer.from,
+      purpose: transfer.purpose,
+      to: transfer.to,
+      value: BigInt(transfer.value),
+    })),
+    beforeEVMTransfers: traceResponse.beforeEVMTransfers.map((transfer) => ({
+      from: transfer.from,
+      purpose: transfer.purpose,
+      to: transfer.to,
+      value: BigInt(transfer.value),
+    })),
+    ...parseCall({
+      from: traceResponse.from,
+      gas: traceResponse.gas,
+      gasUsed: traceResponse.gasUsed,
+      input: traceResponse.input,
+      output: traceResponse.output,
+      error: traceResponse.error,
+      to: traceResponse.to,
+      type: traceResponse.type,
+      value: traceResponse.value,
+      calls: traceResponse.calls,
+    }),
+  };
+}
+
+function formatDebugTransactionStatePart(
+  part: DebugTransactionStateResponsePart,
+): DebugTransactionStatePart {
+  return Object.fromEntries(
+    Object.entries(part).map(([address, data]) => [
+      address,
+      {
+        balance: data.balance ? BigInt(data.balance) : undefined,
+        code: data.code,
+        nonce: data.nonce ? BigInt(data.nonce) : undefined,
+        storage: data.storage
+          ? Object.fromEntries(
+              Object.entries(data.storage).map(([slot, value]) => [
+                slot,
+                value,
+              ]),
+            )
+          : undefined,
+      },
+    ]),
+  );
+}
+
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getClient(client: PublicClient) {
   return client.extend((client) => ({
@@ -792,6 +854,45 @@ function getClient(client: PublicClient) {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         params: [hash, type],
+      });
+    },
+    async debugTraceCall<T extends DebugTransactionTracer>(
+      call: {
+        from: Address;
+        to: Address;
+        gas?: Hex;
+        gasPrice?: Hex;
+        value?: Hex;
+        data?: Hex;
+      },
+      block: BlockTag | Hex,
+      tracer: T,
+      tracerConfig: T extends 'callTracer'
+        ? undefined
+        : {
+            diffMode: boolean;
+          },
+    ): Promise<
+      T extends 'callTracer'
+        ? DebugTransactionTraceResponse
+        : DebugTransactionStateResponse
+    > {
+      return await client.request({
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        method: 'debug_traceCall',
+        params: [
+          call,
+          block,
+          {
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            tracer,
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
+            tracerConfig,
+          },
+        ],
       });
     },
     async debugTraceTransaction<T extends DebugTransactionTracer>(

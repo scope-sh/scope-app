@@ -196,6 +196,7 @@ import { entryPoint06Abi, entryPoint07Abi } from 'viem/account-abstraction';
 import { computed, ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
 
+import { ARBITRUM, ARBITRUM_SEPOLIA } from '#build/imports';
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -235,6 +236,8 @@ import {
 } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace } from '@/utils/context/traces';
 import {
+  convertDebugTraceToTransactionTrace,
+  convertDebugStateToTransactionStateDiff,
   getOpTrace,
   getRevert as getRevertTraceFrame,
 } from '@/utils/context/traces';
@@ -517,12 +520,43 @@ async function fetchTransactionReplay(
           functionName: 'handleOps',
           args: [[op], MOCK_BUNDLER],
         });
-  transactionReplay.value = await evmService.value.getCallReplay({
-    from: MOCK_BUNDLER,
-    to: entryPoint,
-    value: BigInt(0),
-    data: opData,
-  });
+  if (chainId.value === ARBITRUM || chainId.value === ARBITRUM_SEPOLIA) {
+    const [debugTrace, debugState] = await Promise.all([
+      evmService.value.getDebugCallTrace(
+        {
+          from: MOCK_BUNDLER,
+          to: entryPoint,
+          data: opData,
+        },
+        'latest',
+      ),
+      evmService.value.getDebugCallState(
+        {
+          from: MOCK_BUNDLER,
+          to: entryPoint,
+          data: opData,
+        },
+        'latest',
+      ),
+    ]);
+    const trace = convertDebugTraceToTransactionTrace(debugTrace);
+    const stateDiff = convertDebugStateToTransactionStateDiff(debugState);
+    if (!trace || !stateDiff) {
+      transactionReplay.value = null;
+    } else {
+      transactionReplay.value = {
+        trace,
+        stateDiff,
+      };
+    }
+  } else {
+    transactionReplay.value = await evmService.value.getCallReplay({
+      from: MOCK_BUNDLER,
+      to: entryPoint,
+      value: BigInt(0),
+      data: opData,
+    });
+  }
 }
 const opTrace = computed<OpTrace | null>(() => {
   if (!transactionReplay.value) {
