@@ -5,7 +5,7 @@
   />
   <ScopePanel title="Traces">
     <ScopeLabelEmptyState
-      v-if="opTrace === null"
+      v-if="!hasTraces"
       value="Traces not available"
     />
     <template v-else>
@@ -15,7 +15,7 @@
       />
       <template v-if="activeTab === 'calls'">
         <ScopeLabelEmptyState
-          v-if="opTrace === null"
+          v-if="!hasTraces"
           value="No traces found"
         />
         <InternalCalls
@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import InternalCalls from './InternalCalls.vue';
 
@@ -52,7 +52,7 @@ import type { TransactionStateDiff } from '@/services/evm';
 import type { Phase } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace } from '@/utils/context/traces';
 
-defineProps<{
+const { opTrace } = defineProps<{
   isLoading: boolean;
   opTrace: OpTrace | null;
   stateDiff: TransactionStateDiff | null;
@@ -70,4 +70,16 @@ const tabs = [
     value: 'state',
   },
 ];
+
+const hasTraces = computed(() => {
+  if (opTrace === null) {
+    return false;
+  }
+  return (
+    opTrace.creation.length > 0 ||
+    opTrace.validation.length > 0 ||
+    opTrace.payment.length > 0 ||
+    opTrace.execution.length > 0
+  );
+});
 </script>

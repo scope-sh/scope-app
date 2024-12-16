@@ -18,7 +18,10 @@
         :has-error="revertPhase === 'creation'"
       />
     </div>
-    <div class="section">
+    <div
+      v-if="trace.validation.length > 0"
+      class="section"
+    >
       <div
         class="label"
         :class="{ error: revertPhase === 'validation' }"

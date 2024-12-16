@@ -312,14 +312,10 @@ function getOpTrace(
     }
     return decoded.args[1] === hash;
   });
-  if (!validateOpCall) {
-    return null;
-  }
   const validateOpCallInnerCalls = getSubtrace(
     transactionTrace,
     validateOpCall,
   );
-
   // Get payment traces
   // Find the "validatePaymasterUserOp" calls from the entrypoint
   const validatePaymasterOpCalls = transactionTrace.filter(
