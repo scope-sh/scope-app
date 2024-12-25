@@ -30,6 +30,8 @@ import {
   POLYGON_AMOY,
   POLYGON,
   SEPOLIA,
+  MODE,
+  MODE_SEPOLIA,
   getChainData,
   getEndpointUrl,
 } from '@/utils/chains.js';
@@ -263,6 +265,10 @@ function getFallbackChain(chain: Chain): Chain {
     case ARBITRUM:
       return ETHEREUM;
     case ARBITRUM_SEPOLIA:
+      return SEPOLIA;
+    case MODE:
+      return ETHEREUM;
+    case MODE_SEPOLIA:
       return SEPOLIA;
   }
 }

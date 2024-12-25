@@ -49,6 +49,16 @@
     :kind
     type="sepolia"
   />
+  <IconMode
+    v-else-if="chain === MODE"
+    :kind
+    type="mainnet"
+  />
+  <IconMode
+    v-else-if="chain === MODE_SEPOLIA"
+    :kind
+    type="sepolia"
+  />
 </template>
 
 <script setup lang="ts">
@@ -57,6 +67,7 @@ import IconBase from './icon/chain/Base.vue';
 import IconEthereum from './icon/chain/Ethereum.vue';
 import IconOptimism from './icon/chain/Optimism.vue';
 import IconPolygon from './icon/chain/Polygon.vue';
+import IconMode from './icon/chain/Mode.vue';
 import type { Kind } from './icon/chain/kind.js';
 
 import {
@@ -71,6 +82,8 @@ import {
   POLYGON_AMOY,
   ARBITRUM,
   ARBITRUM_SEPOLIA,
+  MODE,
+  MODE_SEPOLIA,
 } from '@/utils/chains.js';
 
 defineProps<{

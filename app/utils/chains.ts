@@ -1,4 +1,4 @@
-import { quicknode, tenderly } from 'evm-providers';
+import { alchemy, quicknode, tenderly } from 'evm-providers';
 import type { Chain as ChainData } from 'viem';
 import {
   mainnet,
@@ -11,6 +11,8 @@ import {
   polygonAmoy,
   arbitrum,
   arbitrumSepolia,
+  mode,
+  modeTestnet,
 } from 'viem/chains';
 
 const ETHEREUM = mainnet.id;
@@ -23,6 +25,8 @@ const POLYGON = polygon.id;
 const POLYGON_AMOY = polygonAmoy.id;
 const ARBITRUM = arbitrum.id;
 const ARBITRUM_SEPOLIA = arbitrumSepolia.id;
+const MODE = mode.id;
+const MODE_SEPOLIA = modeTestnet.id;
 
 type Chain =
   | typeof ETHEREUM
@@ -34,7 +38,9 @@ type Chain =
   | typeof POLYGON
   | typeof POLYGON_AMOY
   | typeof ARBITRUM
-  | typeof ARBITRUM_SEPOLIA;
+  | typeof ARBITRUM_SEPOLIA
+  | typeof MODE
+  | typeof MODE_SEPOLIA;
 
 const DEFAULT_CHAIN = ETHEREUM;
 
@@ -49,6 +55,8 @@ const CHAINS: Chain[] = [
   POLYGON_AMOY,
   ARBITRUM,
   ARBITRUM_SEPOLIA,
+  MODE,
+  MODE_SEPOLIA,
 ];
 
 function getChainData(chainId: Chain): ChainData {
@@ -73,6 +81,10 @@ function getChainData(chainId: Chain): ChainData {
       return arbitrum;
     case ARBITRUM_SEPOLIA:
       return arbitrumSepolia;
+    case MODE:
+      return mode;
+    case MODE_SEPOLIA:
+      return modeTestnet;
   }
 }
 
@@ -97,6 +109,9 @@ function getChainNames(chain: Chain): string[] {
       }
       case ARBITRUM: {
         return ['arbitrum'];
+      }
+      case MODE_SEPOLIA: {
+        return ['mode sepolia'];
       }
     }
     return [];
@@ -126,6 +141,12 @@ function getEndpointUrl(
   quicknodeAppName: string,
   quicknodeAppKey: string,
 ): string {
+  if (chainId === MODE) {
+    return mode.rpcUrls.default.http[0];
+  }
+  if (chainId === MODE_SEPOLIA) {
+    return modeTestnet.rpcUrls.default.http[0];
+  }
   return quicknode(chainId, quicknodeAppName, quicknodeAppKey);
 }
 
@@ -154,6 +175,8 @@ export {
   POLYGON_AMOY,
   ARBITRUM,
   ARBITRUM_SEPOLIA,
+  MODE,
+  MODE_SEPOLIA,
   getChainByName,
   getChainData,
   getChainName,
