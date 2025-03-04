@@ -1,4 +1,4 @@
-import { alchemy, quicknode, tenderly } from 'evm-providers';
+import { quicknode, tenderly } from 'evm-providers';
 import type { Chain as ChainData } from 'viem';
 import {
   mainnet,
