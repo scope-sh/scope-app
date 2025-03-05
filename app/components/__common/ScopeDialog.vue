@@ -26,8 +26,8 @@
 </template>
 
 <script setup lang="ts">
-import { VisuallyHidden } from 'radix-vue';
-import { Dialog } from 'radix-vue/namespaced';
+import { VisuallyHidden } from 'reka-ui';
+import { Dialog } from 'reka-ui/namespaced';
 
 const open = defineModel<boolean>('open', {
   required: true,

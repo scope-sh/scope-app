@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { Pagination } from 'radix-vue/namespaced';
+import { Pagination } from 'reka-ui/namespaced';
 
 import ScopeIcon from './ScopeIcon.vue';
 

@@ -4,12 +4,12 @@
       v-model="model"
       class="root"
       :filter-function="filterOptions"
-      :display-value="(val) => val.label"
     >
       <Combobox.Anchor class="anchor">
         <Combobox.Input
           class="input"
           placeholder="Search functions…"
+          :display-value="(val) => val.label"
         />
         <Combobox.Cancel
           v-if="model"
@@ -71,7 +71,7 @@
 </template>
 
 <script setup lang="ts" generic="T">
-import { Combobox } from 'radix-vue/namespaced';
+import { Combobox } from 'reka-ui/namespaced';
 
 import ScopeLabelEmptyState from './ScopeLabelEmptyState.vue';
 

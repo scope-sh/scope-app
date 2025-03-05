@@ -34,7 +34,7 @@
 
 <script setup lang="ts">
 import { useElementHover } from '@vueuse/core';
-import { Popover } from 'radix-vue/namespaced';
+import { Popover } from 'reka-ui/namespaced';
 import { computed, useTemplateRef } from 'vue';
 
 import IconChain from '@/components/__common/IconChain.vue';

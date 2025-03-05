@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { Tooltip } from 'radix-vue/namespaced';
+import { Tooltip } from 'reka-ui/namespaced';
 import { computed } from 'vue';
 
 type Delay = 'small' | 'medium' | 'large';

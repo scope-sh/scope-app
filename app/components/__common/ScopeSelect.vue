@@ -62,7 +62,8 @@
 </template>
 
 <script setup lang="ts">
-import { Select } from 'radix-vue/namespaced';
+import type { AcceptableValue } from 'reka-ui';
+import { Select } from 'reka-ui/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
@@ -75,8 +76,10 @@ defineProps<{
   placeholder: string;
 }>();
 
-function handleModelValueUpdate(newValue: string): void {
-  model.value = newValue;
+function handleModelValueUpdate(newValue: AcceptableValue): void {
+  if (typeof newValue === 'string') {
+    model.value = newValue;
+  }
 }
 </script>
 

@@ -25,7 +25,8 @@
 </template>
 
 <script setup lang="ts">
-import { ToggleGroup } from 'radix-vue/namespaced';
+import type { AcceptableValue } from 'reka-ui';
+import { ToggleGroup } from 'reka-ui/namespaced';
 
 import ScopeIcon from './ScopeIcon.vue';
 import type { Kind as IconKind } from './icon/general';
@@ -36,14 +37,10 @@ defineProps<{
   options: Option[];
 }>();
 
-function handleModelValueUpdate(value: string | string[] | undefined): void {
-  if (value === undefined) {
-    return;
+function handleModelValueUpdate(value: AcceptableValue): void {
+  if (typeof value === 'string') {
+    modelValue.value = value;
   }
-  if (Array.isArray(value)) {
-    return;
-  }
-  modelValue.value = value;
 }
 </script>
 

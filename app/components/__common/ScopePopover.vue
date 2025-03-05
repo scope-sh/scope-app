@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { Popover } from 'radix-vue/namespaced';
+import { Popover } from 'reka-ui/namespaced';
 </script>
 
 <style scoped>

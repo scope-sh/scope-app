@@ -22,7 +22,7 @@
 </template>
 
 <script setup lang="ts">
-import { Tabs } from 'radix-vue/namespaced';
+import { Tabs } from 'reka-ui/namespaced';
 
 const model = defineModel<Item['value']>();
 

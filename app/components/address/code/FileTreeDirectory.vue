@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { Tree } from 'radix-vue/namespaced';
+import { Tree } from 'reka-ui/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 

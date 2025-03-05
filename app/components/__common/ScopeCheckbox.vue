@@ -19,7 +19,7 @@
 </template>
 
 <script setup lang="ts">
-import { Checkbox } from 'radix-vue/namespaced';
+import { Checkbox } from 'reka-ui/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
