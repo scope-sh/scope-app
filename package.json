@@ -21,7 +21,7 @@
     "dev": "nuxt dev --dotenv .env.local",
     "generate": "nuxt generate",
     "lint": "bun run lint:prettier && bun run lint:eslint && bun run lint:stylelint",
-    "lint:prettier": "prettier -c \"{app,modules,server}/**/*.{json,js,ts}\"",
+    "lint:prettier": "prettier -c \"{app,modules,server}/**/*.{json,js,ts,vue}\"",
     "lint:eslint": "eslint \"{app,modules,server}/**/*.{js,ts,vue}\"",
     "lint:stylelint": "stylelint \"app/**/*.{css,vue}\"",
     "typecheck": "tsc --noEmit && vue-tsc --noEmit"
