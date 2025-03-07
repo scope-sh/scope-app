@@ -73,6 +73,7 @@ const count = computed(() => value.length);
   --width: 320px;
 
   position: fixed;
+  z-index: 10;
   right: var(--spacing-10);
   bottom: var(--spacing-10);
   flex-direction: column;
