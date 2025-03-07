@@ -206,7 +206,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import type { Address, Hex, Log } from 'viem';
-import { decodeErrorResult, encodeFunctionData, size, slice } from 'viem';
+import { encodeFunctionData, size, slice } from 'viem';
 import {
   entryPoint06Abi,
   entryPoint06Address,
@@ -244,7 +244,11 @@ import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
-import type { TransactionReplay, TransactionStateDiff } from '@/services/evm';
+import type {
+  TransactionReplay,
+  TransactionStateDiff,
+  TransactionTraceFrame,
+} from '@/services/evm';
 import EvmService from '@/services/evm';
 import type { Command } from '@/stores/commands';
 import type {
@@ -257,10 +261,9 @@ import {
   getOpEvent,
   getOpHash,
   getOpLogs,
-  getPhaseByEntryPointError,
   unpackOp,
 } from '@/utils/context/erc4337/entryPoint';
-import type { OpTrace } from '@/utils/context/traces';
+import type { OpTrace, OpTraceFrame } from '@/utils/context/traces';
 import {
   convertDebugTraceToTransactionTrace,
   convertDebugStateToTransactionStateDiff,
@@ -649,41 +652,44 @@ const revertTraceFrame = computed(() => {
 });
 
 const revertPhase = computed<Phase | undefined>(() => {
-  if (!entryPoint.value) {
-    return undefined;
+  function isMatch(
+    frame: TransactionTraceFrame,
+    phaseFrames: OpTraceFrame[],
+  ): boolean {
+    for (const phaseFrame of phaseFrames) {
+      if (frame.traceAddress.length !== phaseFrame.fullTraceAddress.length) {
+        continue;
+      }
+      if (
+        frame.traceAddress.every(
+          (value, index) => value === phaseFrame.fullTraceAddress[index],
+        )
+      ) {
+        return true;
+      }
+    }
+    return false;
   }
+
   if (!revertTraceFrame.value) {
     return undefined;
   }
-  if (revertTraceFrame.value.type !== 'call') {
-    return 'unknown';
+  if (!opTrace.value) {
+    return undefined;
   }
-  if (revertTraceFrame.value.action.to !== entryPoint.value) {
+  if (isMatch(revertTraceFrame.value, opTrace.value.creation)) {
+    return 'creation';
+  }
+  if (isMatch(revertTraceFrame.value, opTrace.value.validation)) {
+    return 'validation';
+  }
+  if (isMatch(revertTraceFrame.value, opTrace.value.payment)) {
+    return 'payment';
+  }
+  if (isMatch(revertTraceFrame.value, opTrace.value.execution)) {
     return 'execution';
   }
-  const error = revertTraceFrame.value.error;
-  if (error !== 'Reverted') {
-    return 'unknown';
-  }
-  const errorData = revertTraceFrame.value.result.output;
-  if (!errorData) {
-    return 'unknown';
-  }
-  const decodedError = decodeErrorResult({
-    abi:
-      entryPoint.value === entryPoint06Address
-        ? entryPoint06Abi
-        : entryPoint07Abi,
-    data: errorData,
-  });
-  if (
-    decodedError.errorName !== 'FailedOp' &&
-    decodedError.errorName !== 'FailedOpWithRevert'
-  ) {
-    return 'unknown';
-  }
-  const reason = decodedError.args[1];
-  return getPhaseByEntryPointError(reason);
+  return undefined;
 });
 
 async function fetchAbis(): Promise<void> {

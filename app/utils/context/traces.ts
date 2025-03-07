@@ -17,15 +17,18 @@ import type {
   TransactionTrace,
   TransactionTraceFrame,
   TransactionTraceCallFrame,
-  TransactionTraceCreateFrame,
   TransactionStateDiff,
 } from '@/services/evm';
 
+type OpTraceFrame = TransactionTraceFrame & {
+  fullTraceAddress: number[];
+};
+
 interface OpTrace {
-  creation: TransactionTraceFrame[];
-  validation: TransactionTraceFrame[];
-  payment: TransactionTraceFrame[];
-  execution: TransactionTraceFrame[];
+  creation: OpTraceFrame[];
+  validation: OpTraceFrame[];
+  payment: OpTraceFrame[];
+  execution: OpTraceFrame[];
 }
 
 function startsWith(a: number[], b: number[]): boolean {
@@ -39,9 +42,9 @@ function convertDebugTraceToTransactionTrace(
   function processCall(
     call: DebugTransactionTraceCall,
     traceAddress: number[] = [],
-  ): TransactionTraceFrame[] {
+  ): OpTraceFrame[] {
     const basePart: Pick<
-      TransactionTraceFrame,
+      OpTraceFrame,
       'error' | 'subtraces' | 'traceAddress'
     > = {
       error: call.error,
@@ -49,15 +52,16 @@ function convertDebugTraceToTransactionTrace(
       traceAddress,
     };
 
-    const result: TransactionTraceFrame[] = [];
+    const result: OpTraceFrame[] = [];
 
     if (
       call.type === 'CALL' ||
       call.type === 'STATICCALL' ||
       call.type === 'DELEGATECALL'
     ) {
-      const callPart: TransactionTraceCallFrame = {
+      const callPart: OpTraceFrame = {
         ...basePart,
+        fullTraceAddress: traceAddress,
         type: 'call',
         action: {
           from: call.from,
@@ -77,8 +81,9 @@ function convertDebugTraceToTransactionTrace(
       };
       result.push(callPart);
     } else if (call.type === 'CREATE' || call.type === 'CREATE2') {
-      const createPart: TransactionTraceCreateFrame = {
+      const createPart: OpTraceFrame = {
         ...basePart,
+        fullTraceAddress: traceAddress,
         type: 'create',
         action: {
           from: call.from,
@@ -261,7 +266,7 @@ function getOpTrace(
   function getSubtrace(
     trace: TransactionTraceFrame[],
     root: TransactionTraceFrame | undefined,
-  ): TransactionTraceFrame[] {
+  ): OpTraceFrame[] {
     if (!root) {
       return [];
     }
@@ -271,6 +276,7 @@ function getOpTrace(
       return {
         ...part,
         traceAddress: part.traceAddress.slice(root.traceAddress.length),
+        fullTraceAddress: part.traceAddress,
       };
     });
   }
@@ -390,4 +396,4 @@ export {
   getDirectChildren,
   getChildren,
 };
-export type { OpTrace };
+export type { OpTrace, OpTraceFrame };
