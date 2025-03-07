@@ -232,7 +232,12 @@ import ApiService from '@/services/api';
 import type { TransactionReplay, TransactionStateDiff } from '@/services/evm';
 import EvmService from '@/services/evm';
 import type { Command } from '@/stores/commands';
-import type { Op, Phase } from '@/utils/context/erc4337/entryPoint';
+import type {
+  Op,
+  Op_0_6,
+  Op_0_7,
+  Phase,
+} from '@/utils/context/erc4337/entryPoint';
 import {
   getOpEvent,
   getOpHash,
@@ -326,17 +331,33 @@ const op = computed<Op | null>(() => {
   if (!signature.value) {
     return null;
   }
-  return {
-    sender: sender.value,
-    nonce: BigInt(nonce.value),
-    initCode: initCode.value,
-    callData: callData.value,
-    accountGasLimits: accountGasLimits.value,
-    preVerificationGas: BigInt(preVerificationGas.value),
-    gasFees: gasFees.value,
-    paymasterAndData: paymasterAndData.value,
-    signature: signature.value,
-  };
+  if (entryPoint.value === entryPoint06Address.toLowerCase()) {
+    return {
+      sender: sender.value,
+      nonce: BigInt(nonce.value),
+      initCode: initCode.value,
+      callData: callData.value,
+      verificationGasLimit: BigInt(slice(accountGasLimits.value, 0, 16)),
+      callGasLimit: BigInt(slice(accountGasLimits.value, 16)),
+      preVerificationGas: BigInt(preVerificationGas.value),
+      maxFeePerGas: BigInt(slice(gasFees.value, 0, 16)),
+      maxPriorityFeePerGas: BigInt(slice(gasFees.value, 16)),
+      paymasterAndData: paymasterAndData.value,
+      signature: signature.value,
+    } as Op_0_6;
+  } else {
+    return {
+      sender: sender.value,
+      nonce: BigInt(nonce.value),
+      initCode: initCode.value,
+      callData: callData.value,
+      accountGasLimits: accountGasLimits.value,
+      preVerificationGas: BigInt(preVerificationGas.value),
+      gasFees: gasFees.value,
+      paymasterAndData: paymasterAndData.value,
+      signature: signature.value,
+    } as Op_0_7;
+  }
 });
 const hash = computed(() =>
   op.value && entryPoint.value

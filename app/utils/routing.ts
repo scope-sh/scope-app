@@ -1,4 +1,4 @@
-import type { Address } from 'viem';
+import type { Address, Hex } from 'viem';
 import type { RouteLocationRaw } from 'vue-router';
 
 import type { Chain } from './chains';
@@ -36,13 +36,35 @@ interface OpRoute {
   hash: string;
 }
 
+interface OpSimulateRoute {
+  name: 'op-simulate';
+  chain?: Chain;
+}
+
+interface OpSimulationRoute {
+  name: 'op-simulation';
+  chain?: Chain;
+  entryPoint: Address;
+  sender: Address;
+  nonce: Hex;
+  initCode: Hex;
+  callData: Hex;
+  accountGasLimits: Hex;
+  preVerificationGas: Hex;
+  gasFees: Hex;
+  paymasterAndData: Hex;
+  signature: Hex;
+}
+
 type Route =
   | HomeRoute
   | ChainRoute
   | BlockRoute
   | TransactionRoute
   | AddressRoute
-  | OpRoute;
+  | OpRoute
+  | OpSimulateRoute
+  | OpSimulationRoute;
 
 function getRouteLocation(route: Route): RouteLocationRaw {
   switch (route.name) {
@@ -89,8 +111,31 @@ function getRouteLocation(route: Route): RouteLocationRaw {
           hash: route.hash,
         },
       };
+    case 'op-simulate':
+      return {
+        name: 'op-simulate',
+        params: {
+          chain: route.chain,
+        },
+      };
+    case 'op-simulation':
+      return {
+        name: 'op-simulation',
+        query: {
+          entryPoint: route.entryPoint,
+          sender: route.sender,
+          nonce: route.nonce.toString(),
+          initCode: route.initCode,
+          callData: route.callData,
+          accountGasLimits: route.accountGasLimits.toString(),
+          preVerificationGas: route.preVerificationGas.toString(),
+          gasFees: route.gasFees.toString(),
+          paymasterAndData: route.paymasterAndData,
+          signature: route.signature,
+        },
+      };
   }
 }
 
 export { getRouteLocation };
-export type { Route };
+export type { Route, OpSimulationRoute };
