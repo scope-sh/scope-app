@@ -16,9 +16,15 @@
         }"
       >
         <ScopeIcon
+          v-if="option.icon"
           :kind="option.icon"
           class="icon"
         />
+        <span
+          v-if="option.label"
+          class="label"
+          >{{ option.label }}</span
+        >
       </ToggleGroup.Item>
     </ToggleGroup.Root>
   </div>
@@ -47,7 +53,8 @@ function handleModelValueUpdate(value: AcceptableValue): void {
 <script lang="ts">
 interface Option<T = string> {
   value: T;
-  icon: IconKind;
+  icon?: IconKind;
+  label?: string;
 }
 
 // eslint-disable-next-line import/prefer-default-export
@@ -63,8 +70,6 @@ export type { Option };
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
   padding: 0;
   border: none;
   border-radius: var(--border-radius-s);
@@ -84,5 +89,10 @@ export type { Option };
 .icon {
   width: 16px;
   height: 16px;
+  margin: 3px;
+}
+
+.label {
+  margin: 3px 6px;
 }
 </style>
