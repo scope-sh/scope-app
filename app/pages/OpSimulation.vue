@@ -8,6 +8,13 @@
       title="Simulated UserOp"
       :subtitle="hash"
     >
+      <template #header>
+        <ScopeIcon
+          kind="copy"
+          class="icon"
+          @click="handleCopyClick"
+        />
+      </template>
       <OpStatus
         v-if="opStatus !== null"
         :success="opStatus"
@@ -205,6 +212,7 @@ import { ARBITRUM, ARBITRUM_SEPOLIA } from '#build/imports';
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
+import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 import type { Section } from '@/components/__common/ScopePage.vue';
 import ScopePage from '@/components/__common/ScopePage.vue';
@@ -366,6 +374,17 @@ const hash = computed(() =>
 );
 
 const commands = computed<Command[]>(() => [
+  {
+    icon: 'copy',
+    label: 'Copy page URL',
+    act: (): void => {
+      navigator.clipboard.writeText(window.location.href);
+      sendToast({
+        type: 'success',
+        message: 'Page URL copied to clipboard',
+      });
+    },
+  },
   {
     icon: 'copy',
     label: 'Copy UserOp hash',
@@ -749,6 +768,20 @@ const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
     icon: 'hex-string',
   },
 ]);
+
+function handleCopyClick(): void {
+  copyPageUrl();
+}
+function copyPageUrl(): void {
+  if (!hash.value) {
+    return;
+  }
+  navigator.clipboard.writeText(window.location.href);
+  sendToast({
+    type: 'success',
+    message: 'Page URL copied to clipboard',
+  });
+}
 </script>
 
 <style scoped>
@@ -763,5 +796,11 @@ const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
   display: flex;
   gap: var(--spacing-5);
   flex-direction: column;
+}
+
+.icon {
+  width: 14px;
+  height: 14px;
+  cursor: pointer;
 }
 </style>
