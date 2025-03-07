@@ -256,6 +256,13 @@ const globalCommands = computed<Command[]>(() => {
       isAsync: areGoToItemsAsync('all'),
       getItems: async (query): Promise<Command[]> => getGoToItems('all', query),
     },
+    {
+      icon: 'arrow-right',
+      label: 'Simulate UserOp',
+      act: (): void => {
+        router.push(getRouteLocation({ name: 'op-simulate' }));
+      },
+    },
   ];
 
   if (chainId.value) {
