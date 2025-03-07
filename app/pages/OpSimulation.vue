@@ -9,11 +9,16 @@
       :subtitle="hash"
     >
       <template #header>
-        <ScopeIcon
-          kind="copy"
-          class="icon"
+        <div
+          class="action"
           @click="handleCopyClick"
-        />
+        >
+          <ScopeIcon
+            kind="copy"
+            class="icon"
+          />
+          Copy URL
+        </div>
       </template>
       <OpStatus
         v-if="opStatus !== null"
@@ -796,6 +801,18 @@ function copyPageUrl(): void {
   display: flex;
   gap: var(--spacing-5);
   flex-direction: column;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  gap: var(--spacing-4);
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
 }
 
 .icon {
