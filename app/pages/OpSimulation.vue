@@ -50,7 +50,9 @@
             note="The contract that deployed the smart account based on the template"
           />
           <AttributeItemValue>
-            <LinkAddress :address="opUnpacked.factory" />
+            <LinkAddress
+              :address="opUnpacked.factory.toLowerCase() as Address"
+            />
           </AttributeItemValue>
         </AttributeItem>
         <AttributeItem v-if="opUnpacked.initData">
