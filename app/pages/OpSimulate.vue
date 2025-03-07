@@ -497,6 +497,10 @@ textarea {
   color: var(--color-text-primary);
   font-family: var(--font-mono);
   font-size: var(--font-size-s);
+
+  &:focus {
+    border-color: var(--color-border-primary);
+  }
 }
 
 button {
