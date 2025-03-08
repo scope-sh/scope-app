@@ -206,7 +206,7 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import type { Address, Hex, Log } from 'viem';
-import { encodeFunctionData, size, slice } from 'viem';
+import { decodeErrorResult, encodeFunctionData, size, slice } from 'viem';
 import {
   entryPoint06Abi,
   entryPoint06Address,
@@ -261,6 +261,7 @@ import {
   getOpEvent,
   getOpHash,
   getOpLogs,
+  getPhaseByEntryPointError,
   unpackOp,
 } from '@/utils/context/erc4337/entryPoint';
 import type { OpTrace, OpTraceFrame } from '@/utils/context/traces';
@@ -677,6 +678,7 @@ const revertPhase = computed<Phase | undefined>(() => {
   if (!opTrace.value) {
     return undefined;
   }
+  // First, try to find a matching trace in each phase
   if (isMatch(revertTraceFrame.value, opTrace.value.creation)) {
     return 'creation';
   }
@@ -689,7 +691,37 @@ const revertPhase = computed<Phase | undefined>(() => {
   if (isMatch(revertTraceFrame.value, opTrace.value.execution)) {
     return 'execution';
   }
-  return undefined;
+
+  // Second, try to get a phase by decoding the revert
+  if (revertTraceFrame.value.type !== 'call') {
+    return undefined;
+  }
+  if (revertTraceFrame.value.action.to !== entryPoint.value) {
+    return 'execution';
+  }
+  const error = revertTraceFrame.value.error;
+  if (error !== 'Reverted') {
+    return undefined;
+  }
+  const errorData = revertTraceFrame.value.result.output;
+  if (!errorData) {
+    return undefined;
+  }
+  const decodedError = decodeErrorResult({
+    abi:
+      entryPoint.value === entryPoint06Address
+        ? entryPoint06Abi
+        : entryPoint07Abi,
+    data: errorData,
+  });
+  if (
+    decodedError.errorName !== 'FailedOp' &&
+    decodedError.errorName !== 'FailedOpWithRevert'
+  ) {
+    return undefined;
+  }
+  const reason = decodedError.args[1];
+  return getPhaseByEntryPointError(reason);
 });
 
 async function fetchAbis(): Promise<void> {
