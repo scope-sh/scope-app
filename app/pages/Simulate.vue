@@ -18,6 +18,7 @@
             v-model="input"
             placeholder="User Operation JSON"
           />
+          <ExampleView @select="handleExampleSelect" />
         </div>
         <div>
           <button
@@ -55,6 +56,9 @@ import { useRouter } from 'vue-router';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
+import ExampleView, {
+  type Example,
+} from '@/components/simulate/ExampleView.vue';
 import PreviewView from '@/components/simulate/PreviewView.vue';
 import { type Chain, CHAINS, DEFAULT_CHAIN } from '@/utils/chains';
 import { OpUnionSchema } from '@/utils/context/simulation';
@@ -156,6 +160,12 @@ function openSimulationPage(): void {
 
   const routeLocation = getRouteLocation(simulationQueryParams);
   route.push(routeLocation);
+}
+
+function handleExampleSelect(example: Example): void {
+  chain.value = example.chain;
+  entryPointVersion.value = example.entryPointVersion;
+  input.value = example.value;
 }
 </script>
 
