@@ -800,9 +800,9 @@ function copyPageUrl(): void {
 <style scoped>
 .input {
   display: flex;
+  gap: var(--spacing-2);
   flex-direction: column;
   width: 100%;
-  gap: var(--spacing-2);
 }
 
 .logs {
@@ -813,10 +813,11 @@ function copyPageUrl(): void {
 
 .action {
   display: flex;
+  gap: var(--spacing-4);
   align-items: center;
   color: var(--color-text-secondary);
+  font-size: var(--font-size-s);
   cursor: pointer;
-  gap: var(--spacing-4);
 
   &:hover {
     color: var(--color-text-primary);
