@@ -7,6 +7,11 @@ interface HomeRoute {
   name: 'home';
 }
 
+interface GlobalAddressRoute {
+  name: 'global-address';
+  address: Address;
+}
+
 interface ChainRoute {
   name: 'chain';
   chain?: Chain;
@@ -57,6 +62,7 @@ interface OpSimulationRoute {
 
 type Route =
   | HomeRoute
+  | GlobalAddressRoute
   | ChainRoute
   | BlockRoute
   | TransactionRoute
@@ -74,6 +80,7 @@ function isExplorerRoute(routeName: string | symbol | undefined): boolean {
   }
   const exploreRoutes = [
     'home',
+    'global-address',
     'chain',
     'block',
     'transaction',
@@ -99,6 +106,13 @@ function getRouteLocation(route: Route): RouteLocationRaw {
     case 'home':
       return {
         name: 'home',
+      };
+    case 'global-address':
+      return {
+        name: 'global-address',
+        params: {
+          address: route.address,
+        },
       };
     case 'chain':
       return {
@@ -166,4 +180,4 @@ function getRouteLocation(route: Route): RouteLocationRaw {
 }
 
 export { getRouteLocation, isExplorerRoute, isSimulatorRoute };
-export type { Route, OpSimulationRoute };
+export type { Route, BlockRoute, OpSimulationRoute };

@@ -3,6 +3,7 @@ import type { RouterConfig } from '@nuxt/schema';
 import Address from '@/pages/Address.vue';
 import Block from '@/pages/Block.vue';
 import Chain from '@/pages/Chain.vue';
+import GlobalAddress from '@/pages/GlobalAddress.vue';
 import Op from '@/pages/Op.vue';
 import OpSimulation from '@/pages/OpSimulation.vue';
 import Simulate from '@/pages/Simulate.vue';
@@ -14,6 +15,11 @@ export default <RouterConfig>{
       name: 'home',
       path: '/',
       redirect: '/1',
+    },
+    {
+      name: 'global-address',
+      path: '/address/:address',
+      component: GlobalAddress,
     },
     {
       name: 'chain',
