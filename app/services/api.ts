@@ -208,6 +208,22 @@ class Service {
     return response.json<Abis>();
   }
 
+  public async getContractImplementation(
+    address: Address,
+  ): Promise<{
+    address: Address | null;
+  }> {
+    const response = await this.client.get('contract/implementation', {
+      searchParams: {
+        chain: this.chainId,
+        address,
+      },
+    });
+    return response.json<{
+      address: Address | null;
+    }>();
+  }
+
   public async getContractDeployment(
     address: Address,
   ): Promise<Deployment | null> {
