@@ -43,14 +43,12 @@ function convertDebugTraceToTransactionTrace(
     call: DebugTransactionTraceCall,
     traceAddress: number[] = [],
   ): OpTraceFrame[] {
-    const basePart: Pick<
-      OpTraceFrame,
-      'error' | 'subtraces' | 'traceAddress'
-    > = {
-      error: call.error,
-      subtraces: call.calls.length,
-      traceAddress,
-    };
+    const basePart: Pick<OpTraceFrame, 'error' | 'subtraces' | 'traceAddress'> =
+      {
+        error: call.error,
+        subtraces: call.calls.length,
+        traceAddress,
+      };
 
     const result: OpTraceFrame[] = [];
 
