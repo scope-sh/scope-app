@@ -145,3 +145,9 @@ defineProps<{
   chain: Chain;
 }>();
 </script>
+
+<style scoped>
+.errors {
+  color: var(--color-error);
+}
+</style>

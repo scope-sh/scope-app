@@ -215,8 +215,4 @@ button {
     pointer-events: none;
   }
 }
-
-.errors {
-  color: var(--color-error);
-}
 </style>
