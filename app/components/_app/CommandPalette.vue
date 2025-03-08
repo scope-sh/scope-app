@@ -260,7 +260,7 @@ const globalCommands = computed<Command[]>(() => {
       icon: 'arrow-right',
       label: 'Simulate UserOp',
       act: (): void => {
-        router.push(getRouteLocation({ name: 'op-simulate' }));
+        router.push(getRouteLocation({ name: 'simulate' }));
       },
     },
   ];

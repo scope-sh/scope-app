@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <AppHeader v-if="!isChainPage" />
+    <AppHeader />
     <!-- eslint-disable-next-line vue/no-undef-components -->
     <NuxtPage />
     <AppFooter v-if="!isChainPage" />

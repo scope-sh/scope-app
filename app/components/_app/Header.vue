@@ -1,12 +1,39 @@
 <template>
   <header>
-    <div class="side">
-      <RouterLink :to="chainRoute">
+    <div class="start">
+      <RouterLink
+        v-if="isChainAvailable"
+        :to="chainRoute"
+      >
+        <IconBrand class="icon" />
+      </RouterLink>
+      <RouterLink
+        v-else
+        :to="getRouteLocation({ name: 'home' })"
+      >
         <IconBrand class="icon" />
       </RouterLink>
       <CommandPaletteTrigger />
     </div>
-    <div class="side">
+    <div class="center">
+      <div class="modes">
+        <RouterLink
+          class="mode"
+          :to="getRouteLocation({ name: 'home' })"
+          :class="{ active: isExplorerRoute(route.name) }"
+        >
+          Explore
+        </RouterLink>
+        <RouterLink
+          class="mode"
+          :to="getRouteLocation({ name: 'simulate' })"
+          :class="{ active: isSimulatorRoute(route.name) }"
+        >
+          Simulate
+        </RouterLink>
+      </div>
+    </div>
+    <div class="end">
       <ChainSelector
         v-if="isChainAvailable"
         :model-value="chainId"
@@ -19,7 +46,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink, useRouter, useRoute } from 'vue-router';
 
 import CommandPaletteTrigger from './header/CommandPaletteTrigger.vue';
 import ChainSelector from './header/SelectChain.vue';
@@ -28,10 +55,15 @@ import IconBrand from '@/components/__common/IconBrand.vue';
 import useChain from '@/composables/useChain';
 import type { Chain } from '@/utils/chains';
 import { CHAINS } from '@/utils/chains';
-import { getRouteLocation } from '@/utils/routing';
+import {
+  getRouteLocation,
+  isExplorerRoute,
+  isSimulatorRoute,
+} from '@/utils/routing';
 
 const { isAvailable: isChainAvailable, id: chainId } = useChain();
 const router = useRouter();
+const route = useRoute();
 
 const chainRoute = computed(() =>
   getRouteLocation({ name: 'chain', chain: chainId.value }),
@@ -45,6 +77,7 @@ function handleChainUpdate(value: Chain): void {
 <style scoped>
 header {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   padding: var(--spacing-5) 8px;
   border-bottom: 1px solid var(--color-border-tertiary);
@@ -54,10 +87,25 @@ header {
   }
 }
 
-.side {
+.start,
+.center,
+.end {
   display: flex;
   gap: var(--spacing-7);
+  flex: 1;
   align-items: center;
+}
+
+.start {
+  justify-content: flex-start;
+}
+
+.center {
+  justify-content: center;
+}
+
+.end {
+  justify-content: flex-end;
 }
 
 .icon {
@@ -70,5 +118,25 @@ header {
 
 .icon:hover {
   color: var(--color-text-primary);
+}
+
+.modes {
+  display: flex;
+  gap: var(--spacing-4);
+}
+
+.mode {
+  transition: 0.2s ease-in-out;
+  border-radius: var(--border-radius-full);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &.active {
+    color: var(--color-text-primary);
+  }
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
 }
 </style>

@@ -3,6 +3,10 @@
     <ScopePanel title="Op Simulation">
       <div class="body">
         <div class="form">
+          <SelectChain
+            v-model="chain"
+            :options="CHAINS"
+          />
           <ScopeToggle
             v-model="entryPointVersion"
             :options="[
@@ -32,7 +36,10 @@
               <AttributeItem>
                 <AttributeItemLabel value="Sender" />
                 <AttributeItemValue>
-                  <LinkAddress :address="parsedInputResult.output.sender" />
+                  <LinkAddress
+                    :address="parsedInputResult.output.sender"
+                    :chain="chain"
+                  />
                 </AttributeItemValue>
               </AttributeItem>
               <AttributeItem>
@@ -44,7 +51,10 @@
               <AttributeItem v-if="parsedInputResult.output.factory">
                 <AttributeItemLabel value="Factory" />
                 <AttributeItemValue>
-                  <LinkAddress :address="parsedInputResult.output.factory" />
+                  <LinkAddress
+                    :address="parsedInputResult.output.factory"
+                    :chain="chain"
+                  />
                 </AttributeItemValue>
               </AttributeItem>
               <AttributeItem v-if="parsedInputResult.output.factoryData">
@@ -98,7 +108,10 @@
               <AttributeItem v-if="parsedInputResult.output.paymaster">
                 <AttributeItemLabel value="Paymaster" />
                 <AttributeItemValue>
-                  <LinkAddress :address="parsedInputResult.output.paymaster" />
+                  <LinkAddress
+                    :address="parsedInputResult.output.paymaster"
+                    :chain="chain"
+                  />
                 </AttributeItemValue>
               </AttributeItem>
               <AttributeItem v-if="parsedInputResult.output.paymasterData">
@@ -175,11 +188,15 @@ import {
   AttributeItemLabel,
   AttributeItemValue,
 } from '@/components/__common/attributes';
+import { type Chain, CHAINS, DEFAULT_CHAIN } from '@/utils/chains';
 import { type OpSimulationRoute, getRouteLocation } from '@/utils/routing';
+import SelectChain from '~/components/_app/header/SelectChain.vue';
 
 type SimulationQueryParams = Exclude<OpSimulationRoute, 'name'>;
 
 const route = useRouter();
+
+const chain = ref<Chain>(DEFAULT_CHAIN);
 
 const AddressSchema = v.pipe(
   v.string(),
@@ -424,8 +441,10 @@ function openSimulationPage(): void {
     preVerificationGas,
     signature,
   } = parsedInput.value;
+  console.log(chain.value);
   const simulationQueryParams: SimulationQueryParams = {
     name: 'op-simulation',
+    chain: chain.value,
     entryPoint: entryPoint.value,
     sender,
     nonce: `0x${nonce.toString(16)}`,

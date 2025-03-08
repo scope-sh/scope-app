@@ -36,9 +36,8 @@ interface OpRoute {
   hash: string;
 }
 
-interface OpSimulateRoute {
-  name: 'op-simulate';
-  chain?: Chain;
+interface SimulateRoute {
+  name: 'simulate';
 }
 
 interface OpSimulationRoute {
@@ -63,8 +62,30 @@ type Route =
   | TransactionRoute
   | AddressRoute
   | OpRoute
-  | OpSimulateRoute
+  | SimulateRoute
   | OpSimulationRoute;
+
+function isExplorerRoute(routeName: string | symbol | undefined): boolean {
+  if (!routeName) {
+    return false;
+  }
+  if (typeof routeName === 'symbol') {
+    return false;
+  }
+  const exploreRoutes = ['home', 'chain', 'block', 'transaction', 'address', 'op'];
+  return exploreRoutes.includes(routeName);
+}
+
+function isSimulatorRoute(routeName: string | symbol | undefined): boolean {
+  if (!routeName) {
+    return false;
+  }
+  if (typeof routeName === 'symbol') {
+    return false;
+  }
+  const simulateRoutes = ['simulate', 'op-simulation'];
+  return simulateRoutes.includes(routeName);
+}
 
 function getRouteLocation(route: Route): RouteLocationRaw {
   switch (route.name) {
@@ -111,16 +132,16 @@ function getRouteLocation(route: Route): RouteLocationRaw {
           hash: route.hash,
         },
       };
-    case 'op-simulate':
+    case 'simulate':
       return {
-        name: 'op-simulate',
-        params: {
-          chain: route.chain,
-        },
+        name: 'simulate',
       };
     case 'op-simulation':
       return {
         name: 'op-simulation',
+        params: {
+          chain: route.chain,
+        },
         query: {
           entryPoint: route.entryPoint,
           sender: route.sender,
@@ -137,5 +158,5 @@ function getRouteLocation(route: Route): RouteLocationRaw {
   }
 }
 
-export { getRouteLocation };
+export { getRouteLocation, isExplorerRoute, isSimulatorRoute };
 export type { Route, OpSimulationRoute };

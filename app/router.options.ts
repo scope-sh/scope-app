@@ -4,8 +4,8 @@ import Address from '@/pages/Address.vue';
 import Block from '@/pages/Block.vue';
 import Chain from '@/pages/Chain.vue';
 import Op from '@/pages/Op.vue';
-import OpSimulate from '@/pages/OpSimulate.vue';
 import OpSimulation from '@/pages/OpSimulation.vue';
+import Simulate from '@/pages/Simulate.vue';
 import Transaction from '@/pages/Transaction.vue';
 
 export default <RouterConfig>{
@@ -41,9 +41,9 @@ export default <RouterConfig>{
       component: Op,
     },
     {
-      path: '/:chain/op/simulate',
-      name: 'op-simulate',
-      component: OpSimulate,
+      path: '/simulate',
+      name: 'simulate',
+      component: Simulate,
     },
     {
       path: '/:chain/op/simulation',
