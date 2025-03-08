@@ -6,6 +6,7 @@ import useChain from './useChain';
 import ApiService, { type Label } from '@/services/api.js';
 import type { Requests, RequestType } from '@/stores/labels.js';
 import useStore from '@/stores/labels.js';
+import type { Chain } from '@/utils/chains.js';
 
 interface UseLabels {
   requestLabel: (address: Address, type: RequestType) => Promise<void>;
@@ -15,9 +16,10 @@ interface UseLabels {
   getLabelIcon: (address: Address) => string | null;
 }
 
-function useLabels(): UseLabels {
+function useLabels(chainOverride?: Chain): UseLabels {
   const store = useStore();
-  const { id: chain } = useChain();
+  const { id: availableChain } = useChain();
+  const chain = computed(() => chainOverride ?? availableChain.value);
   const apiService = computed(() => new ApiService(chain.value));
 
   async function requestLabel(

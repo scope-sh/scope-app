@@ -6,6 +6,7 @@
     <ScopeLinkInternal
       :route="{
         name: 'address',
+        chain: chain,
         address: address,
       }"
       :type
@@ -49,13 +50,19 @@ import ScopeLinkInternal, { type Type } from './ScopeLinkInternal.vue';
 import ScopeTooltip from './ScopeTooltip.vue';
 
 import useLabels from '@/composables/useLabels.js';
+import type { Chain } from '@/utils/chains.js';
 
-const { address, type = 'normal' } = defineProps<{
+const {
+  address,
+  chain,
+  type = 'normal',
+} = defineProps<{
   address: Address;
+  chain?: Chain;
   type?: Type;
 }>();
 
-const { getLabelIcon, getLabelText, requestLabel } = useLabels();
+const { getLabelIcon, getLabelText, requestLabel } = useLabels(chain);
 
 defineOptions({
   inheritAttrs: false,
