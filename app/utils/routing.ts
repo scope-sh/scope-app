@@ -72,7 +72,14 @@ function isExplorerRoute(routeName: string | symbol | undefined): boolean {
   if (typeof routeName === 'symbol') {
     return false;
   }
-  const exploreRoutes = ['home', 'chain', 'block', 'transaction', 'address', 'op'];
+  const exploreRoutes = [
+    'home',
+    'chain',
+    'block',
+    'transaction',
+    'address',
+    'op',
+  ];
   return exploreRoutes.includes(routeName);
 }
 

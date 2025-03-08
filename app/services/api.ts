@@ -208,9 +208,7 @@ class Service {
     return response.json<Abis>();
   }
 
-  public async getContractImplementation(
-    address: Address,
-  ): Promise<{
+  public async getContractImplementation(address: Address): Promise<{
     address: Address | null;
   }> {
     const response = await this.client.get('contract/implementation', {

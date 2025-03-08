@@ -197,9 +197,4 @@ type OpSchema = v.InferOutput<typeof UnpackedOpSchema>;
 
 const OpUnionSchema = v.union([UnpackedOpSchema, Op_0_6_Schema, Op_0_7_Schema]);
 
-export {
-  Op_0_6_Schema,
-  Op_0_7_Schema,
-  OpUnionSchema,
-  UnpackedOpSchema,
-};
+export { Op_0_6_Schema, Op_0_7_Schema, OpUnionSchema, UnpackedOpSchema };
