@@ -117,7 +117,6 @@ function openSimulationPage(): void {
     preVerificationGas,
     signature,
   } = parsedInput.value;
-  console.log(chain.value);
   const simulationQueryParams: SimulationQueryParams = {
     name: 'op-simulation',
     chain: chain.value,
