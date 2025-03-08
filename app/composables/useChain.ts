@@ -26,6 +26,7 @@ interface UseChain {
   client: Ref<PublicClient>;
   tenderlyClient: Ref<PublicClient>;
   nativeCurrency: Ref<NativeCurrency>;
+  isAvailable: Ref<boolean>;
 }
 
 function parseChain(value?: string | string[]): Chain | null {
@@ -49,6 +50,10 @@ function useChain(): UseChain {
   const route = useRoute();
   const { quicknodeAppName, quicknodeAppKey, tenderlyNodeAccessKey } = useEnv();
 
+  const isAvailable = computed(() => {
+    const id = parseChain(route.params.chain);
+    return id !== null && CHAINS.includes(id);
+  });
   const id = ref<Chain>(parseChain(route.params.chain) || DEFAULT_CHAIN);
   const name = computed(() => getChainName(id.value));
 
@@ -94,7 +99,7 @@ function useChain(): UseChain {
     return chain.nativeCurrency;
   });
 
-  return { id, name, client, tenderlyClient, nativeCurrency };
+  return { id, name, client, tenderlyClient, nativeCurrency, isAvailable };
 }
 
 export default useChain;

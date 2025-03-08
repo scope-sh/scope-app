@@ -8,6 +8,7 @@
     </div>
     <div class="side">
       <ChainSelector
+        v-if="isChainAvailable"
         :model-value="chainId"
         :options="CHAINS"
         @update:model-value="handleChainUpdate"
@@ -29,7 +30,7 @@ import type { Chain } from '@/utils/chains';
 import { CHAINS } from '@/utils/chains';
 import { getRouteLocation } from '@/utils/routing';
 
-const { id: chainId } = useChain();
+const { isAvailable: isChainAvailable, id: chainId } = useChain();
 const router = useRouter();
 
 const chainRoute = computed(() =>
