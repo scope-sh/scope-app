@@ -348,10 +348,10 @@ const Op_0_7_Schema = v.pipe(
     const callGasLimit = BigInt(
       slice(`0x${op.accountGasLimits.toString(16)}`, 16),
     );
-    const maxFeePerGas = BigInt(slice(`0x${op.gasFees.toString(16)}`, 0, 16));
     const maxPriorityFeePerGas = BigInt(
-      slice(`0x${op.gasFees.toString(16)}`, 16),
+      slice(`0x${op.gasFees.toString(16)}`, 0, 16),
     );
+    const maxFeePerGas = BigInt(slice(`0x${op.gasFees.toString(16)}`, 16));
     return {
       sender: op.sender.toLowerCase() as Address,
       nonce: op.nonce,
@@ -460,10 +460,10 @@ function openSimulationPage(): void {
     ]),
     preVerificationGas: `0x${preVerificationGas.toString(16)}`,
     gasFees: concat([
-      padHex(`0x${maxFeePerGas.toString(16)}`, {
+      padHex(`0x${maxPriorityFeePerGas.toString(16)}`, {
         size: 16,
       }),
-      padHex(`0x${maxPriorityFeePerGas.toString(16)}`, {
+      padHex(`0x${maxFeePerGas.toString(16)}`, {
         size: 16,
       }),
     ]),
