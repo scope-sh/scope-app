@@ -3,7 +3,7 @@
     <AppHeader />
     <!-- eslint-disable-next-line vue/no-undef-components -->
     <NuxtPage />
-    <AppFooter v-if="!isChainPage" />
+    <AppFooter v-if="!isHomeOrChainPage" />
     <CommandPalette />
     <Toaster
       :value="toasts"
@@ -28,7 +28,9 @@ const route = useRoute();
 
 const { items: toasts, hide: hideToast } = useToast();
 
-const isChainPage = computed(() => route.name === 'chain');
+const isHomeOrChainPage = computed(
+  () => route.name === 'home' || route.name === 'chain',
+);
 </script>
 
 <!-- eslint-disable-next-line vue/enforce-style-attribute -->

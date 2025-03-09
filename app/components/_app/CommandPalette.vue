@@ -192,7 +192,7 @@ const globalCommands = computed<Command[]>(() => {
       icon: 'arrow-right',
       label: 'Go home',
       act: (): void => {
-        router.push(getRouteLocation({ name: 'chain' }));
+        router.push(getRouteLocation({ name: 'home' }));
       },
     },
     {

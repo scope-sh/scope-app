@@ -4,6 +4,7 @@ import Address from '@/pages/Address.vue';
 import Block from '@/pages/Block.vue';
 import Chain from '@/pages/Chain.vue';
 import GlobalAddress from '@/pages/GlobalAddress.vue';
+import Home from '@/pages/Home.vue';
 import Op from '@/pages/Op.vue';
 import OpSimulation from '@/pages/OpSimulation.vue';
 import Simulate from '@/pages/Simulate.vue';
@@ -14,7 +15,7 @@ export default <RouterConfig>{
     {
       name: 'home',
       path: '/',
-      redirect: '/1',
+      component: Home,
     },
     {
       name: 'global-address',
