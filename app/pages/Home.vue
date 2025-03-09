@@ -8,10 +8,16 @@
             :is-loading="isEnsResolving"
             placeholder="Address or ENS"
             @submit="handleSearchSubmit"
+            @focus="handleInputFocus"
+            @blur="handleInputBlur"
           />
         </div>
       </div>
       <div class="body">
+        <div
+          class="overlay"
+          :class="{ active: isInputFocused }"
+        />
         <div class="chains">
           <RouterLink
             v-for="chain in CHAINS"
@@ -227,11 +233,22 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
     chainHistory.shift();
   }
 }
+
+const isInputFocused = ref(false);
+
+function handleInputFocus(): void {
+  isInputFocused.value = true;
+}
+
+function handleInputBlur(): void {
+  isInputFocused.value = false;
+}
 </script>
 
 <style scoped>
 .page {
   display: flex;
+  position: relative;
   align-items: center;
   justify-content: center;
   padding-top: 15vh;
@@ -239,11 +256,13 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
 
 .content {
   display: flex;
-  gap: 40px;
+  position: relative;
+  z-index: 1;
   flex-direction: column;
   align-items: center;
   width: 820px;
   margin: 8px;
+  gap: 40px;
 }
 
 @media (width >= 768px) {
@@ -269,6 +288,21 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
 
 .body {
   width: 100%;
+}
+
+.overlay {
+  display: block;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.25s ease-in-out;
+  opacity: 0;
+  background: var(--color-background-primary);
+  pointer-events: none;
+}
+
+.overlay.active {
+  opacity: 0.5;
 }
 
 .chains {

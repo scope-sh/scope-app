@@ -1,12 +1,13 @@
 <template>
   <div class="wrapper">
     <input
-      ref="inputEl"
       :placeholder
       :value
       :disabled="isLoading"
       @input="handleInput"
       @keydown.enter="handleSubmit"
+      @focus="handleFocus"
+      @blur="handleBlur"
     />
     <div class="icon-wrapper">
       <ScopeIcon
@@ -19,9 +20,6 @@
 </template>
 
 <script setup lang="ts">
-import { useFocus } from '@vueuse/core';
-import { useTemplateRef } from 'vue';
-
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
 const value = defineModel<string>({
@@ -35,10 +33,9 @@ defineProps<{
 
 const emit = defineEmits<{
   submit: [];
+  focus: [];
+  blur: [];
 }>();
-
-const inputEl = useTemplateRef('inputEl');
-useFocus(inputEl, { initialValue: true });
 
 function handleInput(event: Event): void {
   const newValue = (event.target as HTMLInputElement).value;
@@ -51,6 +48,14 @@ function handleSubmit(): void {
 
 function handleClick(): void {
   emit('submit');
+}
+
+function handleFocus(): void {
+  emit('focus');
+}
+
+function handleBlur(): void {
+  emit('blur');
 }
 </script>
 
