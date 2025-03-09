@@ -6,7 +6,7 @@
           <InputSearch
             v-model="search"
             :is-loading="isEnsResolving"
-            placeholder="Address or ENS"
+            placeholder="Address, ENS, or chain"
             @submit="handleSearchSubmit"
             @focus="handleInputFocus"
             @blur="handleInputBlur"
@@ -62,7 +62,9 @@ import {
   ETHEREUM,
   getChainData,
   getChainName,
+  getChainByName,
   getEndpointUrl,
+  isChainName,
 } from '@/utils/chains';
 import { getRouteLocation } from '@/utils/routing';
 import { isEnsAddress } from '@/utils/validation/pattern';
@@ -99,7 +101,12 @@ useIntervalFn(
 
 const search = ref('');
 function handleSearchSubmit(): void {
-  if (isEnsAddress(search.value)) {
+  if (isChainName(search.value)) {
+    const chain = getChainByName(search.value);
+    if (chain) {
+      router.push(getRouteLocation({ name: 'chain', chain }));
+    }
+  } else if (isEnsAddress(search.value)) {
     openEnsAddress(search.value);
   } else if (isAddress(search.value)) {
     router.push(
