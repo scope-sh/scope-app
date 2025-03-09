@@ -2,7 +2,7 @@
   <div class="wrapper">
     <input
       ref="inputEl"
-      placeholder="Address, transaction, operation, or block"
+      :placeholder
       :value
       :disabled="isLoading"
       @input="handleInput"
@@ -30,6 +30,7 @@ const value = defineModel<string>({
 
 defineProps<{
   isLoading: boolean;
+  placeholder: string;
 }>();
 
 const emit = defineEmits<{

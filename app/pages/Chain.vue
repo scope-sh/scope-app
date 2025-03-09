@@ -17,6 +17,7 @@
           <InputSearch
             v-model="search"
             :is-loading="isEnsResolving"
+            placeholder="Address, transaction, operation, or block"
             @submit="handleSearchSubmit"
           />
           <div
