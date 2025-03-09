@@ -1,6 +1,9 @@
 <template>
-  <header>
-    <div class="start">
+  <header :class="{ minimal: isMinimal }">
+    <div
+      v-if="!isMinimal"
+      class="start"
+    >
       <RouterLink
         v-if="isChainAvailable"
         :to="chainRoute"
@@ -33,7 +36,10 @@
         </RouterLink>
       </div>
     </div>
-    <div class="end">
+    <div
+      v-if="!isMinimal"
+      class="end"
+    >
       <ChainSelector
         v-if="isChainAvailable"
         :model-value="chainId"
@@ -65,6 +71,11 @@ const { isAvailable: isChainAvailable, id: chainId } = useChain();
 const router = useRouter();
 const route = useRoute();
 
+const isMinimal = computed(() => {
+  const minimalRoutes = ['home', 'chain', 'simulate'];
+  return minimalRoutes.includes(route.name as string);
+});
+
 const chainRoute = computed(() =>
   getRouteLocation({ name: 'chain', chain: chainId.value }),
 );
@@ -79,8 +90,13 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: 48px;
   padding: var(--spacing-5) 8px;
   border-bottom: 1px solid var(--color-border-tertiary);
+
+  &.minimal {
+    border-bottom-color: transparent;
+  }
 
   @media (width >= 992px) {
     padding: var(--spacing-5) 96px;
