@@ -32,10 +32,10 @@ import { Popover } from 'reka-ui/namespaced';
 }
 
 .panel {
-  max-height: var(--radix-popover-content-available-height);
+  max-height: var(--reka-popover-content-available-height);
   padding: var(--spacing-7);
   overflow-y: auto;
-  transform-origin: var(--radix-popover-content-transform-origin);
+  transform-origin: var(--reka-popover-content-transform-origin);
   animation: scale-in 0.125s ease-out;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);

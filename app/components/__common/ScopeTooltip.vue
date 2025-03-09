@@ -58,10 +58,10 @@ const delayDuration = computed<number>(() => {
 }
 
 .panel {
-  max-height: var(--radix-tooltip-content-available-height);
+  max-height: var(--reka-tooltip-content-available-height);
   padding: var(--spacing-3) var(--spacing-4);
   overflow-y: auto;
-  transform-origin: var(--radix-tooltip-content-transform-origin);
+  transform-origin: var(--reka-tooltip-content-transform-origin);
   animation: scale-in 0.125s ease-out;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);

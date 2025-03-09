@@ -134,11 +134,11 @@ export type { Option };
 }
 
 .panel {
-  width: var(--radix-select-trigger-width);
-  max-height: var(--radix-select-content-available-height);
+  width: var(--reka-select-trigger-width);
+  max-height: var(--reka-select-content-available-height);
   padding: var(--spacing-2);
   overflow-y: auto;
-  transform-origin: var(--radix-select-content-transform-origin);
+  transform-origin: var(--reka-select-content-transform-origin);
   animation: scale-in 0.125s ease-out;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);
