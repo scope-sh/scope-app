@@ -140,7 +140,7 @@
 import { useHead } from '@unhead/vue';
 import { slice, zeroAddress } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeButton from '@/components/__common/ScopeButton.vue';
@@ -165,6 +165,7 @@ import BlockStatus from '@/components/block/BlockStatus.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
+import useRoute from '@/composables/useRoute';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
@@ -176,7 +177,7 @@ import {
   formatShare,
   formatTime,
 } from '@/utils/formatting';
-import { getRouteLocation } from '@/utils/routing';
+import { getRouteLocation, type BlockRouteLocation } from '@/utils/routing';
 
 const SECTION_TRANSACTIONS = 'transactions';
 
@@ -190,14 +191,14 @@ const sections = computed<Section[]>(() => {
   ];
 });
 
-const route = useRoute();
+const route = useRoute<BlockRouteLocation>();
 const router = useRouter();
 const { requestAbi } = useAbi();
 const { id: chainId, name: chainName, client } = useChain();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
-const number = computed(() => toBigInt(route.params.number as string) || 0n);
+const number = computed(() => toBigInt(route.params.number) || 0n);
 
 const commands = computed<Command[]>(() => [
   {

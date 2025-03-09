@@ -16,12 +16,12 @@
 import '@fontsource-variable/inter';
 import '@fontsource-variable/inconsolata';
 import { computed } from 'vue';
-import { useRoute } from 'vue-router';
 
 import CommandPalette from '@/components/_app/CommandPalette.vue';
 import AppFooter from '@/components/_app/Footer.vue';
 import AppHeader from '@/components/_app/Header.vue';
 import Toaster from '@/components/_app/Toaster.vue';
+import useRoute from '@/composables/useRoute';
 import useToast from '@/composables/useToast.js';
 
 const route = useRoute();

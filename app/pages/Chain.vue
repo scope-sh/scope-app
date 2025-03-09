@@ -183,9 +183,9 @@ async function openTransactionOrOp(hash: Hex): Promise<void> {
   const foundOp = await indexerService.value.getTxHashByOpHash(hash as Hex);
   isTransactionOrOpResolving.value = false;
   if (foundOp) {
-    router.push(getRouteLocation({ name: 'op', hash: search.value }));
+    router.push(getRouteLocation({ name: 'op', hash: foundOp }));
   } else {
-    router.push(getRouteLocation({ name: 'transaction', hash: search.value }));
+    router.push(getRouteLocation({ name: 'transaction', hash: hash as Hex }));
   }
 }
 

@@ -272,7 +272,7 @@ import { useHead } from '@unhead/vue';
 import type { Address, Hex, Log, Transaction, TransactionReceipt } from 'viem';
 import { size, slice } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
@@ -304,6 +304,7 @@ import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
+import useRoute from '@/composables/useRoute';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import type { TransactionReplay } from '@/services/evm';
@@ -333,7 +334,7 @@ import {
   getRevert as getRevertTraceFrame,
 } from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
-import { getRouteLocation } from '@/utils/routing';
+import { type OpRouteLocation, getRouteLocation } from '@/utils/routing';
 
 const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
@@ -343,7 +344,7 @@ const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
 const { appBaseUrl, indexerEndpoint } = useEnv();
-const route = useRoute();
+const route = useRoute<OpRouteLocation>();
 const router = useRouter();
 const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
 const { requestAbi } = useAbi();
@@ -364,7 +365,7 @@ const sections = computed<Section[]>(() => [
   },
 ]);
 
-const hash = computed(() => route.params.hash as Address);
+const hash = computed(() => route.params.hash);
 
 const commands = computed<Command[]>(() => [
   {

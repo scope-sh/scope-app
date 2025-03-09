@@ -52,13 +52,14 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { RouterLink, useRouter, useRoute } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 import CommandPaletteTrigger from './header/CommandPaletteTrigger.vue';
 import ChainSelector from './header/SelectChain.vue';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
 import useChain from '@/composables/useChain';
+import useRoute from '@/composables/useRoute';
 import type { Chain } from '@/utils/chains';
 import { CHAINS } from '@/utils/chains';
 import {
@@ -72,8 +73,20 @@ const router = useRouter();
 const route = useRoute();
 
 const isMinimal = computed(() => {
-  const minimalRoutes = ['home', 'chain', 'simulate'];
-  return minimalRoutes.includes(route.name as string);
+  switch (route.name) {
+    case 'home':
+    case 'chain':
+    case 'simulate':
+      return true;
+    case 'global-address':
+    case 'block':
+    case 'transaction':
+    case 'address':
+    case 'op':
+    case 'op-simulation':
+      return false;
+  }
+  return false;
 });
 
 const chainRoute = computed(() =>

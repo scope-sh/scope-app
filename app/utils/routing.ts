@@ -1,5 +1,4 @@
 import type { Address, Hex } from 'viem';
-import type { RouteLocationRaw } from 'vue-router';
 
 import type { Chain } from './chains';
 
@@ -26,7 +25,7 @@ interface BlockRoute {
 interface TransactionRoute {
   name: 'transaction';
   chain?: Chain;
-  hash: string;
+  hash: Hex;
 }
 
 interface AddressRoute {
@@ -38,7 +37,7 @@ interface AddressRoute {
 interface OpRoute {
   name: 'op';
   chain?: Chain;
-  hash: string;
+  hash: Hex;
 }
 
 interface SimulateRoute {
@@ -71,37 +70,125 @@ type Route =
   | SimulateRoute
   | OpSimulationRoute;
 
-function isExplorerRoute(routeName: string | symbol | undefined): boolean {
-  if (!routeName) {
-    return false;
-  }
-  if (typeof routeName === 'symbol') {
-    return false;
-  }
-  const exploreRoutes = [
-    'home',
-    'global-address',
-    'chain',
-    'block',
-    'transaction',
-    'address',
-    'op',
-  ];
-  return exploreRoutes.includes(routeName);
+type RouteName = Route['name'];
+
+interface HomeRouteLocation {
+  name: 'home';
 }
 
-function isSimulatorRoute(routeName: string | symbol | undefined): boolean {
-  if (!routeName) {
-    return false;
-  }
-  if (typeof routeName === 'symbol') {
-    return false;
-  }
-  const simulateRoutes = ['simulate', 'op-simulation'];
-  return simulateRoutes.includes(routeName);
+interface GlobalAddressRouteLocation {
+  name: 'global-address';
+  params: {
+    address: Address;
+  };
 }
 
-function getRouteLocation(route: Route): RouteLocationRaw {
+interface ChainRouteLocation {
+  name: 'chain';
+  params: {
+    chain?: Chain;
+  };
+}
+
+interface BlockRouteLocation {
+  name: 'block';
+  params: {
+    chain?: Chain;
+    number: string;
+  };
+}
+
+interface TransactionRouteLocation {
+  name: 'transaction';
+  params: {
+    chain?: Chain;
+    hash: Hex;
+  };
+}
+
+interface AddressRouteLocation {
+  name: 'address';
+  params: {
+    chain?: Chain;
+    address: Address;
+  };
+}
+
+interface OpRouteLocation {
+  name: 'op';
+  params: {
+    chain?: Chain;
+    hash: Hex;
+  };
+}
+
+interface SimulateRouteLocation {
+  name: 'simulate';
+}
+
+interface OpSimulationRouteLocation {
+  name: 'op-simulation';
+  params: {
+    chain?: Chain;
+  };
+  query: {
+    entryPoint: Address;
+    sender: Address;
+    nonce: string;
+    initCode: Hex;
+    callData: Hex;
+    accountGasLimits: string;
+    preVerificationGas: string;
+    gasFees: string;
+    paymasterAndData: Hex;
+    signature: Hex;
+  };
+}
+
+type RouteLocation =
+  | HomeRouteLocation
+  | GlobalAddressRouteLocation
+  | ChainRouteLocation
+  | BlockRouteLocation
+  | TransactionRouteLocation
+  | AddressRouteLocation
+  | OpRouteLocation
+  | SimulateRouteLocation
+  | OpSimulationRouteLocation;
+
+function isExplorerRoute(routeName: RouteName): boolean {
+  switch (routeName) {
+    case 'home':
+    case 'global-address':
+    case 'chain':
+    case 'block':
+    case 'transaction':
+    case 'address':
+    case 'op':
+      return true;
+    case 'simulate':
+    case 'op-simulation':
+      return false;
+  }
+}
+
+function isSimulatorRoute(routeName: RouteName): boolean {
+  switch (routeName) {
+    case 'simulate':
+    case 'op-simulation':
+      return true;
+    case 'home':
+    case 'global-address':
+    case 'chain':
+    case 'block':
+    case 'transaction':
+    case 'address':
+    case 'op':
+      return false;
+  }
+}
+
+function getRouteLocation(route: Route): RouteLocation {
   switch (route.name) {
     case 'home':
       return {
@@ -180,4 +267,19 @@ function getRouteLocation(route: Route): RouteLocationRaw {
 }
 
 export { getRouteLocation, isExplorerRoute, isSimulatorRoute };
-export type { Route, BlockRoute, OpSimulationRoute };
+export type {
+  Route,
+  RouteName,
+  BlockRoute,
+  OpSimulationRoute,
+  RouteLocation,
+  HomeRouteLocation,
+  GlobalAddressRouteLocation,
+  ChainRouteLocation,
+  BlockRouteLocation,
+  TransactionRouteLocation,
+  AddressRouteLocation,
+  OpRouteLocation,
+  SimulateRouteLocation,
+  OpSimulationRouteLocation,
+};

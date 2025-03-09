@@ -78,7 +78,6 @@ import {
   slice,
 } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
 
 import LabelIcon from '@/components/__common/LabelIcon.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
@@ -90,6 +89,7 @@ import PanelCode, {
   type ChainStatus,
 } from '@/components/global-address/PanelCode.vue';
 import useEnv from '@/composables/useEnv';
+import useRoute from '@/composables/useRoute';
 import Service, { type Label } from '@/services/api';
 import {
   type Chain,
@@ -97,10 +97,11 @@ import {
   getChainData,
   getEndpointUrl,
 } from '@/utils/chains';
+import type { GlobalAddressRouteLocation } from '@/utils/routing';
 
 const { quicknodeAppName, quicknodeAppKey } = useEnv();
-const route = useRoute();
-const address = computed(() => route.params.address as Address);
+const route = useRoute<GlobalAddressRouteLocation>();
+const address = computed(() => route.params.address);
 
 const SECTION_CODE = 'code';
 

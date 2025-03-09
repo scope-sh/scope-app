@@ -213,9 +213,7 @@ import {
   entryPoint07Abi,
 } from 'viem/account-abstraction';
 import { computed, ref, onMounted, watch } from 'vue';
-import { useRoute } from 'vue-router';
 
-import { ARBITRUM, ARBITRUM_SEPOLIA } from '#build/imports';
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
@@ -242,6 +240,7 @@ import ViewCallData from '@/components/op/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
+import useRoute from '@/composables/useRoute';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import type {
@@ -251,6 +250,7 @@ import type {
 } from '@/services/evm';
 import EvmService from '@/services/evm';
 import type { Command } from '@/stores/commands';
+import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import type {
   Op,
   Op_0_6,
@@ -272,6 +272,7 @@ import {
   getRevert as getRevertTraceFrame,
 } from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
+import type { OpSimulationRouteLocation } from '@/utils/routing';
 
 const SECTION_LOGS = 'logs';
 const SECTION_INTERNAL = 'internal';
@@ -281,7 +282,7 @@ const MOCK_BUNDLER = '0x433704c40f80cbff02e86fd36bc8bac5e31eb0c1';
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
-const route = useRoute();
+const route = useRoute<OpSimulationRouteLocation>();
 const {
   id: chainId,
   client,

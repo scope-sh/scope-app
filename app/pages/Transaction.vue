@@ -237,7 +237,7 @@
 import { useHead } from '@unhead/vue';
 import { size, type Address, type Hex, type TransactionType } from 'viem';
 import { computed, ref, onMounted, watch } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 import type { LogView } from '@/components/__common/CardLog.vue';
 import CardLog from '@/components/__common/CardLog.vue';
@@ -268,6 +268,7 @@ import type { CallDataView } from '@/components/transaction/ViewCallData.vue';
 import useAbi from '@/composables/useAbi';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
+import useRoute from '@/composables/useRoute';
 import useToast from '@/composables/useToast';
 import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
@@ -294,7 +295,10 @@ import {
   formatShare,
   formatTime,
 } from '@/utils/formatting';
-import { getRouteLocation } from '@/utils/routing';
+import {
+  type TransactionRouteLocation,
+  getRouteLocation,
+} from '@/utils/routing';
 
 const SECTION_OPS = 'ops';
 const SECTION_LOGS = 'logs';
@@ -303,7 +307,7 @@ const SECTION_TRACES = 'internal';
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
-const route = useRoute();
+const route = useRoute<TransactionRouteLocation>();
 const router = useRouter();
 const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
 const { requestAbi } = useAbi();
@@ -328,7 +332,7 @@ const sections = computed<Section[]>(() => {
   return list;
 });
 
-const hash = computed(() => route.params.hash as Address);
+const hash = computed(() => route.params.hash);
 
 onMounted(() => {
   fetch();

@@ -142,7 +142,6 @@ import type { AbiError } from 'abitype';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
 import { toEventSelector, toFunctionSelector } from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
 
 import LabelIcon from '@/components/__common/LabelIcon.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
@@ -165,6 +164,7 @@ import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
 import useEnv from '@/composables/useEnv';
 import useLabels from '@/composables/useLabels';
+import useRoute from '@/composables/useRoute';
 import useToast from '@/composables/useToast';
 import ApiService, {
   type Contract,
@@ -184,6 +184,7 @@ import type { Op } from '@/services/indexer';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
 import { toErrorSelector } from '@/utils/context/errors';
+import type { AddressRouteLocation } from '@/utils/routing';
 
 const SECTION_OPS = 'ops';
 const SECTION_TRANSACTIONS = 'transactions';
@@ -195,13 +196,13 @@ const SECTION_INTERACT = 'interact';
 const { appBaseUrl, indexerEndpoint } = useEnv();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
-const route = useRoute();
+const route = useRoute<AddressRouteLocation>();
 const { id: chainId, name: chainName, client } = useChain();
 const { getLabels, requestLabel } = useLabels();
 const { addAbis } = useAbi();
 
 const address = computed(() => {
-  const address = route.params.address as string;
+  const address = route.params.address;
   return address.toLowerCase() as Address;
 });
 

@@ -468,7 +468,7 @@ async function getGoToItems(
     }
   }
 
-  function getOpenTransactionCommand(hash: string): Command {
+  function getOpenTransactionCommand(hash: Hex): Command {
     return {
       icon: 'arrow-right',
       label: hash,
@@ -478,7 +478,7 @@ async function getGoToItems(
     };
   }
 
-  function getOpenOpCommand(hash: string): Command {
+  function getOpenOpCommand(hash: Hex): Command {
     return {
       icon: 'arrow-right',
       label: hash,
@@ -511,11 +511,11 @@ async function getGoToItems(
     }
     const foundTx = await evmService.value.getTransaction(hash as Hex);
     if (foundTx) {
-      return getOpenTransactionCommand(hash);
+      return getOpenTransactionCommand(foundTx.hash);
     }
     const foundOp = await getTxHashByOp(hash as Hex);
     if (foundOp) {
-      return getOpenOpCommand(hash);
+      return getOpenOpCommand(foundOp);
     }
     return null;
   }

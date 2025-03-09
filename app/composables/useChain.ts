@@ -1,9 +1,9 @@
 import { createPublicClient, http, type PublicClient } from 'viem';
 import type { Ref } from 'vue';
 import { computed, ref, watch } from 'vue';
-import { useRoute } from 'vue-router';
 
 import useEnv from '@/composables/useEnv.js';
+import useRoute from '@/composables/useRoute';
 import {
   CHAINS,
   DEFAULT_CHAIN,
@@ -49,16 +49,17 @@ function parseChain(value?: string | string[]): Chain | null {
 function useChain(): UseChain {
   const route = useRoute();
   const { quicknodeAppName, quicknodeAppKey, tenderlyNodeAccessKey } = useEnv();
+  const chain = computed(() => route.params.chain as string);
 
   const isAvailable = computed(() => {
-    const id = parseChain(route.params.chain);
+    const id = parseChain(chain.value);
     return id !== null && CHAINS.includes(id);
   });
-  const id = ref<Chain>(parseChain(route.params.chain) || DEFAULT_CHAIN);
+  const id = ref<Chain>(parseChain(chain.value) || DEFAULT_CHAIN);
   const name = computed(() => getChainName(id.value));
 
   watch(
-    () => route.params.chain,
+    () => chain.value,
     (newChain) => {
       if (!newChain) {
         id.value = DEFAULT_CHAIN;
