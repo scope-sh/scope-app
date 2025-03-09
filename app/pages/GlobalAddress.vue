@@ -211,29 +211,38 @@ const isCodeLoading = ref(true);
 async function fetchCode(): Promise<void> {
   code.value = {};
   const chainPromises = CHAINS.map(async (chain) => {
-    const client = createPublicClient({
-      chain: getChainData(chain),
-      transport: http(getEndpointUrl(chain, quicknodeAppName, quicknodeAppKey)),
-    });
-    const chainCode = await client.getCode({
-      address: address.value,
-    });
+    try {
+      const client = createPublicClient({
+        chain: getChainData(chain),
+        transport: http(
+          getEndpointUrl(chain, quicknodeAppName, quicknodeAppKey),
+          {
+            timeout: 5_000,
+          },
+        ),
+      });
+      const chainCode = await client.getCode({
+        address: address.value,
+      });
 
-    if (chainCode === undefined) {
-      code.value[chain] = {
-        bytecode: null,
-        implementation: null,
-      };
-    } else {
-      // Check if the contract is a proxy
-      const service = new Service(chain);
-      const implementation = await service.getContractImplementation(
-        address.value,
-      );
-      code.value[chain] = {
-        bytecode: chainCode,
-        implementation: implementation.address,
-      };
+      if (chainCode === undefined) {
+        code.value[chain] = {
+          bytecode: null,
+          implementation: null,
+        };
+      } else {
+        // Check if the contract is a proxy
+        const service = new Service(chain);
+        const implementation = await service.getContractImplementation(
+          address.value,
+        );
+        code.value[chain] = {
+          bytecode: chainCode,
+          implementation: implementation.address,
+        };
+      }
+    } catch {
+      // Ignore
     }
   });
 
