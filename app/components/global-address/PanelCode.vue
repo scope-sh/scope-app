@@ -138,7 +138,6 @@ export type { ChainStatus };
   }
 
   &.no-code {
-    /* opacity: 0.6; */
     color: oklch(from var(--color-text-secondary) l c h / 60%);
   }
 
