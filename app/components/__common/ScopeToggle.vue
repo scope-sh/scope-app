@@ -1,10 +1,9 @@
 <template>
   <div>
     <ToggleGroup.Root
-      :model-value="modelValue"
+      v-model="modelValue"
       type="single"
       class="list"
-      @update:model-value="handleModelValueUpdate"
     >
       <ToggleGroup.Item
         v-for="option in options"
@@ -31,7 +30,6 @@
 </template>
 
 <script setup lang="ts">
-import type { AcceptableValue } from 'reka-ui';
 import { ToggleGroup } from 'reka-ui/namespaced';
 
 import ScopeIcon from './ScopeIcon.vue';
@@ -42,12 +40,6 @@ const modelValue = defineModel<string>();
 defineProps<{
   options: Option[];
 }>();
-
-function handleModelValueUpdate(value: AcceptableValue): void {
-  if (typeof value === 'string') {
-    modelValue.value = value;
-  }
-}
 </script>
 
 <script lang="ts">
