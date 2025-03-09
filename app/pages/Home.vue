@@ -49,9 +49,9 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { useIntervalFn } from '@vueuse/core';
+import { useIntervalFn, useDocumentVisibility } from '@vueuse/core';
 import { createPublicClient, http, isAddress } from 'viem';
-import { ref } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
@@ -80,7 +80,22 @@ useHead({
   title: () => 'Scope',
 });
 
-useIntervalFn(
+const isInputFocused = ref(false);
+
+function handleInputFocus(): void {
+  isInputFocused.value = true;
+}
+
+function handleInputBlur(): void {
+  isInputFocused.value = false;
+}
+
+const isVisible = useDocumentVisibility();
+const shouldPauseFetching = computed(
+  () => isInputFocused.value || isVisible.value === 'hidden',
+);
+
+const { pause, resume } = useIntervalFn(
   () => {
     fetchBlocks();
   },
@@ -88,6 +103,19 @@ useIntervalFn(
   {
     immediate: true,
   },
+);
+
+// Watch for changes in shouldPauseFetching
+watch(
+  shouldPauseFetching,
+  (shouldPause) => {
+    if (shouldPause) {
+      pause();
+    } else {
+      resume();
+    }
+  },
+  { immediate: true },
 );
 
 const search = ref('');
@@ -147,16 +175,6 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
       updatedChains.value.delete(chain);
     }, 200);
   }
-}
-
-const isInputFocused = ref(false);
-
-function handleInputFocus(): void {
-  isInputFocused.value = true;
-}
-
-function handleInputBlur(): void {
-  isInputFocused.value = false;
 }
 </script>
 
