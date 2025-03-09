@@ -56,6 +56,7 @@ import { useRouter } from 'vue-router';
 import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopeToggle from '@/components/__common/ScopeToggle.vue';
+import SelectChain from '@/components/_app/header/SelectChain.vue';
 import ExampleView, {
   type Example,
 } from '@/components/simulate/ExampleView.vue';
@@ -63,7 +64,6 @@ import PreviewView from '@/components/simulate/PreviewView.vue';
 import { type Chain, CHAINS, DEFAULT_CHAIN } from '@/utils/chains';
 import { OpUnionSchema } from '@/utils/context/simulation';
 import { type OpSimulationRoute, getRouteLocation } from '@/utils/routing';
-import SelectChain from '~/components/_app/header/SelectChain.vue';
 
 type SimulationQueryParams = Exclude<OpSimulationRoute, 'name'>;
 
