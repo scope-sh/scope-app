@@ -2,6 +2,9 @@
   <div class="page">
     <div class="content">
       <div class="header">
+        <div class="icons">
+          <IconBrand class="icon" />
+        </div>
         <div class="main">
           <InputSearch
             v-model="search"
@@ -51,6 +54,7 @@ import { createPublicClient, http, isAddress } from 'viem';
 import { ref, computed, watch } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
+import IconBrand from '@/components/__common/IconBrand.vue';
 import IconChain from '@/components/__common/IconChain.vue';
 import InputSearch from '@/components/chain/InputSearch.vue';
 import useEnv from '@/composables/useEnv';
@@ -286,6 +290,18 @@ function handleInputBlur(): void {
   width: 100%;
 }
 
+.icons {
+  display: flex;
+  gap: var(--spacing-5);
+  align-items: center;
+  color: var(--color-text-secondary);
+
+  .icon {
+    width: 32px;
+    height: 32px;
+  }
+}
+
 .main {
   display: flex;
   gap: var(--spacing-6);
@@ -360,6 +376,11 @@ function handleInputBlur(): void {
     align-items: center;
     gap: var(--spacing-4);
     font-size: var(--font-size-m);
+
+    .icon {
+      width: 20px;
+      height: 20px;
+    }
   }
 
   .chain-details {
@@ -369,11 +390,6 @@ function handleInputBlur(): void {
     align-items: center;
     font-size: var(--font-size-s);
   }
-}
-
-.icon {
-  width: 20px;
-  height: 20px;
 }
 
 @keyframes highlight {
