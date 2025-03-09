@@ -1,9 +1,8 @@
 <template>
   <label>
     <Checkbox.Root
-      :checked="modelValue"
+      v-model="modelValue"
       as-child
-      @update:checked="handleModelValueUpdate"
     >
       <button class="root">
         <Checkbox.Indicator class="indicator">
@@ -23,18 +22,13 @@ import { Checkbox } from 'reka-ui/namespaced';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
+const modelValue = defineModel<boolean>('modelValue', {
+  required: true,
+});
+
 defineProps<{
-  modelValue: boolean;
   label: string;
 }>();
-
-const emit = defineEmits<{
-  'update:modelValue': [value: boolean];
-}>();
-
-function handleModelValueUpdate(value: boolean): void {
-  emit('update:modelValue', value);
-}
 </script>
 
 <style scoped>

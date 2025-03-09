@@ -2,7 +2,7 @@
   <div class="input">
     <Checkbox.Root
       :id
-      v-model:checked="model as boolean"
+      v-model="model as boolean"
       as-child
       class="root"
     >
