@@ -49,9 +49,9 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { useIntervalFn, useNow } from '@vueuse/core';
+import { useIntervalFn } from '@vueuse/core';
 import { createPublicClient, http, isAddress } from 'viem';
-import { ref, computed, watch } from 'vue';
+import { ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
@@ -76,26 +76,13 @@ import { isEnsAddress } from '@/utils/validation/pattern';
 const { quicknodeAppName, quicknodeAppKey } = useEnv();
 const router = useRouter();
 
-interface BlockUpdate {
-  timestamp: number;
-  number: bigint;
-}
-
 useHead({
   title: () => 'Scope',
 });
 
-const UPDATE_INTERVALS = [1, 1, 1, 2, 2, 5, 5, 10, 10, 30, 30, 60, 120]; // in seconds
-const HISTORY_SIZE = 10;
-
-const now = useNow();
-const blockHistory = ref<Partial<Record<Chain, BlockUpdate[]>>>({});
-const lastUpdateTime = ref<Partial<Record<Chain, number>>>({});
-const updateCount = ref<Partial<Record<Chain, number>>>({});
-
 useIntervalFn(
   () => {
-    checkAndFetchBlocks();
+    fetchBlocks();
   },
   1000,
   {
@@ -137,83 +124,14 @@ async function openEnsAddress(name: string): Promise<void> {
   }
 }
 
-const blocks = computed(() => {
-  const result: Partial<Record<Chain, bigint>> = {};
-  const currentTime = now.value.getTime();
-
-  for (const chain of CHAINS) {
-    const history = blockHistory.value[chain];
-    if (!history || history.length < 2) {
-      continue;
-    }
-
-    // Get last two updates to calculate the rate
-    const latest = history[history.length - 1];
-    const previous = history[history.length - 2];
-    if (!latest || !previous) {
-      continue;
-    }
-
-    const timeDiff = latest.timestamp - previous.timestamp;
-    const blockDiff = latest.number - previous.number;
-    const rate = Number(blockDiff) / timeDiff; // blocks per millisecond
-
-    // Extrapolate current block
-    const timeElapsed = currentTime - latest.timestamp;
-    const extrapolatedDiff = BigInt(Math.floor(rate * timeElapsed));
-    const newValue = latest.number + extrapolatedDiff;
-    result[chain] = newValue;
-  }
-
-  return result;
-});
-
-// Watch for block changes to trigger animations
-watch(blocks, (newValues, oldValues) => {
-  if (!oldValues) return;
-
-  for (const chain of CHAINS) {
-    if (
-      oldValues[chain] !== undefined &&
-      newValues[chain] !== undefined &&
-      oldValues[chain] !== newValues[chain]
-    ) {
-      updatedChains.value.add(chain);
-      setTimeout(() => {
-        updatedChains.value.delete(chain);
-      }, 100);
-    }
-  }
-});
-
+const blocks = ref<Partial<Record<Chain, bigint>>>({});
 const updatedChains = ref<Set<Chain>>(new Set());
 
-function getCurrentInterval(chain: Chain): number {
-  const count = updateCount.value[chain] || 0;
-  const intervalIndex = Math.min(count, UPDATE_INTERVALS.length - 1);
-  const interval = UPDATE_INTERVALS[intervalIndex];
-  if (!interval) {
-    return 1000;
-  }
-  return interval * 1000;
-}
-
-function shouldUpdate(chain: Chain): boolean {
-  const lastUpdate = lastUpdateTime.value[chain] || 0;
-  const currentTime = Date.now();
-  return currentTime - lastUpdate >= getCurrentInterval(chain);
-}
-
-async function checkAndFetchBlocks(): Promise<void> {
+async function fetchBlocks(): Promise<void> {
   for (const chain of CHAINS) {
-    if (shouldUpdate(chain)) {
-      await fetchChainBlock(chain);
-      lastUpdateTime.value[chain] = Date.now();
-      updateCount.value[chain] = (updateCount.value[chain] || 0) + 1;
-    }
+    fetchChainBlock(chain);
   }
 }
-
 async function fetchChainBlock(chain: Chain): Promise<void> {
   const client = createPublicClient({
     chain: getChainData(chain),
@@ -222,26 +140,12 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
   const service = new EvmService(client);
   const block = await service.getLatestBlock();
 
-  // Initialize history array if it doesn't exist
-  if (!blockHistory.value[chain]) {
-    blockHistory.value[chain] = [];
-  }
-
-  // Add new block to history
-  const update: BlockUpdate = {
-    timestamp: Date.now(),
-    number: block,
-  };
-
-  const chainHistory = blockHistory.value[chain];
-  if (!chainHistory) {
-    return;
-  }
-  chainHistory.push(update);
-
-  // Keep history size limited
-  if (chainHistory.length > HISTORY_SIZE) {
-    chainHistory.shift();
+  if (blocks.value[chain] !== block) {
+    blocks.value[chain] = block;
+    updatedChains.value.add(chain);
+    setTimeout(() => {
+      updatedChains.value.delete(chain);
+    }, 200);
   }
 }
 
