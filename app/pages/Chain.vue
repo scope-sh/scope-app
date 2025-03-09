@@ -3,7 +3,9 @@
     <div class="content">
       <div class="header">
         <div class="icons">
-          <IconBrand class="icon" />
+          <RouterLink :to="getRouteLocation({ name: 'home' })">
+            <IconBrand class="icon" />
+          </RouterLink>
           <ScopeIcon
             class="icon-x"
             kind="cross"
@@ -28,12 +30,12 @@
             <LinkBlock
               v-if="latestBlock"
               :number="latestBlock"
+              type="minimal"
             />
             <span v-else>…</span>
           </div>
         </div>
       </div>
-      <ExampleList v-if="chainId === ETHEREUM" />
     </div>
   </div>
 </template>
@@ -43,12 +45,11 @@ import { useHead } from '@unhead/vue';
 import { useIntervalFn } from '@vueuse/core';
 import type { Hex } from 'viem';
 import { ref, onMounted, watch, computed } from 'vue';
-import { useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
-import ExampleList from '@/components/chain/ExampleList.vue';
 import InputSearch from '@/components/chain/InputSearch.vue';
 import PopoverChain from '@/components/chain/PopoverChain.vue';
 import useChain from '@/composables/useChain';
@@ -59,7 +60,7 @@ import EvmService from '@/services/evm';
 import IndexerService from '@/services/indexer';
 import NamingService from '@/services/naming';
 import type { Command } from '@/stores/commands';
-import { ETHEREUM, type Chain } from '@/utils/chains';
+import type { Chain } from '@/utils/chains';
 import { toBigInt } from '@/utils/conversion';
 import { getRouteLocation } from '@/utils/routing';
 import {
@@ -107,7 +108,7 @@ useIntervalFn(
   () => {
     fetch();
   },
-  5000,
+  1000,
   {
     immediate: true,
   },
@@ -257,6 +258,10 @@ function handleChainUpdate(value: Chain): void {
 .icon {
   width: 32px;
   height: 32px;
+
+  &:hover {
+    color: var(--color-text-primary);
+  }
 }
 
 .icon-x {
