@@ -196,6 +196,7 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
   width: 820px;
   margin: 8px;
   gap: 40px;
+  margin-bottom: 32px;
 }
 
 @media (width >= 768px) {
