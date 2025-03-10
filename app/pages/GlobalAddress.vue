@@ -260,13 +260,13 @@ async function fetchCode(): Promise<void> {
 }
 
 .label-icon {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
 }
 
 .label-details {
   display: flex;
-  gap: var(--spacing-4);
+  gap: var(--spacing-2);
   flex-direction: column;
 }
 
