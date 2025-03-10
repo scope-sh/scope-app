@@ -92,8 +92,8 @@ import {
   isChainName,
 } from '@/utils/chains';
 import { toBigInt } from '@/utils/conversion';
-import { searchTransactionOrOp } from '@/utils/navigation';
 import { getRouteLocation } from '@/utils/routing';
+import { searchTransactionOrOp } from '@/utils/search';
 import {
   isAddress,
   isBlockNumber,

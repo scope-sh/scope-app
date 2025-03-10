@@ -32,8 +32,8 @@ import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useEnv from '@/composables/useEnv';
 import NamingService from '@/services/naming';
 import { ETHEREUM, getChainByName, isChainName } from '@/utils/chains';
-import { searchTransactionOrOp } from '@/utils/navigation';
 import { getRouteLocation } from '@/utils/routing';
+import { searchTransactionOrOp } from '@/utils/search';
 import { isEnsAddress, isTransactionHash } from '@/utils/validation/pattern';
 
 const emit = defineEmits<{
