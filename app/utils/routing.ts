@@ -16,6 +16,11 @@ interface ChainRoute {
   chain?: Chain;
 }
 
+interface BlocksRoute {
+  name: 'blocks';
+  chain?: Chain;
+}
+
 interface BlockRoute {
   name: 'block';
   chain?: Chain;
@@ -63,6 +68,7 @@ type Route =
   | HomeRoute
   | GlobalAddressRoute
   | ChainRoute
+  | BlocksRoute
   | BlockRoute
   | TransactionRoute
   | AddressRoute
@@ -85,6 +91,13 @@ interface GlobalAddressRouteLocation {
 
 interface ChainRouteLocation {
   name: 'chain';
+  params: {
+    chain?: Chain;
+  };
+}
+
+interface BlocksRouteLocation {
+  name: 'blocks';
   params: {
     chain?: Chain;
   };
@@ -149,6 +162,7 @@ type RouteLocation =
   | HomeRouteLocation
   | GlobalAddressRouteLocation
   | ChainRouteLocation
+  | BlocksRouteLocation
   | BlockRouteLocation
   | TransactionRouteLocation
   | AddressRouteLocation
@@ -161,6 +175,7 @@ function isExplorerRoute(routeName: RouteName): boolean {
     case 'home':
     case 'global-address':
     case 'chain':
+    case 'blocks':
     case 'block':
     case 'transaction':
     case 'address':
@@ -180,6 +195,7 @@ function isSimulatorRoute(routeName: RouteName): boolean {
     case 'home':
     case 'global-address':
     case 'chain':
+    case 'blocks':
     case 'block':
     case 'transaction':
     case 'address':
@@ -204,6 +220,13 @@ function getRouteLocation(route: Route): RouteLocation {
     case 'chain':
       return {
         name: 'chain',
+        params: {
+          chain: route.chain,
+        },
+      };
+    case 'blocks':
+      return {
+        name: 'blocks',
         params: {
           chain: route.chain,
         },

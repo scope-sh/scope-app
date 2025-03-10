@@ -5,6 +5,7 @@ import type { RouteName } from './utils/routing';
 
 import Address from '@/pages/Address.vue';
 import Block from '@/pages/Block.vue';
+import Blocks from '@/pages/Blocks.vue';
 import Chain from '@/pages/Chain.vue';
 import GlobalAddress from '@/pages/GlobalAddress.vue';
 import Home from '@/pages/Home.vue';
@@ -34,6 +35,11 @@ const routes: Route[] = [
     name: 'chain',
     path: '/:chain',
     component: Chain,
+  },
+  {
+    name: 'blocks',
+    path: '/:chain/blocks',
+    component: Blocks,
   },
   {
     path: '/:chain/block/:number',

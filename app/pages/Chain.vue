@@ -22,17 +22,25 @@
             placeholder="Address, transaction, operation, or block"
             @submit="handleSearchSubmit"
           />
-          <div
-            class="latest-block"
-            :class="{ loading: isLoading }"
-          >
-            Latest block
-            <LinkBlock
-              v-if="latestBlock"
-              :number="latestBlock"
-              type="minimal"
-            />
-            <span v-else>…</span>
+          <div class="blocks">
+            <div
+              class="latest-block"
+              :class="{ loading: isLoading }"
+            >
+              Latest block
+              <LinkBlock
+                v-if="latestBlock"
+                :number="latestBlock"
+                type="minimal"
+              />
+              <span v-else>…</span>
+            </div>
+            <RouterLink
+              :to="getRouteLocation({ name: 'blocks' })"
+              class="blocks-link"
+            >
+              All blocks →
+            </RouterLink>
           </div>
         </div>
       </div>
@@ -276,19 +284,33 @@ function handleChainUpdate(value: Chain): void {
   width: 100%;
 }
 
-.latest-block {
+.blocks {
   display: flex;
-  gap: var(--spacing-3);
   align-items: center;
-  transition: all 0.25s ease-in-out;
+  justify-content: space-between;
   font-size: var(--font-size-s);
 
-  &.loading {
-    opacity: 0.6;
+  .latest-block {
+    display: flex;
+    gap: var(--spacing-3);
+    align-items: center;
+    transition: all 0.25s ease-in-out;
+
+    &.loading {
+      opacity: 0.6;
+    }
+
+    & span {
+      padding: 2px 0;
+    }
   }
 
-  & span {
-    padding: 2px 0;
+  .blocks-link {
+    color: var(--color-text-secondary);
+
+    &:hover {
+      color: var(--color-text-primary);
+    }
   }
 }
 </style>
