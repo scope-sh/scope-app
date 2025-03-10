@@ -89,6 +89,11 @@ interface Contract {
     abi: Abi | null;
     source: SourceCode | null;
   } | null;
+  delegation: {
+    address: Address;
+    abi: Abi | null;
+    source: SourceCode | null;
+  } | null;
 }
 
 interface ContractSelectors {

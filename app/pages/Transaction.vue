@@ -158,6 +158,31 @@
             </div>
           </AttributeItemValue>
         </AttributeItem>
+
+        <AttributeItem
+          v-if="
+            transaction &&
+            transaction.type === 'eip7702' &&
+            transaction.authorizationList.length > 0
+          "
+        >
+          <AttributeItemLabel
+            value="Authorization list"
+            note="The list of EIP-7702 authorizations"
+          />
+          <AttributeItemValue>
+            <div class="input">
+              <ScopeToggle
+                v-model="selectedAuthorizationListView"
+                :options="authorizationListViewOptions"
+              />
+              <AuthorizationList
+                :list="transaction.authorizationList"
+                :view="selectedAuthorizationListView"
+              />
+            </div>
+          </AttributeItemValue>
+        </AttributeItem>
       </AttributeList>
       <CardHighlights
         v-if="transaction && transactionReceipt"
@@ -259,6 +284,9 @@ import {
   AttributeItemValue,
   AttributeList,
 } from '@/components/__common/attributes';
+import AuthorizationList, {
+  type AuthorizationListView,
+} from '@/components/address/AuthorizationList.vue';
 import CardHighlights from '@/components/transaction/CardHighlights.vue';
 import CardOp from '@/components/transaction/CardOp.vue';
 import PanelTraces from '@/components/transaction/PanelTraces.vue';
@@ -582,6 +610,19 @@ const logViewOptions = computed<ToggleOption<LogView>[]>(() => [
 ]);
 const selectedCallDataView = ref<CallDataView>('decoded');
 const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
+  {
+    value: 'decoded',
+    icon: 'text',
+  },
+  {
+    value: 'hex',
+    icon: 'hex-string',
+  },
+]);
+const selectedAuthorizationListView = ref<AuthorizationListView>('decoded');
+const authorizationListViewOptions = computed<
+  ToggleOption<AuthorizationListView>[]
+>(() => [
   {
     value: 'decoded',
     icon: 'text',

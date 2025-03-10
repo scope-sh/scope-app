@@ -1,16 +1,12 @@
 <template>
   <div class="notice">
     <div class="info">
-      This is a proxy contract.
-      <template v-if="implementation">
-        Its implementation is
-        <LinkAddress :address="implementation" />.
-      </template>
+      This EOA delegates to <LinkAddress :address="delegation" />.
     </div>
     <div class="toggle">
       <ScopeCheckbox
-        :model-value="showAsProxy"
-        label="Show as proxy"
+        :model-value="showAsDelegatee"
+        label="Show as delegatee"
         @update:model-value="handleToggleUpdate"
       />
     </div>
@@ -23,16 +19,16 @@ import type { Address } from 'viem';
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCheckbox from '@/components/__common/ScopeCheckbox.vue';
 
-const showAsProxy = defineModel<boolean>('showAsProxy', {
+const showAsDelegatee = defineModel<boolean>('showAsDelegatee', {
   required: true,
 });
 
 defineProps<{
-  implementation: Address | null;
+  delegation: Address;
 }>();
 
 function handleToggleUpdate(newValue: boolean): void {
-  showAsProxy.value = newValue;
+  showAsDelegatee.value = newValue;
 }
 </script>
 
@@ -51,6 +47,6 @@ function handleToggleUpdate(newValue: boolean): void {
 .info {
   display: flex;
   align-items: center;
-  gap: var(--spacing-2);
+  gap: var(--spacing-4);
 }
 </style>

@@ -1,7 +1,12 @@
 <template>
   <ScopePanel title="Code">
+    <NoticeDelegation
+      v-if="isDelegated && delegation"
+      v-model:show-as-delegatee="showAsDelegatee"
+      :delegation
+    />
     <NoticeProxy
-      v-if="isProxy"
+      v-else-if="isProxy"
       v-model:show-as-proxy="showAsProxy"
       :implementation
     />
@@ -62,6 +67,7 @@ import type { Address, Hex } from 'viem';
 import { computed, ref } from 'vue';
 
 import CardSource from './code/CardSource.vue';
+import NoticeDelegation from './code/NoticeDelegation.vue';
 import NoticeProxy from './code/NoticeProxy.vue';
 import SourceAttributes from './code/SourceAttributes.vue';
 import SourceHighlighter from './code/SourceHighlighter.vue';
@@ -70,33 +76,61 @@ import ScopeButton from '@/components/__common/ScopeButton.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import type { Contract } from '@/services/api';
+import {
+  isDelegating as isDelegatingEip7702,
+  getDelegation as getDelegationEip7702,
+} from '@/utils/context/eip7702';
 
-const { contract } = defineProps<{
+const { contract, bytecode } = defineProps<{
   address: Address;
   bytecode: Hex | null;
   contract: Contract | null;
 }>();
 
 const showAsProxy = ref(true);
+const showAsDelegatee = ref(true);
+
+const isDelegated = computed(() => isDelegatingEip7702(bytecode));
+const delegation = computed(() => getDelegationEip7702(bytecode));
 
 const isProxy = computed(() => contract && contract.implementation);
 const implementation = computed(() =>
   contract && contract.implementation ? contract.implementation.address : null,
 );
-const abi = computed(() =>
-  contract
-    ? showAsProxy.value && contract.implementation
-      ? contract.implementation.abi
-      : contract.abi
-    : null,
-);
-const source = computed(() =>
-  contract
-    ? showAsProxy.value && contract.implementation
+const abi = computed(() => {
+  if (!contract) {
+    return null;
+  }
+  if (showAsDelegatee.value) {
+    return contract.delegation ? contract.delegation.abi : contract.abi;
+  }
+  // Ignore "show as proxy" if the contract is delegated for now
+  if (isDelegated.value) {
+    return contract.abi;
+  }
+  if (showAsProxy.value) {
+    return contract.implementation ? contract.implementation.abi : contract.abi;
+  }
+  return contract.abi;
+});
+const source = computed(() => {
+  if (!contract) {
+    return null;
+  }
+  if (showAsDelegatee.value) {
+    return contract.delegation ? contract.delegation.source : contract.source;
+  }
+  // Ignore "show as proxy" if the contract is delegated for now
+  if (isDelegated.value) {
+    return contract.source;
+  }
+  if (showAsProxy.value) {
+    return contract.implementation
       ? contract.implementation.source
-      : contract.source
-    : null,
-);
+      : contract.source;
+  }
+  return contract.source;
+});
 
 const activeTab = ref<string>('source');
 const tabs = [

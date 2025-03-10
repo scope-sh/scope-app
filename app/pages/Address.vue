@@ -183,6 +183,7 @@ import HypersyncService from '@/services/hypersync';
 import type { Op } from '@/services/indexer';
 import IndexerService from '@/services/indexer';
 import type { Command } from '@/stores/commands';
+import { isDelegating as isDelegatingEip7702 } from '@/utils/context/eip7702';
 import { toErrorSelector } from '@/utils/context/errors';
 import type { AddressRouteLocation } from '@/utils/routing';
 
@@ -329,6 +330,7 @@ const isLoadingTransfers = ref(false);
 const transfers = ref<AddressTransfer[]>([]);
 
 const isContract = computed<boolean>(() => !!bytecode.value);
+const isDelegating = computed(() => isDelegatingEip7702(bytecode.value));
 const addressLabels = computed(() => getLabels(address.value));
 const primaryLabel = computed(() => addressLabels.value[0] || null);
 const labelTypes = computed(() =>
@@ -338,6 +340,9 @@ const labelTypes = computed(() =>
     .map((type) => type.id),
 );
 const overviewPanelTitle = computed<string>(() => {
+  if (isDelegating.value) {
+    return 'Smart EOA';
+  }
   if (!isContract.value) {
     return 'Address';
   }
