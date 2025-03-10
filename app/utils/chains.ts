@@ -110,6 +110,9 @@ function getChainNames(chain: Chain): string[] {
       case ARBITRUM: {
         return ['arbitrum'];
       }
+      case MODE: {
+        return ['mode'];
+      }
       case MODE_SEPOLIA: {
         return ['mode sepolia'];
       }
