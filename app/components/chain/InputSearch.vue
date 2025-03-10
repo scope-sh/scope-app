@@ -1,10 +1,16 @@
 <template>
   <div class="wrapper">
+    <div
+      class="overlay"
+      :class="{ active: isFocused }"
+    />
     <input
       v-model="query"
       placeholder="Address, transaction, operation, or block"
       :disabled="isLoading"
       @keydown.enter="handleSubmit"
+      @focus="handleFocus"
+      @blur="handleBlur"
     />
     <div class="icon-wrapper">
       <ScopeIcon
@@ -36,6 +42,10 @@ import {
   isTransactionHash,
 } from '@/utils/validation/pattern';
 
+const emit = defineEmits<{
+  focus: [];
+  blur: [];
+}>();
 const { id: chainId, client } = useChain();
 const { quicknodeAppName, quicknodeAppKey, indexerEndpoint } = useEnv();
 const router = useRouter();
@@ -51,6 +61,8 @@ const isLoading = computed(
     isLatestBlockResolving.value ||
     isTransactionOrOpResolving.value,
 );
+
+const isFocused = ref(false);
 
 function handleSubmit(): void {
   search();
@@ -123,6 +135,16 @@ async function openTransactionOrOp(hash: Hex): Promise<void> {
     router.push(getRouteLocation({ name: 'transaction', hash: hash as Hex }));
   }
 }
+
+function handleFocus(): void {
+  isFocused.value = true;
+  emit('focus');
+}
+
+function handleBlur(): void {
+  isFocused.value = false;
+  emit('blur');
+}
 </script>
 
 <style scoped>
@@ -130,7 +152,27 @@ async function openTransactionOrOp(hash: Hex): Promise<void> {
   position: relative;
 }
 
+.overlay {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.25s ease-in-out;
+  opacity: 0;
+  background: black;
+  pointer-events: none;
+}
+
+.overlay.active {
+  opacity: 0.2;
+}
+
 input {
+  position: relative;
+  z-index: 2;
   width: 100%;
   padding: var(--spacing-4) var(--spacing-5);
   transition: 0.25s ease-in-out;
@@ -164,6 +206,7 @@ input::placeholder {
 .icon-wrapper {
   display: flex;
   position: absolute;
+  z-index: 2;
   top: 0;
   right: 0;
   align-items: center;

@@ -16,7 +16,10 @@
           />
         </div>
         <div class="main">
-          <InputSearch />
+          <InputSearch
+            @focus="handleInputFocus"
+            @blur="handleInputBlur"
+          />
           <div class="blocks">
             <div
               class="latest-block"
@@ -111,6 +114,7 @@ const evmService = computed(() =>
 
 const isLoading = ref(false);
 const latestBlock = ref<bigint | null>(null);
+const isInputFocused = ref(false);
 
 onMounted(() => {
   fetch();
@@ -134,6 +138,14 @@ async function fetch(): Promise<void> {
 
 function handleChainUpdate(value: Chain): void {
   router.push(getRouteLocation({ name: 'chain', chain: value }));
+}
+
+function handleInputFocus(): void {
+  isInputFocused.value = true;
+}
+
+function handleInputBlur(): void {
+  isInputFocused.value = false;
 }
 </script>
 

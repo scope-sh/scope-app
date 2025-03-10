@@ -13,10 +13,6 @@
         </div>
       </div>
       <div class="body">
-        <div
-          class="overlay"
-          :class="{ active: isInputFocused }"
-        />
         <div class="chains">
           <RouterLink
             v-for="chain in CHAINS"
@@ -190,21 +186,6 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
 
 .body {
   width: 100%;
-}
-
-.overlay {
-  display: block;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  transition: opacity 0.25s ease-in-out;
-  opacity: 0;
-  background: var(--color-background-primary);
-  pointer-events: none;
-}
-
-.overlay.active {
-  opacity: 0.5;
 }
 
 .chains {

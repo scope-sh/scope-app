@@ -1,5 +1,9 @@
 <template>
   <div class="wrapper">
+    <div
+      class="overlay"
+      :class="{ active: isFocused }"
+    />
     <input
       v-model="query"
       placeholder="Address, transaction, operation, or chain"
@@ -48,11 +52,15 @@ function handleClick(): void {
   search();
 }
 
+const isFocused = ref(false);
+
 function handleFocus(): void {
+  isFocused.value = true;
   emit('focus');
 }
 
 function handleBlur(): void {
+  isFocused.value = false;
   emit('blur');
 }
 
@@ -124,7 +132,27 @@ async function openTransactionOrOp(hash: string): Promise<void> {
   position: relative;
 }
 
+.overlay {
+  display: block;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 0.25s ease-in-out;
+  opacity: 0;
+  background: black;
+  pointer-events: none;
+}
+
+.overlay.active {
+  opacity: 0.2;
+}
+
 input {
+  position: relative;
+  z-index: 2;
   width: 100%;
   padding: var(--spacing-4) var(--spacing-5);
   transition: 0.25s ease-in-out;
@@ -158,6 +186,7 @@ input::placeholder {
 .icon-wrapper {
   display: flex;
   position: absolute;
+  z-index: 2;
   top: 0;
   right: 0;
   align-items: center;
