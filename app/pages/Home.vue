@@ -7,10 +7,6 @@
         </div>
         <div class="main">
           <InputSearch
-            v-model="search"
-            :is-loading="isEnsResolving"
-            placeholder="Address, transaction, operation, or chain"
-            @submit="handleSearchSubmit"
             @focus="handleInputFocus"
             @blur="handleInputBlur"
           />
@@ -50,33 +46,25 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import { useIntervalFn, useDocumentVisibility } from '@vueuse/core';
-import type { Hex } from 'viem';
-import { createPublicClient, http, isAddress } from 'viem';
+import { createPublicClient, http } from 'viem';
 import { ref, computed, watch } from 'vue';
-import { RouterLink, useRouter } from 'vue-router';
+import { RouterLink } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
 import IconChain from '@/components/__common/IconChain.vue';
-import InputSearch from '@/components/chain/InputSearch.vue';
+import InputSearch from '@/components/home/InputSearch.vue';
 import useEnv from '@/composables/useEnv';
 import EvmService from '@/services/evm';
-import IndexerService from '@/services/indexer';
-import NamingService from '@/services/naming';
 import type { Chain } from '@/utils/chains';
 import {
   CHAINS,
-  ETHEREUM,
   getChainData,
   getChainName,
-  getChainByName,
   getEndpointUrl,
-  isChainName,
 } from '@/utils/chains';
 import { getRouteLocation } from '@/utils/routing';
-import { isEnsAddress, isTransactionHash } from '@/utils/validation/pattern';
 
-const { indexerEndpoint, quicknodeAppName, quicknodeAppKey } = useEnv();
-const router = useRouter();
+const { quicknodeAppName, quicknodeAppKey } = useEnv();
 
 useHead({
   title: () => 'Scope',
@@ -119,118 +107,6 @@ watch(
   },
   { immediate: true },
 );
-
-const search = ref('');
-function handleSearchSubmit(): void {
-  if (isChainName(search.value)) {
-    const chain = getChainByName(search.value);
-    if (chain) {
-      router.push(getRouteLocation({ name: 'chain', chain }));
-    }
-  } else if (isEnsAddress(search.value)) {
-    openEnsAddress(search.value);
-  } else if (isAddress(search.value)) {
-    router.push(
-      getRouteLocation({
-        name: 'global-address',
-        address: search.value,
-      }),
-    );
-  } else if (isTransactionHash(search.value)) {
-    openTransactionOrOp(search.value);
-  }
-}
-
-const isEnsResolving = ref(false);
-async function openEnsAddress(name: string): Promise<void> {
-  const namingService = new NamingService(
-    quicknodeAppName,
-    quicknodeAppKey,
-    ETHEREUM,
-  );
-  isEnsResolving.value = true;
-  const address = await namingService.resolveEns(name);
-  isEnsResolving.value = false;
-  if (address) {
-    router.push(getRouteLocation({ name: 'global-address', address }));
-  }
-}
-
-const isTransactionOrOpResolving = ref(false);
-
-async function chunkArray<T>(array: T[], size: number): Promise<T[][]> {
-  const chunks: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
-  }
-  return chunks;
-}
-
-async function openTransactionOrOp(hash: Hex): Promise<void> {
-  const maxRequests = 10;
-
-  isTransactionOrOpResolving.value = true;
-
-  // Search for a transaction on each chain
-  const transactionPromises = CHAINS.map(async (chain) => {
-    const client = createPublicClient({
-      chain: getChainData(chain),
-      transport: http(getEndpointUrl(chain, quicknodeAppName, quicknodeAppKey)),
-    });
-    const service = new EvmService(client);
-    try {
-      const transaction = await service.getTransaction(hash);
-      if (transaction) {
-        return { chain, transaction };
-      }
-    } catch {
-      // Ignore
-    }
-    return null;
-  });
-
-  // Process in chunks of 10
-  const chunks = await chunkArray(transactionPromises, maxRequests);
-  for (const chunk of chunks) {
-    const results = await Promise.all(chunk);
-    const found = results.find((result) => result !== null);
-    if (found) {
-      router.push(
-        getRouteLocation({
-          name: 'transaction',
-          chain: found.chain,
-          hash: found.transaction.hash,
-        }),
-      );
-      isTransactionOrOpResolving.value = false;
-      return;
-    }
-  }
-
-  // Search for an op on each chain
-  const opPromises = CHAINS.map(async (chain) => {
-    const indexerService = new IndexerService(indexerEndpoint, chain);
-    const foundOp = await indexerService.getTxHashByOpHash(hash as Hex);
-    if (foundOp) {
-      return chain;
-    }
-    return null;
-  });
-
-  // Process in chunks of 10
-  const opChunks = await chunkArray(opPromises, maxRequests);
-  for (const chunk of opChunks) {
-    const results = await Promise.all(chunk);
-    const foundChain = results.find((result) => result !== null);
-    if (foundChain) {
-      router.push(getRouteLocation({ name: 'op', chain: foundChain, hash }));
-      isTransactionOrOpResolving.value = false;
-      return;
-    }
-  }
-
-  isTransactionOrOpResolving.value = false;
-}
 
 const blocks = ref<Partial<Record<Chain, bigint>>>({});
 const updatedChains = ref<Set<Chain>>(new Set());

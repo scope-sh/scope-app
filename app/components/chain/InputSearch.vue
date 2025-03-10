@@ -1,13 +1,10 @@
 <template>
   <div class="wrapper">
     <input
-      :placeholder
-      :value
+      v-model="query"
+      placeholder="Address, transaction, operation, or block"
       :disabled="isLoading"
-      @input="handleInput"
       @keydown.enter="handleSubmit"
-      @focus="handleFocus"
-      @blur="handleBlur"
     />
     <div class="icon-wrapper">
       <ScopeIcon
@@ -20,42 +17,111 @@
 </template>
 
 <script setup lang="ts">
+import type { Hex } from 'viem';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
+
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import useChain from '@/composables/useChain';
+import useEnv from '@/composables/useEnv';
+import EvmService from '@/services/evm';
+import IndexerService from '@/services/indexer';
+import NamingService from '@/services/naming';
+import { toBigInt } from '@/utils/conversion';
+import { getRouteLocation } from '@/utils/routing';
+import {
+  isAddress,
+  isBlockNumber,
+  isEnsAddress,
+  isTransactionHash,
+} from '@/utils/validation/pattern';
 
-const value = defineModel<string>({
-  required: true,
-});
+const { id: chainId, client } = useChain();
+const { quicknodeAppName, quicknodeAppKey, indexerEndpoint } = useEnv();
+const router = useRouter();
 
-defineProps<{
-  isLoading: boolean;
-  placeholder: string;
-}>();
+const query = ref('');
 
-const emit = defineEmits<{
-  submit: [];
-  focus: [];
-  blur: [];
-}>();
-
-function handleInput(event: Event): void {
-  const newValue = (event.target as HTMLInputElement).value;
-  value.value = newValue;
-}
+const isEnsResolving = ref(false);
+const isLatestBlockResolving = ref(false);
+const isTransactionOrOpResolving = ref(false);
+const isLoading = computed(
+  () =>
+    isEnsResolving.value ||
+    isLatestBlockResolving.value ||
+    isTransactionOrOpResolving.value,
+);
 
 function handleSubmit(): void {
-  emit('submit');
+  search();
 }
 
 function handleClick(): void {
-  emit('submit');
+  search();
 }
 
-function handleFocus(): void {
-  emit('focus');
+function search(): void {
+  if (query.value === '') {
+    return;
+  }
+  if (query.value === 'latest') {
+    openLatestBlock();
+  } else if (isEnsAddress(query.value)) {
+    openEnsAddress(query.value);
+  } else if (isAddress(query.value)) {
+    router.push(getRouteLocation({ name: 'address', address: query.value }));
+  } else if (isBlockNumber(query.value)) {
+    const number = toBigInt(query.value);
+    if (number === null) {
+      return;
+    }
+    router.push(getRouteLocation({ name: 'block', number }));
+  } else if (isTransactionHash(query.value)) {
+    openTransactionOrOp(query.value);
+  }
 }
 
-function handleBlur(): void {
-  emit('blur');
+async function openEnsAddress(name: string): Promise<void> {
+  if (!chainId.value) {
+    return;
+  }
+  const namingService = new NamingService(
+    quicknodeAppName,
+    quicknodeAppKey,
+    chainId.value,
+  );
+  isEnsResolving.value = true;
+  const address = await namingService.resolveEns(name);
+  isEnsResolving.value = false;
+  if (address) {
+    router.push(getRouteLocation({ name: 'address', address }));
+  }
+}
+
+async function openLatestBlock(): Promise<void> {
+  if (!client.value) {
+    return;
+  }
+  const evmService = new EvmService(client.value);
+  isLatestBlockResolving.value = true;
+  const number = await evmService.getLatestBlock();
+  isLatestBlockResolving.value = false;
+  router.push(getRouteLocation({ name: 'block', number }));
+}
+
+async function openTransactionOrOp(hash: Hex): Promise<void> {
+  if (!chainId.value || !client.value) {
+    return;
+  }
+  const indexerService = new IndexerService(indexerEndpoint, chainId.value);
+  isTransactionOrOpResolving.value = true;
+  const foundOp = await indexerService.getTxHashByOpHash(hash as Hex);
+  isTransactionOrOpResolving.value = false;
+  if (foundOp) {
+    router.push(getRouteLocation({ name: 'op', hash: foundOp }));
+  } else {
+    router.push(getRouteLocation({ name: 'transaction', hash: hash as Hex }));
+  }
 }
 </script>
 

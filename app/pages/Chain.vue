@@ -16,12 +16,7 @@
           />
         </div>
         <div class="main">
-          <InputSearch
-            v-model="search"
-            :is-loading="isEnsResolving"
-            placeholder="Address, transaction, operation, or block"
-            @submit="handleSearchSubmit"
-          />
+          <InputSearch />
           <div class="blocks">
             <div
               class="latest-block"
@@ -51,7 +46,6 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import { useIntervalFn } from '@vueuse/core';
-import type { Hex } from 'viem';
 import { ref, onMounted, watch, computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
@@ -62,24 +56,13 @@ import InputSearch from '@/components/chain/InputSearch.vue';
 import PopoverChain from '@/components/chain/PopoverChain.vue';
 import useChain from '@/composables/useChain';
 import useCommands from '@/composables/useCommands';
-import useEnv from '@/composables/useEnv';
 import useToast from '@/composables/useToast';
 import EvmService from '@/services/evm';
-import IndexerService from '@/services/indexer';
-import NamingService from '@/services/naming';
 import type { Command } from '@/stores/commands';
 import type { Chain } from '@/utils/chains';
-import { toBigInt } from '@/utils/conversion';
 import { getRouteLocation } from '@/utils/routing';
-import {
-  isAddress,
-  isBlockNumber,
-  isEnsAddress,
-  isTransactionHash,
-} from '@/utils/validation/pattern';
 
 const { id: chainId, name: chainName, client } = useChain();
-const { quicknodeAppName, quicknodeAppKey, indexerEndpoint } = useEnv();
 const router = useRouter();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
@@ -125,77 +108,6 @@ useIntervalFn(
 const evmService = computed(() =>
   client.value ? new EvmService(client.value) : null,
 );
-const indexerService = computed(() =>
-  chainId.value && client.value
-    ? new IndexerService(indexerEndpoint, chainId.value)
-    : null,
-);
-const namingService = computed(() =>
-  chainId.value
-    ? new NamingService(quicknodeAppName, quicknodeAppKey, chainId.value)
-    : null,
-);
-
-const search = ref('');
-function handleSearchSubmit(): void {
-  if (search.value === '') {
-    return;
-  }
-  if (search.value === 'latest') {
-    openLatestBlock();
-  } else if (isEnsAddress(search.value)) {
-    openEnsAddress(search.value);
-  } else if (isAddress(search.value)) {
-    router.push(getRouteLocation({ name: 'address', address: search.value }));
-  } else if (isBlockNumber(search.value)) {
-    const number = toBigInt(search.value);
-    if (number === null) {
-      return;
-    }
-    router.push(getRouteLocation({ name: 'block', number }));
-  } else if (isTransactionHash(search.value)) {
-    openTransactionOrOp(search.value);
-  }
-}
-
-const isEnsResolving = ref(false);
-async function openEnsAddress(name: string): Promise<void> {
-  if (!namingService.value) {
-    return;
-  }
-  isEnsResolving.value = true;
-  const address = await namingService.value.resolveEns(name);
-  isEnsResolving.value = false;
-  if (address) {
-    router.push(getRouteLocation({ name: 'address', address }));
-  }
-}
-
-const isLatestBlockResolving = ref(false);
-async function openLatestBlock(): Promise<void> {
-  if (!evmService.value) {
-    return;
-  }
-  isLatestBlockResolving.value = true;
-  const number = await evmService.value.getLatestBlock();
-  isLatestBlockResolving.value = false;
-  router.push(getRouteLocation({ name: 'block', number }));
-}
-
-const isTransactionOrOpResolving = ref(false);
-async function openTransactionOrOp(hash: Hex): Promise<void> {
-  if (!indexerService.value) {
-    return;
-  }
-  isTransactionOrOpResolving.value = true;
-  const foundOp = await indexerService.value.getTxHashByOpHash(hash as Hex);
-  isTransactionOrOpResolving.value = false;
-  if (foundOp) {
-    router.push(getRouteLocation({ name: 'op', hash: foundOp }));
-  } else {
-    router.push(getRouteLocation({ name: 'transaction', hash: hash as Hex }));
-  }
-}
 
 const isLoading = ref(false);
 const latestBlock = ref<bigint | null>(null);
