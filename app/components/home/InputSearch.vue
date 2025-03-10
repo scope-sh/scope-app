@@ -20,23 +20,15 @@
 
 <script setup lang="ts">
 import type { Hex } from 'viem';
-import { createPublicClient, http, isAddress } from 'viem';
+import { isAddress } from 'viem';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 import useEnv from '@/composables/useEnv';
-import EvmService from '@/services/evm';
-import IndexerService from '@/services/indexer';
 import NamingService from '@/services/naming';
-import {
-  CHAINS,
-  ETHEREUM,
-  getChainData,
-  getChainByName,
-  getEndpointUrl,
-  isChainName,
-} from '@/utils/chains';
+import { ETHEREUM, getChainByName, isChainName } from '@/utils/chains';
+import { searchTransactionOrOp } from '@/utils/navigation';
 import { getRouteLocation } from '@/utils/routing';
 import { isEnsAddress, isTransactionHash } from '@/utils/validation/pattern';
 
@@ -105,78 +97,25 @@ async function openEnsAddress(name: string): Promise<void> {
   }
 }
 
-async function chunkArray<T>(array: T[], size: number): Promise<T[][]> {
-  const chunks: T[][] = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
-  }
-  return chunks;
-}
-
-async function openTransactionOrOp(hash: Hex): Promise<void> {
-  const maxRequests = 10;
-
+async function openTransactionOrOp(hash: string): Promise<void> {
   isTransactionOrOpResolving.value = true;
-
-  // Search for a transaction on each chain
-  const transactionPromises = CHAINS.map(async (chain) => {
-    const client = createPublicClient({
-      chain: getChainData(chain),
-      transport: http(getEndpointUrl(chain, quicknodeAppName, quicknodeAppKey)),
-    });
-    const service = new EvmService(client);
-    try {
-      const transaction = await service.getTransaction(hash);
-      if (transaction) {
-        return { chain, transaction };
-      }
-    } catch {
-      // Ignore
-    }
-    return null;
-  });
-
-  // Process in chunks of 10
-  const chunks = await chunkArray(transactionPromises, maxRequests);
-  for (const chunk of chunks) {
-    const results = await Promise.all(chunk);
-    const found = results.find((result) => result !== null);
-    if (found) {
-      router.push(
-        getRouteLocation({
-          name: 'transaction',
-          chain: found.chain,
-          hash: found.transaction.hash,
-        }),
-      );
-      isTransactionOrOpResolving.value = false;
-      return;
-    }
-  }
-
-  // Search for an op on each chain
-  const opPromises = CHAINS.map(async (chain) => {
-    const indexerService = new IndexerService(indexerEndpoint, chain);
-    const foundOp = await indexerService.getTxHashByOpHash(hash as Hex);
-    if (foundOp) {
-      return chain;
-    }
-    return null;
-  });
-
-  // Process in chunks of 10
-  const opChunks = await chunkArray(opPromises, maxRequests);
-  for (const chunk of opChunks) {
-    const results = await Promise.all(chunk);
-    const foundChain = results.find((result) => result !== null);
-    if (foundChain) {
-      router.push(getRouteLocation({ name: 'op', chain: foundChain, hash }));
-      isTransactionOrOpResolving.value = false;
-      return;
-    }
-  }
-
+  const result = await searchTransactionOrOp(
+    hash as Hex,
+    quicknodeAppName,
+    quicknodeAppKey,
+    indexerEndpoint,
+  );
   isTransactionOrOpResolving.value = false;
+
+  if (result) {
+    router.push(
+      getRouteLocation({
+        name: result.type,
+        chain: result.chain,
+        hash: result.hash,
+      }),
+    );
+  }
 }
 </script>
 
