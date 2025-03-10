@@ -92,6 +92,7 @@ import {
   isChainName,
 } from '@/utils/chains';
 import { toBigInt } from '@/utils/conversion';
+import { searchTransactionOrOp } from '@/utils/navigation';
 import { getRouteLocation } from '@/utils/routing';
 import {
   isAddress,
@@ -118,7 +119,7 @@ const { appBaseUrl, quicknodeAppName, quicknodeAppKey, indexerEndpoint } =
 const { commands: localCommands } = useCommands();
 const uiStore = useUiStore();
 const { send: sendToast } = useToast();
-const { id: chainId, client } = useChain();
+const { isAvailable: isChainAvailable, id: chainId, client } = useChain();
 
 const isOpen = computed(() => uiStore.isPaletteOpen);
 
@@ -217,55 +218,49 @@ const globalCommands = computed<Command[]>(() => {
       },
     },
   ];
-  const goToCommands: Command[] = [
-    {
-      icon: 'arrow-right',
-      label: 'Go to address',
-      placeholder: 'Enter address, ENS or contract name',
-      isAsync: areGoToItemsAsync('address'),
-      getItems: async (query): Promise<Command[]> =>
-        getGoToItems('address', query),
-    },
-    {
-      icon: 'arrow-right',
-      label: 'Go to transaction',
-      placeholder: 'Enter hash',
-      isAsync: areGoToItemsAsync('transaction'),
-      getItems: async (query): Promise<Command[]> =>
-        getGoToItems('transaction', query),
-    },
-    {
-      icon: 'arrow-right',
-      label: 'Go to UserOp',
-      placeholder: 'Enter hash',
-      isAsync: areGoToItemsAsync('op'),
-      getItems: async (query): Promise<Command[]> => getGoToItems('op', query),
-    },
-    {
-      icon: 'arrow-right',
-      label: 'Go to block',
-      placeholder: 'Enter number',
-      isAsync: areGoToItemsAsync('block'),
-      getItems: async (query): Promise<Command[]> =>
-        getGoToItems('block', query),
-    },
-    {
-      icon: 'arrow-right',
-      label: 'Go to anything',
-      placeholder: 'Enter destination',
-      isAsync: areGoToItemsAsync('all'),
-      getItems: async (query): Promise<Command[]> => getGoToItems('all', query),
-    },
-    {
-      icon: 'arrow-right',
-      label: 'Simulate UserOp',
-      act: (): void => {
-        router.push(getRouteLocation({ name: 'simulate' }));
+  if (isChainAvailable.value) {
+    const goToCommands: Command[] = [
+      {
+        icon: 'arrow-right',
+        label: 'Go to address',
+        placeholder: 'Enter address, ENS or contract name',
+        isAsync: areGoToItemsAsync('address'),
+        getItems: async (query): Promise<Command[]> =>
+          getGoToItems('address', query),
       },
-    },
-  ];
-
-  if (chainId.value) {
+      {
+        icon: 'arrow-right',
+        label: 'Go to transaction',
+        placeholder: 'Enter hash',
+        isAsync: areGoToItemsAsync('transaction'),
+        getItems: async (query): Promise<Command[]> =>
+          getGoToItems('transaction', query),
+      },
+      {
+        icon: 'arrow-right',
+        label: 'Go to UserOp',
+        placeholder: 'Enter hash',
+        isAsync: areGoToItemsAsync('op'),
+        getItems: async (query): Promise<Command[]> =>
+          getGoToItems('op', query),
+      },
+      {
+        icon: 'arrow-right',
+        label: 'Go to block',
+        placeholder: 'Enter number',
+        isAsync: areGoToItemsAsync('block'),
+        getItems: async (query): Promise<Command[]> =>
+          getGoToItems('block', query),
+      },
+      {
+        icon: 'arrow-right',
+        label: 'Go to anything',
+        placeholder: 'Enter destination',
+        isAsync: areGoToItemsAsync('all'),
+        getItems: async (query): Promise<Command[]> =>
+          getGoToItems('all', query),
+      },
+    ];
     for (const command of goToCommands) {
       commands.push(command);
     }
@@ -297,6 +292,13 @@ const globalCommands = computed<Command[]>(() => {
       },
     });
   }
+  commands.push({
+    icon: 'arrow-right',
+    label: 'Simulate UserOp',
+    act: (): void => {
+      router.push(getRouteLocation({ name: 'simulate' }));
+    },
+  });
   commands.push({
     icon: 'input',
     label: 'Resolve ENS',
@@ -400,10 +402,18 @@ async function getGoToItems(
   }
 
   function getOpenAddressCommand(address: Address): Command {
+    if (!isChainAvailable.value) {
+      return {
+        icon: 'arrow-right',
+        label: address,
+        act: (): void => {
+          router.push(getRouteLocation({ name: 'global-address', address }));
+        },
+      };
+    }
     return {
       icon: 'arrow-right',
       label: address,
-      isAsync: (): boolean => false,
       act: (): void => {
         router.push(getRouteLocation({ name: 'address', address }));
       },
@@ -418,16 +428,13 @@ async function getGoToItems(
     if (!address) {
       return null;
     }
-    return {
-      icon: 'arrow-right',
-      label: address,
-      act: (): void => {
-        router.push(getRouteLocation({ name: 'address', address }));
-      },
-    };
+    return getOpenAddressCommand(address);
   }
 
-  function getOpenBlockByNumberCommand(number: string): Command {
+  function getOpenBlockByNumberCommand(number: string): Command | null {
+    if (!isChainAvailable.value) {
+      return null;
+    }
     return {
       icon: 'arrow-right',
       label: number,
@@ -448,23 +455,11 @@ async function getGoToItems(
       return null;
     }
     if (tag === 'earliest') {
-      return {
-        icon: 'arrow-right',
-        label: '0',
-        act: (): void => {
-          router.push(getRouteLocation({ name: 'block', number: 0n }));
-        },
-      };
+      return getOpenBlockByNumberCommand('0');
     } else {
       // Get latest block
       const block = await evmService.value.getLatestBlock();
-      return {
-        icon: 'arrow-right',
-        label: block.toString(),
-        act: (): void => {
-          router.push(getRouteLocation({ name: 'block', number: block }));
-        },
-      };
+      return getOpenBlockByNumberCommand(block.toString());
     }
   }
 
@@ -556,7 +551,8 @@ async function getGoToItems(
     }
     case 'block': {
       if (isBlockNumber(query)) {
-        return [getOpenBlockByNumberCommand(query)];
+        const command = getOpenBlockByNumberCommand(query);
+        return command ? [command] : [];
       }
       if (isBlockTag(query)) {
         const command = await getOpenBlockByTagCommand(query);
@@ -584,13 +580,40 @@ async function getGoToItems(
         return [getOpenAddressCommand(query)];
       }
       if (isBlockNumber(query)) {
-        return [getOpenBlockByNumberCommand(query)];
+        const command = getOpenBlockByNumberCommand(query);
+        return command ? [command] : [];
       }
       if (isBlockTag(query)) {
         const command = await getOpenBlockByTagCommand(query);
         return command ? [command] : [];
       }
       if (isTransactionHash(query)) {
+        if (!isChainAvailable.value) {
+          const result = await searchTransactionOrOp(
+            query as Hex,
+            quicknodeAppName,
+            quicknodeAppKey,
+            indexerEndpoint,
+          );
+          if (result) {
+            return [
+              {
+                icon: 'arrow-right',
+                label: result.hash,
+                act: (): void => {
+                  router.push(
+                    getRouteLocation({
+                      name: result.type,
+                      chain: result.chain,
+                      hash: result.hash,
+                    }),
+                  );
+                },
+              },
+            ];
+          }
+          return [];
+        }
         const command = await getOpenTransactionOrOpCommand(query);
         return command ? [command] : [];
       }
