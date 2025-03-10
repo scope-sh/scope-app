@@ -116,6 +116,7 @@ export type { Example };
 .list {
   display: flex;
   gap: var(--spacing-4);
+  flex-wrap: wrap;
 }
 
 button {

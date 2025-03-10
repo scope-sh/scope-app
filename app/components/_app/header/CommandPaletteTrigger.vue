@@ -8,6 +8,7 @@
       Explore
     </div>
     <ScopeShortcut
+      v-if="!isMobile"
       :shortcut="[{ key: 'K', isMeta: true }]"
       size="regular"
     />
@@ -24,6 +25,8 @@ const uiStore = useUiStore();
 function handleClick(): void {
   uiStore.setPaletteOpen(true);
 }
+
+const isMobile = /(iPhone|android)/i.test(navigator.userAgent);
 </script>
 
 <style scoped>
