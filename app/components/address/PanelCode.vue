@@ -101,11 +101,10 @@ const abi = computed(() => {
   if (!contract) {
     return null;
   }
-  if (showAsDelegatee.value) {
-    return contract.delegation ? contract.delegation.abi : contract.abi;
-  }
-  // Ignore "show as proxy" if the contract is delegated for now
   if (isDelegated.value) {
+    if (showAsDelegatee.value) {
+      return contract.delegation ? contract.delegation.abi : contract.abi;
+    }
     return contract.abi;
   }
   if (showAsProxy.value) {
@@ -117,11 +116,10 @@ const source = computed(() => {
   if (!contract) {
     return null;
   }
-  if (showAsDelegatee.value) {
-    return contract.delegation ? contract.delegation.source : contract.source;
-  }
-  // Ignore "show as proxy" if the contract is delegated for now
   if (isDelegated.value) {
+    if (showAsDelegatee.value) {
+      return contract.delegation ? contract.delegation.source : contract.source;
+    }
     return contract.source;
   }
   if (showAsProxy.value) {
