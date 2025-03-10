@@ -260,6 +260,13 @@ const globalCommands = computed<Command[]>(() => {
         getItems: async (query): Promise<Command[]> =>
           getGoToItems('all', query),
       },
+      {
+        icon: 'arrow-right',
+        label: 'Open blocks',
+        act: (): void => {
+          router.push(getRouteLocation({ name: 'blocks' }));
+        },
+      },
     ];
     for (const command of goToCommands) {
       commands.push(command);
