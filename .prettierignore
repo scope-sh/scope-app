@@ -1,1 +1,4 @@
 app/components/__common/TableTransactions.vue
+app/components/address/TableOps.vue
+app/components/address/TableTransfers.vue
+app/components/blocks/TableBlocks.vue

@@ -61,8 +61,21 @@
                 class="icon"
               />
             </template>
+            <ScopeTooltip
+              v-else-if="cell.column.id === 'blockTimestamp'"
+              delay="medium"
+            >
+              <template #trigger>
+                <div>
+                  {{ formatRelativeTime(toRelativeTime(new Date(), new Date(cell.getValue<number>()))) }}
+                </div>
+              </template>
+              <template #default>
+                {{ formatTime(new Date(cell.getValue<number>())) }}
+              </template>
+            </ScopeTooltip>
             <LinkBlock
-              v-if="cell.column.id === 'blockNumber'"
+              v-else-if="cell.column.id === 'blockNumber'"
               :number="toBlockNumber(cell.getValue())"
               type="minimal"
             />
@@ -164,6 +177,7 @@ import {
   formatEther,
   formatGasPrice,
   formatRelativeTime,
+  formatTime,
 } from '@/utils/formatting';
 
 const { address, transactions, page, perPage, type } = defineProps<{
@@ -192,12 +206,7 @@ const columns = computed(() => {
     columns.push(
       columnHelper.accessor('blockTimestamp', {
         header: 'time',
-        cell: (cell) => {
-          const timestamp = cell.getValue() as number;
-          return formatRelativeTime(
-            toRelativeTime(new Date(), new Date(timestamp)),
-          );
-        },
+        cell: (cell) => cell.getValue(),
       }),
     );
     columns.push(

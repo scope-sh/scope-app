@@ -3,9 +3,16 @@
     <div class="content">
       <div class="header">
         <template v-if="date">
-          <div>
-            {{ formatRelativeTime(toRelativeTime(new Date(), date)) }}
-          </div>
+          <ScopeTooltip delay="medium">
+            <template #trigger>
+              <div>
+                {{ formatRelativeTime(toRelativeTime(new Date(), date)) }}
+              </div>
+            </template>
+            <template #default>
+              {{ formatTime(date) }}
+            </template>
+          </ScopeTooltip>
           ·
         </template>
         <template v-if="log.blockNumber">
@@ -79,6 +86,7 @@ import { computed } from 'vue';
 import ButtonCopy from './ButtonCopy.vue';
 import LinkBlock from './LinkBlock.vue';
 import LinkTransaction from './LinkTransaction.vue';
+import ScopeTooltip from './ScopeTooltip.vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import ScopeCard from '@/components/__common/ScopeCard.vue';
@@ -92,7 +100,7 @@ import useAbi from '@/composables/useAbi';
 import type { Log as TransactionLog } from '@/services/evm';
 import type { Log as AddressLog } from '@/services/hypersync';
 import { toRelativeTime } from '@/utils/conversion';
-import { formatRelativeTime } from '@/utils/formatting';
+import { formatRelativeTime, formatTime } from '@/utils/formatting';
 
 const { log } = defineProps<{
   log: Log;

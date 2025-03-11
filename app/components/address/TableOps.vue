@@ -61,6 +61,19 @@
                 class="icon"
               />
             </template>
+            <ScopeTooltip
+              v-else-if="cell.column.id === 'blockTimestamp'"
+              delay="medium"
+            >
+              <template #trigger>
+                <div>
+                  {{ formatRelativeTime(toRelativeTime(new Date(), new Date(cell.getValue<number>()))) }}
+                </div>
+              </template>
+              <template #default>
+                {{ formatTime(new Date(cell.getValue<number>())) }}
+              </template>
+            </ScopeTooltip>
             <LinkBlock
               v-else-if="cell.column.id === 'blockNumber'"
               :number="toBlockNumber(cell.getValue())"
@@ -119,12 +132,13 @@ import LinkBlock from '@/components/__common/LinkBlock.vue';
 import LinkOp from '@/components/__common/LinkOp.vue';
 import LinkTransaction from '@/components/__common/LinkTransaction.vue';
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import ScopeTooltip from '@/components/__common/ScopeTooltip.vue';
 import {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
 import { toRelativeTime } from '@/utils/conversion';
-import { formatRelativeTime } from '@/utils/formatting';
+import { formatRelativeTime, formatTime } from '@/utils/formatting';
 
 const { ops, page, perPage } = defineProps<{
   ops: Op[];
@@ -141,12 +155,7 @@ const columns = computed(() => [
   }),
   columnHelper.accessor('blockTimestamp', {
     header: 'time',
-    cell: (cell) => {
-      const timestamp = cell.getValue() as number;
-      return formatRelativeTime(
-        toRelativeTime(new Date(), new Date(timestamp)),
-      );
-    },
+    cell: (cell) => cell.getValue(),
   }),
   columnHelper.accessor('blockNumber', {
     header: 'block',

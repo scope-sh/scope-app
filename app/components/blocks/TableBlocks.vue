@@ -52,6 +52,19 @@
               :number="toBlockNumber(cell.getValue())"
               type="minimal"
             />
+            <ScopeTooltip
+              v-else-if="cell.column.id === 'timestamp'"
+              delay="medium"
+            >
+              <template #trigger>
+                <div>
+                  {{ formatRelativeTime(toRelativeTime(new Date(), new Date(cell.getValue<number>()))) }}
+                </div>
+              </template>
+              <template #default>
+                {{ formatTime(new Date(cell.getValue<number>())) }}
+              </template>
+            </ScopeTooltip>
             <LinkAddress
               v-else-if="cell.column.id === 'producer'"
               :address="toAddress(cell.getValue())"
@@ -82,8 +95,9 @@ import { computed, watch } from 'vue';
 
 import LinkAddress from '@/components/__common/LinkAddress.vue';
 import LinkBlock from '@/components/__common/LinkBlock.vue';
+import ScopeTooltip from '@/components/__common/ScopeTooltip.vue';
 import { toRelativeTime } from '@/utils/conversion';
-import { formatRelativeTime, formatShare } from '@/utils/formatting';
+import { formatRelativeTime, formatShare, formatTime } from '@/utils/formatting';
 
 const { blocks, page, perPage } = defineProps<{
   blocks: Block[];
