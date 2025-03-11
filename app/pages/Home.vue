@@ -6,9 +6,13 @@
           <IconBrand class="icon" />
         </div>
         <div class="main">
-          <InputSearch
+          <SearchBar
+            placeholder="Address, transaction, operation, or chain"
+            :results="searchResults"
+            :is-loading="isSearching"
             @focus="handleInputFocus"
             @blur="handleInputBlur"
+            @search="handleSearch"
           />
         </div>
       </div>
@@ -41,26 +45,40 @@
 
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
-import { useIntervalFn, useDocumentVisibility } from '@vueuse/core';
+import {
+  useIntervalFn,
+  useDocumentVisibility,
+  useDebounceFn,
+} from '@vueuse/core';
+import type { Address, Hex } from 'viem';
 import { createPublicClient, http } from 'viem';
 import { ref, computed, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
 import IconChain from '@/components/__common/IconChain.vue';
-import InputSearch from '@/components/home/InputSearch.vue';
+import SearchBar, { type Result } from '@/components/__common/SearchBar.vue';
 import useEnv from '@/composables/useEnv';
 import EvmService from '@/services/evm';
+import NamingService from '@/services/naming';
 import type { Chain } from '@/utils/chains';
 import {
   CHAINS,
+  ETHEREUM,
   getChainData,
   getChainName,
+  getChainNames,
   getEndpointUrl,
 } from '@/utils/chains';
 import { getRouteLocation } from '@/utils/routing';
+import { searchTransactionOrOp } from '@/utils/search';
+import {
+  isAddress,
+  isEnsAddress,
+  isTransactionHash,
+} from '~/utils/validation/pattern';
 
-const { quicknodeAppName, quicknodeAppKey } = useEnv();
+const { indexerEndpoint, quicknodeAppName, quicknodeAppKey } = useEnv();
 
 useHead({
   title: () => 'Scope',
@@ -127,6 +145,83 @@ async function fetchChainBlock(chain: Chain): Promise<void> {
       updatedChains.value.delete(chain);
     }, 200);
   }
+}
+
+const isSearching = ref(false);
+const searchResults = ref<Result[]>([]);
+function handleSearch(query: string): void {
+  searchResults.value = [];
+  if (query !== '') {
+    // Handle synchronous searches immediately
+    if (isAddress(query)) {
+      searchResults.value = [
+        {
+          type: 'address',
+          address: query,
+        },
+      ];
+    } else if (query.length >= 3) {
+      // Fallback: chain search
+      const matchingChains = CHAINS.filter((chain) =>
+        getChainNames(chain).some((name) =>
+          name.toLowerCase().includes(query.toLowerCase()),
+        ),
+      );
+      searchResults.value = matchingChains.map((chain) => ({
+        type: 'chain',
+        chain,
+      }));
+    }
+
+    if (searchResults.value.length === 0) {
+      searchAsync(query);
+    }
+  }
+}
+
+const searchAsync = useDebounceFn(async (query: string) => {
+  if (!query) {
+    return;
+  }
+
+  isSearching.value = true;
+  if (isEnsAddress(query)) {
+    const address = await resolveEns(query);
+    if (address) {
+      searchResults.value = [
+        {
+          type: 'address',
+          address,
+        },
+      ];
+    }
+  } else if (isTransactionHash(query)) {
+    const result = await searchTransactionOrOp(
+      query as Hex,
+      quicknodeAppName,
+      quicknodeAppKey,
+      indexerEndpoint,
+    );
+    if (result) {
+      searchResults.value = [
+        {
+          type: result.type,
+          chain: result.chain,
+          hash: result.hash,
+        },
+      ];
+    }
+  }
+  isSearching.value = false;
+}, 200);
+
+async function resolveEns(name: string): Promise<Address | null> {
+  const namingService = new NamingService(
+    quicknodeAppName,
+    quicknodeAppKey,
+    ETHEREUM,
+  );
+  return namingService.resolveEns(name);
 }
 </script>
 
