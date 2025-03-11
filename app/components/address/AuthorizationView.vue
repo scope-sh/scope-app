@@ -6,7 +6,7 @@
     >
       <LinkAddress :address="signerAddress" />
       undelegated at nonce
-      {{ authorization.nonce }}{{ toChainLabel(authorization.chainId) }}
+      {{ authorization.nonce }}
     </div>
     <div
       v-else
@@ -15,7 +15,7 @@
       <LinkAddress :address="signerAddress" />
       delegated to
       <LinkAddress :address="authorization.contractAddress" /> at nonce
-      {{ authorization.nonce }}{{ toChainLabel(authorization.chainId) }}
+      {{ authorization.nonce }}
     </div>
   </template>
   <div
@@ -24,8 +24,7 @@
   >
     Failed to delegate to
     <LinkAddress :address="authorization.contractAddress" /> at nonce
-    {{ authorization.nonce }}{{ toChainLabel(authorization.chainId) }}: bad
-    signature
+    {{ authorization.nonce }}: bad signature
   </div>
 </template>
 
@@ -55,13 +54,6 @@ async function toSignerAddress(
 }
 
 const { state: signerAddress } = useAsyncState(toSignerAddress(a), null);
-
-function toChainLabel(chainId: number): string {
-  if (chainId === 0) {
-    return ' on all chains';
-  }
-  return '';
-}
 </script>
 
 <style scoped>
