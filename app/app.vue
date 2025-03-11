@@ -36,19 +36,19 @@ const isHomeOrChainPage = computed(
 <!-- eslint-disable-next-line vue/enforce-style-attribute -->
 <style>
 :root {
-  --color-text-primary: oklch(90.67% 0 0deg);
-  --color-text-secondary: oklch(69.6% 0 0deg);
-  --color-text-placeholder: oklch(55.55% 0 0deg);
-  --color-background-primary: oklch(21.26% 0.007 314.68deg);
-  --color-background-secondary: oklch(25.16% 0.008 308.11deg);
+  --color-text-primary: oklch(91% 0 0deg);
+  --color-text-secondary: oklch(70% 0 0deg);
+  --color-text-placeholder: oklch(55% 0 0deg);
+  --color-background-primary: oklch(11% 0.007 314.68deg);
+  --color-background-secondary: oklch(22% 0.008 308.11deg);
   --color-background-tertiary: oklch(27% 0.009 308deg);
-  --color-border-primary: oklch(81.03% 0.04 87.57deg);
-  --color-border-secondary: oklch(63.03% 0.021 90.62deg);
-  --color-border-tertiary: oklch(35.83% 0.014 280.02deg);
-  --color-border-quaternary: oklch(49.51% 0.019 278.16deg);
+  --color-border-primary: oklch(76% 0.04 87.57deg);
+  --color-border-secondary: oklch(58% 0.021 90.62deg);
+  --color-border-tertiary: oklch(34% 0.014 280.02deg);
+  --color-border-quaternary: oklch(48% 0.019 278.16deg);
   --color-accent: oklch(86.41% 0.102 88.3deg);
-  --color-success: oklch(76.61% 0.168 161.85deg);
-  --color-error: oklch(64.66% 0.178 30.98deg);
+  --color-success: oklch(76% 0.168 161.85deg);
+  --color-error: oklch(65% 0.178 30.98deg);
   --font-general: 'Inter Variable', -apple-system, 'BlinkMacSystemFont',
     avenir next, avenir, segoe ui, helvetica neue, helvetica, 'Ubuntu', roboto,
     noto, arial, sans-serif;

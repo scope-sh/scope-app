@@ -49,7 +49,7 @@ const label = computed(() => {
 
 .status.success {
   border-color: rgb(from var(--color-success) r g b / 60%);
-  background: rgb(from var(--color-success) r g b / 5%);
+  background: rgb(from var(--color-success) r g b / 10%);
   color: var(--color-success);
 }
 

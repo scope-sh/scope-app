@@ -93,19 +93,20 @@ export type { Type };
     z-index: -1;
     border: 1px dotted transparent;
     border-radius: var(--border-radius-xs);
-    background: oklch(from var(--color-accent) l c h / 5%);
+    background: oklch(from var(--color-accent) l c h / 10%);
     inset: -2px -3px;
   }
 
   &:hover {
     .background {
-      background: oklch(from var(--color-accent) l c h / 10%);
+      background: oklch(from var(--color-accent) l c h / 15%);
     }
   }
 
   .background.highlighted {
     border-radius: 2px;
     border-color: oklch(from var(--color-accent) l c h / 80%);
+    border-style: dashed;
   }
 
   .background.trimmed {

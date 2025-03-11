@@ -138,13 +138,13 @@ const decoded = computed<DecodedError | null>(() => {
 
 .status.success {
   border-color: rgb(from var(--color-success) r g b / 60%);
-  background: rgb(from var(--color-success) r g b / 5%);
+  background: rgb(from var(--color-success) r g b / 10%);
   color: var(--color-success);
 }
 
 .status.error {
   border-color: rgb(from var(--color-error) r g b / 60%);
-  background: rgb(from var(--color-error) r g b / 5%);
+  background: rgb(from var(--color-error) r g b / 10%);
   color: var(--color-error);
 }
 

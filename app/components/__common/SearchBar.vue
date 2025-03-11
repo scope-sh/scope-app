@@ -363,7 +363,7 @@ input::placeholder {
   border: 1px solid var(--color-border-secondary);
   border-top: none;
   border-radius: 0 0 var(--border-radius-m) var(--border-radius-m);
-  background: var(--color-background-primary);
+  background: var(--color-background-secondary);
   box-shadow: var(--elevation-medium);
 }
 
@@ -381,8 +381,7 @@ input::placeholder {
 
 .result:hover,
 .result.selected {
-  background: var(--color-background-secondary);
-  box-shadow: var(--elevation-low);
+  background: var(--color-background-tertiary);
 }
 
 .result-type {
