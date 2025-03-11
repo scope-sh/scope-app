@@ -151,7 +151,7 @@ input {
   color: var(--color-text-primary);
 }
 
-.input[data-placeholder] {
+.input::placeholder {
   color: var(--color-text-placeholder);
 }
 

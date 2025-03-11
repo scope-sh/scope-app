@@ -803,10 +803,10 @@ input {
   &.with-context {
     padding: var(--spacing-4) var(--spacing-8) var(--spacing-8);
   }
+}
 
-  &::placeholder {
-    color: var(--color-text-placeholder);
-  }
+input::placeholder {
+  color: var(--color-text-placeholder);
 }
 
 .loading {
@@ -864,7 +864,7 @@ input {
 
   &.selected {
     --color-accent-toned-down: oklch(
-      from var(--color-accent) l calc(c * 0.6) h
+      from var(--color-accent) l calc(c * 0.7) h
     );
 
     background: var(--color-background-secondary);

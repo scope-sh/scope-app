@@ -119,9 +119,9 @@ input {
   &.invalid {
     border-color: var(--color-error);
   }
+}
 
-  &::placeholder {
-    color: var(--color-text-placeholder);
-  }
+input::placeholder {
+  color: var(--color-text-placeholder);
 }
 </style>

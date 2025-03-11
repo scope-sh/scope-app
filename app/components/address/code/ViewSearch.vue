@@ -210,10 +210,10 @@ input {
   outline: none;
   background-color: transparent;
   color: var(--color-text-primary);
+}
 
-  &::placeholder {
-    color: var(--color-text-placeholder);
-  }
+input::placeholder {
+  color: var(--color-text-placeholder);
 }
 
 .icon {

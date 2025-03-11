@@ -187,10 +187,6 @@ input {
   color: var(--color-text-primary);
   font-size: var(--font-size-s);
 
-  &::placeholder {
-    color: var(--color-text-placeholder);
-  }
-
   &:hover {
     background: var(--color-background-tertiary);
   }
@@ -198,5 +194,9 @@ input {
   &:focus {
     border-color: var(--color-border-tertiary);
   }
+}
+
+input::placeholder {
+  color: var(--color-text-placeholder);
 }
 </style>
