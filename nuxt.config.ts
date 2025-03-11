@@ -40,14 +40,14 @@ export default defineNuxtConfig({
         { name: 'title', content: 'scope' },
         {
           name: 'description',
-          content: 'block explorer for aa builders',
+          content: 'evm wallet explorer',
         },
         { property: 'og:type', content: 'website' },
         { property: 'og:url', content: 'https://scope.sh/' },
         { property: 'og:title', content: 'scope' },
         {
           property: 'og:description',
-          content: 'block explorer for aa builders',
+          content: 'evm wallet explorer',
         },
         { property: 'og:image', content: 'https://scope.sh/social.png' },
         { property: 'twitter:card', content: 'summary_large_image' },
@@ -55,7 +55,7 @@ export default defineNuxtConfig({
         { property: 'twitter:title', content: 'scope' },
         {
           property: 'twitter:description',
-          content: 'block explorer for aa builders',
+          content: 'evm wallet explorer',
         },
         {
           property: 'twitter:image',
