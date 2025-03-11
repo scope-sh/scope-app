@@ -51,7 +51,7 @@ import SearchResults, {
 } from '@/components/__common/SearchResults.vue';
 import useEnv from '@/composables/useEnv';
 import NamingService from '@/services/naming';
-import { ETHEREUM, isChainName, getChainByName } from '@/utils/chains';
+import { ETHEREUM, CHAINS, getChainNames } from '@/utils/chains';
 import { getRouteLocation } from '@/utils/routing';
 import { searchTransactionOrOp } from '@/utils/search';
 import { isEnsAddress, isTransactionHash } from '@/utils/validation/pattern';
@@ -121,18 +121,6 @@ const search = useDebounceFn(async () => {
     return;
   }
 
-  if (isChainName(query.value)) {
-    const chain = getChainByName(query.value);
-    if (chain) {
-      results.value = [
-        {
-          type: 'chain',
-          chain,
-        },
-      ];
-    }
-  }
-
   if (isEnsAddress(query.value)) {
     isEnsResolving.value = true;
     const address = await resolveEns(query.value);
@@ -170,6 +158,17 @@ const search = useDebounceFn(async () => {
         },
       ];
     }
+  } else if (query.value.length >= 3) {
+    // Fallback: chain search
+    const matchingChains = CHAINS.filter((chain) =>
+      getChainNames(chain).some((name) =>
+        name.toLowerCase().includes(query.value.toLowerCase()),
+      ),
+    );
+    results.value = matchingChains.map((chain) => ({
+      type: 'chain',
+      chain,
+    }));
   }
 }, 200);
 
