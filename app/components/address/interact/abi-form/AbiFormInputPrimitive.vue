@@ -102,7 +102,7 @@ input {
   border-radius: var(--border-radius-s);
   outline: none;
   background: none;
-  box-shadow: inset 2px 2px 2px rgb(0 0 0 / 80%);
+  box-shadow: inset var(--elevation-medium);
   color: var(--color-text-primary);
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-regular);

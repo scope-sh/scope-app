@@ -51,7 +51,7 @@ const id = useId();
   width: 200px;
   border-radius: 4px;
   background: transparent;
-  box-shadow: 0 2px 10px var(--black-a7);
+  box-shadow: inset var(--elevation-low);
   font-family: var(--font-mono);
   font-size: var(--font-size-m);
 }
@@ -61,7 +61,7 @@ const id = useId();
 }
 
 .root:focus {
-  box-shadow: 0 0 0 2px black;
+  box-shadow: inset var(--elevation-medium);
 }
 
 label {
@@ -88,7 +88,7 @@ button {
   border-radius: var(--border-radius-s);
   outline: none;
   background: none;
-  box-shadow: inset 2px 2px 2px rgb(0 0 0 / 80%);
+  box-shadow: inset var(--elevation-medium);
   color: var(--color-text-primary);
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-regular);

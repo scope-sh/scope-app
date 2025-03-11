@@ -37,7 +37,7 @@ const metaKeyLabel = /(Mac|iPhone|iPod|iPad)/i.test(navigator.userAgent)
   align-items: center;
   border-radius: var(--border-radius-xs);
   background: var(--color-background-secondary);
-  box-shadow: 1px 2px 0 0 rgb(0 0 0 / 50%);
+  box-shadow: var(--elevation-low);
   font-family: var(--font-mono);
 
   &.regular {

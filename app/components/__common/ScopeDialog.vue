@@ -104,7 +104,7 @@ function handleOpen(value: boolean): void {
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);
   background-color: var(--color-background-primary);
-  box-shadow: 8px 8px 8px 0 rgb(0 0 0 / 40%);
+  box-shadow: var(--elevation-high);
 }
 
 .panel:focus {

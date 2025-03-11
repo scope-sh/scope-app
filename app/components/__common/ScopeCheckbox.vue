@@ -45,10 +45,17 @@ label {
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-xs);
   background: transparent;
+  transition:
+    border-color 0.2s ease-in-out,
+    box-shadow 0.2s ease-in-out;
+  box-shadow: inset var(--elevation-low);
 }
 
 label:hover .root {
   border-color: var(--color-border-quaternary);
+  box-shadow:
+    inset var(--elevation-low),
+    var(--elevation-medium);
 }
 
 .indicator {
@@ -57,12 +64,14 @@ label:hover .root {
   justify-content: center;
   width: 100%;
   height: 100%;
+  transition: transform 0.2s ease-in-out;
 }
 
 .icon {
   width: 16px;
   height: 16px;
   color: var(--color-accent);
+  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 10%));
 }
 
 .label {

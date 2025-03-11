@@ -66,7 +66,9 @@ const delayDuration = computed<number>(() => {
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);
   background: oklch(from var(--color-background-primary) l c h / 80%);
-  box-shadow: 1px 2px 0 0 rgb(0 0 0 / 20%);
+  box-shadow:
+    0 2px 4px rgb(0 0 0 / 8%),
+    0 1px 2px rgb(0 0 0 / 12%);
   font-size: var(--font-size-s);
   text-align: center;
   text-wrap: balance;

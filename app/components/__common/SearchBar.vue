@@ -284,7 +284,7 @@ input {
   border-radius: var(--border-radius-s);
   outline: none;
   background: transparent;
-  box-shadow: inset 2px 2px 2px rgb(0 0 0 / 40%);
+  box-shadow: inset var(--elevation-medium);
   color: var(--color-text-primary);
   font-size: var(--font-size-l);
 
@@ -319,6 +319,7 @@ input:disabled {
 
 input:focus {
   border-color: var(--color-border-primary);
+  box-shadow: inset var(--elevation-medium);
 }
 
 input::placeholder {
@@ -363,6 +364,7 @@ input::placeholder {
   border-top: none;
   border-radius: 0 0 var(--border-radius-m) var(--border-radius-m);
   background: var(--color-background-primary);
+  box-shadow: var(--elevation-medium);
 }
 
 .result {
@@ -377,17 +379,15 @@ input::placeholder {
   }
 }
 
-.result:hover {
+.result:hover,
+.result.selected {
   background: var(--color-background-secondary);
+  box-shadow: var(--elevation-low);
 }
 
 .result-type {
   color: var(--color-text-secondary);
   font-family: var(--font-mono);
   font-size: var(--font-size-s);
-}
-
-.result.selected {
-  background: var(--color-background-secondary);
 }
 </style>

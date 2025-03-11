@@ -40,7 +40,7 @@ import { Popover } from 'reka-ui/namespaced';
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);
   background: oklch(from var(--color-background-primary) l c h / 60%);
-  box-shadow: 2px 2px 0 0 rgb(0 0 0 / 60%);
+  box-shadow: var(--elevation-medium);
   backdrop-filter: blur(4px);
 }
 

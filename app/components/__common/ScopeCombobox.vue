@@ -175,6 +175,8 @@ input {
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);
   background: var(--color-background-primary);
+  box-shadow: var(--elevation-medium);
+  animation: content-show 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .viewport {

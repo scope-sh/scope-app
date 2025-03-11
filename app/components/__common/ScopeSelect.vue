@@ -112,18 +112,18 @@ export type { Option };
   border-radius: var(--border-radius-s);
   outline: none;
   background: transparent;
-  box-shadow: 1px 1px 0 0 rgb(0 0 0 / 60%);
+  box-shadow: var(--elevation-low);
   color: var(--color-text-secondary);
   cursor: pointer;
 
   &:focus {
     border: 1px solid var(--color-border-quaternary);
-    box-shadow: 2px 2px 0 0 rgb(0 0 0 / 60%);
+    box-shadow: var(--elevation-medium);
   }
 
   &:hover {
     border-color: var(--color-border-quaternary);
-    box-shadow: 2px 2px 0 0 rgb(0 0 0 / 60%);
+    box-shadow: var(--elevation-medium);
     color: var(--color-text-primary);
   }
 
@@ -150,7 +150,7 @@ export type { Option };
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-m);
   background: oklch(from var(--color-background-primary) l c h / 60%);
-  box-shadow: 1px 1px 0 0 rgb(0 0 0 / 80%);
+  box-shadow: var(--elevation-medium);
   backdrop-filter: blur(4px);
 }
 

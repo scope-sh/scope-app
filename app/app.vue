@@ -76,6 +76,9 @@ const isHomeOrChainPage = computed(
   --border-radius-s: 4px;
   --border-radius-m: 8px;
   --border-radius-l: 12px;
+  --elevation-low: 1px 1px 2px rgb(0 0 0 / 60%);
+  --elevation-medium: 2px 2px 4px rgb(0 0 0 / 80%);
+  --elevation-high: 0 4px 8px rgb(0 0 0 / 60%), 0 2px 4px rgb(0 0 0 / 60%);
 }
 
 body {
