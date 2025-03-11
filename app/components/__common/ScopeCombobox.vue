@@ -9,7 +9,7 @@
         <Combobox.Input
           class="input"
           placeholder="Search functions…"
-          :display-value="(val) => val.label"
+          :display-value="(val) => (val ? val.label : '')"
         />
         <Combobox.Cancel
           v-if="model"
