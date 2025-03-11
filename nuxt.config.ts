@@ -43,15 +43,15 @@ export default defineNuxtConfig({
           content: 'block explorer for aa builders',
         },
         { property: 'og:type', content: 'website' },
-        { property: 'og:url', content: 'https://alpha.scope.sh/' },
+        { property: 'og:url', content: 'https://scope.sh/' },
         { property: 'og:title', content: 'scope' },
         {
           property: 'og:description',
           content: 'block explorer for aa builders',
         },
-        { property: 'og:image', content: 'https://alpha.scope.sh/social.png' },
+        { property: 'og:image', content: 'https://scope.sh/social.png' },
         { property: 'twitter:card', content: 'summary_large_image' },
-        { property: 'twitter:url', content: 'https://alpha.scope.sh/' },
+        { property: 'twitter:url', content: 'https://scope.sh/' },
         { property: 'twitter:title', content: 'scope' },
         {
           property: 'twitter:description',
@@ -59,7 +59,7 @@ export default defineNuxtConfig({
         },
         {
           property: 'twitter:image',
-          content: 'https://alpha.scope.sh/social.png',
+          content: 'https://scope.sh/social.png',
         },
       ],
     },
