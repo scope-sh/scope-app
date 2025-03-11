@@ -110,13 +110,32 @@ function handleInput(): void {
   selectedResultIndex.value = 0;
   results.value = [];
   if (query.value !== '') {
-    search();
+    // Handle synchronous searches immediately
+    if (isAddress(query.value)) {
+      results.value = [
+        {
+          type: 'address',
+          address: query.value,
+        },
+      ];
+    } else if (query.value.length >= 3) {
+      // Fallback: chain search
+      const matchingChains = CHAINS.filter((chain) =>
+        getChainNames(chain).some((name) =>
+          name.toLowerCase().includes(query.value.toLowerCase()),
+        ),
+      );
+      results.value = matchingChains.map((chain) => ({
+        type: 'chain',
+        chain,
+      }));
+    }
+
+    searchAsync();
   }
 }
 
-const search = useDebounceFn(async () => {
-  results.value = [];
-
+const searchAsync = useDebounceFn(async () => {
   if (!query.value) {
     return;
   }
@@ -133,13 +152,6 @@ const search = useDebounceFn(async () => {
         },
       ];
     }
-  } else if (isAddress(query.value)) {
-    results.value = [
-      {
-        type: 'address',
-        address: query.value,
-      },
-    ];
   } else if (isTransactionHash(query.value)) {
     isTransactionOrOpResolving.value = true;
     const result = await searchTransactionOrOp(
@@ -158,17 +170,6 @@ const search = useDebounceFn(async () => {
         },
       ];
     }
-  } else if (query.value.length >= 3) {
-    // Fallback: chain search
-    const matchingChains = CHAINS.filter((chain) =>
-      getChainNames(chain).some((name) =>
-        name.toLowerCase().includes(query.value.toLowerCase()),
-      ),
-    );
-    results.value = matchingChains.map((chain) => ({
-      type: 'chain',
-      chain,
-    }));
   }
 }, 200);
 

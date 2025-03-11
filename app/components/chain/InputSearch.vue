@@ -117,12 +117,32 @@ function handleInput(): void {
   selectedResultIndex.value = 0;
   results.value = [];
   if (query.value !== '') {
-    search();
+    // Handle synchronous searches immediately
+    if (isAddress(query.value)) {
+      results.value = [
+        {
+          type: 'address',
+          address: query.value,
+        },
+      ];
+    } else if (isBlockNumber(query.value)) {
+      const number = toBigInt(query.value);
+      if (number !== null) {
+        results.value = [
+          {
+            type: 'block',
+            number,
+          },
+        ];
+      }
+    }
+
+    searchAsync();
   }
 }
 
-const search = useDebounceFn(async () => {
-  if (!query.value || !chainId.value || !client.value) {
+const searchAsync = useDebounceFn(async () => {
+  if (!query.value) {
     return;
   }
 
@@ -150,50 +170,31 @@ const search = useDebounceFn(async () => {
         },
       ];
     }
-  } else if (isAddress(query.value)) {
-    results.value = [
-      {
-        type: 'address',
-        address: query.value,
-      },
-    ];
-  } else if (isBlockNumber(query.value)) {
-    const number = toBigInt(query.value);
-    if (number !== null) {
+  } else if (isTransactionHash(query.value)) {
+    isTransactionOrOpResolving.value = true;
+    const result = await searchTransactionOrOp(query.value as Hex);
+    isTransactionOrOpResolving.value = false;
+    if (result) {
       results.value = [
         {
-          type: 'block',
-          number,
+          type: result.type,
+          chain: chainId.value,
+          hash: result.hash,
         },
       ];
-    } else if (isTransactionHash(query.value)) {
-      isTransactionOrOpResolving.value = true;
-      const result = await searchTransactionOrOp(query.value as Hex);
-      isTransactionOrOpResolving.value = false;
-      if (result) {
-        results.value = [
-          {
-            type: result.type,
-            chain: chainId.value,
-            hash: result.hash,
-          },
-        ];
-      }
     }
-  } else if (query.value.length >= 3) {
-    // Fallback: label search
-    if (apiService.value) {
-      isSearchingLabels.value = true;
-      const labels = await apiService.value.searchLabels(query.value);
-      isSearchingLabels.value = false;
-      results.value = labels.slice(0, 10).map((label) => ({
-        type: 'label',
-        address: label.address,
-        label: label.namespace
-          ? `${label.namespace.value}: ${label.value}`
-          : label.value,
-      }));
-    }
+  } else if (query.value.length >= 3 && apiService.value) {
+    // Label search
+    isSearchingLabels.value = true;
+    const labels = await apiService.value.searchLabels(query.value);
+    isSearchingLabels.value = false;
+    results.value = labels.slice(0, 10).map((label) => ({
+      type: 'label',
+      address: label.address,
+      label: label.namespace
+        ? `${label.namespace.value}: ${label.value}`
+        : label.value,
+    }));
   }
 }, 200);
 
