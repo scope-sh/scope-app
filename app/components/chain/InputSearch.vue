@@ -50,6 +50,7 @@ import SearchResults, {
 } from '@/components/__common/SearchResults.vue';
 import useChain from '@/composables/useChain';
 import useEnv from '@/composables/useEnv';
+import ApiService from '@/services/api';
 import EvmService from '@/services/evm';
 import IndexerService from '@/services/indexer';
 import NamingService from '@/services/naming';
@@ -74,11 +75,17 @@ const results = ref<Result[]>([]);
 const isEnsResolving = ref(false);
 const isLatestBlockResolving = ref(false);
 const isTransactionOrOpResolving = ref(false);
+const isSearchingLabels = ref(false);
 const isLoading = computed(
   () =>
     isEnsResolving.value ||
     isLatestBlockResolving.value ||
-    isTransactionOrOpResolving.value,
+    isTransactionOrOpResolving.value ||
+    isSearchingLabels.value,
+);
+
+const apiService = computed(() =>
+  chainId.value ? new ApiService(chainId.value) : null,
 );
 
 const { focused: isFocused } = useFocusWithin(inputContainerEl);
@@ -172,6 +179,20 @@ const search = useDebounceFn(async () => {
           },
         ];
       }
+    }
+  } else if (query.value.length >= 3) {
+    // Fallback: label search
+    if (apiService.value) {
+      isSearchingLabels.value = true;
+      const labels = await apiService.value.searchLabels(query.value);
+      isSearchingLabels.value = false;
+      results.value = labels.slice(0, 10).map((label) => ({
+        type: 'label',
+        address: label.address,
+        label: label.namespace
+          ? `${label.namespace.value}: ${label.value}`
+          : label.value,
+      }));
     }
   }
 }, 200);

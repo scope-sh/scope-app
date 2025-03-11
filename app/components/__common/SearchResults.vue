@@ -11,7 +11,7 @@
       @click="() => $emit('select', result)"
     >
       <div class="result-value">{{ getLabel(result) }}</div>
-      <div class="result-type">{{ result.type }}</div>
+      <div class="result-type">{{ getType(result.type) }}</div>
     </div>
   </div>
 </template>
@@ -41,13 +41,32 @@ function getLabel(result: Result): string {
       return result.number.toString();
     case 'chain':
       return getChainName(result.chain);
+    case 'label':
+      return result.label;
+  }
+}
+
+function getType(type: ResultType): string {
+  switch (type) {
+    case 'label':
+      return 'address';
+    default:
+      return type;
   }
 }
 </script>
 
 <script lang="ts">
+type ResultType =
+  | 'transaction'
+  | 'op'
+  | 'address'
+  | 'block'
+  | 'chain'
+  | 'label';
+
 interface BaseResult {
-  type: string;
+  type: ResultType;
 }
 
 interface TransactionResult extends BaseResult {
@@ -77,12 +96,19 @@ interface ChainResult extends BaseResult {
   chain: Chain;
 }
 
+interface LabelResult extends BaseResult {
+  type: 'label';
+  address: Hex;
+  label: string;
+}
+
 type Result =
   | TransactionResult
   | OpResult
   | AddressResult
   | BlockResult
-  | ChainResult;
+  | ChainResult
+  | LabelResult;
 
 // eslint-disable-next-line import/prefer-default-export
 export type { Result };
