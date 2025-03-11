@@ -19,9 +19,9 @@ defineProps<{
 <style scoped>
 .value {
   display: flex;
+  gap: var(--spacing-4);
   flex: 1;
   flex-wrap: wrap;
-  gap: var(--spacing-4);
   align-items: center;
   overflow-x: hidden;
   text-overflow: ellipsis;

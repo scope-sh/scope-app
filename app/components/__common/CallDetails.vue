@@ -202,8 +202,8 @@ const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
 .input,
 .output {
   display: flex;
+  gap: var(--spacing-2);
   flex-direction: column;
   width: 100%;
-  gap: var(--spacing-2);
 }
 </style>

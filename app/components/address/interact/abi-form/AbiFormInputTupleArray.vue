@@ -90,14 +90,14 @@ function removeItem(index: number): void {
 <style scoped>
 .root {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-2);
+  flex-direction: column;
 }
 
 .items {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-2);
+  flex-direction: column;
   margin-left: var(--spacing-6);
 }
 

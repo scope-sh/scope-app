@@ -158,8 +158,8 @@ function handleCloseSearch(): void {
 <style scoped>
 .code {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-3);
+  flex-direction: column;
 }
 
 .code-header {

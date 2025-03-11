@@ -109,8 +109,8 @@ export type { Example };
 <style scoped>
 .view {
   display: flex;
-  align-items: center;
   gap: var(--spacing-2);
+  align-items: center;
 }
 
 .list {

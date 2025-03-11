@@ -171,14 +171,14 @@ function handleExampleSelect(example: Example): void {
 <style scoped>
 .body {
   display: flex;
-  flex-direction: column;
   gap: 16px;
+  flex-direction: column;
 }
 
 .form {
   display: flex;
-  flex-direction: column;
   gap: 8px;
+  flex-direction: column;
 }
 
 .form,

@@ -236,13 +236,13 @@ async function resolveEns(name: string): Promise<Address | null> {
 
 .content {
   display: flex;
+  gap: 40px;
   position: relative;
   z-index: 1;
   flex-direction: column;
   align-items: center;
   width: 820px;
   margin: 8px;
-  gap: 40px;
   margin-bottom: 32px;
 }
 
@@ -285,8 +285,8 @@ async function resolveEns(name: string): Promise<Address | null> {
 
 .chains {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-6);
+  grid-template-columns: repeat(4, 1fr);
   width: 100%;
 
   @media (width <= 1600px) {
@@ -304,6 +304,7 @@ async function resolveEns(name: string): Promise<Address | null> {
 
 .chain {
   display: flex;
+  gap: var(--spacing-4);
   flex-direction: column;
   width: 100%;
   height: 80px;
@@ -311,7 +312,6 @@ async function resolveEns(name: string): Promise<Address | null> {
   transition: border-color 0.25s ease-in-out;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);
-  gap: var(--spacing-4);
 
   &:hover {
     border-color: var(--color-border-quaternary);
@@ -328,8 +328,8 @@ async function resolveEns(name: string): Promise<Address | null> {
 
   .chain-header {
     display: flex;
-    align-items: center;
     gap: var(--spacing-4);
+    align-items: center;
     font-size: var(--font-size-m);
 
     .icon {
@@ -340,8 +340,8 @@ async function resolveEns(name: string): Promise<Address | null> {
 
   .chain-details {
     display: flex;
-    flex-wrap: wrap;
     gap: var(--spacing-2);
+    flex-wrap: wrap;
     align-items: center;
     font-size: var(--font-size-s);
   }

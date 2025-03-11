@@ -130,6 +130,7 @@ input {
 
 .anchor {
   display: inline-flex;
+  gap: var(--spacing-3);
   align-items: center;
   width: 100%;
   padding: var(--spacing-4);
@@ -137,7 +138,6 @@ input {
   background-color: var(--color-background-secondary);
   color: var(--color-text-primary);
   font-size: var(--font-size-m);
-  gap: var(--spacing-3);
 }
 
 .anchor:hover {

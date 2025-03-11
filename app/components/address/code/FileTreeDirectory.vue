@@ -164,10 +164,10 @@ button {
 .directories,
 .files {
   display: flex;
+  gap: var(--spacing-2);
   flex-direction: column;
   padding: 0;
   list-style: none;
-  gap: var(--spacing-2);
 }
 
 .directories {

@@ -89,14 +89,14 @@ const constructorViewOptions = computed<ToggleOption<ConstructorView>[]>(() => [
   --spacing: var(--spacing-5);
 
   display: flex;
-  flex-direction: column;
   gap: var(--spacing);
+  flex-direction: column;
 }
 
 .sides {
   display: flex;
-  flex-flow: column wrap;
   row-gap: var(--spacing);
+  flex-flow: column wrap;
 }
 
 @media (width >= 768px) {
@@ -112,8 +112,8 @@ const constructorViewOptions = computed<ToggleOption<ConstructorView>[]>(() => [
 
 .constructor {
   display: flex;
+  gap: var(--spacing-2);
   flex-direction: column;
   width: 100%;
-  gap: var(--spacing-2);
 }
 </style>

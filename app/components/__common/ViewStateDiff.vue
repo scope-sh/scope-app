@@ -25,10 +25,10 @@ defineProps<{
 <style scoped>
 .root {
   display: flex;
+  gap: var(--spacing-8);
   flex-direction: column;
   padding: var(--spacing-8);
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);
-  gap: var(--spacing-8);
 }
 </style>

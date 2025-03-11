@@ -18,14 +18,14 @@ defineProps<{
 <style scoped>
 .root {
   display: flex;
+  gap: var(--spacing-5);
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-5);
 }
 
 .actions {
   display: flex;
-  justify-content: center;
   gap: var(--spacing-4);
+  justify-content: center;
 }
 </style>

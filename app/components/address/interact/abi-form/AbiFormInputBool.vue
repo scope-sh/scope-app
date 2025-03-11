@@ -78,6 +78,7 @@ label {
 
 button {
   display: inline-flex;
+  gap: var(--spacing-2);
   box-sizing: border-box;
   align-items: center;
   justify-content: center;
@@ -92,7 +93,6 @@ button {
   color: var(--color-text-primary);
   font-size: var(--font-size-s);
   font-weight: var(--font-weight-regular);
-  gap: var(--spacing-2);
 
   &:focus {
     border-color: var(--color-border-primary);

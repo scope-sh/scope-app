@@ -287,8 +287,8 @@ const padding = computed(() =>
 
 .content {
   display: flex;
-  align-items: center;
   gap: var(--spacing-6);
+  align-items: center;
 }
 
 .icon-marker {

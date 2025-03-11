@@ -105,8 +105,8 @@ export type { ChainStatus };
 <style scoped>
 .list {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: var(--spacing-6);
+  grid-template-columns: repeat(4, 1fr);
   width: 100%;
 
   @media (width <= 1600px) {
@@ -124,13 +124,13 @@ export type { ChainStatus };
 
 .item {
   display: flex;
+  gap: var(--spacing-4);
   flex-direction: column;
   width: 100%;
   height: 90px;
   padding: var(--spacing-6) var(--spacing-5);
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);
-  gap: var(--spacing-4);
 
   &:hover {
     border-color: var(--color-border-quaternary);

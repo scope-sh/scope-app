@@ -34,6 +34,7 @@ button {
   --transition: 0.25s ease-in-out;
 
   display: flex;
+  gap: var(--spacing-7);
   align-items: center;
   padding: var(--spacing-1) var(--spacing-5);
   transition: var(--transition);
@@ -42,7 +43,6 @@ button {
   background: transparent;
   box-shadow: var(--elevation-low);
   cursor: pointer;
-  gap: var(--spacing-7);
 }
 
 button:hover {
@@ -52,11 +52,11 @@ button:hover {
 
 .label {
   display: flex;
+  gap: var(--spacing-2);
   align-items: center;
   transition: var(--transition);
   color: var(--color-text-secondary);
   font-size: var(--font-size-s);
-  gap: var(--spacing-2);
 }
 
 button:hover .label {

@@ -112,8 +112,8 @@ const { pause, resume } = useTimerFn(() => {
 
 .content {
   display: flex;
-  align-items: center;
   gap: var(--item-gap);
+  align-items: center;
 }
 
 .icon {

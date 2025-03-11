@@ -85,12 +85,12 @@ const label = computed(() => {
   --icon-per-row: 4;
 
   display: flex;
+  gap: var(--icon-gap);
   flex-wrap: wrap;
   width: calc(
     var(--icon-size) * var(--icon-per-row) + var(--icon-gap) *
       (var(--icon-per-row) - 1)
   );
-  gap: var(--icon-gap);
 }
 
 .item {

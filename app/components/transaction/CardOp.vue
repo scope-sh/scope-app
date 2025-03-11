@@ -118,8 +118,8 @@ const opEvent = computed(() => {
 <style scoped>
 .data {
   display: flex;
-  flex-direction: column;
   gap: 16px;
+  flex-direction: column;
 }
 
 .row {

@@ -50,7 +50,7 @@ function handleToggleUpdate(newValue: boolean): void {
 
 .info {
   display: flex;
-  align-items: center;
   gap: var(--spacing-2);
+  align-items: center;
 }
 </style>

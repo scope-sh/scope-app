@@ -302,8 +302,8 @@ async function handleSubmit(
 <style scoped>
 .interact {
   display: flex;
-  flex-direction: column;
   gap: var(--spacing-6);
+  flex-direction: column;
 }
 
 .interact-header {
