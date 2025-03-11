@@ -2,6 +2,7 @@
   <Select.Root
     :model-value="modelValue"
     @update:model-value="handleModelValueUpdate"
+    @update:open="handleOpenUpdate"
   >
     <Select.Trigger
       as-child
@@ -19,7 +20,7 @@
         </Select.Value>
         <ScopeIcon
           class="icon"
-          kind="chevron-down"
+          :kind="isOpen ? 'chevron-up' : 'chevron-down'"
         />
       </button>
     </Select.Trigger>
@@ -64,6 +65,7 @@
 <script setup lang="ts">
 import type { AcceptableValue } from 'reka-ui';
 import { Select } from 'reka-ui/namespaced';
+import { ref } from 'vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
@@ -80,6 +82,11 @@ function handleModelValueUpdate(newValue: AcceptableValue): void {
   if (typeof newValue === 'string') {
     model.value = newValue;
   }
+}
+
+const isOpen = ref(false);
+function handleOpenUpdate(open: boolean): void {
+  isOpen.value = open;
 }
 </script>
 
