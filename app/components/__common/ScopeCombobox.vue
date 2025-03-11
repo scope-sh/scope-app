@@ -38,7 +38,7 @@
           </Combobox.Empty>
 
           <Combobox.Group
-            v-for="(group, groupIndex) of options"
+            v-for="(group, groupIndex) of nonEmptyOptions"
             :key="groupIndex"
           >
             <Combobox.Label class="label"> {{ group.label }} </Combobox.Label>
@@ -60,7 +60,7 @@
               </span>
             </Combobox.Item>
             <Combobox.Separator
-              v-if="groupIndex !== options.length - 1"
+              v-if="groupIndex !== nonEmptyOptions.length - 1"
               class="separator"
             />
           </Combobox.Group>
@@ -72,6 +72,7 @@
 
 <script setup lang="ts" generic="T">
 import { Combobox } from 'reka-ui/namespaced';
+import { computed } from 'vue';
 
 import ScopeLabelEmptyState from './ScopeLabelEmptyState.vue';
 
@@ -79,9 +80,13 @@ import ScopeIcon from '@/components/__common/ScopeIcon.vue';
 
 const model = defineModel<Option<T> | undefined>();
 
-defineProps<{
+const { options } = defineProps<{
   options: OptionGroup<T>[];
 }>();
+
+const nonEmptyOptions = computed(() => {
+  return options.filter((group) => group.options.length > 0);
+});
 
 function filterOptions(options: Option<T>[], query: string): Option<T>[] {
   return options.filter((option) =>
