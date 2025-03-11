@@ -2,36 +2,56 @@
   <div class="wrapper">
     <div
       class="overlay"
-      :class="{ active: isFocused }"
+      :class="{ active: isActive }"
     />
-    <input
-      v-model="query"
-      placeholder="Address, transaction, operation, or chain"
-      :disabled="isLoading"
+    <div
+      ref="inputContainerEl"
+      @keydown.up.prevent="handleUp"
+      @keydown.down.prevent="handleDown"
       @keydown.enter="handleSubmit"
-      @focus="handleFocus"
-      @blur="handleBlur"
-    />
-    <div class="icon-wrapper">
-      <ScopeIcon
-        class="icon"
-        kind="arrow-right"
-        @click="handleClick"
+    >
+      <div class="input-container">
+        <input
+          v-model="query"
+          placeholder="Address, transaction, operation, or chain"
+          @input="handleInput"
+        />
+        <div
+          class="icon-wrapper"
+          :class="{ disabled: results.length === 0 }"
+        >
+          <ScopeIcon
+            class="icon"
+            kind="arrow-right"
+            @click="handleClick"
+          />
+        </div>
+      </div>
+      <SearchResults
+        v-if="isActive"
+        :is-loading="isLoading"
+        :results="results"
+        :selected-index="selectedResultIndex"
+        @select="handleSelect"
       />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import type { Hex } from 'viem';
+import { useDebounceFn, useFocusWithin, refDebounced } from '@vueuse/core';
+import type { Address, Hex } from 'viem';
 import { isAddress } from 'viem';
-import { computed, ref } from 'vue';
+import { computed, ref, useTemplateRef, watch } from 'vue';
 import { useRouter } from 'vue-router';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import SearchResults, {
+  type Result,
+} from '@/components/__common/SearchResults.vue';
 import useEnv from '@/composables/useEnv';
 import NamingService from '@/services/naming';
-import { ETHEREUM, getChainByName, isChainName } from '@/utils/chains';
+import { ETHEREUM, isChainName, getChainByName } from '@/utils/chains';
 import { getRouteLocation } from '@/utils/routing';
 import { searchTransactionOrOp } from '@/utils/search';
 import { isEnsAddress, isTransactionHash } from '@/utils/validation/pattern';
@@ -44,78 +64,147 @@ const emit = defineEmits<{
 const { indexerEndpoint, quicknodeAppName, quicknodeAppKey } = useEnv();
 const router = useRouter();
 
+const inputContainerEl = useTemplateRef<HTMLDivElement>('inputContainerEl');
+
+const { focused: isFocused } = useFocusWithin(inputContainerEl);
+watch(isFocused, (value) => {
+  if (value) {
+    emit('focus');
+  } else {
+    emit('blur');
+  }
+});
+// Prevents race condition when clicking on the search results
+const isFocusedDebounced = refDebounced(isFocused, 100);
+const isActive = computed(() => isFocusedDebounced.value || isFocused.value);
+
 function handleSubmit(): void {
-  search();
+  navigate();
 }
 
 function handleClick(): void {
-  search();
+  navigate();
 }
 
-const isFocused = ref(false);
-
-function handleFocus(): void {
-  isFocused.value = true;
-  emit('focus');
+const selectedResultIndex = ref(0);
+function handleUp(): void {
+  if (selectedResultIndex.value > 0) {
+    selectedResultIndex.value--;
+  }
 }
-
-function handleBlur(): void {
-  isFocused.value = false;
-  emit('blur');
-}
-
-const query = ref('');
-function search(): void {
-  if (isChainName(query.value)) {
-    const chain = getChainByName(query.value);
-    if (chain) {
-      router.push(getRouteLocation({ name: 'chain', chain }));
-    }
-  } else if (isEnsAddress(query.value)) {
-    openEnsAddress(query.value);
-  } else if (isAddress(query.value)) {
-    router.push(
-      getRouteLocation({
-        name: 'global-address',
-        address: query.value,
-      }),
-    );
-  } else if (isTransactionHash(query.value)) {
-    openTransactionOrOp(query.value);
+function handleDown(): void {
+  if (selectedResultIndex.value < results.value.length - 1) {
+    selectedResultIndex.value++;
   }
 }
 
+const query = ref('');
+const results = ref<Result[]>([]);
 const isEnsResolving = ref(false);
 const isTransactionOrOpResolving = ref(false);
 const isLoading = computed(
   () => isEnsResolving.value || isTransactionOrOpResolving.value,
 );
 
-async function openEnsAddress(name: string): Promise<void> {
+function handleInput(): void {
+  selectedResultIndex.value = 0;
+  results.value = [];
+  if (query.value !== '') {
+    search();
+  }
+}
+
+const search = useDebounceFn(async () => {
+  results.value = [];
+
+  if (!query.value) {
+    return;
+  }
+
+  if (isChainName(query.value)) {
+    const chain = getChainByName(query.value);
+    if (chain) {
+      results.value = [
+        {
+          type: 'chain',
+          chain,
+        },
+      ];
+    }
+  }
+
+  if (isEnsAddress(query.value)) {
+    isEnsResolving.value = true;
+    const address = await resolveEns(query.value);
+    isEnsResolving.value = false;
+    if (address) {
+      results.value = [
+        {
+          type: 'address',
+          address,
+        },
+      ];
+    }
+  } else if (isAddress(query.value)) {
+    results.value = [
+      {
+        type: 'address',
+        address: query.value,
+      },
+    ];
+  } else if (isTransactionHash(query.value)) {
+    isTransactionOrOpResolving.value = true;
+    const result = await searchTransactionOrOp(
+      query.value as Hex,
+      quicknodeAppName,
+      quicknodeAppKey,
+      indexerEndpoint,
+    );
+    isTransactionOrOpResolving.value = false;
+    if (result) {
+      results.value = [
+        {
+          type: result.type,
+          chain: result.chain,
+          hash: result.hash,
+        },
+      ];
+    }
+  }
+}, 200);
+
+async function resolveEns(name: string): Promise<Address | null> {
   const namingService = new NamingService(
     quicknodeAppName,
     quicknodeAppKey,
     ETHEREUM,
   );
-  isEnsResolving.value = true;
-  const address = await namingService.resolveEns(name);
-  isEnsResolving.value = false;
-  if (address) {
-    router.push(getRouteLocation({ name: 'global-address', address }));
-  }
+  return namingService.resolveEns(name);
 }
 
-async function openTransactionOrOp(hash: string): Promise<void> {
-  isTransactionOrOpResolving.value = true;
-  const result = await searchTransactionOrOp(
-    hash as Hex,
-    quicknodeAppName,
-    quicknodeAppKey,
-    indexerEndpoint,
-  );
-  isTransactionOrOpResolving.value = false;
+function handleSelect(result: Result): void {
+  openResult(result);
+}
 
-  if (result) {
+function navigate(): void {
+  const result = results.value[selectedResultIndex.value];
+  if (!result) {
+    return;
+  }
+  openResult(result);
+}
+
+function openResult(result: Result): void {
+  if (result.type === 'chain') {
+    router.push(getRouteLocation({ name: 'chain', chain: result.chain }));
+  } else if (result.type === 'address') {
+    router.push(
+      getRouteLocation({
+        name: 'global-address',
+        address: result.address,
+      }),
+    );
+  } else if (result.type === 'transaction' || result.type === 'op') {
     router.push(
       getRouteLocation({
         name: result.type,
@@ -147,12 +236,15 @@ async function openTransactionOrOp(hash: string): Promise<void> {
 }
 
 .overlay.active {
-  opacity: 0.2;
+  opacity: 0.5;
+}
+
+.input-container {
+  position: relative;
+  z-index: 2;
 }
 
 input {
-  position: relative;
-  z-index: 2;
   width: 100%;
   padding: var(--spacing-4) var(--spacing-5);
   transition: 0.25s ease-in-out;
@@ -186,12 +278,17 @@ input::placeholder {
 .icon-wrapper {
   display: flex;
   position: absolute;
-  z-index: 2;
   top: 0;
   right: 0;
   align-items: center;
   height: 100%;
   padding: 0 8px;
+
+  &.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 }
 
 .icon {
