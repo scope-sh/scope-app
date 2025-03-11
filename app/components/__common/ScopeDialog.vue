@@ -70,18 +70,24 @@ function handleOpen(value: boolean): void {
 }
 
 .content {
+  --top: 40%;
+
   position: fixed;
   z-index: 1;
-  top: 40%;
+  top: var(--top);
   left: 50%;
   width: 640px;
   max-width: 90vw;
   max-height: 80vh;
   transform: translate(-50%, -50%);
-}
 
-.content.with-context {
-  top: calc(40% - 12px);
+  @media (height < 680px) {
+    --top: 50%;
+  }
+
+  &.with-context {
+    top: calc(var(--top) - 12px);
+  }
 }
 
 .content[data-state='open'] {
