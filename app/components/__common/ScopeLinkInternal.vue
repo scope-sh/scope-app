@@ -104,9 +104,9 @@ export type { Type };
   }
 
   .background.highlighted {
+    border-style: dashed;
     border-radius: 2px;
     border-color: oklch(from var(--color-accent) l c h / 80%);
-    border-style: dashed;
   }
 
   .background.trimmed {

@@ -19,19 +19,19 @@ defineProps<{
 
 <style scoped>
 button {
-  border-radius: var(--border-radius-s);
-  background-color: transparent;
-  cursor: pointer;
   transition:
     box-shadow 0.2s ease-in-out,
     border-color 0.2s ease-in-out;
+  border-radius: var(--border-radius-s);
+  background-color: transparent;
+  cursor: pointer;
 
   &.primary {
     padding: var(--spacing-3) var(--spacing-5);
     border: 1px solid var(--color-border-secondary);
+    box-shadow: var(--elevation-low);
     color: var(--color-text-primary);
     font-size: var(--font-size-m);
-    box-shadow: var(--elevation-low);
 
     &:hover {
       border-color: var(--color-border-primary);

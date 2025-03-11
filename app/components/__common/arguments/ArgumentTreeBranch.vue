@@ -96,8 +96,8 @@ function getKey(arg: Argument, index: number): string {
   & > .key {
     flex: 0 0 160px;
     overflow: hidden;
-    text-overflow: ellipsis;
     color: var(--color-text-secondary);
+    text-overflow: ellipsis;
   }
 
   @media (width >= 768px) {

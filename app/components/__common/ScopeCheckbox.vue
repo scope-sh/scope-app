@@ -42,12 +42,12 @@ label {
   width: 20px;
   height: 20px;
   padding: 0;
-  border: 1px solid var(--color-border-tertiary);
-  border-radius: var(--border-radius-xs);
-  background: transparent;
   transition:
     border-color 0.2s ease-in-out,
     box-shadow 0.2s ease-in-out;
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-xs);
+  background: transparent;
   box-shadow: inset var(--elevation-low);
 }
 
