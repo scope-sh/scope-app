@@ -115,7 +115,7 @@
               </ScopeTooltip>
             </template>
             <template v-else-if="cell.column.id === 'gasPrice'">
-                <ScopeTooltip
+              <ScopeTooltip
                 delay="medium"
               >
                 <template #trigger>
@@ -124,7 +124,7 @@
                 <template #default>
                   {{ formatGasPrice(cell.getValue<bigint>(), true) }}
                 </template>
-              </ScopeTooltip>
+            </ScopeTooltip>
             </template>
             <FlexRender
               v-else
@@ -236,7 +236,8 @@ const columns = computed(() => {
       }),
       columnHelper.accessor('function', {
         header: 'function',
-        cell: (cell) => formatFunction(address, cell.row.getValue('to'), cell.getValue()),
+        cell: (cell) =>
+          formatFunction(address, cell.row.getValue('to'), cell.getValue()),
       }),
       columnHelper.accessor('value', {
         header: 'value',
@@ -282,7 +283,11 @@ function getAddress(value: Address): string {
   return labelText ? labelText : value;
 }
 
-function formatFunction(address: Address | undefined, to: Address | undefined, value: Hex): string {
+function formatFunction(
+  address: Address | undefined,
+  to: Address | undefined,
+  value: Hex,
+): string {
   if (size(value) === 0) {
     return '—';
   }
