@@ -79,7 +79,7 @@ import {
   isBlockNumber,
   isEnsAddress,
   isTransactionHash,
-} from '~/utils/validation/pattern';
+} from '@/utils/validation/pattern';
 
 const { id: chainId, name: chainName, client } = useChain();
 const router = useRouter();

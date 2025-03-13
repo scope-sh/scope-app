@@ -76,7 +76,7 @@ import {
   isAddress,
   isEnsAddress,
   isTransactionHash,
-} from '~/utils/validation/pattern';
+} from '@/utils/validation/pattern';
 
 const { indexerEndpoint, quicknodeAppName, quicknodeAppKey } = useEnv();
 
