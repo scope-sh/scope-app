@@ -3,6 +3,7 @@
   "compilerOptions": {
     "noUncheckedSideEffectImports": true,
     "verbatimModuleSyntax": false,
-    "isolatedModules": false
+    "isolatedModules": false,
+    "erasableSyntaxOnly": true
   }
 }
