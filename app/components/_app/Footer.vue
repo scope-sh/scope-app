@@ -41,7 +41,7 @@
         </svg>
       </a>
       <a
-        href="https://twitter.com/scope_sh"
+        href="https://x.com/scope_sh"
         target="_blank"
         rel="noopener noreferrer"
         class="social"
