@@ -62,6 +62,10 @@ export default defineNuxtConfig({
           content: 'https://scope.sh/social.png',
         },
       ],
+      script: [
+        { async: true, src: 'https://cdn.metrical.xyz/script.js' },
+        { children: 'window.metrical = { "app": "QjX4GqlXkK"}' },
+      ],
     },
   },
 
