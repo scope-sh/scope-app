@@ -13,6 +13,12 @@ import {
   arbitrumSepolia,
   mode,
   modeTestnet,
+  linea,
+  arbitrumNova,
+  celo,
+  avalanche,
+  avalancheFuji,
+  gnosis,
 } from 'viem/chains';
 
 const ETHEREUM = mainnet.id;
@@ -27,6 +33,12 @@ const ARBITRUM = arbitrum.id;
 const ARBITRUM_SEPOLIA = arbitrumSepolia.id;
 const MODE = mode.id;
 const MODE_SEPOLIA = modeTestnet.id;
+const LINEA = linea.id;
+const ARBITRUM_NOVA = arbitrumNova.id;
+const CELO = celo.id;
+const AVALANCHE = avalanche.id;
+const AVALANCHE_FUJI = avalancheFuji.id;
+const GNOSIS = gnosis.id;
 
 type Chain =
   | typeof ETHEREUM
@@ -40,7 +52,13 @@ type Chain =
   | typeof ARBITRUM
   | typeof ARBITRUM_SEPOLIA
   | typeof MODE
-  | typeof MODE_SEPOLIA;
+  | typeof MODE_SEPOLIA
+  | typeof LINEA
+  | typeof ARBITRUM_NOVA
+  | typeof CELO
+  | typeof AVALANCHE
+  | typeof AVALANCHE_FUJI
+  | typeof GNOSIS;
 
 const DEFAULT_CHAIN = ETHEREUM;
 
@@ -57,6 +75,12 @@ const CHAINS: Chain[] = [
   ARBITRUM_SEPOLIA,
   MODE,
   MODE_SEPOLIA,
+  LINEA,
+  ARBITRUM_NOVA,
+  CELO,
+  AVALANCHE,
+  AVALANCHE_FUJI,
+  GNOSIS,
 ];
 
 function getChainData(chainId: Chain): ChainData {
@@ -85,6 +109,18 @@ function getChainData(chainId: Chain): ChainData {
       return mode;
     case MODE_SEPOLIA:
       return modeTestnet;
+    case LINEA:
+      return linea;
+    case ARBITRUM_NOVA:
+      return arbitrumNova;
+    case CELO:
+      return celo;
+    case AVALANCHE:
+      return avalanche;
+    case AVALANCHE_FUJI:
+      return avalancheFuji;
+    case GNOSIS:
+      return gnosis;
   }
 }
 
@@ -115,6 +151,15 @@ function getChainNames(chain: Chain): string[] {
       }
       case MODE_SEPOLIA: {
         return ['mode sepolia'];
+      }
+      case LINEA: {
+        return ['linea'];
+      }
+      case ARBITRUM_NOVA: {
+        return ['arbitrum', 'nova'];
+      }
+      case AVALANCHE_FUJI: {
+        return ['fuji'];
       }
     }
     return [];
@@ -150,6 +195,12 @@ function getEndpointUrl(
   if (chainId === MODE_SEPOLIA) {
     return modeTestnet.rpcUrls.default.http[0];
   }
+  if (chainId === AVALANCHE) {
+    return avalanche.rpcUrls.default.http[0];
+  }
+  if (chainId === AVALANCHE_FUJI) {
+    return avalancheFuji.rpcUrls.default.http[0];
+  }
   return quicknode(chainId, quicknodeAppName, quicknodeAppKey);
 }
 
@@ -157,6 +208,12 @@ function getTenderlyEndpointUrl(
   chainId: Chain,
   tenderlyNodeAccessKey: string,
 ): string {
+  if (chainId === CELO) {
+    return celo.rpcUrls.default.http[0];
+  }
+  if (chainId === GNOSIS) {
+    return gnosis.rpcUrls.default.http[0];
+  }
   return tenderly(chainId, tenderlyNodeAccessKey);
 }
 
@@ -180,6 +237,12 @@ export {
   ARBITRUM_SEPOLIA,
   MODE,
   MODE_SEPOLIA,
+  LINEA,
+  ARBITRUM_NOVA,
+  CELO,
+  AVALANCHE,
+  AVALANCHE_FUJI,
+  GNOSIS,
   getChainByName,
   getChainData,
   getChainName,

@@ -59,12 +59,47 @@
     :kind
     type="sepolia"
   />
+  <IconLinea
+    v-else-if="chain === LINEA"
+    :kind
+    type="mainnet"
+  />
+  <IconArbitrumNova
+    v-else-if="chain === ARBITRUM_NOVA"
+    :kind
+    type="mainnet"
+  />
+  <IconCelo
+    v-else-if="chain === CELO"
+    :kind
+    type="mainnet"
+  />
+  <IconAvalanche
+    v-else-if="chain === AVALANCHE"
+    :kind
+    type="mainnet"
+  />
+  <IconAvalanche
+    v-else-if="chain === AVALANCHE_FUJI"
+    :kind
+    type="sepolia"
+  />
+  <IconGnosis
+    v-else-if="chain === GNOSIS"
+    :kind
+    type="mainnet"
+  />
 </template>
 
 <script setup lang="ts">
 import IconArbitrum from './icon/chain/Arbitrum.vue';
+import IconArbitrumNova from './icon/chain/ArbitrumNova.vue';
+import IconAvalanche from './icon/chain/Avalanche.vue';
 import IconBase from './icon/chain/Base.vue';
+import IconCelo from './icon/chain/Celo.vue';
 import IconEthereum from './icon/chain/Ethereum.vue';
+import IconGnosis from './icon/chain/Gnosis.vue';
+import IconLinea from './icon/chain/Linea.vue';
 import IconMode from './icon/chain/Mode.vue';
 import IconOptimism from './icon/chain/Optimism.vue';
 import IconPolygon from './icon/chain/Polygon.vue';
@@ -84,6 +119,12 @@ import {
   ARBITRUM_SEPOLIA,
   MODE,
   MODE_SEPOLIA,
+  LINEA,
+  ARBITRUM_NOVA,
+  CELO,
+  AVALANCHE,
+  AVALANCHE_FUJI,
+  GNOSIS,
 } from '@/utils/chains.js';
 
 defineProps<{
