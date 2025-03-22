@@ -32,6 +32,12 @@ import {
   SEPOLIA,
   MODE,
   MODE_SEPOLIA,
+  LINEA,
+  ARBITRUM_NOVA,
+  CELO,
+  AVALANCHE,
+  AVALANCHE_FUJI,
+  GNOSIS,
   getChainData,
   getEndpointUrl,
 } from '@/utils/chains.js';
@@ -270,6 +276,18 @@ function getFallbackChain(chain: Chain): Chain {
       return ETHEREUM;
     case MODE_SEPOLIA:
       return SEPOLIA;
+    case LINEA:
+      return ETHEREUM;
+    case ARBITRUM_NOVA:
+      return ETHEREUM;
+    case CELO:
+      return ETHEREUM;
+    case AVALANCHE:
+      return ETHEREUM;
+    case AVALANCHE_FUJI:
+      return SEPOLIA;
+    case GNOSIS:
+      return ETHEREUM;
   }
 }
 
