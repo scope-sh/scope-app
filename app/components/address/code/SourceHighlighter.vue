@@ -149,7 +149,7 @@ const lineBeforeDisplay = computed(() =>
   transition: border-color 0.25s ease-in-out;
   border: 1px solid transparent;
   border-radius: var(--border-radius-m);
-  background: #201e21;
+  background: var(--color-background-secondary);
   color: var(--color-text-primary);
   font-size: var(--font-size);
 }
