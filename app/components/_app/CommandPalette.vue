@@ -517,7 +517,7 @@ async function getGoToItems(
     }
     const foundOp = await getTxHashByOp(hash as Hex);
     if (foundOp) {
-      return getOpenOpCommand(foundOp);
+      return getOpenOpCommand(hash as Hex);
     }
     return null;
   }
@@ -606,13 +606,13 @@ async function getGoToItems(
             return [
               {
                 icon: 'arrow-right',
-                label: result.hash,
+                label: query,
                 act: (): void => {
                   router.push(
                     getRouteLocation({
                       name: result.type,
                       chain: result.chain,
-                      hash: result.hash,
+                      hash: query,
                     }),
                   );
                 },
