@@ -1,8 +1,8 @@
 <template>
-  <ViewCalls
-    v-if="view === 'calls' && calls"
-    class="calls"
-    :calls
+  <ViewExecution
+    v-if="view === 'execution' && execution"
+    class="execution"
+    :execution
   />
   <div
     v-else-if="view === 'decoded' && decoded"
@@ -35,7 +35,7 @@ import {
 } from 'viem';
 import { computed } from 'vue';
 
-import ViewCalls from './ViewCalls.vue';
+import ViewExecution from './ViewExecution.vue';
 
 import ButtonCopy from '@/components/__common/ButtonCopy.vue';
 import ScopeTextView from '@/components/__common/ScopeTextView.vue';
@@ -45,8 +45,7 @@ import {
   getArguments,
 } from '@/components/__common/arguments';
 import useAbi from '@/composables/useAbi';
-import { decode as decodeCalls } from '@/utils/context/erc4337/callData';
-import type { Call } from '@/utils/context/erc4337/callData';
+import { type Execution, decodeCalldata } from '@/utils/context/erc7821';
 
 const { address, callData } = defineProps<{
   address: Address | null;
@@ -72,7 +71,7 @@ const abi = computed<AbiFunction | null>(() => {
     : null;
 });
 
-const calls = computed<Call[] | null>(() => decodeCalls(callData));
+const execution = computed<Execution | null>(() => decodeCalldata(callData));
 
 const decoded = computed<DecodedCallData | null>(() => {
   if (!abi.value) return null;
@@ -92,14 +91,14 @@ const decoded = computed<DecodedCallData | null>(() => {
 </script>
 
 <script lang="ts">
-type CallDataView = 'calls' | 'hex' | 'decoded';
+type CallDataView = 'execution' | 'hex' | 'decoded';
 
 // eslint-disable-next-line import/prefer-default-export
 export type { CallDataView };
 </script>
 
 <style scoped>
-.calls,
+.execution,
 .decoded {
   display: flex;
   gap: var(--spacing-2);

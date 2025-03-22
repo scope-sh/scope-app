@@ -788,10 +788,10 @@ async function fetchAbis(): Promise<void> {
   }
 }
 
-const selectedCallDataView = ref<CallDataView>('calls');
+const selectedCallDataView = ref<CallDataView>('execution');
 const callDataViewOptions = computed<ToggleOption<CallDataView>[]>(() => [
   {
-    value: 'calls',
+    value: 'execution',
     icon: 'hamburger',
   },
   {
