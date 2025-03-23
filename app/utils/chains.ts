@@ -12,7 +12,6 @@ import {
   arbitrum,
   arbitrumSepolia,
   mode,
-  modeTestnet,
   linea,
   arbitrumNova,
   celo,
@@ -33,7 +32,6 @@ const POLYGON_AMOY = polygonAmoy.id;
 const ARBITRUM = arbitrum.id;
 const ARBITRUM_SEPOLIA = arbitrumSepolia.id;
 const MODE = mode.id;
-const MODE_SEPOLIA = modeTestnet.id;
 const LINEA = linea.id;
 const ARBITRUM_NOVA = arbitrumNova.id;
 const CELO = celo.id;
@@ -54,7 +52,6 @@ type Chain =
   | typeof ARBITRUM
   | typeof ARBITRUM_SEPOLIA
   | typeof MODE
-  | typeof MODE_SEPOLIA
   | typeof LINEA
   | typeof ARBITRUM_NOVA
   | typeof CELO
@@ -77,7 +74,6 @@ const CHAINS: Chain[] = [
   ARBITRUM,
   ARBITRUM_SEPOLIA,
   MODE,
-  MODE_SEPOLIA,
   LINEA,
   ARBITRUM_NOVA,
   CELO,
@@ -111,8 +107,6 @@ function getChainData(chainId: Chain): ChainData {
       return arbitrumSepolia;
     case MODE:
       return mode;
-    case MODE_SEPOLIA:
-      return modeTestnet;
     case LINEA:
       return linea;
     case ARBITRUM_NOVA:
@@ -154,9 +148,6 @@ function getChainNames(chain: Chain): string[] {
       }
       case MODE: {
         return ['mode'];
-      }
-      case MODE_SEPOLIA: {
-        return ['mode sepolia'];
       }
       case LINEA: {
         return ['linea'];
@@ -201,9 +192,6 @@ function getEndpointUrl(
   if (chainId === MODE) {
     return mode.rpcUrls.default.http[0];
   }
-  if (chainId === MODE_SEPOLIA) {
-    return modeTestnet.rpcUrls.default.http[0];
-  }
   if (chainId === AVALANCHE) {
     return avalanche.rpcUrls.default.http[0];
   }
@@ -232,7 +220,6 @@ export {
   ARBITRUM,
   ARBITRUM_SEPOLIA,
   MODE,
-  MODE_SEPOLIA,
   LINEA,
   ARBITRUM_NOVA,
   CELO,

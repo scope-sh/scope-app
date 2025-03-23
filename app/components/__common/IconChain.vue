@@ -54,11 +54,6 @@
     :kind
     type="mainnet"
   />
-  <IconMode
-    v-else-if="chain === MODE_SEPOLIA"
-    :kind
-    type="sepolia"
-  />
   <IconLinea
     v-else-if="chain === LINEA"
     :kind
@@ -124,7 +119,6 @@ import {
   ARBITRUM,
   ARBITRUM_SEPOLIA,
   MODE,
-  MODE_SEPOLIA,
   LINEA,
   ARBITRUM_NOVA,
   CELO,

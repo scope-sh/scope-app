@@ -31,7 +31,6 @@ import {
   POLYGON,
   SEPOLIA,
   MODE,
-  MODE_SEPOLIA,
   LINEA,
   ARBITRUM_NOVA,
   CELO,
@@ -275,8 +274,6 @@ function getFallbackChain(chain: Chain): Chain {
       return SEPOLIA;
     case MODE:
       return ETHEREUM;
-    case MODE_SEPOLIA:
-      return SEPOLIA;
     case LINEA:
       return ETHEREUM;
     case ARBITRUM_NOVA:
