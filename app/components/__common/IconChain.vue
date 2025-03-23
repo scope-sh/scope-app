@@ -89,6 +89,11 @@
     :kind
     type="mainnet"
   />
+  <IconBsc
+    v-else-if="chain === BSC"
+    :kind
+    type="mainnet"
+  />
 </template>
 
 <script setup lang="ts">
@@ -96,6 +101,7 @@ import IconArbitrum from './icon/chain/Arbitrum.vue';
 import IconArbitrumNova from './icon/chain/ArbitrumNova.vue';
 import IconAvalanche from './icon/chain/Avalanche.vue';
 import IconBase from './icon/chain/Base.vue';
+import IconBsc from './icon/chain/Bsc.vue';
 import IconCelo from './icon/chain/Celo.vue';
 import IconEthereum from './icon/chain/Ethereum.vue';
 import IconGnosis from './icon/chain/Gnosis.vue';
@@ -125,6 +131,7 @@ import {
   AVALANCHE,
   AVALANCHE_FUJI,
   GNOSIS,
+  BSC,
 } from '@/utils/chains.js';
 
 defineProps<{

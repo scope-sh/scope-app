@@ -38,6 +38,7 @@ import {
   AVALANCHE,
   AVALANCHE_FUJI,
   GNOSIS,
+  BSC,
   getChainData,
   getEndpointUrl,
 } from '@/utils/chains.js';
@@ -287,6 +288,8 @@ function getFallbackChain(chain: Chain): Chain {
     case AVALANCHE_FUJI:
       return SEPOLIA;
     case GNOSIS:
+      return ETHEREUM;
+    case BSC:
       return ETHEREUM;
   }
 }

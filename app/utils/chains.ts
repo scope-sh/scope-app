@@ -19,6 +19,7 @@ import {
   avalanche,
   avalancheFuji,
   gnosis,
+  bsc,
 } from 'viem/chains';
 
 const ETHEREUM = mainnet.id;
@@ -39,6 +40,7 @@ const CELO = celo.id;
 const AVALANCHE = avalanche.id;
 const AVALANCHE_FUJI = avalancheFuji.id;
 const GNOSIS = gnosis.id;
+const BSC = bsc.id;
 
 type Chain =
   | typeof ETHEREUM
@@ -58,7 +60,8 @@ type Chain =
   | typeof CELO
   | typeof AVALANCHE
   | typeof AVALANCHE_FUJI
-  | typeof GNOSIS;
+  | typeof GNOSIS
+  | typeof BSC;
 
 const DEFAULT_CHAIN = ETHEREUM;
 
@@ -81,6 +84,7 @@ const CHAINS: Chain[] = [
   AVALANCHE,
   AVALANCHE_FUJI,
   GNOSIS,
+  BSC,
 ];
 
 function getChainData(chainId: Chain): ChainData {
@@ -121,6 +125,8 @@ function getChainData(chainId: Chain): ChainData {
       return avalancheFuji;
     case GNOSIS:
       return gnosis;
+    case BSC:
+      return bsc;
   }
 }
 
@@ -160,6 +166,9 @@ function getChainNames(chain: Chain): string[] {
       }
       case AVALANCHE_FUJI: {
         return ['fuji'];
+      }
+      case BSC: {
+        return ['bsc', 'binance smart chain'];
       }
     }
     return [];
@@ -230,6 +239,7 @@ export {
   AVALANCHE,
   AVALANCHE_FUJI,
   GNOSIS,
+  BSC,
   getChainByName,
   getChainData,
   getChainName,
