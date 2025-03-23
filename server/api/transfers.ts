@@ -27,8 +27,9 @@ import erc1155Abi from '@/abi/erc1155';
 import erc20Abi from '@/abi/erc20';
 import { getChainData, parseChain, getEndpointUrl } from '@/utils/chains.js';
 
-const quicknodeAppName = process.env.QUICKNODE_APP_NAME || '';
-const quicknodeAppKey = process.env.QUICKNODE_APP_KEY || '';
+const appBaseUrl = process.env.VITE_APP_BASE_URL || '';
+const quicknodeAppName = process.env.VITE_QUICKNODE_APP_NAME || '';
+const quicknodeAppKey = process.env.VITE_QUICKNODE_APP_KEY || '';
 const envioHypersyncApiKey = process.env.ENVIO_HYPERSYNC_API_KEY || '';
 
 interface TransferData {
@@ -301,7 +302,16 @@ export default defineEventHandler(async (event) => {
   }
   const evmClient = createPublicClient({
     chain: getChainData(chainId),
-    transport: http(getEndpointUrl(chainId, quicknodeAppName, quicknodeAppKey)),
+    transport: http(
+      getEndpointUrl(chainId, quicknodeAppName, quicknodeAppKey),
+      {
+        fetchOptions: {
+          headers: {
+            Origin: appBaseUrl,
+          },
+        },
+      },
+    ),
   });
   const decimalResults = await multicall(evmClient, {
     contracts: assets.map((asset) => ({
