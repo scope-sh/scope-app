@@ -13,7 +13,7 @@ interface AddressLabels {
   type: RequestType;
 }
 
-type Requests = Map<Address, RequestType>;
+type Requests = Map<Chain, Map<Address, RequestType>>;
 
 const store = defineStore('labels', () => {
   const labels = ref<Partial<Record<Chain, Record<Address, AddressLabels>>>>(
@@ -78,18 +78,26 @@ const store = defineStore('labels', () => {
   );
 
   async function requestLabel(
+    chain: Chain,
     address: Address,
     type: RequestType,
     onFetch: (requests: Requests) => void,
   ): Promise<void> {
     // If we receive two requests for the same address (primary and all), make sure to fetch all labels
-    const oldRequestType = requests.get(address);
+    if (!requests.get(chain)) {
+      requests.set(chain, new Map());
+    }
+    const chainRequests = requests.get(chain);
+    if (!chainRequests) {
+      throw new Error('Chain requests not found');
+    }
+    const oldRequestType = chainRequests.get(address);
     const newRequestType = oldRequestType
       ? oldRequestType === 'primary'
         ? type
         : 'all'
       : type;
-    requests.set(address, newRequestType);
+    chainRequests.set(address, newRequestType);
     debouncedFn(onFetch);
   }
 

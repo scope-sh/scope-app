@@ -26,46 +26,54 @@ function useLabels(chainOverride?: Chain): UseLabels {
     address: Address,
     type: RequestType,
   ): Promise<void> {
-    store.requestLabel(address, type, handleLabelFetch);
+    store.requestLabel(chain.value, address, type, handleLabelFetch);
   }
 
   async function handleLabelFetch(requests: Requests): Promise<void> {
-    // Fetch a label for every address only once
-    const primaryLabelAddresses = new Set<Address>();
-    const allLabelAddresses = new Set<Address>();
-    for (const [address, type] of requests) {
-      const existingLabels = store.getAddressLabels(chain.value, address);
-      if (existingLabels && existingLabels.type === 'all') {
-        continue;
-      }
-      if (type === 'primary') {
-        if (existingLabels && existingLabels.type === 'primary') {
+    for (const [chain, chainRequests] of requests) {
+      // Fetch a label for every address only once
+      const primaryLabelAddresses = new Set<Address>();
+      const allLabelAddresses = new Set<Address>();
+      for (const [address, type] of chainRequests) {
+        const existingLabels = store.getAddressLabels(chain, address);
+        if (existingLabels && existingLabels.type === 'all') {
           continue;
         }
-        primaryLabelAddresses.add(address);
-      } else {
-        allLabelAddresses.add(address);
+        if (type === 'primary') {
+          if (existingLabels && existingLabels.type === 'primary') {
+            continue;
+          }
+          primaryLabelAddresses.add(address);
+        } else {
+          allLabelAddresses.add(address);
+        }
       }
+      fetchPrimaryLabels(chain, [...primaryLabelAddresses]);
+      fetchAllLabels(chain, [...allLabelAddresses]);
     }
-    fetchPrimaryLabels([...primaryLabelAddresses]);
-    fetchAllLabels([...allLabelAddresses]);
   }
 
-  async function fetchPrimaryLabels(addresses: Address[]): Promise<void> {
+  async function fetchPrimaryLabels(
+    chain: Chain,
+    addresses: Address[],
+  ): Promise<void> {
     if (addresses.length === 0) {
       return;
     }
     // Fetch primary labels in a single request
     const primaryLabels =
       await apiService.value.getPrimaryAddressLabels(addresses);
-    store.addPrimaryLabels(chain.value, primaryLabels);
+    store.addPrimaryLabels(chain, primaryLabels);
   }
 
-  async function fetchAllLabels(addresses: Address[]): Promise<void> {
+  async function fetchAllLabels(
+    chain: Chain,
+    addresses: Address[],
+  ): Promise<void> {
     // Fetch all labels for each address
     for (const address of addresses) {
       const labels = await apiService.value.getAllAddressLabels(address);
-      store.addAllLabels(chain.value, address, labels);
+      store.addAllLabels(chain, address, labels);
     }
   }
 
