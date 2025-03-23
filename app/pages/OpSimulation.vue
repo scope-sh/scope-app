@@ -154,7 +154,7 @@
       <CardHighlights
         v-if="opUnpacked"
         :op="opUnpacked"
-        :logs="opLogs"
+        :logs="transactionLogs || []"
       />
     </ScopePanel>
     <template #section>
@@ -169,7 +169,11 @@
         >
           <template #default>
             <ScopeLabelEmptyState
-              v-if="!opLogs.length"
+              v-if="!transactionLogs"
+              value="Simulation logs not available"
+            />
+            <ScopeLabelEmptyState
+              v-else-if="!transactionLogs.length"
               value="No logs found"
             />
             <div
@@ -181,7 +185,7 @@
                 :options="logViewOptions"
               />
               <CardLog
-                v-for="(log, index) in opLogs"
+                v-for="(log, index) in transactionLogs"
                 :key="index"
                 :log="log"
                 :view="selectedLogView"
@@ -283,13 +287,7 @@ const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 
 const route = useRoute<OpSimulationRouteLocation>();
-const {
-  id: chainId,
-  client,
-  tenderlyClient,
-  name: chainName,
-  nativeCurrency,
-} = useChain();
+const { id: chainId, client, name: chainName, nativeCurrency } = useChain();
 const { requestAbi } = useAbi();
 
 const section = ref<Section['value']>(SECTION_INTERNAL);
@@ -441,9 +439,6 @@ const apiService = computed(() =>
 const evmService = computed(() =>
   client.value ? new EvmService(client.value) : null,
 );
-const tenderlyService = computed(() =>
-  tenderlyClient.value ? new EvmService(tenderlyClient.value) : null,
-);
 
 const isLoading = ref(false);
 const transactionLogs = ref<Log[] | null>(null);
@@ -536,7 +531,7 @@ async function fetchTransactionLogs(
   entryPoint: Address,
   op: Op,
 ): Promise<void> {
-  if (!tenderlyService.value) {
+  if (!evmService.value) {
     return;
   }
   const opData =
@@ -551,7 +546,7 @@ async function fetchTransactionLogs(
           functionName: 'handleOps',
           args: [[op], MOCK_BUNDLER],
         });
-  transactionLogs.value = await tenderlyService.value.getCallLogs({
+  transactionLogs.value = await evmService.value.getCallLogs({
     from: MOCK_BUNDLER,
     to: entryPoint,
     value: BigInt(0),
@@ -729,7 +724,10 @@ async function fetchAbis(): Promise<void> {
   if (!apiService.value) {
     return;
   }
-  for (const log of opLogs.value) {
+  if (!transactionLogs.value) {
+    return;
+  }
+  for (const log of transactionLogs.value) {
     if (!log.address) {
       continue;
     }
