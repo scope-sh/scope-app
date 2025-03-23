@@ -416,25 +416,23 @@ class Service {
     to: Address;
     value: bigint;
     data: Hex;
-    gas?: bigint;
-    gasPrice?: bigint;
   }): Promise<Log[] | null> {
     try {
-      const response = await this.client.tenderlySimulateTransaction(
-        {
-          from: call.from,
-          to: call.to,
-          value: toHex(call.value),
-          data: call.data,
-          gas: call.gas ? toHex(call.gas) : undefined,
-          gasPrice: call.gasPrice ? toHex(call.gasPrice) : undefined,
-        },
-        'latest',
-      );
-      return response.logs.map((log, index) => ({
-        address: log.raw.address,
-        topics: log.raw.topics,
-        data: log.raw.data,
+      const response = await this.client.simulateCalls({
+        account: call.from,
+        calls: [
+          {
+            to: call.to,
+            data: call.data,
+            value: call.value,
+          },
+        ],
+      });
+      const logs = response.results[0].logs || [];
+      return logs.map((log, index) => ({
+        address: log.address,
+        topics: log.topics,
+        data: log.data,
         blockHash: null,
         blockNumber: null,
         logIndex: index,
