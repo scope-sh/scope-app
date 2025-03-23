@@ -36,21 +36,36 @@
           </Select.ScrollUpButton>
 
           <Select.Viewport>
-            <Select.Group>
-              <Select.Item
-                v-for="(item, index) in options"
-                :key="index"
-                class="item"
-                :value="item.value"
-              >
-                <slot
-                  name="item"
-                  :item
-                >
-                  {{ item.label }}
-                </slot>
-              </Select.Item>
-            </Select.Group>
+            <div class="view">
+              <input
+                v-model="search"
+                placeholder="Filter"
+                class="search"
+              />
+              <template v-if="filteredOptions.length > 0">
+                <Select.Group>
+                  <Select.Item
+                    v-for="(item, index) in filteredOptions"
+                    :key="index"
+                    class="item"
+                    :value="item.value"
+                  >
+                    <slot
+                      name="item"
+                      :item
+                    >
+                      {{ item.label }}
+                    </slot>
+                  </Select.Item>
+                </Select.Group>
+              </template>
+              <template v-else>
+                <ScopeLabelEmptyState
+                  value="No results found"
+                  size="small"
+                />
+              </template>
+            </div>
           </Select.Viewport>
 
           <Select.ScrollDownButton class="scroll-button">
@@ -65,18 +80,26 @@
 <script setup lang="ts">
 import type { AcceptableValue } from 'reka-ui';
 import { Select } from 'reka-ui/namespaced';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import ScopeIcon from '@/components/__common/ScopeIcon.vue';
+import ScopeLabelEmptyState from '@/components/__common/ScopeLabelEmptyState.vue';
 
 const model = defineModel<Option['value']>({
   required: true,
 });
 
-defineProps<{
+const { options } = defineProps<{
   options: Option[];
   placeholder: string;
 }>();
+
+const search = ref('');
+const filteredOptions = computed(() => {
+  return options.filter((option) =>
+    option.label.toLowerCase().includes(search.value.toLowerCase()),
+  );
+});
 
 function handleModelValueUpdate(newValue: AcceptableValue): void {
   if (typeof newValue === 'string') {
@@ -87,6 +110,7 @@ function handleModelValueUpdate(newValue: AcceptableValue): void {
 const isOpen = ref(false);
 function handleOpenUpdate(open: boolean): void {
   isOpen.value = open;
+  search.value = '';
 }
 </script>
 
@@ -142,7 +166,7 @@ export type { Option };
 
 .panel {
   width: var(--reka-select-trigger-width);
-  max-height: var(--reka-select-content-available-height);
+  max-height: 368px;
   padding: var(--spacing-2);
   overflow-y: auto;
   transform-origin: var(--reka-select-content-transform-origin);
@@ -172,6 +196,23 @@ export type { Option };
   justify-content: center;
   height: 25px;
   cursor: default;
+}
+
+.view {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+}
+
+.search {
+  width: 100%;
+  padding: var(--spacing-2);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-s);
+  outline: none;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-s);
 }
 
 .item {
