@@ -254,60 +254,6 @@ interface DebugTransactionState {
   post?: DebugTransactionStatePart;
 }
 
-interface TenderlyTrasnactionTracePart {
-  type: 'CALL' | 'STATICCALL' | 'DELEGATECALL' | 'CREATE' | 'CREATE2';
-  from: Address;
-  to: Address;
-  gas: Hex;
-  gasUsed: Hex;
-  value?: Hex;
-  error?: 'execution reverted' | 'out of gas';
-  errorReason?: string;
-  input: Hex;
-  output: Hex;
-  subtraces: number;
-  traceAddress: number[];
-}
-
-interface TenderlyTransactionSimulationResponse {
-  status: boolean;
-  gasUsed: Hex;
-  cumulativeGasUsed: Hex;
-  blockNumber: Hex;
-  type: Hex;
-  logsBloom: Hex;
-  logs: {
-    raw: {
-      address: Address;
-      topics: [Hex, ...Hex[]];
-      data: Hex;
-    };
-  }[];
-  trace: TenderlyTrasnactionTracePart[];
-  assetChanges: unknown;
-  balanceChanges: unknown;
-  stateChanges: {
-    address: Address;
-    storage?: {
-      slot: Hex;
-      previousValue: Hex;
-      newValue: Hex;
-    }[];
-    nonce?: {
-      previousValue: Hex;
-      newValue: Hex;
-    };
-    balance?: {
-      previousValue: Hex;
-      newValue: Hex;
-    };
-    code?: {
-      previousValue: Hex;
-      newValue: Hex;
-    };
-  }[];
-}
-
 class Service {
   client: ReturnType<typeof getClient>;
 
@@ -779,46 +725,6 @@ function formatDebugTransactionStatePart(
 // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
 function getClient(client: PublicClient) {
   return client.extend((client) => ({
-    async tenderlySimulateTransaction(
-      call: {
-        from?: Address;
-        to: Address;
-        gas?: Hex;
-        gasPrice?: Hex;
-        value?: Hex;
-        data?: Hex;
-        maxFeePerGas?: Hex;
-        maxPriorityFeePerGas?: Hex;
-      },
-      block: BlockTag | number,
-      stateOverrides?: Record<
-        Address,
-        {
-          nonce?: Hex;
-          balance?: Hex;
-          stateDiff?: Record<Hex, Hex>;
-          code?: Hex;
-        }
-      >,
-      blockOverrides?: {
-        number?: Hex;
-        difficulty?: Hex;
-        time?: Hex;
-        gasLimit?: Hex;
-        coinbase?: Hex;
-        random?: Hex;
-        baseFee?: Hex;
-      },
-    ): Promise<TenderlyTransactionSimulationResponse> {
-      return await client.request({
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        method: 'tenderly_simulateTransaction',
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        params: [call, block, stateOverrides, blockOverrides],
-      });
-    },
     async traceCall(
       call: {
         from?: Address;

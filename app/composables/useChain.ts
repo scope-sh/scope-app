@@ -10,7 +10,6 @@ import {
   getChainData,
   getChainName,
   getEndpointUrl,
-  getTenderlyEndpointUrl,
 } from '@/utils/chains.js';
 import type { Chain } from '@/utils/chains.js';
 
@@ -24,7 +23,6 @@ interface UseChain {
   id: Ref<Chain>;
   name: Ref<string>;
   client: Ref<PublicClient>;
-  tenderlyClient: Ref<PublicClient>;
   nativeCurrency: Ref<NativeCurrency>;
   isAvailable: Ref<boolean>;
 }
@@ -48,7 +46,7 @@ function parseChain(value?: string | string[]): Chain | null {
 
 function useChain(): UseChain {
   const route = useRoute();
-  const { quicknodeAppName, quicknodeAppKey, tenderlyNodeAccessKey } = useEnv();
+  const { quicknodeAppName, quicknodeAppKey } = useEnv();
   const chain = computed(() => route.params.chain as string);
 
   const isAvailable = computed(() => {
@@ -86,21 +84,12 @@ function useChain(): UseChain {
     }),
   );
 
-  const tenderlyClient = computed(() =>
-    createPublicClient({
-      chain: getChainData(id.value),
-      transport: http(getTenderlyEndpointUrl(id.value, tenderlyNodeAccessKey), {
-        batch: true,
-      }),
-    }),
-  );
-
   const nativeCurrency = computed(() => {
     const chain = getChainData(id.value);
     return chain.nativeCurrency;
   });
 
-  return { id, name, client, tenderlyClient, nativeCurrency, isAvailable };
+  return { id, name, client, nativeCurrency, isAvailable };
 }
 
 export default useChain;
