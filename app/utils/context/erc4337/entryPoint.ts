@@ -2,17 +2,24 @@ import {
   type Address,
   type Hex,
   type PublicClient,
+  type TypedDataDomain,
   decodeFunctionData,
   encodeAbiParameters,
   keccak256,
   decodeEventLog,
   slice,
   size,
+  stringToHex,
+  hashDomain,
+  concat,
+  getTypesForEIP712Domain,
+  padHex,
 } from 'viem';
 import { readContract } from 'viem/actions';
 
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0.js';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0.js';
+import entryPointV0_8_0Abi from '@/abi/entryPointV0_8_0.js';
 import klasterPaymasterAbi from '@/abi/klasterPaymaster.js';
 import pimlicoBundleBulkerAbi from '@/abi/pimlicoBundleBulker.js';
 import safePaymasterAbi from '@/abi/safePaymaster.js';
@@ -33,6 +40,7 @@ interface OpEvent {
 type TxType =
   | typeof TX_TYPE_ENTRY_POINT_0_6
   | typeof TX_TYPE_ENTRY_POINT_0_7
+  | typeof TX_TYPE_ENTRY_POINT_0_8
   | typeof TX_TYPE_PIMLICO_BULKER
   | typeof TX_TYPE_KLASTER_PAYMASTER
   | typeof TX_TYPE_SAFE_PAYMASTER
@@ -66,7 +74,19 @@ interface Op_0_7 {
   signature: Hex;
 }
 
-type Op = Op_0_6 | Op_0_7;
+interface Op_0_8 {
+  sender: Address;
+  nonce: bigint;
+  initCode: Hex;
+  callData: Hex;
+  accountGasLimits: Hex;
+  preVerificationGas: bigint;
+  gasFees: Hex;
+  paymasterAndData: Hex;
+  signature: Hex;
+}
+
+type Op = Op_0_6 | Op_0_7 | Op_0_8;
 
 interface OpUnpacked {
   hash: Hex;
@@ -95,6 +115,7 @@ interface AccountDeployment {
 
 const TX_TYPE_ENTRY_POINT_0_6 = 'Entry Point 0.6';
 const TX_TYPE_ENTRY_POINT_0_7 = 'Entry Point 0.7';
+const TX_TYPE_ENTRY_POINT_0_8 = 'Entry Point 0.8';
 const TX_TYPE_PIMLICO_BULKER = 'Pimlico Bulker';
 const TX_TYPE_KLASTER_PAYMASTER = 'Klaster Paymaster';
 const TX_TYPE_SAFE_PAYMASTER = 'Safe Paymaster';
@@ -102,6 +123,7 @@ const TX_TYPE_UNKNOWN = 'Unknown';
 
 const ENTRY_POINT_0_6_ADDRESS = '0x5ff137d4b0fdcd49dca30c7cf57e578a026d2789';
 const ENTRY_POINT_0_7_ADDRESS = '0x0000000071727de22e5e9d8baf0edac6f37da032';
+const ENTRY_POINT_0_8_ADDRESS = '0x4337084d9e255ff0702461cf8895ce9e3b5ff108';
 const PIMLICO_BULKER_ADDRESS = '0x000000000091a1f34f51ce866bed8983db51a97e';
 const KLASTER_PAYMASTER_ADDRESS = '0xc31ad82a88609ee88e87d382509060f3490a8eb2';
 const SAFE_PAYMASTER_1_ADDRESS = '0xab9b52a97fb334efdb8fd081763952653040806f';
@@ -113,6 +135,9 @@ function getTxType(transaction: Transaction): TxType {
   }
   if (transaction.to === ENTRY_POINT_0_7_ADDRESS) {
     return TX_TYPE_ENTRY_POINT_0_7;
+  }
+  if (transaction.to === ENTRY_POINT_0_8_ADDRESS) {
+    return TX_TYPE_ENTRY_POINT_0_8;
   }
   if (transaction.to === PIMLICO_BULKER_ADDRESS) {
     return TX_TYPE_PIMLICO_BULKER;
@@ -140,6 +165,9 @@ function getEntryPoint(
   if (txType === TX_TYPE_ENTRY_POINT_0_7) {
     return ENTRY_POINT_0_7_ADDRESS;
   }
+  if (txType === TX_TYPE_ENTRY_POINT_0_8) {
+    return ENTRY_POINT_0_8_ADDRESS;
+  }
   if (txType === TX_TYPE_PIMLICO_BULKER) {
     return ENTRY_POINT_0_6_ADDRESS;
   }
@@ -166,6 +194,9 @@ function getEntryPointFromTrace(trace: TransactionTrace): Address | null {
       if (tracePart.action.to === ENTRY_POINT_0_7_ADDRESS) {
         return ENTRY_POINT_0_7_ADDRESS;
       }
+      if (tracePart.action.to === ENTRY_POINT_0_8_ADDRESS) {
+        return ENTRY_POINT_0_8_ADDRESS;
+      }
     }
   }
   return null;
@@ -186,6 +217,16 @@ function getBeforeExecutionLog(logs: Log[]): Log | null {
     } else if (log.address === ENTRY_POINT_0_7_ADDRESS) {
       const event = decodeEventLog({
         abi: entryPointV0_7_0Abi,
+        data: log.data,
+        topics: log.topics as [Hex, ...Hex[]],
+      });
+      if (event.eventName !== 'BeforeExecution') {
+        continue;
+      }
+      return log;
+    } else if (log.address === ENTRY_POINT_0_8_ADDRESS) {
+      const event = decodeEventLog({
+        abi: entryPointV0_8_0Abi,
         data: log.data,
         topics: log.topics as [Hex, ...Hex[]],
       });
@@ -239,6 +280,25 @@ function getOpEvents(logs: Log[]): OpEvent[] {
         actualGasCost: event.args.actualGasCost,
         actualGasUsed: event.args.actualGasUsed,
       });
+    } else if (log.address === ENTRY_POINT_0_8_ADDRESS) {
+      const event = decodeEventLog({
+        abi: entryPointV0_8_0Abi,
+        data: log.data,
+        topics: log.topics as [Hex, ...Hex[]],
+      });
+      if (event.eventName !== 'UserOperationEvent') {
+        continue;
+      }
+      events.push({
+        logIndex: log.logIndex,
+        userOpHash: event.args.userOpHash,
+        sender: event.args.sender.toLowerCase() as Address,
+        paymaster: event.args.paymaster.toLowerCase() as Address,
+        nonce: event.args.nonce,
+        success: event.args.success,
+        actualGasCost: event.args.actualGasCost,
+        actualGasUsed: event.args.actualGasUsed,
+      });
     }
   }
   return events;
@@ -249,10 +309,11 @@ function getOpEvent(
   entrypoint: Address,
   logs: Log[],
   op: Op,
+  delegate: Address | null,
 ): OpEvent | null {
   const opEvents = getOpEvents(logs);
   const userOpEvent = opEvents.find(
-    (event) => event.userOpHash === getOpHash(chain, entrypoint, op),
+    (event) => event.userOpHash === getOpHash(chain, entrypoint, op, delegate),
   );
   return userOpEvent || null;
 }
@@ -276,6 +337,16 @@ async function getOps(
   if (txType === TX_TYPE_ENTRY_POINT_0_7) {
     const { functionName, args } = decodeFunctionData({
       abi: entryPointV0_7_0Abi,
+      data: transaction.input,
+    });
+    if (functionName !== 'handleOps') {
+      return [];
+    }
+    return args[0] as Op_0_7[];
+  }
+  if (txType === TX_TYPE_ENTRY_POINT_0_8) {
+    const { functionName, args } = decodeFunctionData({
+      abi: entryPointV0_8_0Abi,
       data: transaction.input,
     });
     if (functionName !== 'handleOps') {
@@ -351,13 +422,62 @@ function getTraceOps(trace: TransactionTrace): Op[] {
         } catch {
           // Ignore
         }
+      } else if (tracePart.action.to === ENTRY_POINT_0_8_ADDRESS) {
+        try {
+          const { functionName, args } = decodeFunctionData({
+            abi: entryPointV0_8_0Abi,
+            data: tracePart.action.input,
+          });
+          if (functionName !== 'handleOps') {
+            continue;
+          }
+          ops.push(...args[0]);
+        } catch {
+          // Ignore
+        }
       }
     }
   }
   return ops;
 }
 
-function getOpHash(chain: Chain, entryPoint: Address, op: Op): Hex | null {
+function getEip7702InitCodeHashOverride(
+  initCode: Hex,
+  delegate: Address | null,
+): Hex {
+  if (!isEip7702InitCode(initCode)) {
+    return '0x';
+  }
+  if (!delegate) {
+    return '0x';
+  }
+  if (size(initCode) <= 20) {
+    return keccak256(delegate);
+  } else {
+    return keccak256(concat([delegate, slice(initCode, 20)]));
+  }
+}
+
+function isEip7702InitCode(initCode: Hex): boolean {
+  if (size(initCode) < 2) {
+    return false;
+  }
+  const initCodeStart = slice(initCode, 0, 20);
+  return (
+    initCodeStart ===
+    padHex('0x7702', {
+      size: 20,
+      dir: 'right',
+    })
+  );
+}
+
+function getOpHash(
+  chain: Chain,
+  entryPoint: Address,
+  op: Op,
+  delegate: Address | null,
+): Hex | null {
   if (entryPoint === ENTRY_POINT_0_6_ADDRESS) {
     const userOperation = op as Op_0_6;
     const hashedInitCode = keccak256(userOperation.initCode);
@@ -427,6 +547,64 @@ function getOpHash(chain: Chain, entryPoint: Address, op: Op): Hex | null {
       [keccak256(packedUserOp), entryPoint, BigInt(chain)],
     );
     return keccak256(encoded);
+  } else if (entryPoint === ENTRY_POINT_0_8_ADDRESS) {
+    const userOperation = op as Op_0_8;
+    const typeHash = keccak256(
+      stringToHex(
+        'PackedUserOperation(address sender,uint256 nonce,bytes initCode,bytes callData,bytes32 accountGasLimits,uint256 preVerificationGas,bytes32 gasFees,bytes paymasterAndData)',
+      ),
+    );
+    const initCodeHashOverride = getEip7702InitCodeHashOverride(
+      userOperation.initCode,
+      delegate,
+    );
+    const hashedInitCode =
+      initCodeHashOverride === '0x'
+        ? keccak256(userOperation.initCode)
+        : initCodeHashOverride;
+    const hashedCallData = keccak256(userOperation.callData);
+    const hashedPaymasterAndData = keccak256(userOperation.paymasterAndData);
+    const packedUserOp = encodeAbiParameters(
+      [
+        { type: 'bytes32' },
+        { type: 'address' },
+        { type: 'uint256' },
+        { type: 'bytes32' },
+        { type: 'bytes32' },
+        { type: 'bytes32' },
+        { type: 'uint256' },
+        { type: 'bytes32' },
+        { type: 'bytes32' },
+      ],
+      [
+        typeHash,
+        userOperation.sender,
+        userOperation.nonce,
+        hashedInitCode,
+        hashedCallData,
+        userOperation.accountGasLimits,
+        userOperation.preVerificationGas,
+        userOperation.gasFees,
+        hashedPaymasterAndData,
+      ],
+    );
+    const domain = {
+      name: 'ERC4337',
+      version: '1',
+      chainId: chain,
+      verifyingContract: ENTRY_POINT_0_8_ADDRESS,
+    } as TypedDataDomain;
+    const parts = concat([
+      '0x1901',
+      hashDomain({
+        domain,
+        types: {
+          EIP712Domain: getTypesForEIP712Domain({ domain }),
+        },
+      }),
+      keccak256(packedUserOp),
+    ]);
+    return keccak256(parts);
   }
   return null;
 }
@@ -434,10 +612,15 @@ function getOpHash(chain: Chain, entryPoint: Address, op: Op): Hex | null {
 function unpackOp(hash: Hex, op: Op): OpUnpacked {
   const initCodeUnpacked =
     size(op.initCode) > 0
-      ? {
-          factory: slice(op.initCode, 0, 20),
-          initData: slice(op.initCode, 20),
-        }
+      ? size(op.initCode) > 20
+        ? {
+            factory: slice(op.initCode, 0, 20),
+            initData: slice(op.initCode, 20),
+          }
+        : {
+            factory: slice(op.initCode, 0, 20),
+            initData: null,
+          }
       : {
           factory: null,
           initData: null,
@@ -560,6 +743,19 @@ function getAccountDeployments(logs: Log[]): AccountDeployment[] {
         address: event.args.sender,
         factory: event.args.factory,
       });
+    } else if (log.address === ENTRY_POINT_0_8_ADDRESS) {
+      const event = decodeEventLog({
+        abi: entryPointV0_8_0Abi,
+        data: log.data,
+        topics: log.topics as [Hex, ...Hex[]],
+      });
+      if (event.eventName !== 'AccountDeployed') {
+        continue;
+      }
+      deployments.push({
+        address: event.args.sender,
+        factory: event.args.factory,
+      });
     }
   }
   return deployments;
@@ -580,6 +776,16 @@ function getBeneficiary(transaction: Transaction): Address | null {
   if (txType === TX_TYPE_ENTRY_POINT_0_7) {
     const { functionName, args } = decodeFunctionData({
       abi: entryPointV0_7_0Abi,
+      data: transaction.input,
+    });
+    if (functionName !== 'handleOps') {
+      return null;
+    }
+    return args[1].toLowerCase() as Address;
+  }
+  if (txType === TX_TYPE_ENTRY_POINT_0_8) {
+    const { functionName, args } = decodeFunctionData({
+      abi: entryPointV0_8_0Abi,
       data: transaction.input,
     });
     if (functionName !== 'handleOps') {
@@ -633,8 +839,7 @@ function getPhaseByEntryPointError(error: string): Phase {
 export {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
-  TX_TYPE_ENTRY_POINT_0_6,
-  TX_TYPE_ENTRY_POINT_0_7,
+  ENTRY_POINT_0_8_ADDRESS,
   TX_TYPE_UNKNOWN,
   getTxType,
   getEntryPoint,
@@ -648,4 +853,4 @@ export {
   getPhaseByEntryPointError,
   unpackOp,
 };
-export type { TxType, Phase, Op, OpUnpacked, Op_0_6, Op_0_7 };
+export type { TxType, Phase, Op, OpUnpacked, Op_0_6, Op_0_7, Op_0_8 };

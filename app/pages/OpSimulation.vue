@@ -215,6 +215,7 @@ import {
   entryPoint06Abi,
   entryPoint06Address,
   entryPoint07Abi,
+  entryPoint07Address,
 } from 'viem/account-abstraction';
 import { computed, ref, onMounted, watch } from 'vue';
 
@@ -255,10 +256,12 @@ import type {
 import EvmService from '@/services/evm';
 import type { Command } from '@/stores/commands';
 import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
+import { getDelegation } from '@/utils/context/eip7702';
 import type {
   Op,
   Op_0_6,
   Op_0_7,
+  Op_0_8,
   Phase,
 } from '@/utils/context/erc4337/entryPoint';
 import {
@@ -363,7 +366,7 @@ const op = computed<Op | null>(() => {
       paymasterAndData: paymasterAndData.value,
       signature: signature.value,
     } as Op_0_6;
-  } else {
+  } else if (entryPoint.value === entryPoint07Address.toLowerCase()) {
     return {
       sender: sender.value,
       nonce: BigInt(nonce.value),
@@ -375,11 +378,23 @@ const op = computed<Op | null>(() => {
       paymasterAndData: paymasterAndData.value,
       signature: signature.value,
     } as Op_0_7;
+  } else {
+    return {
+      sender: sender.value,
+      nonce: BigInt(nonce.value),
+      initCode: initCode.value,
+      callData: callData.value,
+      accountGasLimits: accountGasLimits.value,
+      preVerificationGas: BigInt(preVerificationGas.value),
+      gasFees: gasFees.value,
+      paymasterAndData: paymasterAndData.value,
+      signature: signature.value,
+    } as Op_0_8;
   }
 });
 const hash = computed(() =>
   op.value && entryPoint.value
-    ? getOpHash(chainId.value, entryPoint.value, op.value)
+    ? getOpHash(chainId.value, entryPoint.value, op.value, delegate.value)
     : null,
 );
 
@@ -483,7 +498,13 @@ const opEvent = computed(() => {
   if (!op.value) {
     return null;
   }
-  return getOpEvent(chainId.value, entryPoint.value, opLogs.value, op.value);
+  return getOpEvent(
+    chainId.value,
+    entryPoint.value,
+    opLogs.value,
+    op.value,
+    delegate.value,
+  );
 });
 const opStatus = computed(() => {
   if (!transactionReplay.value) {
@@ -522,6 +543,7 @@ async function fetch(): Promise<void> {
   await Promise.all([
     fetchTransactionLogs(entryPoint.value, op.value),
     fetchTransactionReplay(entryPoint.value, op.value),
+    fetchDelegates(),
   ]);
   isLoading.value = false;
   await fetchAbis();
@@ -784,6 +806,26 @@ async function fetchAbis(): Promise<void> {
       });
     }
   }
+}
+
+const delegate = ref<Address | null>(null);
+async function fetchDelegates(): Promise<void> {
+  delegate.value = null;
+  if (!op.value) {
+    return;
+  }
+  if (!evmService.value) {
+    return;
+  }
+  const sender = op.value.sender;
+  if (!sender) {
+    return;
+  }
+  const code = await evmService.value.getCode(sender);
+  if (!code) {
+    return;
+  }
+  delegate.value = getDelegation(sender);
 }
 
 const selectedCallDataView = ref<CallDataView>('execution');

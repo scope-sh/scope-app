@@ -12,6 +12,7 @@
             :options="[
               { value: '0.6', label: 'Entry Point 0.6' },
               { value: '0.7', label: 'Entry Point 0.7' },
+              { value: '0.8', label: 'Entry Point 0.8' },
             ]"
           />
           <textarea
@@ -62,6 +63,7 @@ import ExampleView, {
 } from '@/components/simulate/ExampleView.vue';
 import PreviewView from '@/components/simulate/PreviewView.vue';
 import { type Chain, CHAINS, DEFAULT_CHAIN } from '@/utils/chains';
+import { ENTRY_POINT_0_8_ADDRESS } from '@/utils/context/erc4337/entryPoint';
 import { OpUnionSchema } from '@/utils/context/simulation';
 import { type OpSimulationRoute, getRouteLocation } from '@/utils/routing';
 
@@ -71,11 +73,13 @@ const route = useRouter();
 
 const chain = ref<Chain>(DEFAULT_CHAIN);
 
-const entryPointVersion = ref<'0.6' | '0.7'>('0.7');
+const entryPointVersion = ref<'0.6' | '0.7' | '0.8'>('0.7');
 const entryPoint = computed(() =>
   entryPointVersion.value === '0.6'
     ? (entryPoint06Address.toLowerCase() as Address)
-    : (entryPoint07Address.toLowerCase() as Address),
+    : entryPointVersion.value === '0.7'
+      ? (entryPoint07Address.toLowerCase() as Address)
+      : ENTRY_POINT_0_8_ADDRESS,
 );
 
 const input = ref<string>('');

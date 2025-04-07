@@ -269,9 +269,13 @@ class Service {
     return await this.client.getGasPrice();
   }
 
-  public async getCode(address: Address): Promise<Hex | null> {
+  public async getCode(
+    address: Address,
+    blockNumber?: bigint,
+  ): Promise<Hex | null> {
     const bytecode = await this.client.getCode({
       address: address as Address,
+      blockNumber,
     });
     return bytecode || null;
   }

@@ -136,6 +136,7 @@ import ScopeTooltip from '@/components/__common/ScopeTooltip.vue';
 import {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
+  ENTRY_POINT_0_8_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
 import { toRelativeTime } from '@/utils/conversion';
 import { formatRelativeTime, formatTime } from '@/utils/formatting';
@@ -193,6 +194,9 @@ const columns = computed(() => [
       }
       if (value === ENTRY_POINT_0_7_ADDRESS) {
         return '0.7';
+      }
+      if (value === ENTRY_POINT_0_8_ADDRESS) {
+        return '0.8';
       }
       return '—';
     },

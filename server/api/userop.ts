@@ -10,6 +10,7 @@ import type { Hash } from 'viem';
 import {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
+  ENTRY_POINT_0_8_ADDRESS,
 } from '@/utils/context/erc4337/entryPoint';
 
 const envioHypersyncApiKey = process.env.ENVIO_HYPERSYNC_API_KEY || '';
@@ -32,7 +33,11 @@ export default defineEventHandler(async (event) => {
     fromBlock: 0,
     logs: [
       {
-        address: [ENTRY_POINT_0_6_ADDRESS, ENTRY_POINT_0_7_ADDRESS],
+        address: [
+          ENTRY_POINT_0_6_ADDRESS,
+          ENTRY_POINT_0_7_ADDRESS,
+          ENTRY_POINT_0_8_ADDRESS,
+        ],
         topics: [[USER_OPERATION_EVENT_TOPIC], [hash]],
       },
     ],

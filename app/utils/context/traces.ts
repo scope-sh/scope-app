@@ -4,10 +4,12 @@ import { decodeFunctionData, pad, slice, zeroHash } from 'viem';
 import {
   ENTRY_POINT_0_6_ADDRESS,
   ENTRY_POINT_0_7_ADDRESS,
+  ENTRY_POINT_0_8_ADDRESS,
 } from './erc4337/entryPoint';
 
 import entryPointV0_6_0Abi from '@/abi/entryPointV0_6_0';
 import entryPointV0_7_0Abi from '@/abi/entryPointV0_7_0';
+import entryPointV0_8_0Abi from '@/abi/entryPointV0_8_0';
 import iAccountAbi from '@/abi/iAccount';
 import type {
   DebugTransactionTrace,
@@ -285,7 +287,8 @@ function getOpTrace(
     (part): part is TransactionTraceCallFrame =>
       part.type === 'call' &&
       (part.action.from === ENTRY_POINT_0_6_ADDRESS ||
-        part.action.from === ENTRY_POINT_0_7_ADDRESS) &&
+        part.action.from === ENTRY_POINT_0_7_ADDRESS ||
+        part.action.from === ENTRY_POINT_0_8_ADDRESS) &&
       slice(part.action.input, 0, 4) === '0x570e1a36',
   );
   const createSenderCall = createSenderCalls.find(
@@ -304,6 +307,8 @@ function getOpTrace(
       ((part.action.from === ENTRY_POINT_0_6_ADDRESS &&
         slice(part.action.input, 0, 4) === '0x3a871cdd') ||
         (part.action.from === ENTRY_POINT_0_7_ADDRESS &&
+          slice(part.action.input, 0, 4) === '0x19822f7c') ||
+        (part.action.from === ENTRY_POINT_0_8_ADDRESS &&
           slice(part.action.input, 0, 4) === '0x19822f7c')),
   );
   const validateOpCall = validateOpCalls.find((call) => {
@@ -328,6 +333,8 @@ function getOpTrace(
       ((part.action.from === ENTRY_POINT_0_6_ADDRESS &&
         slice(part.action.input, 0, 4) === '0xf465c77e') ||
         (part.action.from === ENTRY_POINT_0_7_ADDRESS &&
+          slice(part.action.input, 0, 4) === '0x52b7512c') ||
+        (part.action.from === ENTRY_POINT_0_8_ADDRESS &&
           slice(part.action.input, 0, 4) === '0x52b7512c')),
   );
   const validatePaymasterOpCall = validatePaymasterOpCalls.find((call) => {
@@ -355,6 +362,9 @@ function getOpTrace(
         slice(part.action.input, 0, 4) === '0x1d732756') ||
         (part.action.from === ENTRY_POINT_0_7_ADDRESS &&
           part.action.to === ENTRY_POINT_0_7_ADDRESS &&
+          slice(part.action.input, 0, 4) === '0x0042dc53') ||
+        (part.action.from === ENTRY_POINT_0_8_ADDRESS &&
+          part.action.to === ENTRY_POINT_0_8_ADDRESS &&
           slice(part.action.input, 0, 4) === '0x0042dc53')),
   );
   const innerHandleOpCall = innerHandleOpCalls.find((call) => {
@@ -364,10 +374,15 @@ function getOpTrace(
             abi: entryPointV0_6_0Abi,
             data: call.action.input,
           })
-        : decodeFunctionData({
-            abi: entryPointV0_7_0Abi,
-            data: call.action.input,
-          });
+        : call.action.from === ENTRY_POINT_0_7_ADDRESS
+          ? decodeFunctionData({
+              abi: entryPointV0_7_0Abi,
+              data: call.action.input,
+            })
+          : decodeFunctionData({
+              abi: entryPointV0_8_0Abi,
+              data: call.action.input,
+            });
     if (decoded.functionName !== 'innerHandleOp') {
       return false;
     }

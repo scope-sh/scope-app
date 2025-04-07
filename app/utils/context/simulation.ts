@@ -176,6 +176,8 @@ const Op_0_7_Schema = v.pipe(
   }),
 );
 
+const Op_0_8_Schema = Op_0_7_Schema;
+
 const UnpackedOpSchema = v.object({
   callData: HexStringSchema,
   callGasLimit: BigIntSchema,
@@ -195,6 +197,17 @@ const UnpackedOpSchema = v.object({
 });
 type OpSchema = v.InferOutput<typeof UnpackedOpSchema>;
 
-const OpUnionSchema = v.union([UnpackedOpSchema, Op_0_6_Schema, Op_0_7_Schema]);
+const OpUnionSchema = v.union([
+  UnpackedOpSchema,
+  Op_0_6_Schema,
+  Op_0_7_Schema,
+  Op_0_8_Schema,
+]);
 
-export { Op_0_6_Schema, Op_0_7_Schema, OpUnionSchema, UnpackedOpSchema };
+export {
+  Op_0_6_Schema,
+  Op_0_7_Schema,
+  Op_0_8_Schema,
+  OpUnionSchema,
+  UnpackedOpSchema,
+};

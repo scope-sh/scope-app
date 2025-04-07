@@ -335,6 +335,7 @@ import {
 } from '@/utils/context/traces';
 import { formatEther, formatGasPrice } from '@/utils/formatting';
 import { type OpRouteLocation, getRouteLocation } from '@/utils/routing';
+import { getDelegation } from '~/utils/context/eip7702';
 
 const SECTION_TRANSACTION = 'transaction';
 const SECTION_LOGS = 'logs';
@@ -423,10 +424,14 @@ const isLoading = ref(false);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
 const transactionReplay = ref<TransactionReplay | null>(null);
+const delegates = ref<Record<Address, Address>>({});
 
 const entryPoint = ref<Address | null>(null);
 const op = ref<Op | null>(null);
-watch(transaction, async () => {
+const opData = computed(() => {
+  return [transaction.value, transactionReplay.value, delegates.value];
+});
+watch(opData, async () => {
   if (!transaction.value) {
     return;
   }
@@ -442,11 +447,13 @@ watch(transaction, async () => {
   entryPoint.value = getEntryPoint(transaction.value, transactonTrace);
   const ops = await getOps(client.value, transaction.value, transactonTrace);
   op.value =
-    ops.find(
-      (op) =>
-        entryPoint.value &&
-        getOpHash(chain, entryPoint.value, op) === hash.value,
-    ) || null;
+    ops.find((op) => {
+      if (!entryPoint.value) {
+        return false;
+      }
+      const delegate = delegates.value[op.sender] ?? null;
+      return getOpHash(chain, entryPoint.value, op, delegate) === hash.value;
+    }) || null;
 });
 watch(op, async () => {
   if (!apiService.value) {
@@ -496,11 +503,13 @@ const opEvent = computed(() => {
   if (!op.value) {
     return null;
   }
+  const delegate = delegates.value[op.value.sender] ?? null;
   return getOpEvent(
     chainId.value,
     entryPoint.value,
     transactionReceipt.value.logs,
     op.value,
+    delegate,
   );
 });
 const gasPrice = computed(() => {
@@ -539,6 +548,7 @@ async function fetch(): Promise<void> {
     fetchTransactionReceipt(txHash),
     fetchTransactionReplay(txHash),
   ]);
+  await fetchDelegates();
   isLoading.value = false;
   await fetchAbis();
 }
@@ -693,6 +703,38 @@ async function fetchAbis(): Promise<void> {
       });
     }
   }
+}
+
+async function fetchDelegates(): Promise<void> {
+  delegates.value = {};
+  if (!transaction.value) {
+    return;
+  }
+  const transactonTrace = transactionReplay.value?.trace ?? null;
+  const ops = await getOps(client.value, transaction.value, transactonTrace);
+  const senders = ops.map((op) => op.sender);
+  const codes = await Promise.all(
+    senders.map((sender) => {
+      if (!evmService.value) {
+        return null;
+      }
+      if (!transaction.value) {
+        return null;
+      }
+      const blockNumber = transaction.value.blockNumber;
+      if (!blockNumber) {
+        return null;
+      }
+      return evmService.value.getCode(sender, blockNumber);
+    }),
+  );
+  delegates.value = senders.reduce((acc, sender, index) => {
+    const code = codes[index];
+    if (!code) {
+      return acc;
+    }
+    return { ...acc, [sender]: getDelegation(code) };
+  }, {});
 }
 
 const selectedCallDataView = ref<CallDataView>('execution');
