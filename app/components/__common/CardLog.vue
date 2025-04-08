@@ -117,7 +117,11 @@ interface DecodedLog {
 
 const date = computed<Date | null>(() => {
   if ('blockTimestamp' in log) {
-    return new Date(log.blockTimestamp);
+    const timestamp =
+      typeof log.blockTimestamp === 'string'
+        ? parseInt(log.blockTimestamp, 16) * 1000
+        : log.blockTimestamp;
+    return new Date(timestamp);
   }
   return null;
 });
