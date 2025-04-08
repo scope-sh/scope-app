@@ -89,6 +89,11 @@
     :kind
     type="mainnet"
   />
+  <IconMonad
+    v-else-if="chain === MONAD_TESTNET"
+    :kind
+    type="sepolia"
+  />
 </template>
 
 <script setup lang="ts">
@@ -102,6 +107,7 @@ import IconEthereum from './icon/chain/Ethereum.vue';
 import IconGnosis from './icon/chain/Gnosis.vue';
 import IconLinea from './icon/chain/Linea.vue';
 import IconMode from './icon/chain/Mode.vue';
+import IconMonad from './icon/chain/Monad.vue';
 import IconOptimism from './icon/chain/Optimism.vue';
 import IconPolygon from './icon/chain/Polygon.vue';
 import type { Kind } from './icon/chain/kind.js';
@@ -126,6 +132,7 @@ import {
   AVALANCHE_FUJI,
   GNOSIS,
   BSC,
+  MONAD_TESTNET,
 } from '@/utils/chains.js';
 
 defineProps<{

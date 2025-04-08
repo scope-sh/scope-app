@@ -38,6 +38,7 @@ import {
   AVALANCHE_FUJI,
   GNOSIS,
   BSC,
+  MONAD_TESTNET,
   getChainData,
   getEndpointUrl,
 } from '@/utils/chains.js';
@@ -288,6 +289,8 @@ function getFallbackChain(chain: Chain): Chain {
       return ETHEREUM;
     case BSC:
       return ETHEREUM;
+    case MONAD_TESTNET:
+      return SEPOLIA;
   }
 }
 
