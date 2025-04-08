@@ -1,5 +1,5 @@
 <template>
-  <ScopePopover>
+  <ScopePopover v-if="CHAINS.length > 1">
     <template #trigger>
       <IconChain
         class="trigger-icon"
@@ -30,6 +30,12 @@
       </div>
     </template>
   </ScopePopover>
+  <IconChain
+    v-else
+    class="trigger-icon"
+    :chain="modelValue"
+    kind="mono"
+  />
 </template>
 
 <script setup lang="ts">
