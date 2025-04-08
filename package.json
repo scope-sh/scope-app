@@ -37,7 +37,7 @@
     "@vueuse/core": "^13.0.0",
     "@vueuse/nuxt": "^13.0.0",
     "abitype": "^1.0.8",
-    "evm-providers": "^0.5.5",
+    "evm-providers": "^0.5.7",
     "ky": "^1.7.5",
     "nuxt": "^3.16.1",
     "nuxt-posthog": "^1.6.2",
