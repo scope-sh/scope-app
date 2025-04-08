@@ -52,8 +52,8 @@ import {
 } from '@vueuse/core';
 import type { Address, Hex } from 'viem';
 import { createPublicClient, http } from 'viem';
-import { ref, computed, watch } from 'vue';
-import { RouterLink } from 'vue-router';
+import { ref, computed, watch, onMounted } from 'vue';
+import { RouterLink, useRouter } from 'vue-router';
 
 import IconBrand from '@/components/__common/IconBrand.vue';
 import IconChain from '@/components/__common/IconChain.vue';
@@ -82,6 +82,14 @@ const { indexerEndpoint, quicknodeAppName, quicknodeAppKey } = useEnv();
 
 useHead({
   title: () => 'Scope',
+});
+
+const router = useRouter();
+
+onMounted(() => {
+  if (CHAINS.length === 1) {
+    router.push(getRouteLocation({ name: 'chain', chain: CHAINS[0] }));
+  }
 });
 
 const isInputFocused = ref(false);
