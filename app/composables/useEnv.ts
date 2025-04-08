@@ -1,9 +1,13 @@
+import type { Chain } from '@/utils/chains';
+
 interface EnvironmentVariables {
   quicknodeAppName: string;
   quicknodeAppKey: string;
   apiEndpoint: string;
   appBaseUrl: string;
   indexerEndpoint: string;
+  hideChains: Chain[];
+  showChains: Chain[];
 }
 
 function useEnv(): EnvironmentVariables {
@@ -14,6 +18,8 @@ function useEnv(): EnvironmentVariables {
     apiEndpoint: env.VITE_API_ENDPOINT || '',
     appBaseUrl: env.VITE_APP_BASE_URL || '',
     indexerEndpoint: env.VITE_INDEXER_ENDPOINT || '',
+    hideChains: env.VITE_HIDE_CHAINS?.split(',').map(Number) || [],
+    showChains: env.VITE_SHOW_CHAINS?.split(',').map(Number) || [],
   };
 }
 

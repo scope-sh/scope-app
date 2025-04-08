@@ -16,5 +16,7 @@ interface ImportMeta {
     VITE_APP_BASE_URL?: string;
     VITE_API_ENDPOINT?: string;
     VITE_INDEXER_ENDPOINT?: string;
+    VITE_HIDE_CHAINS?: string;
+    VITE_SHOW_CHAINS?: string;
   };
 }

@@ -22,6 +22,10 @@ import {
   monadTestnet,
 } from 'viem/chains';
 
+import useEnv from '@/composables/useEnv';
+
+const { hideChains, showChains } = useEnv();
+
 const ETHEREUM = mainnet.id;
 const SEPOLIA = sepolia.id;
 const OPTIMISM = optimism.id;
@@ -65,7 +69,7 @@ type Chain =
 
 const DEFAULT_CHAIN = ETHEREUM;
 
-const CHAINS: Chain[] = [
+const ALL_CHAINS: Chain[] = [
   ETHEREUM,
   SEPOLIA,
   OPTIMISM,
@@ -86,6 +90,12 @@ const CHAINS: Chain[] = [
   BSC,
   MONAD_TESTNET,
 ];
+const CHAINS =
+  showChains.length > 0
+    ? showChains
+    : hideChains.length > 0
+      ? ALL_CHAINS.filter((chain) => !hideChains.includes(chain))
+      : ALL_CHAINS;
 
 function getChainData(chainId: Chain): ChainData {
   switch (chainId) {
