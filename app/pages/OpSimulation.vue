@@ -324,6 +324,7 @@ const paymasterAndData = computed(
 );
 const signature = computed(() => route.query.signature as Hex | undefined);
 
+const delegate = ref<Address | null>(null);
 const op = computed<Op | null>(() => {
   if (!sender.value) {
     return null;
@@ -808,7 +809,6 @@ async function fetchAbis(): Promise<void> {
   }
 }
 
-const delegate = ref<Address | null>(null);
 async function fetchDelegates(): Promise<void> {
   delegate.value = null;
   if (!op.value) {
