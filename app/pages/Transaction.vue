@@ -211,6 +211,7 @@
               :op="op"
               :transaction="transaction"
               :transaction-receipt="transactionReceipt"
+              :delegate="null"
             />
           </template>
         </ScopePanel>
