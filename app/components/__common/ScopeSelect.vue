@@ -38,6 +38,7 @@
           <Select.Viewport>
             <div class="view">
               <input
+                v-if="options.length >= FILTER_THRESHOLD"
                 v-model="search"
                 placeholder="Filter"
                 class="search"
@@ -93,6 +94,8 @@ const { options } = defineProps<{
   options: Option[];
   placeholder: string;
 }>();
+
+const FILTER_THRESHOLD = 8;
 
 const search = ref('');
 const filteredOptions = computed(() => {
