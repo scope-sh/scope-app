@@ -52,6 +52,7 @@
   },
   "devDependencies": {
     "@nuxt/eslint": "^1.2.0",
+    "@types/bun": "^1.2.8",
     "@typescript-eslint/eslint-plugin": "^8.27.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/compiler-sfc": "^3.5.13",
