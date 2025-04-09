@@ -1,4 +1,4 @@
 type Kind = 'coloured' | 'mono';
+type ChainType = 'mainnet' | 'testnet';
 
-// eslint-disable-next-line import/prefer-default-export
-export type { Kind };
+export type { Kind, ChainType };

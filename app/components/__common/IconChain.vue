@@ -7,7 +7,7 @@
   <IconBase
     v-else-if="chain === BASE_SEPOLIA"
     :kind
-    type="sepolia"
+    type="testnet"
   />
   <IconEthereum
     v-else-if="chain === ETHEREUM"
@@ -17,7 +17,7 @@
   <IconEthereum
     v-else-if="chain === SEPOLIA"
     :kind
-    type="sepolia"
+    type="testnet"
   />
   <IconOptimism
     v-else-if="chain === OPTIMISM"
@@ -27,7 +27,7 @@
   <IconOptimism
     v-else-if="chain === OPTIMISM_SEPOLIA"
     :kind
-    type="sepolia"
+    type="testnet"
   />
   <IconPolygon
     v-else-if="chain === POLYGON"
@@ -37,7 +37,7 @@
   <IconPolygon
     v-else-if="chain === POLYGON_AMOY"
     :kind
-    type="amoy"
+    type="testnet"
   />
   <IconArbitrum
     v-else-if="chain === ARBITRUM"
@@ -47,7 +47,7 @@
   <IconArbitrum
     v-else-if="chain === ARBITRUM_SEPOLIA"
     :kind
-    type="sepolia"
+    type="testnet"
   />
   <IconMode
     v-else-if="chain === MODE"
@@ -77,7 +77,7 @@
   <IconAvalanche
     v-else-if="chain === AVALANCHE_FUJI"
     :kind
-    type="sepolia"
+    type="testnet"
   />
   <IconGnosis
     v-else-if="chain === GNOSIS"
@@ -92,7 +92,7 @@
   <IconMonad
     v-else-if="chain === MONAD_TESTNET"
     :kind
-    type="sepolia"
+    type="testnet"
   />
 </template>
 
