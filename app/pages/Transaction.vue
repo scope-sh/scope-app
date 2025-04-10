@@ -211,7 +211,7 @@
               :op="op"
               :transaction="transaction"
               :transaction-receipt="transactionReceipt"
-              :delegate="null"
+              :delegate="delegates[op.sender] ?? null"
             />
           </template>
         </ScopePanel>
@@ -309,6 +309,7 @@ import type {
 } from '@/services/evm';
 import type { Command } from '@/stores/commands';
 import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
+import { getDelegation } from '@/utils/context/eip7702';
 import type { Op } from '@/utils/context/erc4337/entryPoint';
 import { getEntryPoint, getOps } from '@/utils/context/erc4337/entryPoint';
 import {
@@ -387,6 +388,7 @@ const block = ref<Block | null>(null);
 const transaction = ref<Transaction | null>(null);
 const transactionReceipt = ref<TransactionReceipt | null>(null);
 const transactionReplay = ref<TransactionReplay | null>(null);
+const delegates = ref<Record<Address, Address>>({});
 
 const hasPrevTransaction = computed(() => {
   if (!transaction.value || !transaction.value.transactionIndex) {
@@ -478,6 +480,7 @@ async function fetch(): Promise<void> {
       transaction.value.blockNumber,
     );
   }
+  await fetchDelegates();
   isLoading.value = false;
   await fetchAbis();
 }
@@ -596,6 +599,38 @@ async function fetchAbis(): Promise<void> {
       });
     }
   }
+}
+
+async function fetchDelegates(): Promise<void> {
+  delegates.value = {};
+  if (!transaction.value) {
+    return;
+  }
+  const transactonTrace = transactionReplay.value?.trace ?? null;
+  const ops = await getOps(client.value, transaction.value, transactonTrace);
+  const senders = ops.map((op) => op.sender);
+  const codes = await Promise.all(
+    senders.map((sender) => {
+      if (!evmService.value) {
+        return null;
+      }
+      if (!transaction.value) {
+        return null;
+      }
+      const blockNumber = transaction.value.blockNumber;
+      if (!blockNumber) {
+        return null;
+      }
+      return evmService.value.getCode(sender, blockNumber);
+    }),
+  );
+  delegates.value = senders.reduce((acc, sender, index) => {
+    const code = codes[index];
+    if (!code) {
+      return acc;
+    }
+    return { ...acc, [sender]: getDelegation(code) };
+  }, {});
 }
 
 const selectedLogView = ref<LogView>('decoded');
