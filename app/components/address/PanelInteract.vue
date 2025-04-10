@@ -1,5 +1,10 @@
 <template>
   <ScopePanel title="Interact">
+    <NoticeDelegation
+      v-if="isDelegated && delegation"
+      v-model:show-as-delegatee="showAsDelegatee"
+      :delegation
+    />
     <NoticeProxy
       v-if="isProxy"
       v-model:show-as-proxy="showAsProxy"
@@ -45,6 +50,7 @@ import { type Hex, toFunctionSelector } from 'viem';
 import { readContract, simulateContract } from 'viem/actions';
 import { computed, ref, watch } from 'vue';
 
+import NoticeDelegation from './code/NoticeDelegation.vue';
 import NoticeProxy from './code/NoticeProxy.vue';
 import AbiForm from './interact/abi-form/AbiForm.vue';
 
@@ -56,6 +62,10 @@ import ScopeTabs from '@/components/__common/ScopeTabs.vue';
 import useChain from '@/composables/useChain';
 import type { Contract } from '@/services/api';
 import {
+  isDelegating as isDelegatingEip7702,
+  getDelegation as getDelegationEip7702,
+} from '@/utils/context/eip7702';
+import {
   getQueryError,
   getFragmentName,
   getConstants,
@@ -66,14 +76,20 @@ import {
 } from '@/utils/context/evm';
 import type { AbiFragment, QueryError } from '@/utils/context/evm';
 
-const { address, contract } = defineProps<{
+const { address, bytecode, contract } = defineProps<{
   address: Address;
+  bytecode: Hex | null;
   contract: Contract | null;
 }>();
 
 const { client } = useChain();
 
 const showAsProxy = ref(true);
+const showAsDelegatee = ref(true);
+
+const isDelegated = computed(() => isDelegatingEip7702(bytecode));
+const delegation = computed(() => getDelegationEip7702(bytecode));
+
 const isFunctionLoading = ref<Record<Hex, boolean>>();
 const errors = ref<Record<Hex, QueryError | null>>();
 const results = ref<Record<Hex, unknown>>();
@@ -136,13 +152,21 @@ const isProxy = computed(() => contract && contract.implementation);
 const implementation = computed(() =>
   contract && contract.implementation ? contract.implementation.address : null,
 );
-const abi = computed(() =>
-  contract
-    ? showAsProxy.value && contract.implementation
-      ? contract.implementation.abi
-      : contract.abi
-    : null,
-);
+const abi = computed(() => {
+  if (!contract) {
+    return null;
+  }
+  if (isDelegated.value) {
+    if (showAsDelegatee.value) {
+      return contract.delegation ? contract.delegation.abi : contract.abi;
+    }
+    return contract.abi;
+  }
+  if (showAsProxy.value) {
+    return contract.implementation ? contract.implementation.abi : contract.abi;
+  }
+  return contract.abi;
+});
 
 const constants = computed(() => getConstants(abi.value || []));
 const paramlessFunctions = computed(() =>
