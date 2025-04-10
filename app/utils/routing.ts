@@ -52,6 +52,7 @@ interface SimulateRoute {
 interface OpSimulationRoute {
   name: 'op-simulation';
   chain?: Chain;
+  blockNumber?: number;
   entryPoint: Address;
   sender: Address;
   nonce: Hex;
@@ -145,6 +146,7 @@ interface OpSimulationRouteLocation {
     chain?: Chain;
   };
   query: {
+    blockNumber?: number;
     entryPoint: Address;
     sender: Address;
     nonce: string;
@@ -274,6 +276,7 @@ function getRouteLocation(route: Route): RouteLocation {
           chain: route.chain,
         },
         query: {
+          blockNumber: route.blockNumber,
           entryPoint: route.entryPoint,
           sender: route.sender,
           nonce: route.nonce.toString(),

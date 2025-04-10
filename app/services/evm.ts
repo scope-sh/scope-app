@@ -366,9 +366,11 @@ class Service {
     to: Address;
     value: bigint;
     data: Hex;
+    blockNumber?: number;
   }): Promise<Log[] | null> {
     try {
       const response = await this.client.simulateCalls({
+        blockNumber: call.blockNumber ? BigInt(call.blockNumber) : undefined,
         account: call.from,
         calls: [
           {
@@ -395,14 +397,17 @@ class Service {
     }
   }
 
-  public async getCallReplay(call: {
-    from: Address;
-    to: Address;
-    value: bigint;
-    data: Hex;
-    gas?: bigint;
-    gasPrice?: bigint;
-  }): Promise<TransactionReplay | null> {
+  public async getCallReplay(
+    call: {
+      from: Address;
+      to: Address;
+      value: bigint;
+      data: Hex;
+      gas?: bigint;
+      gasPrice?: bigint;
+    },
+    blockNumber?: Hex | BlockTag,
+  ): Promise<TransactionReplay | null> {
     try {
       const traceResponse = await this.client.traceCall(
         {
@@ -414,6 +419,7 @@ class Service {
           gasPrice: call.gasPrice ? toHex(call.gasPrice) : undefined,
         },
         ['trace', 'stateDiff'],
+        blockNumber,
       );
       return traceResponseToReplay(traceResponse);
     } catch {
@@ -741,6 +747,7 @@ function getClient(client: PublicClient) {
         maxPriorityFeePerGas?: Hex;
       },
       type: ('trace' | 'stateDiff' | 'vmTrace')[],
+      block?: Hex | BlockTag,
     ): Promise<TransactionTraceResponse> {
       return await client.request({
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -748,7 +755,7 @@ function getClient(client: PublicClient) {
         method: 'trace_call',
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
-        params: [call, type],
+        params: [call, type, block],
       });
     },
     async traceReplayTransaction(

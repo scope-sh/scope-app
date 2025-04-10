@@ -3,24 +3,32 @@
     <ScopePanel title="Op Simulation">
       <div class="body">
         <div class="form">
-          <SelectChain
-            v-model="chain"
-            :options="CHAINS"
-          />
-          <ScopeToggle
-            v-model="entryPointVersion"
-            :options="[
-              { value: '0.6', label: 'Entry Point 0.6' },
-              { value: '0.7', label: 'Entry Point 0.7' },
-              { value: '0.8', label: 'Entry Point 0.8' },
-            ]"
-          />
-          <textarea
-            v-model="input"
-            placeholder="User Operation JSON"
-          />
-          <ExampleView @select="handleExampleSelect" />
+          <div class="input">
+            <textarea
+              v-model="input"
+              placeholder="User Operation JSON"
+            />
+          </div>
+          <div class="options">
+            <SelectChain
+              v-model="chain"
+              :options="CHAINS"
+            />
+            <input
+              v-model="blockInput"
+              placeholder="Block Number"
+            />
+            <ScopeToggle
+              v-model="entryPointVersion"
+              :options="[
+                { value: '0.6', label: 'Entry Point 0.6' },
+                { value: '0.7', label: 'Entry Point 0.7' },
+                { value: '0.8', label: 'Entry Point 0.8' },
+              ]"
+            />
+          </div>
         </div>
+        <ExampleView @select="handleExampleSelect" />
         <div>
           <button
             :disabled="!parsedInputResult.success"
@@ -99,6 +107,17 @@ const parsedInput = computed(() =>
     : null,
 );
 
+const blockInput = ref<string>('');
+const block = computed<number | undefined>(() => {
+  // If an input is a valid non-negative integer, convert it to a number
+  // Otherwise, return 'latest'
+  const blockNumber = parseInt(blockInput.value);
+  if (!isNaN(blockNumber) && blockNumber >= 0) {
+    return blockNumber;
+  }
+  return undefined;
+});
+
 function openSimulationPage(): void {
   if (!parsedInput.value) {
     return;
@@ -124,6 +143,7 @@ function openSimulationPage(): void {
   const simulationQueryParams: SimulationQueryParams = {
     name: 'op-simulation',
     chain: chain.value,
+    blockNumber: block.value,
     entryPoint: entryPoint.value,
     sender,
     nonce: `0x${nonce.toString(16)}`,
@@ -168,6 +188,7 @@ function openSimulationPage(): void {
 function handleExampleSelect(example: Example): void {
   chain.value = example.chain;
   entryPointVersion.value = example.entryPointVersion;
+  blockInput.value = example.blockNumber.toString();
   input.value = example.value;
 }
 </script>
@@ -175,13 +196,23 @@ function handleExampleSelect(example: Example): void {
 <style scoped>
 .body {
   display: flex;
-  gap: 16px;
+  gap: var(--spacing-7);
   flex-direction: column;
 }
 
 .form {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-10);
+}
+
+.input {
+  flex: 3;
+}
+
+.options {
+  display: flex;
+  flex: 2;
+  gap: var(--spacing-6);
   flex-direction: column;
 }
 
@@ -193,7 +224,7 @@ function handleExampleSelect(example: Example): void {
 textarea {
   width: 100%;
   height: 120px;
-  padding: 8px;
+  padding: var(--spacing-4);
   border: 1px solid var(--color-border-secondary);
   border-radius: var(--border-radius-m);
   outline: none;
@@ -204,6 +235,21 @@ textarea {
 
   &:focus {
     border-color: var(--color-border-primary);
+  }
+}
+
+input {
+  width: 120px;
+  padding: var(--spacing-3);
+  border: 1px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-s);
+  outline: none;
+  background: var(--color-background-primary);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-s);
+
+  &:focus {
+    border-color: var(--color-border-quaternary);
   }
 }
 

@@ -24,6 +24,7 @@ const EXAMPLES: Example[] = [
   {
     name: 'Failed Validation',
     chain: BASE_SEPOLIA,
+    blockNumber: 22850000,
     entryPointVersion: '0.7',
     value: `{
   "paymaster": "0x0000000000000039cd5e8aE05257CE51C473ddd1",
@@ -46,6 +47,7 @@ const EXAMPLES: Example[] = [
   {
     name: 'Expired Gas Payment',
     chain: BASE_SEPOLIA,
+    blockNumber: 22850000,
     entryPointVersion: '0.7',
     value: `{
   "paymaster": "0x0000000000000039cd5e8aE05257CE51C473ddd1",
@@ -68,6 +70,7 @@ const EXAMPLES: Example[] = [
   {
     name: 'Success',
     chain: BASE_SEPOLIA,
+    blockNumber: 22850000,
     entryPointVersion: '0.7',
     value: `{
   "sender": "0xA943F7b2369f3feD6446C7f92a98F2176440c7e6",
@@ -98,6 +101,7 @@ function handleClick(example: Example): void {
 interface Example {
   name: string;
   chain: Chain;
+  blockNumber: number;
   entryPointVersion: '0.6' | '0.7';
   value: string;
 }

@@ -210,7 +210,13 @@
 <script setup lang="ts">
 import { useHead } from '@unhead/vue';
 import type { Address, Hex, Log } from 'viem';
-import { decodeErrorResult, encodeFunctionData, size, slice } from 'viem';
+import {
+  decodeErrorResult,
+  encodeFunctionData,
+  numberToHex,
+  size,
+  slice,
+} from 'viem';
 import {
   entryPoint06Abi,
   entryPoint06Address,
@@ -255,7 +261,7 @@ import type {
 } from '@/services/evm';
 import EvmService from '@/services/evm';
 import type { Command } from '@/stores/commands';
-import { ARBITRUM, ARBITRUM_SEPOLIA } from '@/utils/chains';
+import { ARBITRUM, ARBITRUM_NOVA, ARBITRUM_SEPOLIA } from '@/utils/chains';
 import { getDelegation } from '@/utils/context/eip7702';
 import type {
   Op,
@@ -323,6 +329,7 @@ const paymasterAndData = computed(
   () => route.query.paymasterAndData as Hex | undefined,
 );
 const signature = computed(() => route.query.signature as Hex | undefined);
+const block = computed(() => route.query.blockNumber);
 
 const delegate = ref<Address | null>(null);
 const op = computed<Op | null>(() => {
@@ -574,6 +581,7 @@ async function fetchTransactionLogs(
     to: entryPoint,
     value: BigInt(0),
     data: opData,
+    blockNumber: block.value,
   });
 }
 
@@ -596,7 +604,12 @@ async function fetchTransactionReplay(
           functionName: 'handleOps',
           args: [[op], MOCK_BUNDLER],
         });
-  if (chainId.value === ARBITRUM || chainId.value === ARBITRUM_SEPOLIA) {
+  const blockReference = block.value ? numberToHex(block.value) : 'latest';
+  if (
+    chainId.value === ARBITRUM ||
+    chainId.value === ARBITRUM_SEPOLIA ||
+    chainId.value === ARBITRUM_NOVA
+  ) {
     const [debugTrace, debugState] = await Promise.all([
       evmService.value.getDebugCallTrace(
         {
@@ -604,7 +617,7 @@ async function fetchTransactionReplay(
           to: entryPoint,
           data: opData,
         },
-        'latest',
+        blockReference,
       ),
       evmService.value.getDebugCallState(
         {
@@ -612,7 +625,7 @@ async function fetchTransactionReplay(
           to: entryPoint,
           data: opData,
         },
-        'latest',
+        blockReference,
       ),
     ]);
     const trace = convertDebugTraceToTransactionTrace(debugTrace);
@@ -626,12 +639,15 @@ async function fetchTransactionReplay(
       };
     }
   } else {
-    transactionReplay.value = await evmService.value.getCallReplay({
-      from: MOCK_BUNDLER,
-      to: entryPoint,
-      value: BigInt(0),
-      data: opData,
-    });
+    transactionReplay.value = await evmService.value.getCallReplay(
+      {
+        from: MOCK_BUNDLER,
+        to: entryPoint,
+        value: BigInt(0),
+        data: opData,
+      },
+      blockReference,
+    );
   }
 }
 const opTrace = computed<OpTrace | null>(() => {
