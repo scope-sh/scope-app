@@ -118,6 +118,7 @@
         <PanelInteract
           v-if="isContract"
           :contract
+          :bytecode
           :address
         />
       </template>
@@ -409,7 +410,8 @@ watch(contract, (contract) => {
   if (!contract) {
     return;
   }
-  const abi = contract.implementation?.abi || contract.abi;
+  const abi =
+    contract.delegation?.abi || contract.implementation?.abi || contract.abi;
   if (!abi) {
     return;
   }
@@ -709,7 +711,9 @@ const commands = computed<Command[]>(() => {
     },
   ];
   const contractAbi =
-    contract.value?.implementation?.abi || contract.value?.abi;
+    contract.value?.delegation?.abi ||
+    contract.value?.implementation?.abi ||
+    contract.value?.abi;
   if (contractAbi) {
     commands.push({
       icon: 'copy',
