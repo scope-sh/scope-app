@@ -12,7 +12,7 @@
           kind="mono"
           class="trigger-icon"
         />
-        <span>{{ getChainName(model) }}</span>
+        <span class="trigger-label">{{ getChainName(model) }}</span>
       </template>
       <template #item="{ item }">
         <IconChain
@@ -75,6 +75,12 @@ function getChain(value: string): Chain {
 .trigger-icon {
   width: 18px;
   height: 18px;
+}
+
+.trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-icon {
