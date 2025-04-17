@@ -143,6 +143,7 @@ export type { Option };
   justify-content: space-between;
   width: 100%;
   padding: var(--spacing-2) var(--spacing-4);
+  overflow: hidden;
   transition: 0.25s ease-in-out;
   border: 1px solid var(--color-border-tertiary);
   border-radius: var(--border-radius-s);
