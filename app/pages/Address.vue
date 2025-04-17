@@ -5,7 +5,7 @@
     @update:section="handleSectionUpdate"
   >
     <ScopePanelLoading
-      v-if="isLoadingBalance || isLoadingCode"
+      v-if="isLoadingCode"
       title="Address"
       :subtitle="address"
     />
@@ -20,10 +20,11 @@
       >
         <CardDeployment :deployment />
       </template>
-      <FormEther
+      <BalanceView
         v-if="address"
-        v-model:balance="etherBalance"
         :address="address"
+        :balances="tokenBalances"
+        :is-loading="isLoadingBalance"
       />
       <div
         v-if="primaryLabel"
@@ -141,7 +142,12 @@
 import { useHead } from '@unhead/vue';
 import type { AbiError } from 'abitype';
 import type { AbiEvent, AbiFunction, Address, Hex } from 'viem';
-import { toEventSelector, toFunctionSelector } from 'viem';
+import {
+  formatUnits,
+  toEventSelector,
+  toFunctionSelector,
+  zeroAddress,
+} from 'viem';
 import { computed, onMounted, ref, watch } from 'vue';
 
 import LabelIcon from '@/components/__common/LabelIcon.vue';
@@ -151,8 +157,8 @@ import ScopePage from '@/components/__common/ScopePage.vue';
 import ScopePanel from '@/components/__common/ScopePanel.vue';
 import ScopePanelLoading from '@/components/__common/ScopePanelLoading.vue';
 import ScopePopover from '@/components/__common/ScopePopover.vue';
+import BalanceView from '@/components/address/BalanceView.vue';
 import CardDeployment from '@/components/address/CardDeployment.vue';
-import FormEther from '@/components/address/FormEther.vue';
 import LensView from '@/components/address/LensView.vue';
 import PanelCode from '@/components/address/PanelCode.vue';
 import PanelInteract from '@/components/address/PanelInteract.vue';
@@ -199,7 +205,7 @@ const { appBaseUrl, indexerEndpoint } = useEnv();
 const { setCommands } = useCommands();
 const { send: sendToast } = useToast();
 const route = useRoute<AddressRouteLocation>();
-const { id: chainId, name: chainName, client } = useChain();
+const { id: chainId, name: chainName, client, nativeCurrency } = useChain();
 const { getLabels, requestLabel } = useLabels();
 const { addAbis } = useAbi();
 
@@ -306,6 +312,7 @@ const hypersyncService = computed(() =>
 
 const isLoadingBalance = ref(false);
 const etherBalance = ref<bigint | null>(null);
+const tokenBalances = ref<TokenBalance[]>([]);
 
 const isLoadingCode = ref(false);
 const isLoadingContract = ref(false);
@@ -373,11 +380,34 @@ async function fetch(): Promise<void> {
 
 async function fetchBalance(): Promise<void> {
   etherBalance.value = null;
-  if (!address.value || !evmService.value) {
+  tokenBalances.value = [];
+  if (!address.value || !evmService.value || !hypersyncService.value) {
     return;
   }
   isLoadingBalance.value = true;
-  etherBalance.value = await evmService.value.getBalance(address.value);
+
+  // Get native balance
+  const nativeBalance = await evmService.value.getBalance(address.value);
+  const nativeToken: TokenBalance = {
+    address: zeroAddress,
+    symbol: nativeCurrency.value.symbol,
+    decimals: nativeCurrency.value.decimals,
+    balance: formatUnits(nativeBalance, nativeCurrency.value.decimals),
+  };
+  tokenBalances.value = [nativeToken];
+
+  // Get token balances
+  const balances = await hypersyncService.value.getAddressBalances(
+    address.value,
+  );
+
+  // Request labels for each token address
+  for (const token of balances) {
+    await requestLabel(token.address, 'primary');
+  }
+
+  tokenBalances.value = [nativeToken, ...balances];
+
   isLoadingBalance.value = false;
 }
 
@@ -739,6 +769,14 @@ watch(
     immediate: true,
   },
 );
+
+interface TokenBalance {
+  address: Address;
+  symbol: string | null;
+  decimals: number;
+  balance: string;
+  iconUrl?: string;
+}
 </script>
 
 <style scoped>

@@ -185,6 +185,37 @@ function getChainNames(chain: Chain): string[] {
   return [mainName, ...aliases];
 }
 
+function getChainIconUrl(chainId: Chain): string {
+  switch (chainId) {
+    case ETHEREUM:
+    case SEPOLIA:
+    case OPTIMISM:
+    case OPTIMISM_SEPOLIA:
+    case BASE:
+    case BASE_SEPOLIA:
+    case ARBITRUM:
+    case ARBITRUM_SEPOLIA:
+    case MODE:
+    case LINEA:
+    case ARBITRUM_NOVA:
+      return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/ethereum/info/logo.png';
+    case POLYGON:
+    case POLYGON_AMOY:
+      return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/polygon/info/logo.png';
+    case CELO:
+      return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/celo/info/logo.png';
+    case AVALANCHE:
+    case AVALANCHE_FUJI:
+      return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/avalanchec/info/logo.png';
+    case GNOSIS:
+      return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/xdai/info/logo.png';
+    case BSC:
+      return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/binance/info/logo.png';
+    case MONAD_TESTNET:
+      return 'https://cdn.prod.website-files.com/667c57e6f9254a4b6d914440/667d7104644c621965495f6e_LogoMark.svg';
+  }
+}
+
 function getChainByName(value: string): Chain | null {
   const chainIndex = CHAINS.findIndex((chain) => {
     const chainNames = getChainNames(chain);
@@ -248,6 +279,7 @@ export {
   getChainData,
   getChainName,
   getChainNames,
+  getChainIconUrl,
   getEndpointUrl,
   isChainName,
   parseChain,

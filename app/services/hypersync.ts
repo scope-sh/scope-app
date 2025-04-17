@@ -103,6 +103,14 @@ interface Log {
   data: Hex;
 }
 
+interface TokenBalance {
+  address: Address;
+  symbol: string;
+  decimals: number;
+  balance: string;
+  iconUrl?: string;
+}
+
 class Service {
   chain: Chain;
   client: KyInstance;
@@ -190,7 +198,17 @@ class Service {
     });
     return response.text() as Promise<Hex>;
   }
+
+  async getAddressBalances(address: Address): Promise<TokenBalance[]> {
+    const response = await this.client.get('balances', {
+      searchParams: {
+        chain: this.chain,
+        address,
+      },
+    });
+    return response.json<TokenBalance[]>();
+  }
 }
 
 export default Service;
-export type { Transaction, Log, Transfer, Pagination, Sort };
+export type { Transaction, Log, Transfer, Pagination, Sort, TokenBalance };
