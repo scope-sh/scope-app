@@ -1,6 +1,7 @@
 <template>
   <Select.Root
     :model-value="modelValue"
+    :disabled
     @update:model-value="handleModelValueUpdate"
     @update:open="handleOpenUpdate"
   >
@@ -8,7 +9,10 @@
       as-child
       :aria-label="placeholder"
     >
-      <button class="trigger">
+      <button
+        class="trigger"
+        :disabled
+      >
         <Select.Value
           as="div"
           class="value"
@@ -90,9 +94,14 @@ const model = defineModel<Option['value']>({
   required: true,
 });
 
-const { options } = defineProps<{
+const {
+  options,
+  placeholder,
+  disabled = false,
+} = defineProps<{
   options: Option[];
   placeholder: string;
+  disabled?: boolean;
 }>();
 
 const FILTER_THRESHOLD = 8;
@@ -142,6 +151,12 @@ export type { Option };
   box-shadow: var(--elevation-low);
   color: var(--color-text-secondary);
   cursor: pointer;
+
+  &:disabled {
+    opacity: 0.8;
+    cursor: default;
+    pointer-events: none;
+  }
 
   &:focus {
     border: 1px solid var(--color-border-quaternary);
