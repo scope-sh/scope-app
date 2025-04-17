@@ -108,8 +108,10 @@ const FILTER_THRESHOLD = 8;
 
 const search = ref('');
 const filteredOptions = computed(() => {
-  return options.filter((option) =>
-    option.label.toLowerCase().includes(search.value.toLowerCase()),
+  return options.filter(
+    (option) =>
+      option.label.toLowerCase().includes(search.value.toLowerCase()) ||
+      option.value === search.value,
   );
 });
 
