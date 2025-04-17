@@ -249,7 +249,7 @@ export type { Option };
 
   &:hover,
   &:focus {
-    background: var(--color-background-secondary);
+    background: oklch(from var(--color-background-secondary) l c h / 50%);
     color: var(--color-text-primary);
   }
 }
