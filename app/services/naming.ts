@@ -39,6 +39,7 @@ import {
   GNOSIS,
   BSC,
   MONAD_TESTNET,
+  MEGAETH_TESTNET,
   getChainData,
   getEndpointUrl,
 } from '@/utils/chains.js';
@@ -290,6 +291,8 @@ function getFallbackChain(chain: Chain): Chain {
     case BSC:
       return ETHEREUM;
     case MONAD_TESTNET:
+      return SEPOLIA;
+    case MEGAETH_TESTNET:
       return SEPOLIA;
   }
 }

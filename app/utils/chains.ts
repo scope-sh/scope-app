@@ -20,6 +20,7 @@ import {
   gnosis,
   bsc,
   monadTestnet,
+  megaethTestnet,
 } from 'viem/chains';
 
 import useEnv from '@/composables/useEnv';
@@ -45,6 +46,7 @@ const AVALANCHE_FUJI = avalancheFuji.id;
 const GNOSIS = gnosis.id;
 const BSC = bsc.id;
 const MONAD_TESTNET = monadTestnet.id;
+const MEGAETH_TESTNET = megaethTestnet.id;
 
 type Chain =
   | typeof ETHEREUM
@@ -65,7 +67,8 @@ type Chain =
   | typeof AVALANCHE_FUJI
   | typeof GNOSIS
   | typeof BSC
-  | typeof MONAD_TESTNET;
+  | typeof MONAD_TESTNET
+  | typeof MEGAETH_TESTNET;
 
 const DEFAULT_CHAIN = ETHEREUM;
 
@@ -89,6 +92,7 @@ const ALL_CHAINS: Chain[] = [
   GNOSIS,
   BSC,
   MONAD_TESTNET,
+  MEGAETH_TESTNET,
 ];
 const CHAINS =
   showChains.length > 0
@@ -137,6 +141,8 @@ function getChainData(chainId: Chain): ChainData {
       return bsc;
     case MONAD_TESTNET:
       return monadTestnet;
+    case MEGAETH_TESTNET:
+      return megaethTestnet;
   }
 }
 
@@ -177,6 +183,9 @@ function getChainNames(chain: Chain): string[] {
       case BSC: {
         return ['bsc', 'binance smart chain'];
       }
+      case MEGAETH_TESTNET: {
+        return ['mega testnet'];
+      }
     }
     return [];
   }
@@ -213,6 +222,8 @@ function getChainIconUrl(chainId: Chain): string {
       return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/binance/info/logo.png';
     case MONAD_TESTNET:
       return 'https://cdn.prod.website-files.com/667c57e6f9254a4b6d914440/667d7104644c621965495f6e_LogoMark.svg';
+    case MEGAETH_TESTNET:
+      return 'https://raw.githubusercontent.com/trustwallet/assets/refs/heads/master/blockchains/megaeth/info/logo.png';
   }
 }
 
@@ -245,6 +256,9 @@ function getEndpointUrl(
   if (chainId === AVALANCHE_FUJI) {
     return avalancheFuji.rpcUrls.default.http[0];
   }
+  if (chainId === MEGAETH_TESTNET) {
+    return megaethTestnet.rpcUrls.default.http[0];
+  }
   return quicknode(chainId, quicknodeAppName, quicknodeAppKey);
 }
 
@@ -275,6 +289,7 @@ export {
   GNOSIS,
   BSC,
   MONAD_TESTNET,
+  MEGAETH_TESTNET,
   getChainByName,
   getChainData,
   getChainName,

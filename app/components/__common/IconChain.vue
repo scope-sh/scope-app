@@ -94,6 +94,11 @@
     :kind
     type="testnet"
   />
+  <IconMegaeth
+    v-else-if="chain === MEGAETH_TESTNET"
+    :kind
+    type="testnet"
+  />
 </template>
 
 <script setup lang="ts">
@@ -106,6 +111,7 @@ import IconCelo from './icon/chain/Celo.vue';
 import IconEthereum from './icon/chain/Ethereum.vue';
 import IconGnosis from './icon/chain/Gnosis.vue';
 import IconLinea from './icon/chain/Linea.vue';
+import IconMegaeth from './icon/chain/Megaeth.vue';
 import IconMode from './icon/chain/Mode.vue';
 import IconMonad from './icon/chain/Monad.vue';
 import IconOptimism from './icon/chain/Optimism.vue';
@@ -133,6 +139,7 @@ import {
   GNOSIS,
   BSC,
   MONAD_TESTNET,
+  MEGAETH_TESTNET,
 } from '@/utils/chains.js';
 
 defineProps<{
