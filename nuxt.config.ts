@@ -63,7 +63,7 @@ export default defineNuxtConfig({
         },
       ],
       script: [
-        { async: true, src: 'https://cdn.metrical.xyz/script.js' },
+        { async: true, src: 'https://cdn.metrical.xyz/script.js', type: 'text/javascript' },
         { children: 'window.metrical = { "app": "QjX4GqlXkK"}' },
       ],
     },
