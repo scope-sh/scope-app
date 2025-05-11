@@ -18,5 +18,6 @@ bun run dev
 
 ## Related
 
-* [Scope API Server](https://github.com/scope-sh/scope-api)
-* [Scope Label Registry](https://github.com/scope-sh/scope-registry)
+* [Scope API](https://github.com/scope-sh/scope-api)
+* [Scope Registry](https://github.com/scope-sh/scope-registry)
+* [Indexer](https://github.com/scope-sh/hyperindex-erc4337)
