@@ -16,7 +16,7 @@
         class="sunset"
         :class="{ warning: isWarning, error: isError }"
       >
-        The hosted version will be sunset on June 19th.
+        The hosted version will be sunset on July 19th.
       </span>
     </div>
   </div>
@@ -25,21 +25,21 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-// Only show after May 19th
+// Only show after June 19th
 const isVisible = computed(() => {
-  const date = new Date('2025-05-19');
+  const date = new Date('2025-06-19');
   return date < new Date();
 });
 
-// Show as a warning after June 5th
+// Show as a warning after July 5th
 const isWarning = computed(() => {
-  const date = new Date('2025-06-05');
+  const date = new Date('2025-07-05');
   return date < new Date();
 });
 
-// Show as an error after June 12th
+// Show as an error after July 12th
 const isError = computed(() => {
-  const date = new Date('2025-06-12');
+  const date = new Date('2025-07-12');
   return date < new Date();
 });
 </script>
