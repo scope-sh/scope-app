@@ -16,7 +16,7 @@
         class="sunset"
         :class="{ warning: isWarning, error: isError }"
       >
-        The hosted version will be sunset on July 19th.
+        The hosted version will be sunset on {{ formattedSunsetDate }}.
       </span>
     </div>
   </div>
@@ -25,21 +25,29 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
-// Only show after June 19th
+const SUNSET_DATE = new Date('2026-05-18');
+const DAY = 24 * 60 * 60 * 1000;
+const formattedSunsetDate = SUNSET_DATE.toLocaleDateString('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+});
+
+// Show banner 30 days before sunset
 const isVisible = computed(() => {
-  const date = new Date('2025-06-19');
+  const date = new Date(SUNSET_DATE.getTime() - 30 * DAY);
   return date < new Date();
 });
 
-// Show as a warning after July 5th
+// Show as a warning 14 days before sunset
 const isWarning = computed(() => {
-  const date = new Date('2025-07-05');
+  const date = new Date(SUNSET_DATE.getTime() - 14 * DAY);
   return date < new Date();
 });
 
-// Show as an error after July 12th
+// Show as an error 7 days before sunset
 const isError = computed(() => {
-  const date = new Date('2025-07-12');
+  const date = new Date(SUNSET_DATE.getTime() - 7 * DAY);
   return date < new Date();
 });
 </script>
