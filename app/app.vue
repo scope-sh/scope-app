@@ -1,5 +1,6 @@
 <template>
   <div id="app">
+    <BannerSunset />
     <AppHeader />
     <!-- eslint-disable-next-line vue/no-undef-components -->
     <NuxtPage />
@@ -17,6 +18,7 @@ import '@fontsource-variable/inter';
 import '@fontsource-variable/inconsolata';
 import { computed } from 'vue';
 
+import BannerSunset from '@/components/_app/BannerSunset.vue';
 import CommandPalette from '@/components/_app/CommandPalette.vue';
 import AppFooter from '@/components/_app/Footer.vue';
 import AppHeader from '@/components/_app/Header.vue';
